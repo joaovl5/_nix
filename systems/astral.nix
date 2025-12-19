@@ -26,15 +26,11 @@ in
     curl
     git
     htop
-    lynx
     openal
     neovim-nightly
     pulseaudio
-    tinycc
-    transcrypt
     wget
     fish
-    pinentry-curses
   ];
 
   system.stateVersion = "26.05";
