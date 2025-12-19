@@ -3,7 +3,6 @@ let
   cfg = config.services.pipewire;
 in
 lib.mkIf cfg.enable {
-  sound.enable = lib.mkDefault true;
   security.rtkit.enable = lib.mkDefault true;
 
   services.pipewire = {

@@ -39,5 +39,6 @@ in
     tinycc
     transcrypt
     wget
+    fish
   ];
 }
