@@ -16,7 +16,7 @@ in
 
   environment.shells = [ pkgs.fish ];
   users.users.lav = {
-    initalPassword = "12";
+    initialPassword = "12";
     isNormalUser = true;
     shell = pkgs.fish;
     extraGroups = [ "wheel" "docker" "libvirt" ];
