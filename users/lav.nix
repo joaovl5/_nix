@@ -42,7 +42,7 @@ in
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      pinentry = "qt";
+      pinentryPackage = pkgs.pinentry-gnome3;
     };
 
     gtk = {
