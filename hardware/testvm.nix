@@ -20,7 +20,7 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.supportedFileSystems = {
+  boot.initrd.supportedFileSystems = {
     bcachefs = true;
   };
   boot.kernelPackages = pkgs.linuxPackages_latest;
