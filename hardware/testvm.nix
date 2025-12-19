@@ -15,8 +15,6 @@
 
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
-  interface.hardware.networking = true;
-  interface.hardware.gui = true;
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sr_mod" "virtio_blk" ];
   boot.initrd.kernelModules = [ ];
