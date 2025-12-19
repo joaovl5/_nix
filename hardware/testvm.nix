@@ -24,7 +24,7 @@
     bcachefs = true;
   };
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.loader.grub.device = "UUID=90ecc4f4-65ca-47df-b362-5184cda952d0";
+  boot.loader.grub.device = "/dev/disk/by-uuid/90ecc4f4-65ca-47df-b362-5184cda952d0";
 
   fileSystems."/" =
     {
