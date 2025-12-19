@@ -25,7 +25,7 @@ in
   };
 
   home-manager.users.lav = { config, ... }: {
-    home.stateVersion = "22.11";
+    home.stateVersion = "23.11";
 
 
     programs.git = {
@@ -39,11 +39,11 @@ in
       nix-direnv.enable = true;
     };
 
-    # services.pcscd.enable = true;
+    services.pcscd.enable = true;
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      # pinentryPackage = pkgs.pinentry-curses;
+      pinentryFlavor = pkgs.pinentry-curses;
     };
 
     gtk = {
@@ -61,33 +61,38 @@ in
     };
 
     home.packages = with pkgs; [
-      # # core
-      # libreoffice
-      # obs-studio
-      #
-      # ## games/emulation/vms
-      # steam
-      # steam-run
-      # ckan
-      # glfw
-      # wineWowPackages.full
-      # winetricks
-      # virt-manager
-      #
-      # ## utils
-      # ripgrep
-      # gcc
-      # gnumake
-      # lldb
-      # lshw
-      # nix-prefetch-git
-      # pandoc
-      # pciutils
-      # (with fenix; combine [
-      #   default.toolchain
-      #   latest.rust-src
-      # ])
-      # xclip
+      # deps
+      pinentry-curses
+
+      # core
+      libreoffice
+      obs-studio
+      ghostty
+      zen-browser
+
+      ## games/emulation/vms
+      steam
+      steam-run
+      ckan
+      glfw
+      wineWowPackages.full
+      winetricks
+      virt-manager
+
+      ## utils
+      ripgrep
+      gcc
+      gnumake
+      lldb
+      lshw
+      nix-prefetch-git
+      pandoc
+      pciutils
+      (with fenix; combine [
+        default.toolchain
+        latest.rust-src
+      ])
+      xclip
     ];
   };
 }
