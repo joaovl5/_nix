@@ -30,7 +30,6 @@ in
   services.openssh.enable = true;
   programs.ssh.startAgent = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_xanmod;
   virtualisation.docker.enable = true;
   virtualisation.libvirtd = {
     enable = true;
