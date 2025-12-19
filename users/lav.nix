@@ -1,0 +1,83 @@
+{ pkgs, inputs, lib, system, ... }:
+let
+  font = {
+    name = "FiraCode Nerd Font";
+    package = pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; };
+    size = 13;
+  };
+  term = "ghostty";
+  browser = "zen-browser";
+  editor = "nvim";
+in
+{
+  environment.shells = [ pkgs.fish ];
+  users.users.lav = {
+    initalPassword = "12";
+    isNormalUser = true;
+    shell = pkgs.fish;
+    extraGroups = [ "wheel" "docker" "libvirt" ];
+  };
+
+  home-manager.users.lav = { config, ... }: {
+    programs.git = {
+      enable = true;
+      userEmail = "vieiraleao2005@gmail.com";
+      userName = "João Pedro";
+    };
+
+    programs.direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+
+    services.gpg-agent = {
+      enable = true;
+      enableSshSupport = true;
+      pinentryFlavor = "qt";
+    };
+
+    gtk = {
+      enable = true;
+
+      inherit font;
+      iconTheme = {
+        package = pkgs.papirus-icon-theme;
+        name = "ePapirus";
+      };
+      theme = {
+        package = pkgs.nordic;
+        name = "Nordic";
+      };
+    };
+
+    home.packages = with pkgs; [
+      # core
+      libreoffice
+      obs-studio
+
+      ## games/emulation/vms
+      steam
+      steam-run
+      ckan
+      glfw
+      wineWowPackages.full
+      winetricks
+      virt-manager
+
+      ## utils
+      ripgrep
+      gcc
+      gnumake
+      lldb
+      lshw
+      nix-prefetch-git
+      pandoc
+      pciutils
+      (with fenix; combine [
+        default.toolchain
+        latest.rust-src
+      ])
+      xclip
+    ];
+  };
+}
