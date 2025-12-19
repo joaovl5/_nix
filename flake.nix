@@ -52,7 +52,7 @@
       sharedOverlays = with inputs; [
         self.overlay
         nur.overlays.default
-        neovim.overlay
+        neovim.overlays.default
       ];
 
       channels = {
