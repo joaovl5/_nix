@@ -16,13 +16,7 @@ in
   programs.ssh.startAgent = true;
 
   virtualisation.docker.enable = true;
-  virtualisation.libvirtd = {
-    enable = true;
-    qemu = {
-      ovmf.enable = true;
-    };
-  };
-
+  virtualisation.libvirtd.enable = true;
   # todo put wm 
 
   documentation.man.generateCaches = true;
