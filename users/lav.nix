@@ -10,6 +10,10 @@ let
   editor = "nvim";
 in
 {
+  imports = with inputs; [
+    hm.nixosModules.home-manager
+  ];
+
   environment.shells = [ pkgs.fish ];
   users.users.lav = {
     initalPassword = "12";
