@@ -30,7 +30,17 @@ in
     bcachefs = true;
   };
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.loader.grub.device = boot_disk;
+
+  boot.loader.grub.enabled = false;
+  boot.loader.systemd-boot = {
+    enabled = true;
+    # we use Git for version control, so we don't need to keep too many generations.
+    configurationLimit = lib.mkDefault 10;
+    # pick the highest resolution for systemd-boot's console.
+    consoleMode = lib.mkDefault "max";
+  };
+
+  boot.loader.timeout = lib.mkDefault 8; # wait for x seconds to select the boot entry
 
   fileSystems."/" =
     {
