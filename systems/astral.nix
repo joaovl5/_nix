@@ -20,7 +20,7 @@ in
     ];
 
   networking = {
-    hostName = lib.mkForce secrets.Hostname;
+    hostName = lib.mkForce secrets.hostName;
   };
 
   users.mutableUsers = false;
