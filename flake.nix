@@ -7,6 +7,7 @@
     unstable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
     nixpkgs.follows = "unstable";
     nur.url = "github:nix-community/NUR";
+    nur.inputs.nixpkgs.follows = "nixpkgs";
 
     # core
     hm.url = "github:nix-community/home-manager/release-23.11";
@@ -50,7 +51,7 @@
       # overlays that get applied to all channels
       sharedOverlays = with inputs; [
         self.overlay
-        nur.overlay
+        nur.overlays.default
         neovim.overlay
       ];
 
