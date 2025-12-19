@@ -16,13 +16,18 @@
 
     # pkgs
     neovim.url = "github:nix-community/neovim-nightly-overlay";
-    # pkgs.hyprland
+    # hyprland
     hyprland = {
       url = github:hyprwm/Hyprland?ref=v0.46.2;
       flake = false;
     };
     hypr-binds-flake = {
       url = github:hyprland-community/hypr-binds;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # zen
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Fast nix search client
@@ -59,6 +64,7 @@
         nur.overlays.default
         neovim.overlays.default
         fenix.overlays.default
+        zen-browser.overlays.default
       ];
 
       channels = {
