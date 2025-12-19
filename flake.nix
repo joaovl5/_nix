@@ -64,7 +64,6 @@
         nur.overlays.default
         neovim.overlays.default
         fenix.overlays.default
-        zen-browser.overlays.default
       ];
 
       channels = {

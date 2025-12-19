@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 let secrets = {
   hostName = "astral";
 };
@@ -31,6 +31,7 @@ in
     pulseaudio
     wget
     fish
+    inputs.zen-browser.packages.${pkgs.system}.default
   ];
 
   system.stateVersion = "26.05";
