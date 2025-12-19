@@ -27,7 +27,7 @@ in
     git
     htop
     openal
-    neovim-nightly
+    neovim
     pulseaudio
     wget
     fish
