@@ -2,7 +2,7 @@
 {
   boot.loader = {
     grub = {
-      enable = true;
+      enable = lib.mkDefault true;
       efiSupport = lib.mkDefault true;
       configurationLimit = lib.mkDefault 60;
       theme = pkgs.nixos-grub2-theme;
