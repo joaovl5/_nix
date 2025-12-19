@@ -30,8 +30,6 @@
 
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
-  config.interface.hardware.networking = true;
-  config.interface.hardware.gui = true;
 
   # rgb
   hardware.i2c = {

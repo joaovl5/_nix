@@ -4,21 +4,6 @@ let secrets = {
 };
 in
 {
-  assertions =
-    let
-      hw = config.interface.hardware;
-    in
-    [
-      {
-        assertion = hw.networking;
-        message = "This config requires networking!";
-      }
-      {
-        assertion = hw.gui;
-        message = "This config requires graphical hardware!";
-      }
-    ];
-
   networking = {
     hostName = lib.mkForce secrets.hostName;
   };
