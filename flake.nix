@@ -30,6 +30,11 @@
       url = github:diamondburned/nix-search;
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # better rust nightly support
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 
@@ -53,6 +58,7 @@
         self.overlay
         nur.overlays.default
         neovim.overlays.default
+        fenix.overlays.default
       ];
 
       channels = {
