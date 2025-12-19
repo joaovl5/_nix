@@ -83,14 +83,14 @@
 
       hosts = with inputs; {
         lavpc.modules = [
-          "./hardware/lavpc.nix"
-          "./systems/astral.nix"
-          "./users/lav.nix"
+          ./hardware/lavpc.nix
+          ./systems/astral.nix
+          ./users/lav.nix
         ];
         testvm.modules = [
-          "./hardware/testvm.nix"
-          "./systems/astral.nix"
-          "./users/lav.nix"
+          ./hardware/testvm.nix
+          ./systems/astral.nix
+          ./users/lav.nix
         ];
       };
 
