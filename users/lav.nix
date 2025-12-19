@@ -23,6 +23,8 @@ in
   };
 
   home-manager.users.lav = { config, ... }: {
+    stateVersion = "24.11";
+
     programs.git = {
       enable = true;
       userEmail = "vieiraleao2005@gmail.com";
