@@ -10,7 +10,7 @@
     nur.inputs.nixpkgs.follows = "nixpkgs";
 
     # core
-    hm.url = "github:nix-community/home-manager/release-23.11";
+    hm.url = "git+https://github,com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
     fup.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
