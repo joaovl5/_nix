@@ -61,7 +61,7 @@
           overlaysBuilder = channels: [
             (final: prev: {
               inherit (channels) stable;
-              inherit (channels.stable) pass-secret-service;
+              # inherit (channels.stable) pass-secret-service;
             })
           ];
         };
