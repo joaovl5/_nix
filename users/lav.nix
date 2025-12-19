@@ -67,7 +67,6 @@ in
       libreoffice
       obs-studio
       ghostty
-      zen-browser
 
       ## games/emulation/vms
       steam
