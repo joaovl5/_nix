@@ -39,7 +39,6 @@ in
       nix-direnv.enable = true;
     };
 
-    services.pcscd.enable = true;
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
