@@ -23,7 +23,7 @@ in
   };
 
   home-manager.users.lav = { config, ... }: {
-    home.stateVersion = "24.11";
+    home.stateVersion = "23.11";
 
     programs.git = {
       enable = true;
