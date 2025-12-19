@@ -1,10 +1,9 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 {
   imports =
     inputs.self.moduleSets.hardware ++
     [
-      (modulesPath + "/profiles/qemu-guest.nix")
       inputs.nixpkgs.nixosModules.notDetected
     ];
 
