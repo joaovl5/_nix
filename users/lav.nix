@@ -15,6 +15,7 @@ in
   ];
 
   environment.shells = [ pkgs.fish ];
+
   users.users.lav = {
     initialPassword = "12";
     isNormalUser = true;
@@ -24,6 +25,10 @@ in
 
   home-manager.users.lav = { config, ... }: {
     home.stateVersion = "23.11";
+
+    programs.fish = {
+      enable = true;
+    };
 
     programs.git = {
       enable = true;
