@@ -43,7 +43,7 @@ in
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      pinentryPackage = pkgs.pinentry-curses;
+      # pinentryPackage = pkgs.pinentry-curses;
     };
 
     gtk = {
@@ -61,33 +61,33 @@ in
     };
 
     home.packages = with pkgs; [
-      # core
-      libreoffice
-      obs-studio
-
-      ## games/emulation/vms
-      steam
-      steam-run
-      ckan
-      glfw
-      wineWowPackages.full
-      winetricks
-      virt-manager
-
-      ## utils
-      ripgrep
-      gcc
-      gnumake
-      lldb
-      lshw
-      nix-prefetch-git
-      pandoc
-      pciutils
-      (with fenix; combine [
-        default.toolchain
-        latest.rust-src
-      ])
-      xclip
+      # # core
+      # libreoffice
+      # obs-studio
+      #
+      # ## games/emulation/vms
+      # steam
+      # steam-run
+      # ckan
+      # glfw
+      # wineWowPackages.full
+      # winetricks
+      # virt-manager
+      #
+      # ## utils
+      # ripgrep
+      # gcc
+      # gnumake
+      # lldb
+      # lshw
+      # nix-prefetch-git
+      # pandoc
+      # pciutils
+      # (with fenix; combine [
+      #   default.toolchain
+      #   latest.rust-src
+      # ])
+      # xclip
     ];
   };
 }
