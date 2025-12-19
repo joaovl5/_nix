@@ -27,5 +27,5 @@ lib.mkIf cfg.enable {
     alsa-lib
   ];
 
-  interface.hardware.audio = true;
+  # interface.hardware.audio = true;
 }
