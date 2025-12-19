@@ -6,8 +6,9 @@ let
 in
 {
   imports =
-    inputs.self.moduleSets.hardware ++
     [
+      ./hardware/modules/pipewire.nix
+      ./hardware/modules/grub.nix
       (modulesPath + "/profiles/qemu-guest.nix")
       inputs.nixpkgs.nixosModules.notDetected
     ];
