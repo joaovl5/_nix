@@ -43,7 +43,7 @@ in
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      pinentry = pkgs.pinentry-curses;
+      pinentryFlavor = pkgs.pinentry-curses;
     };
 
     gtk = {
