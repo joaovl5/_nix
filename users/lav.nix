@@ -61,9 +61,6 @@ in
     };
 
     home.packages = with pkgs; [
-      # deps
-      pinentry-curses
-
       # core
       libreoffice
       obs-studio

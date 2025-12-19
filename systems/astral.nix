@@ -34,6 +34,7 @@ in
     transcrypt
     wget
     fish
+    pinentry-curses
   ];
 
   system.stateVersion = "26.05";
