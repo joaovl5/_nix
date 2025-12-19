@@ -35,4 +35,6 @@ in
     wget
     fish
   ];
+
+  system.stateVersion = "26.05";
 }

@@ -39,11 +39,12 @@ in
       nix-direnv.enable = true;
     };
 
-    # services.gpg-agent = {
-    #   enable = true;
-    #   enableSshSupport = true;
-    #   pinentryPackage = pkgs.pinentry-gnome3;
-    # };
+    services.pcscd.enable = true;
+    services.gpg-agent = {
+      enable = true;
+      enableSshSupport = true;
+      pinentry = pkgs.pinentry-curses;
+    };
 
     gtk = {
       enable = true;
@@ -60,6 +61,9 @@ in
     };
 
     home.packages = with pkgs; [
+      # deps
+      pinentry-curses
+
       # core
       libreoffice
       obs-studio
