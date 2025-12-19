@@ -7,8 +7,8 @@ in
 {
   imports =
     [
-      ./hardware/modules/pipewire.nix
-      ./hardware/modules/grub.nix
+      ./modules/pipewire.nix
+      ./modules/grub.nix
       (modulesPath + "/profiles/qemu-guest.nix")
       inputs.nixpkgs.nixosModules.notDetected
     ];
