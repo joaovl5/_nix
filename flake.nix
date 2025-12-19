@@ -84,11 +84,15 @@
       hosts = with inputs; {
         lavpc.modules = [
           ./hardware/lavpc.nix
+          ./hardware/modules/pipewire.nix
+          ./hardware/modules/grub.nix
           ./systems/astral.nix
           ./users/lav.nix
         ];
         testvm.modules = [
           ./hardware/testvm.nix
+          ./hardware/modules/pipewire.nix
+          ./hardware/modules/grub.nix
           ./systems/astral.nix
           ./users/lav.nix
         ];

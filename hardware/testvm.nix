@@ -1,11 +1,11 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, modulesPath, ... }:
 
 {
-  imports =
-    inputs.self.moduleSets.hardware ++
-    [
-      inputs.nixpkgs.nixosModules.notDetected
-    ];
+  # imports =
+  #   inputs.self.moduleSets.hardware ++
+  #   [
+  #     inputs.nixpkgs.nixosModules.notDetected
+  #   ];
 
   time.timeZone = "Americas/Sao_Paulo";
 
