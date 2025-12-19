@@ -33,6 +33,10 @@
 
     swapDevices =
       [{ device = "/dev/disk/by-uuid/14520cb5-f22d-4354-83b3-44c10f2e0574"; }];
+
+    environment.defaultPackages = with pkgs; [
+      openrgb
+    ];
   };
 
   # rgb
@@ -45,9 +49,6 @@
     openrgb
   ];
 
-  environment.defaultPackages = with pkgs; [
-    openrgb
-  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;
