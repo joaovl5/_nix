@@ -1,10 +1,10 @@
 { pkgs, inputs, lib, system, ... }:
 let
-  font = {
-    name = "FiraCode Nerd Font";
-    package = pkgs.nerd-fonts.override { fonts = [ "FiraCode" ]; };
-    size = 13;
-  };
+  # font = {
+  #   name = "FiraCode Nerd Font";
+  #   package = pkgs.nerd-fonts.override { fonts = [ "FiraCode" ]; };
+  #   size = 13;
+  # };
   term = "ghostty";
   browser = "zen-browser";
   editor = "nvim";
@@ -48,7 +48,7 @@ in
     gtk = {
       enable = true;
 
-      inherit font;
+      # inherit font;
       iconTheme = {
         package = pkgs.papirus-icon-theme;
         name = "ePapirus";
