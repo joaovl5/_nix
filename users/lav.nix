@@ -33,8 +33,10 @@ in {
 
     programs.git = {
       enable = true;
-      settings.userEmail = "vieiraleao2005@gmail.com";
-      settings.userName = "João Pedro";
+      settings = {
+        userEmail = "vieiraleao2005@gmail.com";
+        userName = "João Pedro";
+      };
     };
 
     programs.direnv = {
