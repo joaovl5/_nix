@@ -11,6 +11,6 @@
   home-manager = {
     useGlobalPkgs = lib.mkDefault true;
     useUserPackages = lib.mkDefault true;
-    sharedModules = inputs.self.moduleSets.user;
+    sharedModules = [];
   };
 }
