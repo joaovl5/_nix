@@ -23,8 +23,7 @@
             main = {
               size = "100%";
               content = {
-                type = "filesystem";
-                format = "btrfs";
+                type = "btrfs";
                 extraArgs = ["-f"]; # override existing
                 # dont know if its necessary:
                 # mountpoint = "/partition-root";
