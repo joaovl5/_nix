@@ -42,11 +42,6 @@
       url = "github:nix-community/fenix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # greeter for greetd display manager
-    sysc-greet = {
-      url = "github:Nomadcxx/sysc-greet";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
@@ -101,7 +96,6 @@
       hosts = with inputs; {
         lavpc.modules = [
           disko.nixosModules.default
-          sysc-greet.nixosModules.default
           ./hardware/lavpc.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
@@ -112,7 +106,6 @@
         ];
         testvm.modules = [
           inputs.disko.nixosModules.default
-          sysc-greet.nixosModules.default
           ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
