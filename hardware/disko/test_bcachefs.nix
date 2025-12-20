@@ -18,7 +18,6 @@
               };
             };
             swap = {
-              type = "swap";
               size = "5G";
               content = {
                 type = "swap";
