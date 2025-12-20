@@ -8,7 +8,7 @@
   imports = [
     ./modules/pipewire.nix
     ./modules/grub.nix
-    ./disko/test_bcachefs.nix
+    ./disko/testvm_btrfs.nix
     (modulesPath + "/profiles/qemu-guest.nix")
     inputs.nixpkgs.nixosModules.notDetected
   ];
