@@ -1,4 +1,4 @@
-{
+{...}: {
   disko.devices = {
     disk = {
       vda = {
@@ -15,14 +15,6 @@
                 format = "vfat";
                 mountpoint = "/boot";
                 mountOptions = ["umask=0077"];
-              };
-            };
-            swap = {
-              size = "5G";
-              content = {
-                type = "swap";
-                randomEncryption = true;
-                priority = 100; # prefer encrypting as long as we have enough space
               };
             };
             main = {
@@ -73,25 +65,18 @@
           # todo handle targets
         ];
         subvolumes = {
-          # Subvolume name is different from mountpoint.
           "subvolumes/root" = {
             mountpoint = "/";
             mountOptions = [
               "verbose"
             ];
           };
-          # Subvolume name is the same as the mountpoint.
           "subvolumes/home" = {
             mountpoint = "/home";
           };
-          # Nested subvolume doesn't need a mountpoint as its parent is mounted.
-          "subvolumes/home/user" = {};
-          # Parent is not mounted so the mountpoint must be set.
           "subvolumes/nix" = {
             mountpoint = "/nix";
           };
-          # This subvolume will be created but not mounted.
-          "subvolumes/test" = {};
         };
       };
     };
