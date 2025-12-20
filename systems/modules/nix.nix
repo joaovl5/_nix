@@ -2,6 +2,8 @@
   nix = {
     generateRegistryFromInputs = lib.mkDefault true;
     settings = {
+      warn-dirty = false;
+      experimental-features = ["nix-command" "flakes" "ca-derivations"];
       download-buffer-size = lib.mkDefault 524288000; # 500mb
       substituters = [
         "https://nix-community.cachix.org"
@@ -14,6 +16,13 @@
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       ];
+    };
+
+    # garbage collection
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
     };
   };
 
