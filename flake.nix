@@ -100,7 +100,6 @@
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
           ./systems/astral.nix
-          ./systems/modules/display-manager.nix
           ./systems/modules/home-manager.nix
           ./users/lav.nix
         ];
@@ -110,7 +109,6 @@
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
           ./systems/astral.nix
-          ./systems/modules/display-manager.nix
           ./systems/modules/home-manager.nix
           ./users/lav.nix
         ];
