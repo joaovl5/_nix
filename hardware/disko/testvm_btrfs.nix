@@ -26,7 +26,7 @@
                 type = "btrfs";
                 extraArgs = ["-f"]; # override existing
                 # dont know if its necessary:
-                # mountpoint = "/partition-root";
+                mountpoint = "/partition-root";
                 swap = {
                   swapfile.size = "4G";
                   swapfile2.size = "2G";
