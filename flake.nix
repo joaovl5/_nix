@@ -13,6 +13,9 @@
     hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
     fup.url = "github:gytis-ivaskevicius/flake-utils-plus";
+    fup.inputs.nixpkgs.follows = "nixpkgs";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
 
     # pkgs
     neovim.url = "github:nix-community/neovim-nightly-overlay";
@@ -94,6 +97,7 @@
 
       hosts = with inputs; {
         lavpc.modules = [
+          inputs.disko.nixosModules.default
           ./hardware/lavpc.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
@@ -101,6 +105,7 @@
           ./users/lav.nix
         ];
         testvm.modules = [
+          inputs.disko.nixosModules.default
           ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
@@ -112,6 +117,7 @@
       nixosModules =
         let
           moduleList = [
+            inputs.disko.nixosModules.default
             ./systems/modules/nix.nix
             ./systems/modules/home-manager.nix
             ./hardware/modules/pipewire.nix

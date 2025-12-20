@@ -1,9 +1,4 @@
 { config, lib, pkgs, inputs, modulesPath, ... }:
-let
-  boot_disk = "/dev/vda";
-  root_uuid = "0c748c2f-e173-47fb-a059-e8a26f5d7adc";
-  swap_uuid = "ad065f12-cb45-44a9-b69a-e39effadc0dd";
-in
 {
   imports =
     [
@@ -30,18 +25,6 @@ in
     bcachefs = true;
   };
   boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  boot.loader.grub.device = boot_disk;
-
-  fileSystems."/" =
-    {
-      device = "/dev/vda1:/dev/vdb1";
-      # device = "UUID=${root_uuid}";
-      fsType = "bcachefs";
-    };
-
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/${swap_uuid}"; }];
 
   environment.defaultPackages = with pkgs; [
     openrgb
