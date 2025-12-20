@@ -28,6 +28,7 @@ in {
   services.dbus.packages = with pkgs; [dconf];
 
   environment.systemPackages = with pkgs; [
+    dconf
     curl
     git
     htop
