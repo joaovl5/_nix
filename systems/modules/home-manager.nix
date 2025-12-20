@@ -1,5 +1,9 @@
-{ inputs, pkgs, lib, ... }:
 {
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {
   imports = with inputs; [
     hm.nixosModules.home-manager
   ];

@@ -6,60 +6,58 @@
     stable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-23.11";
     unstable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
     nixpkgs.follows = "unstable";
-    nur.url = "github:nix-community/NUR";
+    nur.url = "github:nix-community/NUR?shallow=1";
     nur.inputs.nixpkgs.follows = "nixpkgs";
 
     # core
     hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
-    fup.url = "github:gytis-ivaskevicius/flake-utils-plus";
+    fup.url = "github:gytis-ivaskevicius/flake-utils-plus?shallow=1";
     fup.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     # pkgs
-    neovim.url = "github:nix-community/neovim-nightly-overlay";
+    neovim.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
     # hyprland
     hyprland = {
-      url = github:hyprwm/Hyprland?ref=v0.46.2;
+      url = "github:hyprwm/Hyprland?ref=v0.46.2&shallow=1";
       flake = false;
     };
     hypr-binds-flake = {
-      url = github:hyprland-community/hypr-binds;
+      url = "github:hyprland-community/hypr-binds?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # zen
     zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
+      url = "github:youwen5/zen-browser-flake?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Fast nix search client
     nix-search = {
-      url = github:diamondburned/nix-search;
+      url = "github:diamondburned/nix-search?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # better rust nightly support
     fenix = {
-      url = "github:nix-community/fenix";
+      url = "github:nix-community/fenix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , hm
-    , fup
-    , ...
-    } @ inputs:
+  outputs = {
+    self,
+    nixpkgs,
+    hm,
+    fup,
+    ...
+  } @ inputs:
     fup.lib.mkFlake {
       inherit self inputs;
       supportedSystems = [
         "aarch64-linux"
         "x86_64-linux"
       ];
-
 
       # overlays that get applied to all channels
       sharedOverlays = with inputs; [
@@ -84,20 +82,21 @@
 
       channelsConfig.allowUnfree = true;
 
-      hostDefaults =
-        let
-          sys = "x86_64-linux";
-        in
-        {
+      hostDefaults = let
+        sys = "x86_64-linux";
+      in {
+        system = sys;
+        modules = [];
+        channelName = "unstable";
+        specialArgs = {
+          inherit inputs;
           system = sys;
-          modules = [ ];
-          channelName = "unstable";
-          specialArgs = { inherit inputs; system = sys; };
         };
+      };
 
       hosts = with inputs; {
         lavpc.modules = [
-          inputs.disko.nixosModules.default
+          disko.nixosModules.default
           ./hardware/lavpc.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
@@ -114,16 +113,15 @@
         ];
       };
 
-      nixosModules =
-        let
-          moduleList = [
-            inputs.disko.nixosModules.default
-            ./systems/modules/nix.nix
-            ./systems/modules/home-manager.nix
-            ./hardware/modules/pipewire.nix
-            ./hardware/modules/grub.nix
-          ];
-        in
+      nixosModules = let
+        moduleList = [
+          inputs.disko.nixosModules.default
+          ./systems/modules/nix.nix
+          ./systems/modules/home-manager.nix
+          ./hardware/modules/pipewire.nix
+          ./hardware/modules/grub.nix
+        ];
+      in
         fup.lib.exportModules moduleList;
 
       overlay = import ./pkgs;

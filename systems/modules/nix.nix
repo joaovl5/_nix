@@ -1,8 +1,8 @@
-{ lib, ... }:
-{
+{lib, ...}: {
   nix = {
     generateRegistryFromInputs = lib.mkDefault true;
     settings = {
+      download-buffer-size = lib.mkDefault 524288000; # 500mb
       substituters = [
         "https://nix-community.cachix.org"
       ];

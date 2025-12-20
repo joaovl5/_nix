@@ -1,9 +1,14 @@
-{ config, pkgs, lib, inputs, ... }:
-let secrets = {
-  hostName = "astral";
-};
-in
 {
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}: let
+  secrets = {
+    hostName = "astral";
+  };
+in {
   networking = {
     hostName = lib.mkForce secrets.hostName;
   };
@@ -17,10 +22,10 @@ in
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
-  # todo put wm 
+  # todo put wm
 
   documentation.man.generateCaches = true;
-  services.dbus.packages = with pkgs; [ dconf ];
+  services.dbus.packages = with pkgs; [dconf];
 
   environment.systemPackages = with pkgs; [
     curl

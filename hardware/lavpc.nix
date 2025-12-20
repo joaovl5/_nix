@@ -1,32 +1,34 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
   imports =
-    inputs.self.moduleSets.hardware ++
-    [
+    inputs.self.moduleSets.hardware
+    ++ [
       (modulesPath + "/profiles/qemu-guest.nix")
       inputs.nixpkgs.nixosModules.notDetected
     ];
 
   time.timeZone = "Americas/Sao_Paulo";
 
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sr_mod" "virtio_blk" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sr_mod" "virtio_blk"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
   services.pipewire.enable = true;
 
-  fileSystems."/" =
-    {
-      device = "UUID=90ecc4f4-65ca-47df-b362-5184cda952d0";
-      fsType = "bcachefs";
-    };
+  fileSystems."/" = {
+    device = "UUID=90ecc4f4-65ca-47df-b362-5184cda952d0";
+    fsType = "bcachefs";
+  };
 
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/14520cb5-f22d-4354-83b3-44c10f2e0574"; }];
+  swapDevices = [{device = "/dev/disk/by-uuid/14520cb5-f22d-4354-83b3-44c10f2e0574";}];
 
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
@@ -44,7 +46,6 @@
   environment.defaultPackages = with pkgs; [
     openrgb
   ];
-
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;

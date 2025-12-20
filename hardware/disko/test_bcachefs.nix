@@ -14,7 +14,7 @@
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                mountOptions = [ "umask=0077" ];
+                mountOptions = ["umask=0077"];
               };
             };
             swap = {
@@ -61,7 +61,6 @@
           };
         };
       };
-
     };
 
     bcachefs_filesystems = {
@@ -86,13 +85,13 @@
             mountpoint = "/home";
           };
           # Nested subvolume doesn't need a mountpoint as its parent is mounted.
-          "subvolumes/home/user" = { };
+          "subvolumes/home/user" = {};
           # Parent is not mounted so the mountpoint must be set.
           "subvolumes/nix" = {
             mountpoint = "/nix";
           };
           # This subvolume will be created but not mounted.
-          "subvolumes/test" = { };
+          "subvolumes/test" = {};
         };
       };
     };

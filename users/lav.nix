@@ -1,5 +1,10 @@
-{ pkgs, inputs, lib, system, ... }:
-let
+{
+  pkgs,
+  inputs,
+  lib,
+  system,
+  ...
+}: let
   # font = {
   #   name = "FiraCode Nerd Font";
   #   package = pkgs.nerd-fonts.override { fonts = [ "FiraCode" ]; };
@@ -8,30 +13,28 @@ let
   term = "ghostty";
   browser = "zen-browser";
   editor = "nvim";
-in
-{
+in {
   imports = with inputs; [
     hm.nixosModules.home-manager
   ];
 
-  environment.shells = [ pkgs.fish ];
+  environment.shells = [pkgs.fish];
   programs.fish.enable = true;
 
   users.users.lav = {
     initialPassword = "12";
     isNormalUser = true;
     shell = pkgs.fish;
-    extraGroups = [ "wheel" "docker" "libvirt" ];
+    extraGroups = ["wheel" "docker" "libvirt"];
   };
 
-  home-manager.users.lav = { config, ... }: {
+  home-manager.users.lav = {config, ...}: {
     home.stateVersion = "23.11";
-
 
     programs.git = {
       enable = true;
-      userEmail = "vieiraleao2005@gmail.com";
-      userName = "João Pedro";
+      settings.userEmail = "vieiraleao2005@gmail.com";
+      settings.userName = "João Pedro";
     };
 
     programs.direnv = {
@@ -86,10 +89,11 @@ in
       nix-prefetch-git
       pandoc
       pciutils
-      (with fenix; combine [
-        default.toolchain
-        latest.rust-src
-      ])
+      (with fenix;
+        combine [
+          default.toolchain
+          latest.rust-src
+        ])
       xclip
     ];
   };

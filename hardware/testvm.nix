@@ -1,12 +1,17 @@
-{ config, lib, pkgs, inputs, modulesPath, ... }:
 {
-  imports =
-    [
-      ./modules/pipewire.nix
-      ./modules/grub.nix
-      (modulesPath + "/profiles/qemu-guest.nix")
-      inputs.nixpkgs.nixosModules.notDetected
-    ];
+  config,
+  lib,
+  pkgs,
+  inputs,
+  modulesPath,
+  ...
+}: {
+  imports = [
+    ./modules/pipewire.nix
+    ./modules/grub.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
+    inputs.nixpkgs.nixosModules.notDetected
+  ];
 
   time.timeZone = "Americas/Sao_Paulo";
 
@@ -17,10 +22,10 @@
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
 
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sr_mod" "virtio_blk" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sr_mod" "virtio_blk"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
   boot.supportedFilesystems = {
     bcachefs = true;
   };
@@ -40,8 +45,6 @@
     openrgb
   ];
 
-
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;
-
 }
