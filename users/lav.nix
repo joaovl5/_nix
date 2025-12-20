@@ -34,8 +34,8 @@ in {
     programs.git = {
       enable = true;
       settings = {
-        userEmail = "vieiraleao2005@gmail.com";
-        userName = "João Pedro";
+        user.email = "vieiraleao2005@gmail.com";
+        user.name = "João Pedro";
       };
     };
 
