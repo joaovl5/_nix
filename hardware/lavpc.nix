@@ -23,13 +23,6 @@
   services.blueman.enable = true;
   services.pipewire.enable = true;
 
-  fileSystems."/" = {
-    device = "UUID=90ecc4f4-65ca-47df-b362-5184cda952d0";
-    fsType = "bcachefs";
-  };
-
-  swapDevices = [{device = "/dev/disk/by-uuid/14520cb5-f22d-4354-83b3-44c10f2e0574";}];
-
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
 
