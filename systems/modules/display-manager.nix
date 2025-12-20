@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   # tty-based manager
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
@@ -18,7 +14,7 @@
     enable = true;
     settings = {
       default_session = let
-        tuigreet = "${lib.exe pkgs.tuigreet}";
+        tuigreet = "${pkgs.greetd.tuigreet}";
       in {
         command = "${tuigreet} --time --remember";
       };
