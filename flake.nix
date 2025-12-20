@@ -13,7 +13,7 @@
     hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
     fup.url = "github:gytis-ivaskevicius/flake-utils-plus?shallow=1";
-    disko.url = "github:nix-community/disko?shallow=1";
+    disko.url = "github:nix-community/disko?shallow=1?shallow=1";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     # pkgs
