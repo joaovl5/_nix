@@ -22,7 +22,7 @@ in {
   # scans network, detects hostnames
   services.avahi.enable = true;
   # automount media devices (cameras, phones, etc)
-  gvfs.enable = true;
+  services.gvfs.enable = true;
   # auth backend
   security.polkit.enable = true;
   # ssh daemon and agent
