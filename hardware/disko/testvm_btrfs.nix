@@ -72,7 +72,7 @@
             other = {
               size = "100%";
               content = {
-                type = "filesystem4";
+                type = "filesystem";
                 format = "ext4";
                 mountpoint = "/secondary";
                 extraFormatArgs = [
