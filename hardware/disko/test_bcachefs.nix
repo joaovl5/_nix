@@ -33,26 +33,26 @@
         };
       };
 
-      vdb = {
-        device = "/dev/vdb";
-        type = "disk";
-        content = {
-          type = "gpt";
-          partitions = {
-            vdc1 = {
-              size = "100%";
-              content = {
-                type = "bcachefs";
-                filesystem = "main_bcachefs";
-                label = "group_a.hdd";
-                extraFormatArgs = [
-                  "--discard"
-                ];
-              };
-            };
-          };
-        };
-      };
+      # vdb = {
+      #   device = "/dev/vdb";
+      #   type = "disk";
+      #   content = {
+      #     type = "gpt";
+      #     partitions = {
+      #       vdc1 = {
+      #         size = "100%";
+      #         content = {
+      #           type = "bcachefs";
+      #           filesystem = "main_bcachefs";
+      #           label = "group_a.hdd";
+      #           extraFormatArgs = [
+      #             "--discard"
+      #           ];
+      #         };
+      #       };
+      #     };
+      #   };
+      # };
     };
 
     bcachefs_filesystems = {
