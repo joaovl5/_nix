@@ -1,20 +1,19 @@
 {...}: {
   disko.devices = {
     disk = {
-      vda = {
+      primary = {
         device = "/dev/vda";
         type = "disk";
         content = {
           type = "gpt";
           partitions = {
             esp = {
-              type = "EF00";
-              size = "100M";
+              type = "ESP";
+              size = "1G";
               content = {
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                mountOptions = ["umask=0077"];
               };
             };
             swap = {
@@ -29,9 +28,7 @@
               size = "100%";
               content = {
                 type = "bcachefs";
-                # refers to a filesystem in the `bcachefs_filesystems` attrset below.
                 filesystem = "main_bcachefs";
-                label = "group_a.ssd";
                 extraFormatArgs = [
                   "--discard"
                 ];
@@ -41,18 +38,17 @@
         };
       };
 
-      vdb = {
+      secondary = {
         device = "/dev/vdb";
         type = "disk";
         content = {
           type = "gpt";
           partitions = {
-            vdb1 = {
+            other = {
               size = "100%";
               content = {
                 type = "bcachefs";
                 filesystem = "main_bcachefs";
-                label = "group_a.hdd";
                 extraFormatArgs = [
                   "--discard"
                 ];
