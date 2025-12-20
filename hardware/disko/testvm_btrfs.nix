@@ -75,9 +75,6 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/secondary";
-                extraFormatArgs = [
-                  "--discard"
-                ];
               };
             };
           };
