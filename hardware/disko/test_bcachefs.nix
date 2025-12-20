@@ -17,6 +17,14 @@
                 mountOptions = ["umask=0077"];
               };
             };
+            swap = {
+              size = "5G";
+              content = {
+                type = "swap";
+                randomEncryption = true;
+                priority = 100; # prefer encrypting as long as we have enough space
+              };
+            };
             main = {
               size = "100%";
               content = {
@@ -33,30 +41,29 @@
         };
       };
 
-      # vdb = {
-      #   device = "/dev/vdb";
-      #   type = "disk";
-      #   content = {
-      #     type = "gpt";
-      #     partitions = {
-      #       vdc1 = {
-      #         size = "100%";
-      #         content = {
-      #           type = "bcachefs";
-      #           filesystem = "main_bcachefs";
-      #           label = "group_a.hdd";
-      #           extraFormatArgs = [
-      #             "--discard"
-      #           ];
-      #         };
-      #       };
-      #     };
-      #   };
-      # };
+      vdb = {
+        device = "/dev/vdb";
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            vdb1 = {
+              size = "100%";
+              content = {
+                type = "bcachefs";
+                filesystem = "main_bcachefs";
+                label = "group_a.hdd";
+                extraFormatArgs = [
+                  "--discard"
+                ];
+              };
+            };
+          };
+        };
+      };
     };
 
     bcachefs_filesystems = {
-      # Example showing mounted subvolumes in a multi-disk configuration.
       main_bcachefs = {
         type = "bcachefs_filesystem";
         extraFormatArgs = [
