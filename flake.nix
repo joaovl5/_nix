@@ -27,6 +27,9 @@
       url = "github:hyprland-community/hypr-binds?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+
+
     # zen
     zen-browser = {
       url = "github:youwen5/zen-browser-flake?shallow=1";
