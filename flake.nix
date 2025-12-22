@@ -115,6 +115,15 @@
           ./systems/modules/home-manager.nix
           ./users/lav.nix
         ];
+        testvm_arm.modules = [
+          inputs.disko.nixosModules.default
+          ./hardware/testvm_arm.nix
+          ./hardware/modules/pipewire.nix
+          ./hardware/modules/grub.nix
+          ./systems/astral.nix
+          ./systems/modules/home-manager.nix
+          ./users/lav.nix
+        ];
       };
 
       nixosModules = let
