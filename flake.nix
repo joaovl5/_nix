@@ -95,37 +95,10 @@
         };
       };
 
-      hosts = let
-        testvm_hw = import ./hardware/testvm.nix {
-          inherit inputs;
-          disk_config = ./disko/testvm_btrfs.nix;
-        };
-        testvm_old_hw = import ./hardware/testvm.nix {
-          inherit inputs;
-          disk_config = ./disko/testvm_btrfs_old.nix;
-        };
-      in {
-        # lavpc.modules = [
-        #   inputs.disko.nixosModules.default
-        #   ./hardware/lavpc.nix
-        #   ./hardware/modules/pipewire.nix
-        #   ./hardware/modules/grub.nix
-        #   ./systems/astral.nix
-        #   ./systems/modules/home-manager.nix
-        #   ./users/lav.nix
-        # ];
+      hosts = {
         testvm.modules = [
           inputs.disko.nixosModules.default
-          testvm_hw
-          ./hardware/modules/pipewire.nix
-          ./hardware/modules/grub.nix
-          ./systems/astral.nix
-          ./systems/modules/home-manager.nix
-          ./users/lav.nix
-        ];
-        testvm_old.modules = [
-          inputs.disko.nixosModules.default
-          testvm_old_hw
+          ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
           ./systems/astral.nix

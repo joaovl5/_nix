@@ -3,13 +3,11 @@
   pkgs,
   inputs,
   modulesPath,
-  disk_config,
   ...
 }: {
   imports = [
     ./modules/pipewire.nix
     ./modules/grub.nix
-    disk_config
     ./disko/testvm_btrfs.nix
     (modulesPath + "/profiles/qemu-guest.nix")
     inputs.nixpkgs.nixosModules.notDetected
