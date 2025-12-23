@@ -10,6 +10,7 @@
     nur.inputs.nixpkgs.follows = "nixpkgs";
 
     # core
+
     hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
     fup.url = "github:gytis-ivaskevicius/flake-utils-plus?shallow=1";
@@ -27,8 +28,6 @@
       url = "github:hyprland-community/hypr-binds?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-
 
     # zen
     zen-browser = {

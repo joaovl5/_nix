@@ -3,7 +3,7 @@
   pkgs,
   inputs,
   modulesPath,
-  disk_config
+  disk_config,
   ...
 }: {
   imports = [
