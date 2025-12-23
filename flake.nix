@@ -96,8 +96,14 @@
       };
 
       hosts = let
-        testvm_hw = import ./hardware/testvm.nix {disk_config = ./disko/testvm_btrfs.nix;};
-        testvm_old_hw = import ./hardware/testvm.nix {disk_config = ./disko/testvm_btrfs_old.nix;};
+        testvm_hw = import ./hardware/testvm.nix {
+          inherit inputs;
+          disk_config = ./disko/testvm_btrfs.nix;
+        };
+        testvm_old_hw = import ./hardware/testvm.nix {
+          inherit inputs;
+          disk_config = ./disko/testvm_btrfs_old.nix;
+        };
       in {
         # lavpc.modules = [
         #   inputs.disko.nixosModules.default
