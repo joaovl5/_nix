@@ -103,6 +103,17 @@
           ./hardware/modules/grub.nix
           ./systems/astral.nix
           ./systems/modules/home-manager.nix
+          ./systems/modules/hyprland.nix
+          ./users/lav.nix
+        ];
+
+        # servers
+
+        tyrant.modules = [
+          inputs.disko.nixosModules.default
+          ./hardware/modules/grub.nix
+          # ./hardware/testvm.nix
+          ./systems/tyrant.nix
           ./users/lav.nix
         ];
       };
