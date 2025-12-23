@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  inputs,
   modulesPath,
   disk_config,
   ...
@@ -12,7 +11,6 @@
     disk_config
     ./disko/testvm_btrfs.nix
     (modulesPath + "/profiles/qemu-guest.nix")
-    inputs.nixpkgs.nixosModules.notDetected
   ];
 
   time.timeZone = "Americas/Sao_Paulo";
