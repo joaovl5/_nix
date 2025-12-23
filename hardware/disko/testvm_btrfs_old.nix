@@ -1,5 +1,6 @@
 {
   primary_device,
+  secondary_device,
   ...
 }: {
   disko.devices = {
@@ -56,6 +57,24 @@
                     };
                   };
                 };
+              };
+            };
+          };
+        };
+      };
+
+      secondary = {
+        device = secondary_device;
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            other = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/secondary";
               };
             };
           };
