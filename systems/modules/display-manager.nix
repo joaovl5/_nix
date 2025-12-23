@@ -18,7 +18,7 @@
     enable = true;
     settings = {
       default_session = let
-        tuigreet = "${pkgs.greetd.tuigreet}";
+        tuigreet = "${pkgs.greetd.tuigreet}/bin/tuigreet";
         cmd = default_cmd;
       in {
         command = "${tuigreet} --time --remember --cmd ${cmd}";
