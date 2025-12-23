@@ -16,5 +16,5 @@ in {
   programs.hyprland.enable = true;
 
   # allows Hyprland to run without root privileges
-  seatd.enable = true;
+  # seatd.enable = true;
 }
