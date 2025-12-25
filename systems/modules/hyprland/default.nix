@@ -1,6 +1,6 @@
 {
   pkgs,
-  config,
+  inputs,
   ...
 }: let
   package = pkgs.hyprland;
@@ -9,7 +9,8 @@
     default_cmd = "${package}/bin/Hyprland";
   };
 in {
-  imports = [
+  imports = with inputs; [
+    hm.nixosModules.home-manager
     displayManager
   ];
 
