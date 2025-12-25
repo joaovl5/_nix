@@ -39,6 +39,9 @@ in {
       enable = true;
       dates = "weekly";
     };
+    defaultNetwork.settings = {
+      "dns_enabled" = false; # don't use port 53 - pi-hole conflicts
+    };
   };
   virtualisation.oci-containers.backend = lib.mkForce "podman";
   # Enable container name DNS for all Podman networks.

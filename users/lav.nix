@@ -84,6 +84,7 @@ in {
       ## terminal
       ghostty
       kitty
+      tmux
       ## clipboard manager
       wl-clipboard # wl-paste/...
       cliphist
