@@ -21,6 +21,6 @@ in {
     '';
     Unit.After = ["podman.service" "podman.socket"];
     Unit.X-SwitchMethod = "stop-start";
-    Install.WantedBy = ["multi-user.target"];
+    Install.WantedBy = ["default.target"];
   };
 }
