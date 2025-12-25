@@ -43,7 +43,6 @@
   outputs = {
     self,
     nixpkgs,
-    selfhostblocks,
     disko,
     hm,
     fup,
