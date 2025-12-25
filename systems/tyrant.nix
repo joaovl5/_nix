@@ -31,6 +31,8 @@ in {
     };
   };
 
+  # disable privileged ports
+  boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
   virtualisation.podman = {
     enable = true;
     # dockerCompat = true;
@@ -40,19 +42,10 @@ in {
       dates = "weekly";
     };
     defaultNetwork.settings = {
-      "dns_enabled" = false; # don't use port 53 - pi-hole conflicts
+      "dns_enabled" = true;
     };
   };
   virtualisation.oci-containers.backend = lib.mkForce "podman";
-  # Enable container name DNS for all Podman networks.
-  networking.firewall.interfaces = let
-    matchAll =
-      if !config.networking.nftables.enable
-      then "podman+"
-      else "podman*";
-  in {
-    "${matchAll}".allowedUDPPorts = [53];
-  };
 
   environment.systemPackages = with pkgs; [
     # virtualisation
