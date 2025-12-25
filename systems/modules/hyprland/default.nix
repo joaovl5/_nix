@@ -13,21 +13,21 @@ in {
     displayManager
   ];
 
-  wayland.windowManager.hyprland = {
-    inherit package;
-
-    enable = true;
-    systemd.enable = true;
-    xwayland.enable = true;
-
-    settings = {
-      source = [];
-    };
-  };
-
   config = {
     programs.dconf.enable = true;
     programs.hyprland.enable = true;
+
+    wayland.windowManager.hyprland = {
+      inherit package;
+
+      enable = true;
+      systemd.enable = true;
+      xwayland.enable = true;
+
+      settings = {
+        source = [];
+      };
+    };
     home.packages = with pkgs; [
       # launcher
       anyrun
