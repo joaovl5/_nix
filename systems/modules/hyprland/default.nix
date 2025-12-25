@@ -32,7 +32,7 @@ in {
       # launcher
       anyrun
       # file manager
-      thunar
+      xfce.thunar
       # terminal
       ghostty
       kitty
