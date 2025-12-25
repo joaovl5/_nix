@@ -31,6 +31,10 @@ in {
   home-manager.users.lav = {config, ...}: {
     home.stateVersion = "23.11";
 
+    imports = [
+      ./hm/modules/hyprland
+    ];
+
     programs.git = {
       enable = true;
       settings = {
