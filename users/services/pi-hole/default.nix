@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  ...
 }: let
   services_dir = "~/projects";
   service_name = "pi-hole";
