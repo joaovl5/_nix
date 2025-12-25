@@ -16,8 +16,6 @@
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
-    hm.nixosModules.home-manager
-    a
   ];
 
   environment.shells = [pkgs.fish];
