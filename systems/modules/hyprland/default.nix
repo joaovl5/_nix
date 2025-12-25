@@ -13,20 +13,18 @@ in {
     displayManager
   ];
 
-  config = {
-    programs.dconf.enable = true;
-    programs.hyprland.enable = true;
+  programs.dconf.enable = true;
+  programs.hyprland.enable = true;
 
-    wayland.windowManager.hyprland = {
-      inherit package;
+  wayland.windowManager.hyprland = {
+    inherit package;
 
-      enable = true;
-      systemd.enable = true;
-      xwayland.enable = true;
+    enable = true;
+    systemd.enable = true;
+    xwayland.enable = true;
 
-      settings = {
-        source = [];
-      };
+    settings = {
+      source = [];
     };
   };
 }
