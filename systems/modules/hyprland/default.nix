@@ -4,7 +4,7 @@
   ...
 }: let
   package = pkgs.hyprland;
-  displayManager = import ./display-manager.nix {
+  displayManager = import ../display-manager.nix {
     inherit pkgs;
     default_cmd = "${package}/bin/Hyprland";
   };
