@@ -11,6 +11,7 @@
     useGlobalPkgs = lib.mkDefault true;
     useUserPackages = lib.mkDefault true;
     sharedModules = [];
+    backupFileExtension = "bkp";
   };
   # needed for home-manager portal/DE configs be linked
   environment.pathsToLink = [
