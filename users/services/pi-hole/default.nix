@@ -17,7 +17,8 @@ in {
 
   systemd.user.services.${service_name} = {
     Service.ExecStart = pkgs.writeShellScript "exec_${service_name}" ''
-      ${compose_cmd} -f ${compose_target} up
+      #!/run/current-system/sw/bin/bash
+      ${compose_cmd} -f "$HOME/${compose_target}" up
     '';
     Unit.After = ["podman.service" "podman.socket"];
     Unit.X-SwitchMethod = "stop-start";
