@@ -13,8 +13,10 @@ in {
     displayManager
   ];
 
-  programs.dconf.enable = true;
-  programs.hyprland.enable = true;
+  config = {
+    programs.dconf.enable = true;
+    programs.hyprland.enable = true;
+  };
 
   wayland.windowManager.hyprland = {
     inherit package;
