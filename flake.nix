@@ -98,7 +98,7 @@
           ./hardware/modules/grub.nix
           ./systems/astral.nix
           ./systems/modules/home-manager.nix
-          ./systems/modules/hyprland.nix
+          ./systems/modules/hyprland
           ./users/lav.nix
         ];
 
