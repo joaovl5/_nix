@@ -29,17 +29,4 @@ in {
       };
     };
   };
-
-  home.packages = with pkgs; [
-    # launcher
-    anyrun
-    # file manager
-    xfce.thunar
-    # terminal
-    ghostty
-    kitty
-    # clipboard manager
-    wl-clipboard # wl-paste/...
-    cliphist
-  ];
 }

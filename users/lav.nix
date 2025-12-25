@@ -73,6 +73,17 @@ in {
       obs-studio
       ghostty
 
+      ## launcher
+      anyrun
+      ## file manager
+      xfce.thunar
+      ## terminal
+      ghostty
+      kitty
+      ## clipboard manager
+      wl-clipboard # wl-paste/...
+      cliphist
+
       ## games/emulation/vms
       steam
       steam-run
