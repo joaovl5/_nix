@@ -1,8 +1,4 @@
-{
-  pkgs,
-  default_cmd,
-  ...
-}: {
+{pkgs, ...}: {
   # tty-based manager
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
@@ -18,10 +14,10 @@
     enable = true;
     settings = {
       default_session = let
-        tuigreet = "${pkgs.tuigreet}/bin/tuigreet";
-        cmd = default_cmd;
+        greeter = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ";
       in {
-        command = "${tuigreet} --time --remember --cmd ${cmd}";
+        # .wayland-session - set by hm modules for wayland compositors
+        command = "${greeter} $HOME/.wayland-session";
       };
     };
   };

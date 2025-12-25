@@ -98,6 +98,7 @@
           ./hardware/modules/grub.nix
           ./systems/astral.nix
           ./systems/modules/home-manager.nix
+          ./systems/modules/display-manager.nix
           ./users/lav.nix
         ];
 

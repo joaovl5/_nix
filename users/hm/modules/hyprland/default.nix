@@ -4,15 +4,7 @@
   ...
 }: let
   package = pkgs.hyprland;
-  displayManager = import ../display-manager.nix {
-    inherit pkgs;
-    default_cmd = "${package}/bin/Hyprland";
-  };
 in {
-  imports = with inputs; [
-    displayManager
-  ];
-
   wayland.windowManager.hyprland = {
     inherit package;
 
@@ -23,5 +15,11 @@ in {
     settings = {
       source = [];
     };
+  };
+
+  # this executable is used by greetd to detect the default wayland session command
+  home.file.".wayland-session" = {
+    source = "${package}/bin/Hyprland";
+    executable = true;
   };
 }
