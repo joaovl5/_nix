@@ -3,7 +3,7 @@
   config,
   ...
 }: let
-  services_dir = "~/projects";
+  services_dir = "projects";
   service_name = "pi-hole";
   compose_source = ./compose.yml;
   compose_target = "${services_dir}/${service_name}/compose.yml";
@@ -16,7 +16,7 @@ in {
   };
 
   systemd.user.services.${service_name} = {
-    Service.ExecStart = ''
+    Service.ExecStart = pkgs.writeShellScript "exec_${service_name}" ''
       ${compose_cmd} -f ${compose_target} up
     '';
     Unit.After = ["podman.service" "podman.socket"];
