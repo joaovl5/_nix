@@ -1,0 +1,146 @@
+$cfgs = $HOME/.config/hypr/configs
+$scripts = $HOME/.config/hypr/scripts
+
+$mod = SUPER
+$term = ghostty
+
+$files = thunar
+$menu = anyrun --plugins libapplications.so
+$menu_files = anyrun --plugins libkidex.so
+$menu_search = anyrun --plugins libwebsearch.so
+$menu_unicode = anyrun --plugins libsymbols.so
+$menu_calc = anyrun --plugins librink.so
+
+# ---------------------------
+# Critical
+# ---------------------------
+bind = CTRL ALT, Delete, exec, hyprctl dispatch exit 0
+bind = CTRL ALT, L, exec, $scripts/lock-screen.sh
+
+# ---------------------------
+# Applications
+# ---------------------------
+# Terminal
+bind = $mod, Return, exec, $term
+bind = $mod, X, exec, kitten quick-access-terminal
+
+# File Manager
+bind = $mod, T, exec, $files
+
+# Menus
+bind = $mod, code:49, exec, swaync-client -t -sw # notifications panel, key is `
+bind = $mod ALT, SPACE, exec, $scripts/powermenu.sh # powermenu # TODO: improve
+bind = $mod, W, exec, $scripts/wallpaper_selector.sh # wallpaper selector # TODO: improve
+bind = $mod, SPACE, exec, $menu # app list
+bind = $mod, C, exec, $menu_calc
+bind = $mod, period, exec, $menu_unicode
+bind = $mod, code:47, exec, $menu_search # semicolon (;)
+
+# ---------------------------
+# Windows
+# ---------------------------
+## Managing current window
+bind = $mod, Q, killactive
+bind = $mod SHIFT, Q, exec, $scripts/kill-active-process.sh
+bind = $mod, F, fullscreen, 1
+bind = ALT, F, fullscreen, 2
+bind = $mod SHIFT, F, togglefloating
+
+### Resizing
+$resizeAmount = 50
+binde = $mod SHIFT, H, resizeactive, -$resizeAmount 0
+binde = $mod SHIFT, J, resizeactive, 0 $resizeAmount
+binde = $mod SHIFT, K, resizeactive, 0 -$resizeAmount
+binde = $mod SHIFT, L, resizeactive, $resizeAmount 0
+bindm = $mod, mouse:273, resizewindow # resize w/ mouse right
+### Moving focus
+$moveFocus = movefocus
+bind = $mod, H, $moveFocus, l
+bind = $mod, J, $moveFocus, d
+bind = $mod, K, $moveFocus, u
+bind = $mod, L, $moveFocus, r
+## Navigating between windows
+bind = ALT, Tab, cyclenext
+bind = ALT, Tab, bringactivetotop
+# easymotion plugin 
+# bind = $mod, P, easymotion, action:hyprctl dispatch focuswindow address:{}
+
+### Moving position
+$moveWindow = movewindow
+bind = $mod CTRL, H, $moveWindow, l
+bind = $mod CTRL, J, $moveWindow, d
+bind = $mod CTRL, K, $moveWindow, u
+bind = $mod CTRL, L, $moveWindow, r
+bindm = $mod, mouse:272, movewindow # move w/ mouse left
+
+
+
+# ---------------------------
+# Workspaces
+# ---------------------------
+## Managing current workspace 
+### Move workspace between monitors
+bind = $mod ALT, h, movecurrentworkspacetomonitor, l
+bind = $mod ALT, l, movecurrentworkspacetomonitor, r
+
+## Navigating between workspaces
+# hyprexpo view 
+bind = $mod, Tab, hyprexpo:expo, toggle
+
+bind = $mod, code:10, workspace, 1
+bind = $mod, code:11, workspace, 2
+bind = $mod, code:12, workspace, 3
+bind = $mod, code:13, workspace, 4
+bind = $mod, code:14, workspace, 5
+bind = $mod, code:15, workspace, 6
+bind = $mod, code:16, workspace, 7
+bind = $mod, code:17, workspace, 8
+bind = $mod, code:18, workspace, 9
+bind = $mod, code:19, workspace, 10
+bind = $mod, A, togglespecialworkspace, scratch
+
+## Move active window between workspaces
+bind = $mod SHIFT, code:10, movetoworkspace, 1
+bind = $mod SHIFT, code:11, movetoworkspace, 2
+bind = $mod SHIFT, code:12, movetoworkspace, 3
+bind = $mod SHIFT, code:13, movetoworkspace, 4
+bind = $mod SHIFT, code:14, movetoworkspace, 5
+bind = $mod SHIFT, code:15, movetoworkspace, 6
+bind = $mod SHIFT, code:16, movetoworkspace, 7
+bind = $mod SHIFT, code:17, movetoworkspace, 8
+bind = $mod SHIFT, code:18, movetoworkspace, 9
+bind = $mod SHIFT, code:19, movetoworkspace, 10
+bind = $mod SHIFT, code:19, movetoworkspace, 10
+bind = $mod SHIFT, A, movetoworkspace, special:scratch
+
+## Move active window *silently* to workspaces (without focus)
+bind = $mod CTRL, code:10, movetoworkspacesilent, 1
+bind = $mod CTRL, code:11, movetoworkspacesilent, 2
+bind = $mod CTRL, code:12, movetoworkspacesilent, 3
+bind = $mod CTRL, code:13, movetoworkspacesilent, 4
+bind = $mod CTRL, code:14, movetoworkspacesilent, 5
+bind = $mod CTRL, code:15, movetoworkspacesilent, 6
+bind = $mod CTRL, code:16, movetoworkspacesilent, 7
+bind = $mod CTRL, code:17, movetoworkspacesilent, 8
+bind = $mod CTRL, code:18, movetoworkspacesilent, 9
+bind = $mod CTRL, code:19, movetoworkspacesilent, 10
+
+# ---------------------------
+# Media
+# ---------------------------
+bindl = , XF86AudioNext, exec, playerctl next
+bindl = , XF86AudioPause, exec, playerctl play-pause
+bindl = , XF86AudioPlay, exec, playerctl play-pause
+bindl = , XF86AudioPrev, exec, playerctl previous
+## Audio
+bindel = , xf86audioraisevolume, exec, $scripts/media.sh --inc
+bindel = , xf86audiolowervolume, exec, $scripts/media.sh --dec
+bindl = , xf86AudioMicMute, exec, $scripts/media.sh --toggle-mic
+bindl = , xf86audiomute, exec, $scripts/media.sh --toggle-audio
+
+## Screenshots
+bind = $mod SHIFT, S, exec, $scripts/hyprshot.sh -m region --clipboard-only
+
+## Zoom
+bind = $mod, mouse_down, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '.float * 1.25')
+bind = $mod, mouse_up, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '(.float / 2) | if . < 1 then 1 else . end')

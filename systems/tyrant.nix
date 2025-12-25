@@ -1,11 +1,12 @@
 {
   pkgs,
+  config,
   lib,
   inputs,
   ...
 }: let
   secrets = {
-    hostName = "astral";
+    hostName = "tyrant";
   };
 in {
   networking = {
@@ -21,25 +22,45 @@ in {
   # scans network, detects hostnames
   services.avahi.enable = true;
   # ssh daemon and agent
-  services.openssh.enable = true;
-
-  virtualisation.docker = {
+  services.openssh = {
     enable = true;
+
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = true; # todo remove later
+    };
+  };
+
+  virtualisation.podman = {
+    enable = true;
+    # dockerCompat = true;
+    dockerSocket.enable = true;
     autoPrune = {
       enable = true;
       dates = "weekly";
     };
   };
-  virtualisation.libvirtd = {
-    enable = true;
+  virtualisation.oci-containers.backend = lib.mkForce "podman";
+  # Enable container name DNS for all Podman networks.
+  networking.firewall.interfaces = let
+    matchAll =
+      if !config.networking.nftables.enable
+      then "podman+"
+      else "podman*";
+  in {
+    "${matchAll}".allowedUDPPorts = [53];
   };
 
   environment.systemPackages = with pkgs; [
+    # virtualisation
+    podman-compose
+
+    # utils
     dconf
     curl
+    wget
     git
-    htop
-    openal
+    btop
     wget
   ];
 

@@ -30,13 +30,30 @@ in {
   services.dbus.packages = with pkgs; [dconf];
 
   virtualisation.spiceUSBRedirection.enable = true;
-  virtualisation.docker = {
+  virtualisation.containers.enable = true;
+  virtualisation.podman = {
     enable = true;
+    # simulate a docker socket
+    dockerSocket.enable = true;
+    # create a `docker` alias for podman, to use it as a drop-in replacement
+    dockerCompat = true;
+    # required for containers under podman-compose to be able to talk to each other.
+    defaultNetwork.settings.dns_enabled = true;
     autoPrune = {
       enable = true;
       dates = "weekly";
     };
   };
+  users.groups.podman = {
+    name = "podman";
+  };
+  # virtualisation.docker = {
+  #   enable = true;
+  #   autoPrune = {
+  #     enable = true;
+  #     dates = "weekly";
+  #   };
+  # };
   virtualisation.libvirtd = {
     enable = true;
   };
@@ -44,6 +61,10 @@ in {
   documentation.man.generateCaches = true;
 
   environment.systemPackages = with pkgs; [
+    # virtualisation
+    podman
+    podman-compose
+    # utils
     dconf
     curl
     git

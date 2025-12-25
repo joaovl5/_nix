@@ -1,0 +1,36 @@
+# restart services that depend on envvars set
+# exec-once = dinitctl start wallpaper
+# exec-once = dinitctl start polkit-gnome
+
+# hyprland plugin manager
+exec-once = hyprpm reload -n
+
+# audio
+# exec-once = pipewire &
+# exec-once = pipewire-pulse &
+# exec-once = wireplumber &
+# exec-once = easyeffects --gapplication-service
+
+# screensharing support
+# exec-once = sleep 1 && /usr/lib/xdg-desktop-portal >> ~/logs/xdg-desktop-portal.log 2>&1 &
+# exec-once = sleep 1 && /usr/lib/xdg-desktop-portal-hyprland >> ~/logs/xdg-desktop-portal-hyprland.log 2>&1 &
+
+# hypridle
+# exec-once = hypridle &
+
+# status bar
+# exec-once = ironbar &
+
+# sway notification manager
+# exec-once = swaync &
+
+# app runner services
+# exec-once = blueman-applet &
+# exec-once = walker --gapplication-service &
+
+# clipboard management
+# exec-once = wl-paste --type text --watch cliphist store # text data
+# exec-once = wl-paste --type image --watch cliphist store # image data
+
+# dpi xwayland fix
+# exec-once = echo "Xft.dpi: 128" | xrdb -merge

@@ -1,0 +1,4 @@
+monitor=HDMI-A-1,1920x1080@100.0,0x240,1.0
+monitor=HDMI-A-1,transform,1
+monitor=DP-1,3840x2160@240.08,1080x396,1.333333
+monitor=Unknown-1,3840x2160@240.08,1080x396,1.333333
