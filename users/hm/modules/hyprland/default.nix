@@ -10,7 +10,6 @@
   };
 in {
   imports = with inputs; [
-    hm.nixosModules.home-manager
     displayManager
   ];
 
