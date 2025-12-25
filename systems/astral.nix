@@ -29,6 +29,9 @@ in {
   programs.ssh.startAgent = true;
   services.dbus.packages = with pkgs; [dconf];
 
+  # disable privileged ports
+  boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
+
   virtualisation.spiceUSBRedirection.enable = true;
   virtualisation.containers.enable = true;
   virtualisation.podman = {
