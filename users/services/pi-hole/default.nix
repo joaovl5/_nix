@@ -8,7 +8,7 @@
   compose_source = ./compose.yml;
   compose_target = "${services_dir}/${service_name}/compose.yml";
   compose_cmd = "${pkgs.podman-compose}/bin/podman-compose";
-  mkSymlink = - config.lib.file.mkOutOfStoreSymlink;
+  mkSymlink = config.lib.file.mkOutOfStoreSymlink;
 in {
   home.file.${compose_target} = {
     force = true;
