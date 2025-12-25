@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  config,
+  ...
+}: let
   package = pkgs.hyprland;
   displayManager = import ./display-manager.nix {
     inherit pkgs;
