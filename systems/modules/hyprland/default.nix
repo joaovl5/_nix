@@ -13,8 +13,6 @@ in {
     displayManager
   ];
 
-  programs.dconf.enable = true;
-  programs.hyprland.enable = true;
   wayland.windowManager.hyprland = {
     inherit package;
 
@@ -28,6 +26,8 @@ in {
   };
 
   config = {
+    programs.dconf.enable = true;
+    programs.hyprland.enable = true;
     home.packages = with pkgs; [
       # launcher
       anyrun
