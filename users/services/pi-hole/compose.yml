@@ -14,7 +14,7 @@ services:
       # http
       - "8001:80/tcp"
     environment:
-      FTLCONF_dns_listeningMode: "ALL"
+      # FTLCONF_dns_listeningMode: "ALL"
       TZ: "America/Sao_Paulo"
       FTLCONF_webserver_api_password: "changeme"
     volumes:
