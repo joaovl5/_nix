@@ -26,7 +26,6 @@ in {
     #   ${compose_cmd} -f "$HOME/${compose_target}" down
     # '';
     Unit.After = ["docker.service" "docker.socket"];
-    Unit.Requires = ["docker.service" "docker.socket"];
     Unit.X-SwitchMethod = "stop-start";
     Install.WantedBy = ["default.target"];
   };
