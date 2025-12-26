@@ -7,7 +7,7 @@
   service_name = "pi-hole";
   compose_source = ./compose.yml;
   compose_target = "${services_dir}/${service_name}/compose.yml";
-  compose_cmd = "${pkgs.podman-compose}/bin/podman-compose --podman-path ${pkgs.podman}/bin/podman";
+  compose_cmd = "${pkgs.docker-compose}/bin/docker-compose --docker-path ${pkgs.docker}/bin/podman";
   mkSymlink = config.lib.file.mkOutOfStoreSymlink;
 in {
   home.file.${compose_target} = {
@@ -16,11 +16,15 @@ in {
   };
 
   systemd.user.services.${service_name} = {
-    Service.ExecStart = pkgs.writeShellScript "exec_${service_name}" ''
+    Service.ExecStart = pkgs.writeShellScript "exec_start_${service_name}" ''
       #!/run/current-system/sw/bin/bash
       ${compose_cmd} -f "$HOME/${compose_target}" up
     '';
-    Unit.After = ["podman.service" "podman.socket"];
+    # Service.ExecStop = pkgs.writeShellScript "exec_stop_${service_name}" ''
+    #   #!/run/current-system/sw/bin/bash
+    #   ${compose_cmd} -f "$HOME/${compose_target}" down
+    # '';
+    Unit.After = ["docker.service" "docker.socket"];
     Unit.X-SwitchMethod = "stop-start";
     Install.WantedBy = ["default.target"];
   };

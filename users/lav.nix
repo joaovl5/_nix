@@ -25,7 +25,7 @@ in {
     initialPassword = "12";
     isNormalUser = true;
     shell = pkgs.fish;
-    extraGroups = ["wheel" "docker" "libvirt"];
+    extraGroups = ["wheel" "libvirt"];
   };
 
   home-manager.users.lav = {config, ...}: {
