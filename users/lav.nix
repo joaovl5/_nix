@@ -33,7 +33,7 @@ in {
 
     imports = [
       ./hm/modules/hyprland
-      ./services/pi-hole
+      ./services/technitium-dns
     ];
 
     programs.git = {
