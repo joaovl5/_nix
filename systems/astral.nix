@@ -70,8 +70,11 @@ in {
 
   environment.systemPackages = with pkgs; [
     # virtualisation
+    ## containers
     docker
     docker-compose
+    arion # nix syntax + containers/vms/etc
+
     # podman
     # podman-compose
     # utils
