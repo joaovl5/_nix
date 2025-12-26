@@ -18,6 +18,7 @@ in {
   systemd.user.services.${service_name} = {
     Service.ExecStart = pkgs.writeShellScript "exec_start_${service_name}" ''
       #!/run/current-system/sw/bin/bash
+      export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
       ${compose_cmd} -f "$HOME/${compose_target}" up
     '';
     # Service.ExecStop = pkgs.writeShellScript "exec_stop_${service_name}" ''
@@ -25,6 +26,7 @@ in {
     #   ${compose_cmd} -f "$HOME/${compose_target}" down
     # '';
     Unit.After = ["docker.service" "docker.socket"];
+    Unit.Requires = ["docker.service" "docker.socket"];
     Unit.X-SwitchMethod = "stop-start";
     Install.WantedBy = ["default.target"];
   };

@@ -51,7 +51,7 @@ in {
   #   name = "podman";
   # };
   virtualisation.docker = {
-    enable = true;
+    enable = false; # we use rootless instead
     # storageDriver = "btrfs";
     autoPrune = {
       enable = true;
