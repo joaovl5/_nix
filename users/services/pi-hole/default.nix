@@ -7,7 +7,7 @@
   service_name = "pi-hole";
   compose_source = ./compose.yml;
   compose_target = "${services_dir}/${service_name}/compose.yml";
-  compose_cmd = "${pkgs.docker-compose}/bin/docker-compose --docker-path ${pkgs.docker}/bin/podman";
+  compose_cmd = "${pkgs.docker-compose}/bin/docker-compose";
   mkSymlink = config.lib.file.mkOutOfStoreSymlink;
 in {
   home.file.${compose_target} = {
