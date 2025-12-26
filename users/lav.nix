@@ -16,6 +16,7 @@
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
+    ./services/technitium-dns
   ];
 
   environment.shells = [pkgs.fish];
@@ -33,7 +34,6 @@ in {
 
     imports = [
       ./hm/modules/hyprland
-      ./services/technitium-dns
     ];
 
     programs.git = {
