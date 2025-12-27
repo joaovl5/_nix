@@ -4,10 +4,12 @@
   inputs,
   modulesPath,
   ...
-}: {
+}: let
+  disko_cfg = import ./disko/server_1.nix {primary_device = "/dev/sda";};
+in {
   imports = [
     ./modules/grub.nix
-    ./disko/server_1.nix
+    disko_cfg
     inputs.nixpkgs.nixosModules.notDetected
   ];
 

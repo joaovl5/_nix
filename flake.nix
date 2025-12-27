@@ -109,6 +109,7 @@
           ./hardware/tyrant.nix
           ./hardware/modules/grub.nix
           ./systems/tyrant.nix
+          ./systems/modules/home-manager.nix
           ./users/tyrant.nix
         ];
       };
