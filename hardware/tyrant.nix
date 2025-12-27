@@ -23,6 +23,7 @@ in {
   boot.kernelModules = ["kvm-intel"];
   boot.kernelPackages = pkgs.linuxPackages_hardened;
   boot.loader.grub.efiSupport = false;
+  security.unprivilegedUsernsClone = true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;
