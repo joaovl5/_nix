@@ -1,4 +1,4 @@
-{...} @ args: let
+{pkgs, ...} @ args: let
   svc = import ../../../lib/services.nix args;
   inherit (svc) make_docker_service;
 in {
