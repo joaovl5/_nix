@@ -20,7 +20,7 @@
           Type = "simple";
           ExecStart = pkgs.writeShellScript "exec_start_${service_name}" ''
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-            PROJ_DIR="~/projects/${service_name}"
+            PROJ_DIR="$HOME/projects/${service_name}"
             mkdir -p "$PROJ_DIR"
             cd "$PROJ_DIR"
             ${compose_cmd} -f "${compose_file}" up
