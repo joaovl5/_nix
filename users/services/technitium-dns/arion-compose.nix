@@ -1,7 +1,7 @@
 {...}: {
   project.name = "technitium-dns";
   services = {
-    technitium = {
+    technitium.service = {
       image = "technitium/dns-server:latest";
       container_name = "technitium-dns";
       hostname = "dns";
