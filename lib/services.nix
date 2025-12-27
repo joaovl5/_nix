@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   make_docker_service = let
     default_compose_cmd = ''
-      ${pkgs.arion}/bin/arion \
+      arion \
         --pkgs "import <nixpkgs> { system = builtins.currentSystem; }" \
     '';
   in
@@ -13,11 +13,16 @@
     }: {
       systemd.user.services.${service_name} = {
         enable = true;
+        path = [
+          pkgs.arion
+        ];
         serviceConfig = {
           Type = "simple";
           ExecStart = pkgs.writeShellScript "exec_start_${service_name}" ''
-            #!/run/current-system/sw/bin/bash
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+            PROJ_DIR="~/projects/${service_name}"
+            mkdir -p "$PROJ_DIR"
+            cd "$PROJ_DIR"
             ${compose_cmd} -f "${compose_file}" up
           '';
         };
