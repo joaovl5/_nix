@@ -106,11 +106,10 @@
 
         tyrant.modules = [
           disko.nixosModules.default
-
+          ./hardware/tyrant.nix
           ./hardware/modules/grub.nix
-          # ./hardware/testvm.nix
           ./systems/tyrant.nix
-          ./users/lav.nix
+          ./users/tyrant.nix
         ];
       };
 

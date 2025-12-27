@@ -33,22 +33,29 @@ in {
 
   # disable privileged ports
   boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
-  virtualisation.podman = {
-    enable = true;
-    # dockerCompat = true;
-    dockerSocket.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+  virtualisation.containers.enable = true;
+  virtualisation.docker = {
+    enable = false; # we use rootless instead
+    # storageDriver = "btrfs";
     autoPrune = {
       enable = true;
       dates = "weekly";
     };
-    # required for containers under podman-compose to be able to talk to each other.
-    defaultNetwork.settings.dns_enabled = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
   };
-  virtualisation.oci-containers.backend = lib.mkForce "podman";
+  virtualisation.libvirtd = {
+    enable = true;
+  };
 
   environment.systemPackages = with pkgs; [
     # virtualisation
-    podman-compose
+    docker
+    docker-compose
+    arion
 
     # utils
     dconf

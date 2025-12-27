@@ -9,6 +9,7 @@
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
+    ./services/technitium-dns
   ];
 
   environment.shells = [pkgs.fish];
@@ -16,7 +17,7 @@ in {
 
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = ["wheel" "podman" "libvirt"];
+    extraGroups = ["wheel" "libvirt"];
     initialPassword = "12";
     shell = pkgs.fish;
   };
@@ -48,7 +49,6 @@ in {
 
       ## utils
       ripgrep
-      vim
       neovim
     ];
   };
