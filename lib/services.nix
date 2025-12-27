@@ -2,7 +2,7 @@
   make_docker_service = let
     default_compose_cmd = ''
       ${pkgs.arion}/bin/arion \
-        --pkgs "import <nixpkgs> { system = builtins.currentSystem; } \"
+        --pkgs "import <nixpkgs> { system = builtins.currentSystem; }" \
     '';
   in
     {
