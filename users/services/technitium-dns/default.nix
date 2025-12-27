@@ -3,6 +3,6 @@
   inherit (svc) make_docker_service;
 in
   make_docker_service {
-    service_name = "technitium-dns";
+    service_name = "technitium_dns";
     compose_file = ./arion-compose.nix;
   }
