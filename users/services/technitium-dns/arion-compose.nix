@@ -26,7 +26,7 @@
       ];
     };
   };
-  volumes = {
+  docker-compose.volumes = {
     "technitium-cfg" = {};
   };
 }
