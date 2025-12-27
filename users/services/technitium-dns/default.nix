@@ -1,5 +1,5 @@
-{...}: let
-  svc = import ../../../lib/services.nix;
+{...} @ args: let
+  svc = import ../../../lib/services.nix args;
   inherit (svc) make_docker_service;
 in {
   config = make_docker_service {
