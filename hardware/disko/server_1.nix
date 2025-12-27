@@ -12,7 +12,7 @@
               size = "1M";
               attributes = [0];
             };
-            main = {
+            root = {
               size = "100%";
               content = {
                 type = "lvm_pv";
@@ -34,20 +34,24 @@
               extraArgs = ["-f"]; # override existing
               subvolumes = let
                 mk_subvol = {
-                  mountpoint,
-                  mountOptions ? [
+                  mp,
+                  opts ? [
                     "compress=zstd:1"
                     "noatime"
                   ],
+                  extraOpts ? [],
                 }: {
-                  inherit mountpoint;
-                  inherit mountOptions;
+                  mountpoint = mp;
+                  mountOptions = opts ++ extraOpts;
                 };
               in {
-                "@root" = mk_subvol "/" [];
-                "@nix" = mk_subvol "/nix";
-                "@logs" = mk_subvol "/var/logs";
-                "@home" = mk_subvol "/home";
+                "@root" = mk_subvol {
+                  mp = "/";
+                  opts = [];
+                };
+                "@nix" = mk_subvol {mp = "/nix";};
+                "@logs" = mk_subvol {mp = "/var/logs";};
+                "@home" = mk_subvol {mp = "/home";};
                 "@swap" = {
                   mountpoint = "/.swapvol";
                   swap.swapfile.size = "10G";
