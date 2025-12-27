@@ -8,9 +8,9 @@
           type = "gpt";
           partitions = {
             boot = {
-              type = "EF02"; # grub mbr
               size = "1M";
-              attributes = [0];
+              type = "EF02"; # grub mbr
+              # attributes = [0];
             };
             root = {
               size = "100%";
