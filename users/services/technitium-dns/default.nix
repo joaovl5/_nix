@@ -5,7 +5,7 @@
   ...
 } @ args: let
   inherit (import ../../../lib/services.nix args) make_docker_service;
-  inherit (lib) mkOption mkIf mkEnableOption types;
+  inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
   cfg = config.my_nix.technitium_dns;
 in {
   # TODO: make the bug of ther dns make dynamic config nixos valeu
@@ -13,7 +13,7 @@ in {
     enable =
       mkEnableOption "Enable Technitium DNS"
       // {
-        default = true;
+        default = false;
       };
 
     http_port = mkOption {
@@ -35,14 +35,15 @@ in {
     };
   };
 
-  config =
-    mkIf cfg.enable
-    make_docker_service {
+  config = mkIf cfg.enable mkMerge [
+    (make_docker_service {
       service_name = "technitium_dns";
       compose_obj = import ./compose.nix {inherit (cfg) http_port;};
-    }
-    // {
+    })
+
+    {
       networking.firewall.allowedTCPPorts = [53 cfg.http_port];
       networking.firewall.allowedUDPPorts = [53];
-    };
+    }
+  ];
 }
