@@ -6,7 +6,7 @@
   cfg = config.my_nix;
 in {
   make_docker_service = let
-    default_compose_cmd = "arion";
+    default_compose_cmd = "arion --show-trace --log-level DEBUG";
   in
     {
       service_name,
