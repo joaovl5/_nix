@@ -100,6 +100,7 @@
           ./systems/astral.nix
           ./systems/modules/home-manager.nix
           ./systems/modules/display-manager.nix
+          ./systems/modules/systemd.nix
           ./users/lav.nix
         ];
 
@@ -112,6 +113,7 @@
           ./hardware/modules/grub.nix
           ./systems/tyrant.nix
           ./systems/modules/home-manager.nix
+          ./systems/modules/systemd.nix
           ./users/tyrant.nix
         ];
       };
