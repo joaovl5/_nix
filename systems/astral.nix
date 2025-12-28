@@ -56,7 +56,6 @@ in {
     ## containers
     docker
     docker-compose
-    arion # nix syntax + containers/vms/etc
 
     # podman
     # podman-compose

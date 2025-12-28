@@ -53,7 +53,6 @@ in {
     # virtualisation
     docker
     docker-compose
-    arion
 
     # utils
     dconf

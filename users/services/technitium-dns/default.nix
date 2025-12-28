@@ -6,3 +6,7 @@ in
     service_name = "technitium_dns";
     compose_obj = import ./compose.nix {};
   }
+  // {
+    networking.firewall.allowedTCPPorts = [53 5380];
+    networking.firewall.allowedUDPPorts = [53];
+  }

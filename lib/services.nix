@@ -26,7 +26,6 @@ in {
         path = with pkgs; [
           docker
           docker-compose
-          arion
           yj
         ];
         serviceConfig = {
