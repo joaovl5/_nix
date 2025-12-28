@@ -24,9 +24,9 @@ in {
           service = "technitium_dns";
           entryPoints = ["web"];
         };
-        services.technitium_dns = {
-          loadBalancer.servers = ["http://${host_ip}:${builtins.toString http_port}"];
-        };
+        # services.technitium_dns = {
+        #   loadBalancer.servers = ["http://${host_ip}:${builtins.toString http_port}"];
+        # };
       }))
     ];
   };
