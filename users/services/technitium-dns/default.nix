@@ -35,7 +35,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable mkMerge [
+  config = mkIf cfg.enable (mkMerge [
     (make_docker_service {
       service_name = "technitium_dns";
       compose_obj = import ./compose.nix {inherit (cfg) http_port;};
@@ -45,5 +45,5 @@ in {
       networking.firewall.allowedTCPPorts = [53 cfg.http_port];
       networking.firewall.allowedUDPPorts = [53];
     }
-  ];
+  ]);
 }
