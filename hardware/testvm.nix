@@ -16,10 +16,10 @@ in {
     inputs.nixpkgs.nixosModules.notDetected
   ];
 
-  config.my_nix.hostname = "testvm";
-  config.my_nix.username = "tester";
-  config.my_nix.email = "vieiraleao2005+testvm@gmail.com";
-  config.my_nix.name = "Tester";
+  my_nix.hostname = "testvm";
+  my_nix.username = "tester";
+  my_nix.email = "vieiraleao2005+testvm@gmail.com";
+  my_nix.name = "Tester";
 
   time.timeZone = cfg.timezone;
 
