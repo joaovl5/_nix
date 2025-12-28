@@ -21,8 +21,10 @@ in {
     in {
       systemd.user.services.${service_name} = {
         enable = true;
-        path = [
-          pkgs.arion
+        path = with pkgs; [
+          docker
+          docker-compose
+          arion
         ];
         serviceConfig = {
           Type = "simple";
