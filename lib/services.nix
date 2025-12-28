@@ -33,7 +33,6 @@ in {
             cd "$PROJ_DIR"
             exec ${compose_cmd} -f "${compose_file}" up
           '';
-          WorkingDirectory = project_dir;
         };
         description = service_description;
         after = ["docker.service" "docker.socket"];
