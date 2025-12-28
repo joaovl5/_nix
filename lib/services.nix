@@ -6,10 +6,7 @@
   cfg = config.my_nix;
 in {
   make_docker_service = let
-    default_compose_cmd = ''
-      arion \
-        --pkgs "import <nixpkgs> { system = builtins.currentSystem; }" \
-    '';
+    default_compose_cmd = "arion";
   in
     {
       service_name,
@@ -32,8 +29,10 @@ in {
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
             PROJ_DIR="${project_dir}"
             mkdir -p "$PROJ_DIR"
+            cp ${compose_file} "$PROJ_DIR/arion-compose.nix"
+            echo "import <nixpkgs> { system = builtins.currentSystem; }" > "$PROJ_DIR/arion-pkgs.nix"
             cd "$PROJ_DIR"
-            exec ${compose_cmd} -f "${compose_file}" up
+            exec ${compose_cmd} up
           '';
         };
         description = service_description;
