@@ -14,6 +14,8 @@ in {
         web.address = ":80";
         web.asDefault = true;
       };
+      api.dashboard = true;
+      api.insecure = true;
     };
     dynamicConfigOptions.http = mkMerge [
       (mkIf cfg.technitium_dns.enable (with cfg.technitium_dns; {
