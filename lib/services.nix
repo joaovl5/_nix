@@ -8,7 +8,6 @@
 in {
   make_docker_service = let
     default_compose_cmd = "docker compose";
-    yaml_converter = pkgs.formats.yaml {};
   in
     {
       service_name,

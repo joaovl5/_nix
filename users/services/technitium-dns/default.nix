@@ -4,5 +4,5 @@
 in
   make_docker_service {
     service_name = "technitium_dns";
-    compose_file = ./compose.nix;
+    compose_obj = import ./compose.nix;
   }
