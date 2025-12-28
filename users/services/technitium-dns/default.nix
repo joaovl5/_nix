@@ -42,7 +42,9 @@ in {
     })
 
     {
-      networking.firewall.allowedTCPPorts = [53 cfg.http_port];
+      # don't expose `http_port` here, since
+      # traefik will handle proxy redirects
+      networking.firewall.allowedTCPPorts = [53];
       networking.firewall.allowedUDPPorts = [53];
     }
   ]);

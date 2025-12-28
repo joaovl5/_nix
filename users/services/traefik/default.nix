@@ -6,6 +6,7 @@
   cfg = config.my_nix;
   inherit (lib) mkIf mkMerge;
 in {
+  networking.firewall.allowedTCPPorts = [80];
   services.traefik = {
     enable = true;
     staticConfigOptions = {
@@ -22,7 +23,7 @@ in {
           entryPoints = ["web"];
         };
         services.technitium_dns = {
-          loadBalancer.servers = ["http://${host_ip}:${port}"];
+          loadBalancer.servers = ["http://${host_ip}:${http_port}"];
         };
       }))
     ];
