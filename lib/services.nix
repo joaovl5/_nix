@@ -31,7 +31,7 @@ in {
             PROJ_DIR="${project_dir}"
             mkdir -p "$PROJ_DIR"
             cd "$PROJ_DIR"
-            ${compose_cmd} -f "${compose_file}" up
+            exec ${compose_cmd} -f "${compose_file}" up
           '';
           WorkingDirectory = project_dir;
         };
