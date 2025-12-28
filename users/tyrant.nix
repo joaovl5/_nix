@@ -13,7 +13,7 @@ in {
   imports = with inputs; [
     hm.nixosModules.home-manager
     ./services/technitium-dns
-    ./services/nginx
+    ./services/traefik
   ];
 
   environment.shells = [pkgs.fish];
