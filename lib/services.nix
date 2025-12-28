@@ -10,7 +10,9 @@
       service_description ? "[${service_name}] - systemd unit",
       compose_file,
       compose_cmd ? default_compose_cmd,
-    }: {
+    }: let
+      project_dir = "$HOME/projects/${service_name}";
+    in {
       systemd.user.services.${service_name} = {
         enable = true;
         path = [
@@ -20,11 +22,12 @@
           Type = "simple";
           ExecStart = pkgs.writeShellScript "exec_start_${service_name}" ''
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-            PROJ_DIR="$HOME/projects/${service_name}"
+            PROJ_DIR="${project_dir}"
             mkdir -p "$PROJ_DIR"
             cd "$PROJ_DIR"
             ${compose_cmd} -f "${compose_file}" up
           '';
+          WorkingDirectory = project_dir;
         };
         description = service_description;
         after = ["docker.service" "docker.socket"];
