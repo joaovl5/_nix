@@ -5,7 +5,7 @@
   inputs,
   ...
 }: let
-  cfg = cfg.my_nix;
+  cfg = config.my_nix;
 in {
   networking = {
     hostName = lib.mkForce cfg.hostname;
