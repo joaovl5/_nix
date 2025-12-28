@@ -1,12 +1,12 @@
-{...}: {
+{http_port ? 5380}: {
   services = {
     technitium = {
       image = "technitium/dns-server:latest";
       container_name = "technitium-dns";
       hostname = "dns";
       ports = [
-        "5380:5380/tcp" # dns web console - http
-        "53443:53443/tcp" # dns web console - https
+        "${http_port}:5380/tcp" # dns web console - http
+        # "53443:53443/tcp" # dns web console - https
         "53:53/tcp" # dns service
         "53:53/udp" # dns service
         # "853:853/udp" # dns-over-quic service
