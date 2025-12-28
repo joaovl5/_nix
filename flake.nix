@@ -93,6 +93,7 @@
       hosts = {
         testvm.modules = [
           disko.nixosModules.default
+          ./modules/options.nix
           ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
           ./hardware/modules/grub.nix
@@ -106,6 +107,7 @@
 
         tyrant.modules = [
           disko.nixosModules.default
+          ./modules/options.nix
           ./hardware/tyrant.nix
           ./hardware/modules/grub.nix
           ./systems/tyrant.nix
@@ -117,6 +119,7 @@
       nixosModules = let
         moduleList = [
           disko.nixosModules.default
+          ./modules/options.nix
           ./systems/modules/nix.nix
           ./systems/modules/home-manager.nix
           ./hardware/modules/pipewire.nix

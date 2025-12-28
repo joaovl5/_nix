@@ -1,10 +1,11 @@
 {
   lib,
+  config,
   pkgs,
   inputs,
-  modulesPath,
   ...
 }: let
+  cfg = config.my_nix;
   disko_cfg = import ./disko/server_1.nix {primary_device = "/dev/sda";};
 in {
   imports = [
@@ -13,7 +14,12 @@ in {
     inputs.nixpkgs.nixosModules.notDetected
   ];
 
-  time.timeZone = "Americas/Sao_Paulo";
+  config.my_nix.hostname = "tyrant";
+  config.my_nix.username = "tyrant";
+  config.my_nix.email = "vieiraleao2005+tyrant@gmail.com";
+  config.my_nix.name = "Tyrant";
+
+  time.timeZone = cfg.timezone;
 
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;

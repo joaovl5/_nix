@@ -1,15 +1,14 @@
 {
   pkgs,
+  config,
   lib,
   inputs,
   ...
 }: let
-  secrets = {
-    hostName = "astral";
-  };
+  cfg = cfg.my_nix;
 in {
   networking = {
-    hostName = lib.mkForce secrets.hostName;
+    hostName = lib.mkForce cfg.hostname;
   };
 
   users.mutableUsers = false;

@@ -1,18 +1,12 @@
 {
   pkgs,
+  config,
   inputs,
   lib,
   system,
   ...
 }: let
-  # font = {
-  #   name = "FiraCode Nerd Font";
-  #   package = pkgs.nerd-fonts.override { fonts = [ "FiraCode" ]; };
-  #   size = 13;
-  # };
-  term = "ghostty";
-  browser = "zen-browser";
-  editor = "nvim";
+  cfg = config.my_nix;
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
@@ -22,14 +16,14 @@ in {
   environment.shells = [pkgs.fish];
   programs.fish.enable = true;
 
-  users.users.lav = {
+  users.users.${cfg.username} = {
     initialPassword = "12";
     isNormalUser = true;
     shell = pkgs.fish;
     extraGroups = ["wheel" "libvirt"];
   };
 
-  home-manager.users.lav = {config, ...}: {
+  home-manager.users.${cfg.username} = {config, ...}: {
     home.stateVersion = "23.11";
 
     imports = [
@@ -39,8 +33,8 @@ in {
     programs.git = {
       enable = true;
       settings = {
-        user.email = "vieiraleao2005@gmail.com";
-        user.name = "João Pedro";
+        user.email = cfg.email;
+        user.name = cfg.name;
       };
     };
 
@@ -52,7 +46,6 @@ in {
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      # pinentryFlavor = pkgs.pinentry-curses;
     };
 
     gtk = {

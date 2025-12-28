@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: let
+  cfg = config.my_nix;
+in {
   make_docker_service = let
     default_compose_cmd = ''
       arion \
@@ -11,7 +17,7 @@
       compose_file,
       compose_cmd ? default_compose_cmd,
     }: let
-      project_dir = "$HOME/projects/${service_name}";
+      project_dir = "${config.users.users.${cfg.username}.home}/projects/${service_name}";
     in {
       systemd.user.services.${service_name} = {
         enable = true;

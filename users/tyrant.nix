@@ -1,11 +1,12 @@
 {
   pkgs,
+  config,
   inputs,
   lib,
   system,
   ...
 }: let
-  username = "tyrant";
+  cfg = config.my_nix;
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
@@ -15,7 +16,7 @@ in {
   environment.shells = [pkgs.fish];
   programs.fish.enable = true;
 
-  users.users.${username} = {
+  users.users.${cfg.username} = {
     isNormalUser = true;
     extraGroups = ["wheel" "libvirt"];
     initialPassword = "12";
@@ -25,7 +26,7 @@ in {
   # allow sudo without password
   security.sudo.extraRules = [
     {
-      users = [username];
+      users = [cfg.username];
       commands = [
         {
           command = "ALL";

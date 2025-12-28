@@ -1,11 +1,12 @@
 {
   pkgs,
+  config,
   inputs,
   lib,
   system,
   ...
 }: let
-  username = "plankton";
+  cfg = config.my_nix;
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
@@ -14,7 +15,7 @@ in {
   environment.shells = [pkgs.bash];
   programs.bash.enable = true;
 
-  users.users.${username} = {
+  users.users.${cfg.username} = {
     isNormalUser = true;
     linger = true; # needed for autostarting pods
     extraGroups = ["wheel" "podman" "libvirt"];
@@ -25,7 +26,7 @@ in {
   # allow sudo without password
   security.sudo.extraRules = [
     {
-      users = [username];
+      users = [cfg.username];
       commands = [
         {
           command = "ALL";
@@ -35,7 +36,7 @@ in {
     }
   ];
 
-  home-manager.users.${username} = {config, ...}: {
+  home-manager.users.${cfg.username} = {config, ...}: {
     home.stateVersion = "23.11";
 
     home.packages = with pkgs; [

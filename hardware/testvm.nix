@@ -1,10 +1,13 @@
 {
   lib,
+  config,
   pkgs,
   inputs,
   modulesPath,
   ...
-}: {
+}: let
+  cfg = config.my_nix;
+in {
   imports = [
     ./modules/pipewire.nix
     ./modules/grub.nix
@@ -13,7 +16,12 @@
     inputs.nixpkgs.nixosModules.notDetected
   ];
 
-  time.timeZone = "Americas/Sao_Paulo";
+  config.my_nix.hostname = "testvm";
+  config.my_nix.username = "tester";
+  config.my_nix.email = "vieiraleao2005+testvm@gmail.com";
+  config.my_nix.name = "Tester";
+
+  time.timeZone = cfg.timezone;
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
