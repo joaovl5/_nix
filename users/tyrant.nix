@@ -8,9 +8,12 @@
 }: let
   cfg = config.my_nix;
 in {
+  config.my_nix.technitium_dns.enable = true;
+
   imports = with inputs; [
     hm.nixosModules.home-manager
     ./services/technitium-dns
+    ./services/nginx
   ];
 
   environment.shells = [pkgs.fish];
