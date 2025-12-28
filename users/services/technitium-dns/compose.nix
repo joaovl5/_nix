@@ -5,7 +5,7 @@
       container_name = "technitium-dns";
       hostname = "dns";
       ports = [
-        "${http_port}:5380/tcp" # dns web console - http
+        "${builtins.toString http_port}:5380/tcp" # dns web console - http
         # "53443:53443/tcp" # dns web console - https
         "53:53/tcp" # dns service
         "53:53/udp" # dns service

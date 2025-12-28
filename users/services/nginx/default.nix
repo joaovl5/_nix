@@ -19,7 +19,7 @@ in {
     virtualHosts = mkMerge [
       (mkIf cfg.technitium_dns.enable (with cfg.technitium_dns; {
         ${hostname}.locations."/" = {
-          proxyPass = "http://${host_ip}:${http_port}";
+          proxyPass = "http://${host_ip}:${builtins.toString http_port}";
           proxyWebsockets = true;
           extraConfig = ''
             proxy_pass_header Authorization;
