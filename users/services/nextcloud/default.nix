@@ -31,54 +31,54 @@ in {
     };
   };
   config = {
-    services.nextcloud = let
-      package = pkgs.nextcloud28;
-    in {
-      inherit package;
-      enable = true;
-      extraAppsEnable = true;
-      extraApps = {
-        inherit (package) news contacts calendar tasks;
-      };
-
-      settings = {
-        enabledPreviewProviders = [
-          # image
-          "OC\\Preview\\BMP"
-          "OC\\Preview\\GIF"
-          "OC\\Preview\\JPEG"
-          "OC\\Preview\\HEIC"
-          "OC\\Preview\\Krita"
-          "OC\\Preview\\PNG"
-          "OC\\Preview\\XBitmap"
-          # doc
-          "OC\\Preview\\MarkDown"
-          "OC\\Preview\\OpenDocument"
-          "OC\\Preview\\TXT"
-          # audio
-          "OC\\Preview\\MP3"
-        ];
-      };
-
-      config.objectstore.s3 = mkIf cfg.use_minio {
-        enable = true;
-        autocreate = true;
-        useSsl = false;
-        usePathStyle = true;
-        region = "us-east-1";
-        bucket = cfg.minio_bucket_name;
-        key = minio_cfg.root_username;
-        secretFile = "${pkgs.writeText "secret" minio_cfg.root_password}";
-        hostname = minio_cfg.host_ip;
-      };
-
-      https = false;
-    };
-    services.nginx.virtualHosts."localhost".listen = [
-      {
-        addr = "127.0.0.1";
-        port = cfg.http_port;
-      }
-    ];
+    # services.nextcloud = let
+    #   package = pkgs.nextcloud28;
+    # in {
+    #   inherit package;
+    #   enable = true;
+    #   extraAppsEnable = true;
+    #   extraApps = {
+    #     inherit (package) news contacts calendar tasks;
+    #   };
+    #
+    #   settings = {
+    #     enabledPreviewProviders = [
+    #       # image
+    #       "OC\\Preview\\BMP"
+    #       "OC\\Preview\\GIF"
+    #       "OC\\Preview\\JPEG"
+    #       "OC\\Preview\\HEIC"
+    #       "OC\\Preview\\Krita"
+    #       "OC\\Preview\\PNG"
+    #       "OC\\Preview\\XBitmap"
+    #       # doc
+    #       "OC\\Preview\\MarkDown"
+    #       "OC\\Preview\\OpenDocument"
+    #       "OC\\Preview\\TXT"
+    #       # audio
+    #       "OC\\Preview\\MP3"
+    #     ];
+    #   };
+    #
+    #   config.objectstore.s3 = mkIf cfg.use_minio {
+    #     enable = true;
+    #     autocreate = true;
+    #     useSsl = false;
+    #     usePathStyle = true;
+    #     region = "us-east-1";
+    #     bucket = cfg.minio_bucket_name;
+    #     key = minio_cfg.root_username;
+    #     secretFile = "${pkgs.writeText "secret" minio_cfg.root_password}";
+    #     hostname = minio_cfg.host_ip;
+    #   };
+    #
+    #   https = false;
+    # };
+    # services.nginx.virtualHosts."localhost".listen = [
+    #   {
+    #     addr = "127.0.0.1";
+    #     port = cfg.http_port;
+    #   }
+    # ];
   };
 }
