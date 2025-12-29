@@ -9,6 +9,7 @@
   cfg = config.my_nix;
 in {
   my_nix.technitium_dns.enable = true;
+  my_nix.nextcloud.enable = true;
   my_nix.minio.enable = true;
 
   imports = with inputs; [
