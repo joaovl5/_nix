@@ -3,82 +3,63 @@
   config,
   lib,
   ...
-}: let
-  inherit (lib) mkOption mkIf mkEnableOption types;
+} @ args: let
+  inherit (import ../../../lib/services.nix args) make_docker_service;
+  inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
   cfg = config.my_nix.nextcloud;
-  minio_cfg = config.my_nix.minio;
 in {
+  # TODO: make the bug of ther dns make dynamic config nixos valeu
   options.my_nix.nextcloud = {
     enable =
       mkEnableOption "Enable Nextcloud"
       // {
         default = false;
       };
-    use_minio =
-      mkEnableOption "Uses Minio as object storage. Assumes it's enabled."
-      // {
-        default = true;
-      };
-    minio_bucket_name = mkOption {
-      description = "If using Minio, what bucket name to use";
-      type = types.str;
-      default = "my_nextcloud";
-    };
+
     http_port = mkOption {
-      description = "Web port for Nextcloud";
+      description = "Port for Nextcloud's web UI";
       type = types.int;
-      default = 9901;
+      default = 1009;
+    };
+
+    admin_user = mkOption {
+      description = "Default admin user for Nextcloud";
+      type = types.str;
+      default = "admin";
+    };
+
+    admin_password = mkOption {
+      description = "Default admin password for Nextcloud";
+      type = types.str;
+      default = "adminchangeme";
+    };
+
+    hostname = mkOption {
+      description = "Hostname for local DNS";
+      type = types.str;
+      default = "cloud.bigbug";
+    };
+
+    host_ip = mkOption {
+      description = "IP for service, if it's hosted in another machine. Localhost by default.";
+      type = types.str;
+      default = "127.0.0.1";
     };
   };
-  config = {
-    # services.nextcloud = let
-    #   package = pkgs.nextcloud28;
-    # in {
-    #   inherit package;
-    #   enable = true;
-    #   extraAppsEnable = true;
-    #   extraApps = {
-    #     inherit (package) news contacts calendar tasks;
-    #   };
-    #
-    #   settings = {
-    #     enabledPreviewProviders = [
-    #       # image
-    #       "OC\\Preview\\BMP"
-    #       "OC\\Preview\\GIF"
-    #       "OC\\Preview\\JPEG"
-    #       "OC\\Preview\\HEIC"
-    #       "OC\\Preview\\Krita"
-    #       "OC\\Preview\\PNG"
-    #       "OC\\Preview\\XBitmap"
-    #       # doc
-    #       "OC\\Preview\\MarkDown"
-    #       "OC\\Preview\\OpenDocument"
-    #       "OC\\Preview\\TXT"
-    #       # audio
-    #       "OC\\Preview\\MP3"
-    #     ];
-    #   };
-    #
-    #   config.objectstore.s3 = mkIf cfg.use_minio {
-    #     enable = true;
-    #     autocreate = true;
-    #     useSsl = false;
-    #     usePathStyle = true;
-    #     region = "us-east-1";
-    #     bucket = cfg.minio_bucket_name;
-    #     key = minio_cfg.root_username;
-    #     secretFile = "${pkgs.writeText "secret" minio_cfg.root_password}";
-    #     hostname = minio_cfg.host_ip;
-    #   };
-    #
-    #   https = false;
-    # };
-    # services.nginx.virtualHosts."localhost".listen = [
-    #   {
-    #     addr = "127.0.0.1";
-    #     port = cfg.http_port;
-    #   }
-    # ];
-  };
+
+  config = mkIf cfg.enable (mkMerge [
+    (make_docker_service {
+      service_name = "nextcloud";
+      compose_obj = import ./compose.nix {
+        nextcloud_http_port = cfg.http_port;
+        nextcloud_admin_user = cfg.admin_user;
+        nextcloud_admin_password = cfg.admin_password;
+        mariadb_timezone = config.my_nix.timezone;
+      };
+    })
+    # {
+    #   networking.firewall.allowedTCPPorts = [53];
+    #   networking.firewall.allowedUDPPorts = [53];
+    # }
+  ]);
 }

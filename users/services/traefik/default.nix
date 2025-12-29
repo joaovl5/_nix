@@ -30,6 +30,18 @@ in {
           ];
         };
       }))
+      (mkIf cfg.nextcloud.enable (with cfg.nextcloud; {
+        routers.nextcloud = {
+          rule = "Host(`${hostname}`)";
+          service = "nextcloud";
+          entryPoints = ["web"];
+        };
+        services.nextcloud = {
+          loadBalancer.servers = [
+            {url = "http://${host_ip}:${builtins.toString http_port}";}
+          ];
+        };
+      }))
     ];
   };
 }
