@@ -15,7 +15,7 @@
       container_name = "nextcloud_db";
       hostname = "nextcloud_db";
       command = "--transaction-isolation=READ-COMMITTED --innodb_read_only_compressed=OFF";
-      # expose = [3306];
+      expose = [3306];
       environment = {
         "MYSQL_DATABASE" = mariadb_database;
         "MYSQL_USER" = mariadb_user;
