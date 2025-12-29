@@ -2,6 +2,7 @@
   nextcloud_http_port ? 1009,
   nextcloud_admin_user ? "admin",
   nextcloud_admin_password ? "adminchangeme",
+  nextcloud_trusted_domains ? "",
   mariadb_database ? "nextcloud_db",
   mariadb_user ? "nextcloud_user",
   mariadb_password ? "nextcloud_pw",
@@ -52,7 +53,7 @@
       environment = {
         "NEXTCLOUD_ADMIN_USER" = nextcloud_admin_user;
         "NEXTCLOUD_ADMIN_PASSWORD" = nextcloud_admin_password;
-        # "NEXTCLOUD_TRUSTED_DOMAINS" = "";
+        "NEXTCLOUD_TRUSTED_DOMAINS" = nextcloud_trusted_domains;
         # "TRUSTED_PROXIES" = "";
         # mysql
         "MYSQL_HOST" = "nextcloud_db";

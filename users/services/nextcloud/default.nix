@@ -54,6 +54,7 @@ in {
         nextcloud_http_port = cfg.http_port;
         nextcloud_admin_user = cfg.admin_user;
         nextcloud_admin_password = cfg.admin_password;
+        nextcloud_trusted_domains = cfg.hostname;
         mariadb_timezone = config.my_nix.timezone;
       };
     })
