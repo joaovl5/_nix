@@ -9,10 +9,13 @@
   cfg = config.my_nix;
 in {
   my_nix.technitium_dns.enable = true;
+  my_nix.minio.enable = true;
 
   imports = with inputs; [
     hm.nixosModules.home-manager
     ./services/technitium-dns
+    ./services/minio
+    ./services/nextcloud
     ./services/traefik
   ];
 

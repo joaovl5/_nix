@@ -10,7 +10,7 @@ in {
     timezone = mkOption {
       description = "System timezone";
       type = types.str;
-      default = "Americas/Sao_Paulo";
+      default = "America/Sao_Paulo";
     };
 
     # user-level
@@ -26,6 +26,17 @@ in {
     name = mkOption {
       description = "First name for admin user";
       type = types.str;
+    };
+
+    shared_data_dirname = mkOption {
+      description = "Name of directory from which shared data will reside, will get prepended to $HOME";
+      type = types.path;
+      default = "shared";
+    };
+    private_data_dirname = mkOption {
+      description = "Name of directory from which private data will reside, will get prepended to $HOME";
+      type = types.str;
+      default = "private";
     };
   };
 }
