@@ -1,4 +1,7 @@
-{http_port ? 5380}: {
+{
+  http_port ? 5380,
+  technitium_mount_path,
+}: {
   services = {
     technitium = {
       image = "technitium/dns-server:latest";
@@ -21,11 +24,8 @@
         "DNS_SERVER_DOMAIN" = "dns";
       };
       volumes = [
-        "technitium-cfg:/etc/dns"
+        "${technitium_mount_path}:/etc/dns"
       ];
     };
-  };
-  volumes = {
-    "technitium-cfg" = {};
   };
 }

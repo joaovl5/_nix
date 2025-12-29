@@ -2,7 +2,8 @@
   nextcloud_http_port ? 1009,
   nextcloud_admin_user ? "admin",
   nextcloud_admin_password ? "adminchangeme",
-  nextcloud_trusted_domains ? "",
+  nextcloud_trusted_domain ? "",
+  nextcloud_mount_path,
   mariadb_database ? "nextcloud_db",
   mariadb_user ? "nextcloud_user",
   mariadb_password ? "nextcloud_pw",
@@ -29,7 +30,7 @@
         "TZ" = mariadb_timezone;
       };
       volumes = [
-        "mariadb:/var/lib/mysql"
+        "${nextcloud_mount_path}/mariadb:/var/lib/mysql"
       ];
     };
     nextcloud_redis = {
@@ -53,8 +54,10 @@
       environment = {
         "NEXTCLOUD_ADMIN_USER" = nextcloud_admin_user;
         "NEXTCLOUD_ADMIN_PASSWORD" = nextcloud_admin_password;
-        "NEXTCLOUD_TRUSTED_DOMAINS" = nextcloud_trusted_domains;
-        # "TRUSTED_PROXIES" = "";
+        "NEXTCLOUD_TRUSTED_DOMAINS" = nextcloud_trusted_domain;
+        "OVERWRITEHOST" = nextcloud_trusted_domain;
+        "OVERWRITECLIURL" = nextcloud_trusted_domain;
+        # "TRUSTED_PROXIES" = "127.0.0.1";
         # mysql
         "MYSQL_HOST" = "nextcloud_db";
         "MYSQL_DATABASE" = mariadb_database;
@@ -65,14 +68,8 @@
         "REDIS_HOST_PASSWORD" = redis_password;
       };
       volumes = [
-        "nextcloud_data:/var/www/html/data"
-        "nextcloud_app:/var/www/html"
+        "${nextcloud_mount_path}/app:/var/www/html"
       ];
     };
-  };
-  volumes = {
-    "mariadb" = {};
-    "nextcloud_data" = {};
-    "nextcloud_app" = {};
   };
 }

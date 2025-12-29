@@ -4,9 +4,10 @@
   lib,
   ...
 } @ args: let
-  inherit (import ../../../lib/services.nix args) make_docker_service;
+  inherit (import ../../../lib/services.nix args) make_docker_service data_dir;
   inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
   cfg = config.my_nix.nextcloud;
+  mount_path = "${data_dir}/nextcloud";
 in {
   # TODO: make the bug of ther dns make dynamic config nixos valeu
   options.my_nix.nextcloud = {
@@ -54,7 +55,8 @@ in {
         nextcloud_http_port = cfg.http_port;
         nextcloud_admin_user = cfg.admin_user;
         nextcloud_admin_password = cfg.admin_password;
-        nextcloud_trusted_domains = cfg.hostname;
+        nextcloud_trusted_domain = cfg.hostname;
+        nextcloud_mount_path = mount_path;
         mariadb_timezone = config.my_nix.timezone;
       };
     })

@@ -5,7 +5,10 @@
   ...
 }: let
   cfg = config.my_nix;
+  home_path = config.users.users.${cfg.username}.home;
 in {
+  data_dir = "${home_path}/${cfg.private_data_dirname}/services";
+
   make_docker_service = let
     default_compose_cmd = "docker compose";
   in
