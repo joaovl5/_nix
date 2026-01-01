@@ -21,7 +21,7 @@ in {
     age_key = mkDefault public_data.age_key.main;
   };
 
-  config.sops = {
+  config.sops = lib.mkForce {
     defaultSopsFile = "${mysecrets}/.sops.yaml";
 
     # make files for these
