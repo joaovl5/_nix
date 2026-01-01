@@ -1,9 +1,11 @@
 {
   sops-nix,
-  mysecrets,
+  inputs,
   lib,
   ...
-}: {
+}: let
+  mysecrets = inputs.mysecrets;
+in {
   imports = [
     # imports private secrets sops module
     # this will leverage sops-nix
