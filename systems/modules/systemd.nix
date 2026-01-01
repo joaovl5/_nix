@@ -1,5 +1,9 @@
 {...}: {
-  # docker systemd bullshit
-  # https://github.com/hercules-ci/arion/issues/122
-  # systemd.enableUnifiedCgroupHierarchy = false;
+  # See https://www.freedesktop.org/software/systemd/man/journald.conf.html#SystemMaxUse=
+  services.journald.extraConfig = ''
+    SystemMaxUse=2G
+    SystemKeepFree=4G
+    SystemMaxFileSize=100M
+    MaxFileSec=day
+  '';
 }

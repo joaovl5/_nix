@@ -1,10 +1,19 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  ...
+}: let
+  cfg = config.my_nix;
+in {
   nix = {
     generateRegistryFromInputs = lib.mkDefault true;
     settings = {
+      trusted-users = [cfg.username];
       warn-dirty = false;
+      auto-optimise-store = true;
       experimental-features = ["nix-command" "flakes" "ca-derivations"];
       download-buffer-size = lib.mkDefault 524288000; # 500mb
+
       substituters = [
         "https://nix-community.cachix.org"
       ];

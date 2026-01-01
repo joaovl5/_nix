@@ -26,7 +26,7 @@ in {
   users.users.${cfg.username} = {
     isNormalUser = true;
     extraGroups = ["wheel" "libvirt"];
-    initialPassword = "12";
+    hashedPasswordFile = config.sops.secrets.password_hash.path;
     shell = pkgs.fish;
   };
 

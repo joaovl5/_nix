@@ -2,14 +2,18 @@
   description = "lav nixos config";
 
   inputs = {
+    # ---------------
     # nixpkgs
+    # ---------------
     stable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-23.11";
     unstable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
     nixpkgs.follows = "unstable";
     nur.url = "github:nix-community/NUR?shallow=1";
     nur.inputs.nixpkgs.follows = "nixpkgs";
 
+    # ---------------
     # core
+    # ---------------
     ## home manager
     hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
     hm.inputs.nixpkgs.follows = "nixpkgs";
@@ -18,8 +22,16 @@
     ## disko
     disko.url = "github:nix-community/disko?shallow=1?shallow=1";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    ## secrets management
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    ### private secrets repository
+    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1";
+    mysecrets.flake = false;
 
+    # ---------------
     # pkgs
+    # ---------------
     ## neovim
     neovim.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
     ## hyprland
@@ -27,7 +39,6 @@
       url = "github:hyprwm/Hyprland?ref=v0.46.2&shallow=1";
       flake = false;
     };
-
     ## zen
     zen-browser = {
       url = "github:youwen5/zen-browser-flake?shallow=1";
@@ -44,18 +55,27 @@
     self,
     nixpkgs,
     disko,
+    sops-nix,
     hm,
     fup,
     ...
   } @ inputs:
     fup.lib.mkFlake {
-      inherit self inputs;
+      inherit self inputs; # required
+
+      ## supported systems
       supportedSystems = [
         "aarch64-linux"
         "x86_64-linux"
       ];
 
-      # overlays that get applied to all channels
+      # ---------------
+      # Channels
+      # ---------------
+
+      channelsConfig.allowUnfree = true;
+
+      ## these overlays get applied on *all* channels
       sharedOverlays = with inputs; [
         self.overlay
         nur.overlays.default
@@ -63,6 +83,7 @@
         fenix.overlays.default
       ];
 
+      ## fine-tuning channel cfg
       channels = {
         stable.input = inputs.stable;
         unstable = {
@@ -70,66 +91,75 @@
           overlaysBuilder = channels: [
             (final: prev: {
               inherit (channels) stable;
+              # we can override packages from stable here
               # inherit (channels.stable) pass-secret-service;
             })
           ];
         };
       };
 
-      channelsConfig.allowUnfree = true;
+      # ---------------
+      # Hosts
+      # ---------------
 
       hostDefaults = let
-        sys = "x86_64-linux";
+        default_system = "x86_64-linux";
       in {
-        system = sys;
-        modules = [];
+        # default sys architecture
+        system = default_system;
+        # default modules for all hosts
+        modules = [
+          disko.nixosModules.default
+          sops-nix.nixosModule.sops
+          ./modules/options.nix
+          ./modules/secrets.nix
+          ./hardware/modules/grub.nix
+          ./systems/modules/systemd.nix
+          ./systems/modules/home-manager.nix
+          ./systems/modules/nix.nix
+        ];
+        # default channel
         channelName = "unstable";
-        specialArgs = {
+        # other args
+        extraArgs = {
           inherit inputs;
-          system = sys;
+          system = default_system;
         };
       };
 
+      ## host-specific config
       hosts = {
+        ### desktops
         testvm.modules = [
-          disko.nixosModules.default
-          ./modules/options.nix
           ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
-          ./hardware/modules/grub.nix
           ./systems/astral.nix
-          ./systems/modules/home-manager.nix
           ./systems/modules/display-manager.nix
-          ./systems/modules/systemd.nix
           ./users/lav.nix
         ];
 
-        # servers
-
+        ### servers
         tyrant.modules = [
-          disko.nixosModules.default
-          ./modules/options.nix
           ./hardware/tyrant.nix
-          ./hardware/modules/grub.nix
           ./systems/tyrant.nix
-          ./systems/modules/home-manager.nix
-          ./systems/modules/systemd.nix
           ./users/tyrant.nix
+        ];
+
+        ### other/special
+        iso.modules = [
+          ./modules/iso.nix
         ];
       };
 
-      nixosModules = let
-        moduleList = [
-          disko.nixosModules.default
-          ./modules/options.nix
-          ./systems/modules/nix.nix
-          ./systems/modules/home-manager.nix
-          ./hardware/modules/pipewire.nix
-          ./hardware/modules/grub.nix
-        ];
-      in
-        fup.lib.exportModules moduleList;
+      # ---------------
+      # Build
+      # ---------------
+      packages.x86_64-linux.build_iso =
+        self.nixosConfigurations.iso.config.system.build.isoImage;
 
-      overlay = import ./pkgs;
+      # ---------------
+      # Other settings
+      # ---------------
+      overlay = import ./overlays;
     };
 }

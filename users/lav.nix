@@ -17,13 +17,13 @@ in {
   programs.fish.enable = true;
 
   users.users.${cfg.username} = {
-    initialPassword = "12";
+    hashedPasswordFile = config.sops.secrets.password_hash.path;
     isNormalUser = true;
     shell = pkgs.fish;
     extraGroups = ["wheel" "libvirt"];
   };
 
-  home-manager.users.${cfg.username} = {config, ...}: {
+  home-manager.users.${cfg.username} = {...}: {
     home.stateVersion = "23.11";
 
     imports = [
