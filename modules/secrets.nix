@@ -1,4 +1,5 @@
 {
+  sops-nix,
   mysecrets,
   lib,
   ...

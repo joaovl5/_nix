@@ -110,7 +110,7 @@
         # default modules for all hosts
         modules = [
           disko.nixosModules.default
-          sops-nix.nixosModule.sops
+          sops-nix.nixosModules.sops
           ./modules/options.nix
           ./modules/secrets.nix
           ./hardware/modules/grub.nix
