@@ -1,9 +1,9 @@
 {
-  self,
+  inputs,
   lib,
   ...
 }: let
-  mysecrets = self.inputs.mysecrets;
+  mysecrets = inputs.mysecrets;
 in {
   imports = [
     # imports private secrets sops module

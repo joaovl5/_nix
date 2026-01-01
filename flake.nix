@@ -107,24 +107,24 @@
       in {
         # default sys architecture
         system = default_system;
+        # default channel
+        channelName = "unstable";
+        # args for module imports
+        extraArgs = {
+          inherit inputs;
+          system = default_system;
+        };
         # modules for all hosts
         modules = [
           disko.nixosModules.default
           sops-nix.nixosModules.sops
           ./modules/options.nix
-          ./modules/secrets.nix
+          # ./modules/secrets.nix
           ./hardware/modules/grub.nix
           ./systems/modules/systemd.nix
           ./systems/modules/home-manager.nix
           ./systems/modules/nix.nix
         ];
-        # default channel
-        channelName = "unstable";
-        # other args
-        extraArgs = {
-          inherit inputs;
-          system = default_system;
-        };
       };
 
       ## host-specific config
