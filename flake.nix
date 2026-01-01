@@ -107,7 +107,7 @@
       in {
         # default sys architecture
         system = default_system;
-        # default modules for all hosts
+        # modules for all hosts
         modules = [
           disko.nixosModules.default
           sops-nix.nixosModules.sops
