@@ -1,10 +1,9 @@
 {
-  sops-nix,
-  inputs,
+  self,
   lib,
   ...
 }: let
-  mysecrets = inputs.mysecrets;
+  mysecrets = self.inputs.mysecrets;
 in {
   imports = [
     # imports private secrets sops module
