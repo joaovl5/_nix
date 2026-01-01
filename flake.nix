@@ -25,9 +25,9 @@
     ## secrets management
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    ### private secrets repository
-    # mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1";
-    # mysecrets.flake = false;
+    ## private secrets repository
+    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1";
+    mysecrets.flake = false;
 
     # ---------------
     # pkgs
@@ -110,20 +110,20 @@
         # default channel
         channelName = "unstable";
         # args for module imports
-        extraArgs = {
+        specialArgs = {
           inherit inputs;
           system = default_system;
         };
         # modules for all hosts
         modules = [
-          # disko.nixosModules.default
-          # sops-nix.nixosModules.sops
-          # ./modules/options.nix
-          # ./modules/secrets.nix
-          # ./hardware/modules/grub.nix
-          # ./systems/modules/systemd.nix
-          # ./systems/modules/home-manager.nix
-          # ./systems/modules/nix.nix
+          disko.nixosModules.default
+          sops-nix.nixosModules.sops
+          ./modules/options.nix
+          ./modules/secrets.nix
+          ./hardware/modules/grub.nix
+          ./systems/modules/systemd.nix
+          ./systems/modules/home-manager.nix
+          ./systems/modules/nix.nix
         ];
       };
 
@@ -138,24 +138,24 @@
           ./users/lav.nix
         ];
 
-        ### servers
-        # tyrant.modules = [
-        #   ./hardware/tyrant.nix
-        #   ./systems/tyrant.nix
-        #   ./users/tyrant.nix
-        # ];
+        ## servers
+        tyrant.modules = [
+          ./hardware/tyrant.nix
+          ./systems/tyrant.nix
+          ./users/tyrant.nix
+        ];
 
-        ### other/special
-        # iso.modules = [
-        #   ./modules/iso.nix
-        # ];
+        ## other/special
+        iso.modules = [
+          ./modules/iso.nix
+        ];
       };
 
       # ---------------
       # Build
       # ---------------
-      # packages.x86_64-linux.build_iso =
-      #   self.nixosConfigurations.iso.config.system.build.isoImage;
+      packages.x86_64-linux.build_iso =
+        self.nixosConfigurations.iso.config.system.build.isoImage;
 
       # ---------------
       # Other settings
