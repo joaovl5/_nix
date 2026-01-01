@@ -57,19 +57,25 @@ in {
     docker
     docker-compose
 
-    # podman
-    # podman-compose
-    # utils
-    dconf
-    curl
-    git
-    htop
-    openal
-    neovim
-    pulseaudio
-    wget
-    fish
+    # gui
+    ## browser
     inputs.zen-browser.packages.${pkgs.system}.default
+    ## audio
+    openal
+    pulseaudio
+
+    # utils
+    neovim # text editing
+    ## terminal
+    fish # shell
+    tmux # terminal multiplexer
+    btop # resource monitor
+    ### git
+    git
+    ### etc
+    wget
+    curl
+    dconf
   ];
 
   system.stateVersion = "26.05";

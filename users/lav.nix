@@ -74,7 +74,7 @@ in {
       ## launcher
       anyrun
       ## file manager
-      xfce.thunar
+      thunar
       ## terminal
       ghostty
       kitty

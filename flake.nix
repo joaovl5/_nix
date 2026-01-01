@@ -90,7 +90,6 @@
           input = inputs.unstable;
           overlaysBuilder = channels: [
             (final: prev: {
-              inherit (channels) stable;
               # we can override packages from stable here
               # inherit (channels.stable) pass-secret-service;
             })
