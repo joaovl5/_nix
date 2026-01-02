@@ -129,6 +129,13 @@
       ## host-specific config
       hosts = {
         ### desktops
+        lavpc.modules = [
+          ./hardware/lavpc.nix
+          ./hardware/modules/pipewire.nix
+          ./systems/astral.nix
+          ./systems/modules/display-manager.nix
+          ./users/lav.nix
+        ];
         testvm.modules = [
           ./hardware/testvm.nix
           ./hardware/modules/pipewire.nix
@@ -137,14 +144,14 @@
           ./users/lav.nix
         ];
 
-        ## servers
+        ### servers
         tyrant.modules = [
           ./hardware/tyrant.nix
           ./systems/tyrant.nix
           ./users/tyrant.nix
         ];
 
-        ## other/special
+        ### other/special
         iso.modules = [
           ./modules/iso.nix
         ];

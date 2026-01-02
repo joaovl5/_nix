@@ -2,6 +2,7 @@
   lib,
   config,
   inputs,
+  modulesPath,
   ...
 }: let
   cfg = config.my_nix;
@@ -10,7 +11,7 @@ in {
     ./modules/pipewire.nix
     ./modules/grub.nix
     ./disko/lavpc.nix
-    inputs.nixpkgs.nixosModules.notDetected
+    "${modulesPath}/installer/scan/not-detected.nix"
   ];
 
   my_nix.hostname = "lavpc";
@@ -26,8 +27,11 @@ in {
   networking.useDHCP = lib.mkDefault true;
   networking.usePredictableInterfaceNames = true;
 
-  # replace here w/ output from generate-cfg
-
+  boot.initrd.availableKernelModules = ["nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 12;
 }
