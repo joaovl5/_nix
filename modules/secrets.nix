@@ -28,8 +28,8 @@ in {
     # how should they appear there?
     # - injected in iso?
     # - how to persist declaratively?
-    age.sshKeyPaths = ["/boot/host_key"];
-    age.keyFile = "/boot/age_sops_key.txt";
+    age.sshKeyPaths = ["/root/host_key"];
+    age.keyFile = "/root/age_sops_key.txt";
 
     secrets = {
       "password_hash" = {
