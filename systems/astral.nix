@@ -13,7 +13,7 @@ in {
 
   users.mutableUsers = false;
   users.users.root = {
-    initialPassword = "12";
+    hashedPasswordFile = config.sops.secrets.password_hash.path;
     shell = pkgs.bash;
   };
 
