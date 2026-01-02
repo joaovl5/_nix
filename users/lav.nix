@@ -10,7 +10,7 @@
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
-    ./services/technitium-dns
+    ./modules/gnome.nix
   ];
 
   environment.shells = [pkgs.fish];
