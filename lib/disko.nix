@@ -16,7 +16,7 @@
   luks = {
     name ? "crypted",
     size ? "100%",
-    keyFile ? "/tmp/secret.key",
+    passwordFile ? "/tmp/secret.key",
     allowDiscards ? true,
     additionalKeyFiles ? [],
     extraOpenArgs ? [],
@@ -24,14 +24,12 @@
     inherit size;
     content = {
       inherit extraOpenArgs;
+      inherit passwordFile;
       inherit additionalKeyFiles;
       inherit content;
       inherit name;
       type = "luks";
       settings = {
-        # if you want to use the key for interactive login be sure there is no trailing newline
-        # for example use `echo -n "password" > /tmp/secret.key`
-        inherit keyFile;
         inherit allowDiscards;
       };
     };
