@@ -36,12 +36,22 @@
     neovim.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
     ## hyprland
     hyprland = {
-      url = "github:hyprwm/Hyprland?ref=v0.46.2&shallow=1";
-      flake = false;
+      url = "github:hyprwm/Hyprland?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    ## zen
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins?shallow=1";
+      inputs.hyprland.follows = "hyprland";
+    };
+    ## zen browser
     zen-browser = {
-      url = "github:youwen5/zen-browser-flake?shallow=1";
+      url = "github:0xc000022070/zen-browser-flake?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "hm";
+    };
+    firefox-addons = {
+      ## support for declarative extensions
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ## rust nightly support
@@ -49,6 +59,8 @@
       url = "github:nix-community/fenix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ## flatpak support
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
   };
 
   outputs = {
