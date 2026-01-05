@@ -13,6 +13,12 @@ in {
       default = "America/Sao_Paulo";
     };
 
+    flake_location = mkOption {
+      description = "Location where flake for system will reside";
+      type = types.nullOr types.str;
+      default = null;
+    };
+
     # user-level
     username = mkOption {
       description = "Name for the admin user";

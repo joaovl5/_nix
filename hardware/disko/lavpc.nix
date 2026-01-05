@@ -23,7 +23,6 @@
       "@nix" = subvolume {mp = "/nix";};
       "@logs" = subvolume {mp = "/var/logs";};
       "@home" = subvolume {mp = "/home";};
-      "@swap" = swap {sz = "12G";};
     };
   };
 in {

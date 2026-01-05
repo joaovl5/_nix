@@ -58,24 +58,52 @@ in {
     docker-compose
 
     # gui
-    ## browser
-    inputs.zen-browser.packages.${pkgs.system}.default
+    ## components
+    ### bar
+    ironbar
+    ## file manager
+    thunar
+    ## terminal
+    ghostty
+    kitty
     ## audio
     openal
     pulseaudio
+    ## gui settings
+    nwg-look
+    pwvucontrol
 
     # utils
     neovim # text editing
     ## terminal
     fish # shell
+    starship # shell prompt
     tmux # terminal multiplexer
-    btop # resource monitor
+    ### nix
+    nh # better cli
+    nix-prefetch-scripts
     ### git
     git
+    lazygit
+    ### coreutils alternatives
+    zoxide # fast cd jumps
+    eza # ls alt.
+    bat # cat alt.
+    rm-improved # rm alt.
+    ripgrep # grep alt.
+    ### system monitoring/inspection
+    pciutils
+    btop
     ### etc
+    tealdeer # tldr alternative
+    pandoc
     wget
     curl
     dconf
+    gcc
+    gnumake
+    lldb
+    lshw
   ];
 
   system.stateVersion = "26.05";

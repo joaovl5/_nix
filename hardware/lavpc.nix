@@ -18,8 +18,23 @@ in {
   my_nix.username = "lav";
   my_nix.email = "vieiraleao2005+lavpc@gmail.com";
   my_nix.name = "João Pedro";
+  my_nix.flake_location = "/home/lav/my_nix#lavpc";
 
   time.timeZone = cfg.timezone;
+
+  ## nvidia
+  hardware.graphics.enable = true;
+  services.xserver.videoDrivers = ["nvidia"];
+  hardware.nvidia = {
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    modesetting.enable = true;
+    powerManagement.enable = true;
+    powerManagement.finegrained = false;
+    open = true;
+    nvidiaSettings = true;
+  };
+
+  ## etc
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
