@@ -6,7 +6,7 @@
   # inherit (args) hyprland-plugins hyprland;
   # package = hyprland.packages.${system}.hyprland;
   # portal_package = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
-  package = pkgs.hyprland;
+  # package = pkgs.hyprland;
 in {
   # wayland.windowManager.hyprland = {
   #   # inherit package;

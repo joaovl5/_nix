@@ -1,6 +1,8 @@
 {
   inputs,
   lib,
+  pkgs,
+  system,
   ...
 }: {
   imports = with inputs; [
@@ -11,7 +13,12 @@
     useGlobalPkgs = lib.mkDefault true;
     useUserPackages = lib.mkDefault true;
     sharedModules = [];
-    backupFileExtension = "bkp";
+    backupCommand = "${pkgs.rm-improved}/bin/rip";
+    extraSpecialArgs = {
+      inherit inputs;
+      inherit system;
+    };
+    overwriteBackup = true;
   };
   # needed for home-manager portal/DE configs be linked
   environment.pathsToLink = [
