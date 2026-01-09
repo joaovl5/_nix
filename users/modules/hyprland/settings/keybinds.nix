@@ -10,8 +10,9 @@
   zoom_factor_out = 2;
 
   # apps
-  term = "${pkgs.ghostty}/bin/ghostty";
-  explorer = "${pkgs.thunar}/bin/Thunar";
+  run = cmd: "${pkgs.runapp}/bin/runapp ${cmd}";
+  term = "${pkgs.ghostty}/bin/ghostty +new-window";
+  explorer = run "${pkgs.thunar}/bin/Thunar";
   ## actions
   ### core
   exit_hyprland = "hyprctl dispatch exit 0";

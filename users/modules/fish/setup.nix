@@ -1,9 +1,16 @@
 {
-  hm = {lib, ...}: {
+  hm = {
+    config,
+    lib,
+    ...
+  } @ args: {
     programs.fish = {
       enable = true;
-      interactiveShellInit = ''
+      shellInit = ''
         ${lib.readFile ./src/vars.fish}
+        ${import ./secrets.nix args}
+      '';
+      interactiveShellInit = ''
         ${lib.readFile ./src/functions.fish}
       '';
     };

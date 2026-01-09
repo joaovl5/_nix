@@ -1,0 +1,130 @@
+:root {
+  --color-dark-primary: #000000;
+  --color-dark-secondary: #2d2d2d;
+  --color-white: #ccc;
+  --color-border: #444;
+  --color-active: #6699cc;
+  --color-urgent: #8f0a0a;
+
+  --margin-lg: 0.5em;
+  --margin-sm: 0.1em;
+}
+
+* {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  /* font-family: "IosevkaTerm Nerd Font Mono"; */
+  font-family: "IosevkaTerm Nerd Font Mono";
+  color: var(--color-white);
+}
+
+#bar,
+calendar {
+  box-shadow: inset 0 -1px var(--color-border);
+  /* border: 1px solid --var(--color-border); */
+}
+
+#bar,
+popover,
+popover contents,
+calendar {
+  background-color: var(--color-dark-primary);
+}
+
+box,
+button,
+label {
+  background-color: #0000;
+}
+
+button {
+  padding-left: var(--margin-sm);
+  padding-right: var(--margin-sm);
+}
+
+button:hover,
+button:active {
+  background-color: var(--color-dark-secondary);
+}
+
+#end > * + * {
+  margin-left: var(--margin-lg);
+}
+
+#bar-cpu,
+#bar-ram,
+#bar-disk,
+#bar-volume {
+  font-weight: 600;
+  font-size: 18px;
+  font-family: "Inter Nerd Font Propo";
+}
+
+#bar-cpu {
+  color: #8ff;
+}
+
+#bar-ram {
+  color: #ff8;
+}
+
+#bar-disk {
+  color: #ac74fc;
+}
+
+#bar-volume {
+  color: #c1fcb5;
+}
+
+.sysinfo {
+  font-size: 0.8em;
+}
+
+.sysinfo .item {
+  margin-bottom: -10px;
+}
+
+/* .sysinfo > * + * { */
+/**/
+/* } */
+
+#sep {
+  color: var(--color-border);
+  font-size: 1.5em;
+}
+
+.clock {
+  font-weight: bold;
+  margin: 0 12px;
+}
+
+.focused .label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.popup-clock .calendar-clock {
+  font-size: 2em;
+}
+
+.popup-clock .calendar .today {
+  background-color: var(--color-active);
+}
+
+.workspaces {
+  margin-left: 12px;
+}
+
+.workspaces .item.visible {
+  box-shadow: inset 0 -1px var(--color-white);
+}
+
+.workspaces .item.focused {
+  background-color: var(--color-dark-secondary);
+}
+
+.workspaces .item.urgent {
+  background-color: var(--color-urgent);
+}
+

@@ -3,7 +3,6 @@ let
   modules = [
     (import ./setup.nix)
     (import ./aliases.nix)
-    (import ./secrets.nix)
   ];
 in
   combine_modules modules

@@ -9,5 +9,6 @@
     "systemctl --user restart xdg-desktop-portal"
     "systemctl --user restart xdg-desktop-portal-hyprland"
     "systemctl --user restart ironbar"
+    "systemctl --user restart anyrun-daemon"
   ];
 }

@@ -1,8 +1,10 @@
 # set graveyard for rip/rm-improved
-set -Ux GRAVEYARD "$HOME/.trash"
+set -gx GRAVEYARD "$HOME/.trash"
 mkdir -p $GRAVEYARD
 # set default editor
-set -Ux EDITOR nvim
+set -gx EDITOR nvim
 # nvim for man pages
-set -Ux MANPAGER "nvim +Man!"
-set -Ux MANWIDTH 999
+set -gx MANPAGER "nvim +Man!"
+set -gx MANWIDTH 999
+# sops stuff
+set -gx SOPS_AGE_KEY_FILE "$HOME/.config/sops/age/age-keys.txt"

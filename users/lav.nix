@@ -13,11 +13,15 @@
   modules = [
     (import ./modules/cli)
     (import ./modules/fish)
+    (import ./modules/ghostty)
+    (import ./modules/anyrun)
+    (import ./modules/ironbar)
     (import ./modules/coding)
     (import ./modules/gtk)
     (import ./modules/gnome)
     (import ./modules/hyprland)
     (import ./modules/gaming)
+    (import ./modules/codex)
   ];
   module_imports = extract_imports modules;
 in {
@@ -116,18 +120,16 @@ in {
     home.packages = with pkgs; [
       # deps
       pinentry-curses
+      bc
+      runapp
 
       # core
       libreoffice
       obs-studio
-      ghostty
-      kitty
 
       # gui
       ## notifications
       libnotify
-      ## launcher
-      anyrun
       ## terminal
       zellij
       ## audio

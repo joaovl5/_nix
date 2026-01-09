@@ -59,6 +59,13 @@ in {
         mode = "0400";
       };
 
+      # api stuff
+      "openai_key" = {
+        sopsFile = "${mysecrets}/secrets/api_keys.yaml";
+        key = "openai";
+        owner = "${cfg.username}";
+      };
+
       # syncthing-related stuff
       syncthing_server_id = {
         sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
