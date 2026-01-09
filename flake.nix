@@ -26,7 +26,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     ## private secrets repository
-    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1";
+    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1&ref=main";
     mysecrets.flake = false;
 
     # ---------------
