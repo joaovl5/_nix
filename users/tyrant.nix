@@ -21,7 +21,7 @@ in {
     ./services/traefik
   ];
 
-  environment.shells = [pkgs.fish];
+  # environment.shells = [pkgs.fish];
   programs.fish.enable = true;
 
   users.users.${cfg.username} = {

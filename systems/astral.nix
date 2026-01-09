@@ -17,6 +17,12 @@ in {
     shell = pkgs.bash;
   };
 
+  # terminal shell
+  programs.fish.enable = true;
+
+  # xwayland
+  programs.xwayland.enable = true;
+
   # scans network, detects hostnames
   services.avahi.enable = true;
   # automount media devices (cameras, phones, etc)
@@ -79,7 +85,6 @@ in {
     # utils
     neovim # text editing
     ## terminal
-    fish # shell
     starship # shell prompt
     tmux # terminal multiplexer
     sops # secrets thing
