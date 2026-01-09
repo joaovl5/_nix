@@ -19,16 +19,29 @@
     passwordFile ? "/tmp/secret.key",
     allowDiscards ? true,
     additionalKeyFiles ? [],
-    extraOpenArgs ? [],
   }: content: {
     inherit size;
     content = {
-      inherit extraOpenArgs;
       inherit passwordFile;
       inherit additionalKeyFiles;
       inherit content;
       inherit name;
       type = "luks";
+      # encrypt the root partition with luks2 and argon2id, will prompt for a passphrase, which will be used to unlock the partition.
+      # cryptsetup luksFormat
+      extraFormatArgs = [
+        "--type luks2"
+        "--cipher aes-xts-plain64"
+        "--hash sha512"
+        "--iter-time 5000"
+        "--key-size 256"
+        "--pbkdf argon2id"
+        # use true random data from /dev/random, will block until enough entropy is available
+        "--use-random"
+      ];
+      extraOpenArgs = [
+        "--timeout 10"
+      ];
       settings = {
         inherit allowDiscards;
       };

@@ -17,6 +17,7 @@ in {
     ./services/technitium-dns
     ./services/minio
     ./services/nextcloud
+    ./services/syncthing
     ./services/traefik
   ];
 
@@ -26,7 +27,7 @@ in {
   users.users.${cfg.username} = {
     isNormalUser = true;
     extraGroups = ["wheel" "libvirt"];
-    hashedPasswordFile = config.sops.secrets.password_hash.path;
+    hashedPasswordFile = config.sops.secrets.password_hash_server.path;
     shell = pkgs.fish;
   };
 

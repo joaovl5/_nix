@@ -1,4 +1,11 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: let
+  cfg = config.my_nix;
+  home_path = config.users.users.${cfg.username}.home;
+in {
   # tty-based manager
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
@@ -17,7 +24,7 @@
         greeter = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ";
       in {
         # .wayland-session - set by hm modules for wayland compositors
-        command = "${greeter} $HOME/.wayland-session";
+        command = "${greeter} ${home_path}/.wayland-session";
       };
     };
   };

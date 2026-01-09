@@ -26,6 +26,9 @@ in {
   # ssh daemon and agent
   services.openssh.enable = true;
   programs.ssh.startAgent = true;
+  programs.dconf.enable = true;
+  services.xserver.enable = false;
+  services.dbus.enable = true;
   services.dbus.packages = with pkgs; [dconf];
 
   # disable privileged ports
@@ -79,6 +82,7 @@ in {
     fish # shell
     starship # shell prompt
     tmux # terminal multiplexer
+    sops # secrets thing
     ### nix
     nh # better cli
     nix-prefetch-scripts

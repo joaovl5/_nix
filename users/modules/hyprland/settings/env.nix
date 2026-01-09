@@ -40,9 +40,9 @@
   ];
 
   exec-once = let
-    vars = "DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland";
+    vars = "DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP";
   in [
-    "dbus-update-activation-environment ${vars}"
-    "systemctl --user set-environment ${vars}"
+    "dbus-update-activation-environment --all --systemd ${vars}"
+    "systemctl --user import-environment ${vars}"
   ];
 }

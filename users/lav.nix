@@ -47,18 +47,10 @@ in {
     package = pkgs.xdg-terminal-exec-mkhl;
     settings = let
       terms = [
-        "kitty.desktop"
         "com.mitchellh.ghostty.desktop"
-        # "foot.desktop"
+        "kitty.desktop"
       ];
     in {
-      GNOME =
-        terms
-        ++ [
-          "com.raggesilver.BlackBox.desktop"
-          "org.gnome.Terminal.desktop"
-        ];
-      niri = terms;
       default = terms;
     };
   };
@@ -80,13 +72,13 @@ in {
 
     home.stateVersion = "23.11";
 
-    # set dpi for 4k monitor
-    xresources.properties = {
-      # dpi for Xorg's font
-      "Xft.dpi" = 150;
-      # or set a generic dpi
-      "*.dpi" = 150;
-    };
+    # # set dpi for 4k monitor
+    # xresources.properties = {
+    #   # dpi for Xorg's font
+    #   "Xft.dpi" = 150;
+    #   # or set a generic dpi
+    #   "*.dpi" = 150;
+    # };
 
     # gaming
 
@@ -121,20 +113,6 @@ in {
       enable = true;
       nix-direnv.enable = true;
     };
-    ### js
-    programs.npm = {
-      enable = true;
-      package = pkgs.nodejs;
-      settings = {
-        color = true;
-        maxsockets = 30;
-        prefer-offline = true;
-        fetch-retries = 3;
-        fetch-retry-mintimeout = 15000; # 15s
-        fetch-retry-maxtimeout = 90000; # 1m30s
-      };
-    };
-
     ## services
     ### gpg
     services.gpg-agent = {

@@ -1,10 +1,10 @@
 let
-  get_hyprland = {
+  get_hypr_pkgs = {
     inputs,
     system,
     ...
   }:
-    inputs.hyprland.packages.${system}.hyprland;
+    inputs.hyprland.packages.${system};
 in {
   nx = {
     inputs,
@@ -12,15 +12,43 @@ in {
     pkgs,
     ...
   } @ args: let
-    hyprland_pkg = get_hyprland args;
+    hyprland_pkgs = get_hypr_pkgs args;
   in {
+    # programs.hyprland = {
+    #   enable = true;
+    #   package = hyprland_pkg;
+    #   portalPackage = inputs.unstable.xdg-desktop-portal-gnome;
+    #
+    #   withUWSM = false;
+    #   systemd.setPath.enable = true;
+    # };
+    #
+
     programs.hyprland = {
       enable = true;
-      package = hyprland_pkg;
-      portalPackage = pkgs.xdg-desktop-portal-gnome;
+      package = hyprland_pkgs.hyprland;
+      portalPackage = hyprland_pkgs.xdg-desktop-portal-hyprland;
+      withUWSM = true;
+    };
 
-      withUWSM = false;
-      systemd.setPath.enable = true;
+    # xdg.icons.enable = true;
+    # xdg.menus.enable = true;
+    xdg.portal = {
+      enable = true;
+      xdgOpenUsePortal = true;
+      extraPortals = with pkgs; [
+        hyprland_pkgs.xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk
+        xdg-desktop-portal-gnome
+      ];
+      config = {
+        common.default = ["gtk"];
+        hyprland = {
+          default = ["hyprland" "gtk" "gnome"];
+          # "org.freedesktop.portal.FileChooser" = ["kde"];
+          # "org.freedesktop.portal.OpenURI" = ["kde"];
+        };
+      };
     };
 
     systemd.user.services.ironbar = {
@@ -28,37 +56,11 @@ in {
       path = [pkgs.ironbar];
       description = "Ironbar unit";
       # hyprland target is provided by home-manager
-      wantedBy = ["hyprland-session.target"];
+      # wantedBy = ["hyprland-session.target"];
       after = ["dbus.service"];
       serviceConfig = {
         Type = "simple";
         ExecStart = "${pkgs.ironbar}/bin/ironbar";
-      };
-    };
-
-    xdg = {
-      autostart.enable = lib.mkForce false;
-      menus.enable = lib.mkDefault true;
-      mime.enable = lib.mkDefault true;
-      icons.enable = lib.mkDefault true;
-      portal = {
-        enable = true;
-        # sets environment variable NIXOS_XDG_OPEN_USE_PORTAL to 1
-        xdgOpenUsePortal = true;
-        # ls /run/current-system/sw/share/xdg-desktop-portal/portals/
-        extraPortals = with pkgs; [
-          xdg-desktop-portal-gtk # for provides file picker / OpenURI
-          xdg-desktop-portal-gnome # for screensharing
-        ];
-        config = {
-          common = {
-            # use xdg-desktop-portal-gtk for every portal interface...
-            default = [
-              "gtk"
-              "gnome"
-            ];
-          };
-        };
       };
     };
   };
@@ -67,16 +69,30 @@ in {
     inputs,
     system,
     pkgs,
+    lib,
     ...
   } @ args: let
-    hyprland_pkg = get_hyprland args;
+    hyprland_pkgs = get_hypr_pkgs args;
   in {
+    # write ~/.wayland-session for usage by display-manager later
+    home.file.".wayland-session" = {
+      source = pkgs.writeScript "init-session" ''
+        if uwsm check may-start; then
+            exec uwsm start hyprland.desktop
+        fi
+      '';
+      executable = true;
+    };
+
+    systemd.user.targets.hyprland-session.Unit.Wants = [
+      "xdg-desktop-autostart.target"
+    ];
     wayland.windowManager.hyprland = {
       enable = true;
-      systemd.enable = true; # allows using `hyprland-session.target`
+      systemd.enable = false;
       xwayland.enable = true;
-      # portalPackage = pkgs.xdg-desktop-portal-gnome;
-      package = hyprland_pkg;
+      package = null;
+      portalPackage = null;
       settings = import ./settings args;
     };
 
@@ -86,6 +102,32 @@ in {
     };
     services.swayosd = {
       enable = true;
+    };
+
+    xdg.configFile."electron-flags.conf".text = ''
+      --enable-features=UseOzonePlatform
+      --ozone-platform=wayland
+    '';
+    xdg = {
+      autostart.enable = lib.mkForce true;
+      mime.enable = true;
+      # portal = {
+      #   enable = true;
+      #   xdgOpenUsePortal = true;
+      #   extraPortals = with pkgs; [
+      #     xdg-desktop-portal-gtk
+      #     portal_pkg
+      #   ];
+      #   config = {
+      #     common = {
+      #       # use xdg-desktop-portal-gtk for every portal interface...
+      #       default = [
+      #         "gnome"
+      #         "gtk"
+      #       ];
+      #     };
+      #   };
+      # };
     };
   };
 }

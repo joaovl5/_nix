@@ -103,7 +103,7 @@
           overlaysBuilder = channels: [
             (final: prev: {
               # we can override packages from stable here
-              # inherit (channels.stable) pass-secret-service;
+              inherit (channels.stable) xdg-desktop-portal-gnome;
             })
           ];
         };

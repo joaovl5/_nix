@@ -53,11 +53,9 @@
   hm = {pkgs, ...}: {
     programs.lutris = {
       enable = true;
-      package = pkgs.lutris-unwrapped;
     };
     home.packages = with pkgs; [
       glfw
-      lutris
       wineWowPackages.full
       winetricks
     ];

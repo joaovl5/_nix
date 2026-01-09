@@ -37,7 +37,7 @@ in {
     shared_data_dirname = mkOption {
       description = "Name of directory from which shared data will reside, will get prepended to $HOME";
       type = types.str;
-      default = "shared";
+      default = ".sync";
     };
     private_data_dirname = mkOption {
       description = "Name of directory from which private data will reside, will get prepended to $HOME";

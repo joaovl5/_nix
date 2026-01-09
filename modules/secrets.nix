@@ -1,9 +1,11 @@
 {
   inputs,
+  config,
   lib,
   ...
 }: let
   mysecrets = inputs.mysecrets;
+  cfg = config.my_nix;
 in {
   imports = [
     # imports private secrets sops module
@@ -40,12 +42,38 @@ in {
         mode = "0400";
         neededForUsers = true;
       };
+
+      "password_hash_server" = {
+        sopsFile = "${mysecrets}/secrets/password_hashes.yaml";
+        key = "server";
+        owner = "root";
+        group = "root";
+        mode = "0400";
+        neededForUsers = true;
+      };
       "personal_ssh_key" = {
         sopsFile = "${mysecrets}/secrets/ssh_keys.yaml";
         key = "personal_ssh_key";
         owner = "root";
         group = "root";
         mode = "0400";
+      };
+
+      # syncthing-related stuff
+      syncthing_server_id = {
+        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
+        key = "server.id";
+        owner = "${cfg.username}";
+      };
+      syncthing_pem_cert = {
+        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
+        key = "server.pem.cert";
+        owner = "${cfg.username}";
+      };
+      syncthing_pem_key = {
+        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
+        key = "server.pem.key";
+        owner = "${cfg.username}";
       };
     };
   };
