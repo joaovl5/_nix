@@ -11,10 +11,12 @@
   cfg = config.my_nix;
 
   modules = [
-    (import ./modules/hyprland)
-    (import ./modules/gnome)
-    (import ./modules/gtk)
+    (import ./modules/cli)
+    (import ./modules/fish)
     (import ./modules/coding)
+    (import ./modules/gtk)
+    (import ./modules/gnome)
+    (import ./modules/hyprland)
     (import ./modules/gaming)
   ];
   module_imports = extract_imports modules;
@@ -98,16 +100,6 @@ in {
     };
 
     ### nix
-    programs.nh = mkMerge [
-      {
-        enable = true;
-        clean.enable = true;
-        clean.extraArgs = "--keep 5 --keep-since 5d";
-      }
-      (mkIf (cfg.flake_location != null) {
-        flake = cfg.flake_location;
-      })
-    ];
 
     programs.direnv = {
       enable = true;
@@ -149,6 +141,7 @@ in {
       goofcord
 
       ## programming
+      mergiraf # git merge helper
       alejandra # formatter
       nixd # lsp
       nil # lsp

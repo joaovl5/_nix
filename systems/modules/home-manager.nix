@@ -2,6 +2,7 @@
   inputs,
   lib,
   pkgs,
+  config,
   system,
   ...
 }: {
@@ -17,6 +18,7 @@
     extraSpecialArgs = {
       inherit inputs;
       inherit system;
+      nixos_config = config;
     };
     overwriteBackup = true;
   };
