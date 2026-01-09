@@ -2,7 +2,6 @@
   dev_1, # nvme ssd
   dev_2, # sata ssd
   dev_3, # sata hdd
-  raid_type ? "raid5",
   ...
 }: let
   inherit (import ../../lib/disko.nix) efi luks btrfs;
@@ -20,6 +19,7 @@ in {
           subvolumes = {
             "@root" = subvolume {mp = "/";};
             "@nix" = subvolume {mp = "/nix";};
+            "@swap" = swap {sz = "30G";};
           };
         };
       };

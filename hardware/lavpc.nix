@@ -10,7 +10,7 @@ in {
   imports = [
     ./modules/pipewire.nix
     ./modules/grub.nix
-    ./disko/lavpc.nix
+    ./disko/lavpc_v2.nix
     "${modulesPath}/installer/scan/not-detected.nix"
   ];
 
