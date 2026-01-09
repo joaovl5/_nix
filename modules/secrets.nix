@@ -62,17 +62,27 @@ in {
       # syncthing-related stuff
       syncthing_server_id = {
         sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server.id";
+        key = "server_id";
+        owner = "${cfg.username}";
+      };
+      syncthing_gui_user = {
+        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
+        key = "server_gui_user";
+        owner = "${cfg.username}";
+      };
+      syncthing_gui_password = {
+        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
+        key = "server_gui_password";
         owner = "${cfg.username}";
       };
       syncthing_pem_cert = {
         sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server.pem.cert";
+        key = "pem_cert";
         owner = "${cfg.username}";
       };
       syncthing_pem_key = {
         sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server.pem.key";
+        key = "pem_key";
         owner = "${cfg.username}";
       };
     };
