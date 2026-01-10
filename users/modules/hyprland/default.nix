@@ -5,6 +5,11 @@ let
     ...
   }:
     inputs.hyprland.packages.${system};
+  get_hyprland = hypr_pkgs: (
+    hypr_pkgs.hyprland.override {
+      enableNvidiaPatches = true;
+    }
+  );
 in {
   nx = {
     inputs,
@@ -13,6 +18,7 @@ in {
     ...
   } @ args: let
     hyprland_pkgs = get_hypr_pkgs args;
+    hyprland_pkg = get_hyprland hyprland_pkgs;
   in {
     # programs.hyprland = {
     #   enable = true;
@@ -26,7 +32,7 @@ in {
 
     programs.hyprland = {
       enable = true;
-      package = hyprland_pkgs.hyprland;
+      package = hyprland_pkg;
       portalPackage = hyprland_pkgs.xdg-desktop-portal-hyprland;
       withUWSM = true;
     };
@@ -73,13 +79,12 @@ in {
     ...
   } @ args: let
     hyprland_pkgs = get_hypr_pkgs args;
+    hyprland_pkg = get_hyprland hyprland_pkgs;
   in {
     # write ~/.wayland-session for usage by display-manager later
     home.file.".wayland-session" = {
-      source = pkgs.writeScript "init-session" ''
-        if uwsm check may-start; then
-            exec uwsm start hyprland.desktop
-        fi
+      source = pkgs.writeScript "hyprland-wayland-session" ''
+        ${hyprland_pkg}/bin/start-hyprland
       '';
       executable = true;
     };
