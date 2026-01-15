@@ -108,9 +108,12 @@ in {
       obs-studio
 
       # gui
+
+      fuzzel # backup launcher
       ## notifications
       libnotify
       ## terminal
+      alacritty # backup
       zellij
       ## audio
       playerctl
@@ -124,6 +127,7 @@ in {
 
       ## programming
       mergiraf # git merge helper
+      dbeaver-bin # db ide thing
       ### rust
       (with fenix;
         combine [
