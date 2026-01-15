@@ -32,7 +32,7 @@
     + "${_jq} '.float * ${toString zoom_factor_in}')";
   zoom_out =
     "${_set_zoom} $(${_get_zoom} | "
-    + "${_jq} '.float / ${toString zoom_factor_out} | if . < 1 then 1 else . end)'";
+    + "${_jq} '.float / ${toString zoom_factor_out} | if . < 1 then 1 else . end')";
 
   ### media actions
   _osd = "${pkgs.swayosd}/bin/swayosd-client";
