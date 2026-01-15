@@ -7,6 +7,7 @@ let
     (import ./fzf.nix)
     (import ./nix-tools.nix)
     (import ./lazygit.nix)
+    (import ./tmux)
   ];
 in
   combine_modules modules

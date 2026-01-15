@@ -1,24 +1,10 @@
-let
-  get_hypr_pkgs = {
-    inputs,
-    system,
-    ...
-  }:
-    inputs.hyprland.packages.${system};
-  get_hyprland = hypr_pkgs: (
-    hypr_pkgs.hyprland.override {
-      enableNvidiaPatches = true;
-    }
-  );
-in {
+{
   nx = {
-    inputs,
     lib,
     pkgs,
     ...
   } @ args: let
-    hyprland_pkgs = get_hypr_pkgs args;
-    hyprland_pkg = get_hyprland hyprland_pkgs;
+    hyprland_pkg = pkgs.hyprland;
   in {
     # programs.hyprland = {
     #   enable = true;
@@ -33,7 +19,7 @@ in {
     programs.hyprland = {
       enable = true;
       package = hyprland_pkg;
-      portalPackage = hyprland_pkgs.xdg-desktop-portal-hyprland;
+      portalPackage = pkgs.xdg-desktop-portal-hyprland;
       withUWSM = true;
     };
 
@@ -43,16 +29,15 @@ in {
       enable = true;
       xdgOpenUsePortal = true;
       extraPortals = with pkgs; [
-        hyprland_pkgs.xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
-        xdg-desktop-portal-gnome
       ];
       config = {
         common.default = ["gtk"];
         hyprland = {
-          default = ["hyprland" "gtk" "gnome"];
-          # "org.freedesktop.portal.FileChooser" = ["kde"];
-          # "org.freedesktop.portal.OpenURI" = ["kde"];
+          default = [
+            "hyprland"
+            "gtk"
+          ];
         };
       };
     };
@@ -78,8 +63,7 @@ in {
     lib,
     ...
   } @ args: let
-    hyprland_pkgs = get_hypr_pkgs args;
-    hyprland_pkg = get_hyprland hyprland_pkgs;
+    hyprland_pkg = pkgs.hyprland;
   in {
     # write ~/.wayland-session for usage by display-manager later
     home.file.".wayland-session" = {
@@ -116,23 +100,22 @@ in {
     xdg = {
       autostart.enable = lib.mkForce true;
       mime.enable = true;
-      # portal = {
-      #   enable = true;
-      #   xdgOpenUsePortal = true;
-      #   extraPortals = with pkgs; [
-      #     xdg-desktop-portal-gtk
-      #     portal_pkg
-      #   ];
-      #   config = {
-      #     common = {
-      #       # use xdg-desktop-portal-gtk for every portal interface...
-      #       default = [
-      #         "gnome"
-      #         "gtk"
-      #       ];
-      #     };
-      #   };
-      # };
+      portal = {
+        enable = lib.mkForce true;
+        xdgOpenUsePortal = true;
+        extraPortals = with pkgs; [
+          xdg-desktop-portal-gtk
+        ];
+        config = {
+          common = {
+            # use xdg-desktop-portal-gtk for every portal interface...
+            default = [
+              "hyprland"
+              "gtk"
+            ];
+          };
+        };
+      };
     };
   };
 }

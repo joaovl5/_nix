@@ -5,62 +5,63 @@
     # ---------------
     # nixpkgs
     # ---------------
-    stable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-23.11";
-    unstable.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
+    stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-25.11&shallow=1";
+    unstable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
     nixpkgs.follows = "unstable";
-    nur.url = "github:nix-community/NUR?shallow=1";
+    nur.url = "git+https://github.com/nix-community/NUR?shallow=1";
     nur.inputs.nixpkgs.follows = "nixpkgs";
 
     # ---------------
     # core
     # ---------------
     ## home manager
-    hm.url = "git+https://github.com/nix-community/home-manager?shallow=1&ref=master";
+    hm.url = "git+https://github.com/nix-community/home-manager?ref=master&shallow=1";
     hm.inputs.nixpkgs.follows = "nixpkgs";
     ## flake utils lib
-    fup.url = "github:gytis-ivaskevicius/flake-utils-plus?shallow=1";
+    fup.url = "git+https://github.com/gytis-ivaskevicius/flake-utils-plus?shallow=1";
     ## disko
-    disko.url = "github:nix-community/disko?shallow=1?shallow=1";
+    disko.url = "git+https://github.com/nix-community/disko?shallow=1";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     ## secrets management
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.url = "git+https://github.com/Mic92/sops-nix?shallow=1";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     ## private secrets repository
-    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?shallow=1&ref=main";
+    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
     mysecrets.flake = false;
 
     # ---------------
     # pkgs
     # ---------------
     ## neovim
-    neovim.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
+    neovim.url = "git+https://github.com/nix-community/neovim-nightly-overlay?shallow=1";
     ## hyprland
-    hyprland = {
-      url = "github:hyprwm/Hyprland?shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # hyprland = {
+    #   url = "github:hyprwm/Hyprland?";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins?shallow=1";
-      inputs.hyprland.follows = "hyprland";
+      url = "git+https://github.com/hyprwm/hyprland-plugins?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.hyprland.follows = "hyprland";
     };
     ## zen browser
     zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake?shallow=1";
+      url = "git+https://github.com/0xc000022070/zen-browser-flake?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "hm";
     };
     firefox-addons = {
       ## support for declarative extensions
-      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+      url = "git+https://gitlab.com/rycee/nur-expressions?dir=pkgs/firefox-addons&shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ## rust nightly support
     fenix = {
-      url = "github:nix-community/fenix?shallow=1";
+      url = "git+https://github.com/nix-community/fenix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ## flatpak support
-    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
+    nix-flatpak.url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
   };
 
   outputs = {
@@ -103,7 +104,9 @@
           overlaysBuilder = channels: [
             (final: prev: {
               # we can override packages from stable here
-              inherit (channels.stable) xdg-desktop-portal-gnome;
+              inherit (channels.stable) xdg-desktop-portal;
+              inherit (channels.stable) xdg-desktop-portal-gtk;
+              inherit (channels.stable) xdg-desktop-portal-hyprland;
             })
           ];
         };
@@ -135,6 +138,7 @@
           ./systems/modules/systemd.nix
           ./systems/modules/home-manager.nix
           ./systems/modules/nix.nix
+          ./systems/modules/lix.nix
         ];
       };
 

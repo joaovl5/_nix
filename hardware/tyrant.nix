@@ -18,6 +18,7 @@ in {
   my_nix.username = "tyrant";
   my_nix.email = "vieiraleao2005+tyrant@gmail.com";
   my_nix.name = "Tyrant";
+  my_nix.is_server = true;
 
   time.timeZone = cfg.timezone;
 

@@ -19,6 +19,12 @@ in {
       default = null;
     };
 
+    is_server = mkOption {
+      description = "Enable to activate certain server-specific tweaks not meant for desktops";
+      type = types.bool;
+      default = false;
+    };
+
     # user-level
     username = mkOption {
       description = "Name for the admin user";

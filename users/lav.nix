@@ -13,6 +13,7 @@
   modules = [
     (import ./modules/cli)
     (import ./modules/fish)
+    (import ./modules/zen-browser)
     (import ./modules/ghostty)
     (import ./modules/anyrun)
     (import ./modules/ironbar)
@@ -20,6 +21,7 @@
     (import ./modules/gtk)
     (import ./modules/gnome)
     (import ./modules/hyprland)
+    (import ./modules/niri)
     (import ./modules/gaming)
     (import ./modules/codex)
   ];
@@ -33,14 +35,6 @@ in {
     ]);
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
-
-  services.flatpak.enable = true;
-  services.flatpak.packages = [
-    "com.stremio.Stremio" # nixpkgs stremio is currently broken
-  ];
-
-  environment.shells = [pkgs.fish];
-  programs.fish.enable = true;
 
   # programs.nix-ld = {
   #   enable = true;
@@ -72,9 +66,8 @@ in {
   home-manager.users.${cfg.username} = {config, ...}: {
     imports =
       module_imports.hm
-      ++ (with inputs; [
-        ./modules/hm/zen-browser
-      ]);
+      ++ [
+      ];
 
     home.stateVersion = "23.11";
 
@@ -94,21 +87,7 @@ in {
     #   3. ~/.config/gtk-4.0/settings.ini
 
     ## cli tools
-    ### git
-    programs.git = {
-      enable = true;
-      settings = {
-        user.email = cfg.email;
-        user.name = cfg.name;
-      };
-    };
-
     ### nix
-
-    programs.direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-    };
     ## services
     ### gpg
     services.gpg-agent = {
@@ -122,6 +101,7 @@ in {
       pinentry-curses
       bc
       runapp
+      perl
 
       # core
       libreoffice
@@ -140,15 +120,10 @@ in {
       xclip
 
       # communication
-      goofcord
+      legcord
 
       ## programming
       mergiraf # git merge helper
-      alejandra # formatter
-      nixd # lsp
-      nil # lsp
-      ### perl (required for some dependencies apparently)
-      perl
       ### rust
       (with fenix;
         combine [

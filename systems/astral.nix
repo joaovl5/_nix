@@ -32,6 +32,7 @@ in {
   # ssh daemon and agent
   services.openssh.enable = true;
   programs.ssh.startAgent = true;
+  services.flatpak.enable = true;
   programs.dconf.enable = true;
   services.xserver.enable = false;
   services.dbus.enable = true;

@@ -11,8 +11,7 @@ in {
       trusted-users = [cfg.username];
       warn-dirty = false;
       auto-optimise-store = true;
-      experimental-features = ["nix-command" "flakes" "ca-derivations"];
-      download-buffer-size = lib.mkDefault 524288000; # 500mb
+      experimental-features = ["nix-command" "flakes"];
 
       substituters = [
         "https://nix-community.cachix.org"
