@@ -46,10 +46,13 @@
       "rm" = "rip";
       # apps
       "n" = "nvim";
+      ## tmux
       "t" = "tmux";
       "t.a" = "tmux attach";
       "t.l" = "tmux list-sessions";
       "t.k" = "tmux kill-session";
+      ## nh
+      "n.s" = "nh os switch --verbose --show-trace";
     };
   };
 }

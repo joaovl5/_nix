@@ -4,7 +4,7 @@
     nixos_config,
     ...
   }: let
-    cfg = nixos_config.mynix;
+    cfg = nixos_config.my_nix;
   in {
     programs.git = {
       enable = true;
@@ -13,12 +13,5 @@
         user.name = cfg.name;
       };
     };
-    home.packages = with pkgs; [
-      # lsp
-      nixd
-      nil
-      # formatter
-      alejandra
-    ];
   };
 }

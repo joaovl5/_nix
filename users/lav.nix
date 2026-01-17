@@ -11,19 +11,21 @@
   cfg = config.my_nix;
 
   modules = [
+    (import ./modules/xdg-portals.nix)
     (import ./modules/cli)
     (import ./modules/fish)
-    (import ./modules/zen-browser)
-    (import ./modules/ghostty)
+    (import ./modules/gtk)
     (import ./modules/anyrun)
     (import ./modules/ironbar)
-    (import ./modules/coding)
-    (import ./modules/gtk)
-    (import ./modules/gnome)
     (import ./modules/hyprland)
     (import ./modules/niri)
+    (import ./modules/gnome)
     (import ./modules/gaming)
+    (import ./modules/coding)
     (import ./modules/codex)
+    (import ./modules/obs)
+    (import ./modules/ghostty)
+    (import ./modules/zen-browser)
   ];
   module_imports = extract_imports modules;
 in {
@@ -35,25 +37,6 @@ in {
     ]);
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
-
-  # programs.nix-ld = {
-  #   enable = true;
-  #   libraries = with pkgs; [
-  #   ];
-  # };
-  # gui
-  xdg.terminal-exec = {
-    enable = true;
-    package = pkgs.xdg-terminal-exec-mkhl;
-    settings = let
-      terms = [
-        "com.mitchellh.ghostty.desktop"
-        "kitty.desktop"
-      ];
-    in {
-      default = terms;
-    };
-  };
 
   users.users.${cfg.username} = {
     hashedPasswordFile = config.sops.secrets.password_hash.path;
@@ -71,21 +54,6 @@ in {
 
     home.stateVersion = "23.11";
 
-    # # set dpi for 4k monitor
-    # xresources.properties = {
-    #   # dpi for Xorg's font
-    #   "Xft.dpi" = 150;
-    #   # or set a generic dpi
-    #   "*.dpi" = 150;
-    # };
-
-    # gaming
-
-    # gtk's theme settings, generate files:
-    #   1. ~/.gtkrc-2.0
-    #   2. ~/.config/gtk-3.0/settings.ini
-    #   3. ~/.config/gtk-4.0/settings.ini
-
     ## cli tools
     ### nix
     ## services
@@ -97,30 +65,20 @@ in {
 
     # etc
     home.packages = with pkgs; [
-      # deps
-      pinentry-curses
-      bc
-      runapp
-      perl
-
       # core
       libreoffice
-      obs-studio
+
+      # terminal
+      ## emulator
+      alacritty # backup
+      ## multiplexer
+      zellij
+      ## tui
+      systemctl-tui
 
       # gui
-
-      fuzzel # backup launcher
-      ## notifications
-      libnotify
-      ## terminal
-      alacritty # backup
-      zellij
-      ## audio
-      playerctl
-      ## clipboard manager
-      wl-clipboard # wl-paste/...
-      cliphist
-      xclip
+      ## launcher
+      fuzzel # backup
 
       # communication
       legcord
@@ -139,6 +97,17 @@ in {
 
       ## vms
       virt-manager
+
+      # dependencies
+      pinentry-curses
+      bc
+      perl
+      runapp
+      libnotify
+      playerctl
+      wl-clipboard # wl-paste/...
+      cliphist
+      xclip
     ];
   };
 }

@@ -9,14 +9,14 @@
     unstable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
     nixpkgs.follows = "unstable";
     nur.url = "git+https://github.com/nix-community/NUR?shallow=1";
-    nur.inputs.nixpkgs.follows = "nixpkgs";
+    nur.inputs.nixpkgs.follows = "unstable";
 
     # ---------------
     # core
     # ---------------
     ## home manager
-    hm.url = "git+https://github.com/nix-community/home-manager?ref=master&shallow=1";
-    hm.inputs.nixpkgs.follows = "nixpkgs";
+    hm.url = "git+https://github.com/nix-community/home-manager?shallow=1";
+    hm.inputs.nixpkgs.follows = "unstable";
     ## flake utils lib
     fup.url = "git+https://github.com/gytis-ivaskevicius/flake-utils-plus?shallow=1";
     ## disko
@@ -44,10 +44,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
       # inputs.hyprland.follows = "hyprland";
     };
+    ## niri
+    niri = {
+      url = "git+https://github.com/sodiboo/niri-flake?shallow=1";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nixpkgs-stable.follows = "nixpkgs";
+      };
+    };
     ## zen browser
     zen-browser = {
       url = "git+https://github.com/0xc000022070/zen-browser-flake?shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable";
       inputs.home-manager.follows = "hm";
     };
     firefox-addons = {
@@ -93,20 +101,35 @@
         self.overlay
         nur.overlays.default
         neovim.overlays.default
+        niri.overlays.niri
         fenix.overlays.default
       ];
 
       ## fine-tuning channel cfg
       channels = {
-        stable.input = inputs.stable;
-        unstable = {
-          input = inputs.unstable;
+        unstable.input = inputs.unstable;
+        stable = {
+          input = inputs.stable;
           overlaysBuilder = channels: [
             (final: prev: {
-              # we can override packages from stable here
-              inherit (channels.stable) xdg-desktop-portal;
-              inherit (channels.stable) xdg-desktop-portal-gtk;
-              inherit (channels.stable) xdg-desktop-portal-hyprland;
+              # inherit
+              #   (channels.unstable)
+              #   legcord
+              #   thunar
+              #   runapp
+              #   anyrun
+              #   fish
+              #   swayosd
+              #   lutris
+              #   lutris-unwrapped
+              #   ghostty
+              #   swaynotificationcenter
+              #   gamescope
+              #   steam
+              #   gtk3
+              #   gtk4
+              #   gtk2
+              #   ;
             })
           ];
         };

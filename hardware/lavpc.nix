@@ -18,7 +18,7 @@ in {
   my_nix.username = "lav";
   my_nix.email = "vieiraleao2005+lavpc@gmail.com";
   my_nix.name = "João Pedro";
-  my_nix.flake_location = "/home/lav/my_nix#lavpc";
+  my_nix.flake_location = "/home/lav/my_nix";
 
   time.timeZone = cfg.timezone;
 

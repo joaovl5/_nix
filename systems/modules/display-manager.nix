@@ -17,8 +17,21 @@ in {
     TTYVTDisallocate = true;
   };
 
-  services.greetd = {
+  services.displayManager.sddm = {
     enable = true;
+    wayland.enable = true;
+    theme = "catppuccin-mocha-mauve";
+  };
+
+  environment.systemPackages = [ 
+    (pkgs.catppuccin-sddm.override {
+      flavor = "mocha";
+      accent = "mauve";
+    })
+  ];
+
+  services.greetd = {
+    enable = false;
     settings = {
       default_session = let
         greeter = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ";

@@ -19,28 +19,28 @@
     programs.hyprland = {
       enable = true;
       package = hyprland_pkg;
-      portalPackage = pkgs.xdg-desktop-portal-hyprland;
+      portalPackage = null;
       withUWSM = true;
     };
 
     # xdg.icons.enable = true;
     # xdg.menus.enable = true;
-    xdg.portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gtk
-      ];
-      config = {
-        common.default = ["gtk"];
-        hyprland = {
-          default = [
-            "hyprland"
-            "gtk"
-          ];
-        };
-      };
-    };
+    # xdg.portal = {
+    #   enable = true;
+    #   xdgOpenUsePortal = true;
+    #   extraPortals = with pkgs; [
+    #     xdg-desktop-portal-gtk
+    #   ];
+    #   config = {
+    #     common.default = ["gtk"];
+    #     hyprland = {
+    #       default = [
+    #         "hyprland"
+    #         "gtk"
+    #       ];
+    #     };
+    #   };
+    # };
 
     systemd.user.services.ironbar = {
       enable = true;
@@ -73,9 +73,6 @@
       executable = true;
     };
 
-    systemd.user.targets.hyprland-session.Unit.Wants = [
-      "xdg-desktop-autostart.target"
-    ];
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = false;
