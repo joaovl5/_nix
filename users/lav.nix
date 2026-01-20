@@ -11,15 +11,16 @@
   cfg = config.my_nix;
 
   modules = [
-    (import ./modules/xdg-portals.nix)
     (import ./modules/cli)
     (import ./modules/fish)
     (import ./modules/gtk)
+    (import ./modules/audio)
     (import ./modules/anyrun)
     (import ./modules/ironbar)
     (import ./modules/hyprland)
     (import ./modules/niri)
     (import ./modules/gnome)
+    (import ./modules/xdg-portals.nix)
     (import ./modules/gaming)
     (import ./modules/coding)
     (import ./modules/codex)
@@ -36,7 +37,7 @@ in {
       hm.nixosModules.home-manager
     ]);
 
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  # environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   users.users.${cfg.username} = {
     hashedPasswordFile = config.sops.secrets.password_hash.path;
@@ -108,6 +109,7 @@ in {
       wl-clipboard # wl-paste/...
       cliphist
       xclip
+      unzip
     ];
   };
 }

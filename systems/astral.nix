@@ -36,6 +36,7 @@ in {
   programs.dconf.enable = true;
   services.xserver.enable = false;
   services.dbus.enable = true;
+  services.dbus.implementation = lib.mkForce "dbus";
   services.dbus.packages = with pkgs; [dconf];
 
   # disable privileged ports

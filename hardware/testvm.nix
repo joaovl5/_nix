@@ -9,7 +9,6 @@
   cfg = config.my_nix;
 in {
   imports = [
-    ./modules/pipewire.nix
     ./modules/grub.nix
     ./disko/testvm_btrfs.nix
     (modulesPath + "/profiles/qemu-guest.nix")

@@ -100,35 +100,21 @@
       sharedOverlays = with inputs; [
         self.overlay
         nur.overlays.default
-        neovim.overlays.default
+        # neovim.overlays.default
         niri.overlays.niri
         fenix.overlays.default
       ];
 
       ## fine-tuning channel cfg
       channels = {
-        unstable.input = inputs.unstable;
-        stable = {
-          input = inputs.stable;
+        stable.input = inputs.stable;
+        unstable = {
+          input = inputs.unstable;
           overlaysBuilder = channels: [
             (final: prev: {
               # inherit
-              #   (channels.unstable)
-              #   legcord
-              #   thunar
-              #   runapp
-              #   anyrun
-              #   fish
-              #   swayosd
-              #   lutris
-              #   lutris-unwrapped
-              #   ghostty
-              #   swaynotificationcenter
-              #   gamescope
-              #   steam
-              #   gtk3
-              #   gtk4
-              #   gtk2
+              #   (channels.stable)
+              #   pipewire
               #   ;
             })
           ];
@@ -170,14 +156,14 @@
         ### desktops
         lavpc.modules = [
           ./hardware/lavpc.nix
-          ./hardware/modules/pipewire.nix
+          ./systems/modules/pipewire.nix
           ./systems/astral.nix
           ./systems/modules/display-manager.nix
           ./users/lav.nix
         ];
         testvm.modules = [
           ./hardware/testvm.nix
-          ./hardware/modules/pipewire.nix
+          ./systems/modules/pipewire.nix
           ./systems/astral.nix
           ./systems/modules/display-manager.nix
           ./users/lav.nix

@@ -3,14 +3,16 @@
   pkgs,
   ...
 }: {
-  security.rtkit.enable = lib.mkDefault true;
+  security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
-    pulse.enable = lib.mkDefault true;
-    alsa.enable = lib.mkDefault true;
-    alsa.support32Bit = lib.mkDefault true;
-    wireplumber.enable = lib.mkDefault true;
-    jack.enable = lib.mkDefault true;
+    audio.enable = true;
+    raopOpenFirewall = true; # airplay
+    pulse.enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    wireplumber.enable = true;
+    jack.enable = true;
   };
 
   environment.etc."openal/alsoft.conf".text = lib.mkDefault ''

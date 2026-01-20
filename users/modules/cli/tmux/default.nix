@@ -1,5 +1,9 @@
 {
-  hm = {lib, ...}: {
+  hm = {
+    lib,
+    pkgs,
+    ...
+  }: {
     programs.tmux = {
       enable = true;
 
@@ -8,14 +12,20 @@
       disableConfirmationPrompt = true;
       customPaneNavigationAndResize = true;
       focusEvents = true;
+      secureSocket = false;
 
       terminal = "tmux-256color";
       keyMode = "vi";
-      shortcut = "d";
-      escapeTime = 10;
+      shortcut = "a";
+      escapeTime = 0;
       baseIndex = 1;
       resizeAmount = 10;
       historyLimit = 10000;
+
+      plugins = with pkgs; [
+        tmuxPlugins.better-mouse-mode
+      ];
+
       extraConfig = lib.readFile ./tmux.conf;
     };
   };

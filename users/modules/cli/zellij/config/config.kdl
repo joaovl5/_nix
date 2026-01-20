@@ -1,0 +1,53 @@
+default_mode "normal"
+theme "catpuccin-mocha"
+
+keybinds clear-defaults=true {
+  normal = {
+    bind "Ctrl a" { SwitchToMode "tmux"; }
+    bind "Ctrl z" { SwitchToMode "locked"; }
+  }
+
+  locked {
+    bind "Ctrl z" { SwitchToMode "tmux"; }
+  }
+
+  tmux {
+    bind "Ctrl s" { NewPane "Right"; SwitchToMode "normal"; }
+    bind "Ctrl v" { NewPane "Down"; SwitchToMode "normal"; }
+    bind "," { SwitchToMode "RenameTab"; }
+    bind "h" { MoveFocus "Left"; }
+    bind "j" { MoveFocus "Down"; }
+    bind "k" { MoveFocus "Up"; }
+    bind "l" { MoveFocus "Right"; }
+    bind ">" { MovePane; }
+    bind "H" { Resize "Left"; }
+    bind "J" { Resize "Down"; }
+    bind "K" { Resize "Up"; }
+    bind "L" { Resize "Right"; }
+    bind "Ctrl h" { GoToNextTab; }
+    bind "Ctrl l" { GoToPreviousTab; }
+    bind "c" { NewTab; SwitchToMode "normal"; }
+    bind "x" { CloseFocus; SwitchToMode "normal"; }
+    bind "a" { EditScrollback; SwitchToMode "normal"; }
+    bind "Esc" "Space" "Enter" { SwitchToMode "normal"; }
+  }
+
+  RenameTab {
+    bind "Alt a" { SwitchToMode "tmux"; }
+    bind "Enter" { SwitchToMode "normal"; }
+    bind "Esc" { UndoRenameTab; SwitchToMode "normal"; }
+  }
+}
+
+plugins {
+  tab-bar { path "tab-bar"; }
+  status-bar { path "status-bar"; }
+  strider { path "strider"; }
+  compact-bar { path "compact-bar"; }
+}
+
+ui {
+  pane_frames {
+    rounded_corners true
+  }
+}

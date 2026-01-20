@@ -25,6 +25,26 @@ in {
       default = false;
     };
 
+    # desktops
+    monitor_layout = mkOption {
+      description = "Fixed layout for monitor(s)";
+      # todo: type this
+      type = types.nullOr types.attrs;
+      default = null;
+      /*
+      Expected form:
+      {
+        "DP-4" = {
+            primary = true;
+            resolution = "3840x2160";
+            refresh = "240.08";
+            scaling = "1.333333";
+          };
+      }
+
+      */
+    };
+
     # user-level
     username = mkOption {
       description = "Name for the admin user";

@@ -8,6 +8,7 @@ let
     (import ./nix-tools.nix)
     (import ./lazygit.nix)
     (import ./tmux)
+    (import ./zellij)
   ];
 in
   combine_modules modules

@@ -8,7 +8,6 @@
   cfg = config.my_nix;
 in {
   imports = [
-    ./modules/pipewire.nix
     ./modules/grub.nix
     ./disko/lavpc_v2.nix
     "${modulesPath}/installer/scan/not-detected.nix"
@@ -19,6 +18,18 @@ in {
   my_nix.email = "vieiraleao2005+lavpc@gmail.com";
   my_nix.name = "João Pedro";
   my_nix.flake_location = "/home/lav/my_nix";
+  my_nix.monitor_layout = {
+    "DP-4" = {
+      primary = true;
+      resolution = "3840x2160";
+      refresh = "240.08";
+      scaling = "1.333333";
+    };
+    "HDMI-A-2" = {
+      primary = false;
+      transform = "90";
+    };
+  };
 
   time.timeZone = cfg.timezone;
 
