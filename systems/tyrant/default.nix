@@ -2,11 +2,16 @@
   pkgs,
   config,
   lib,
-  inputs,
   ...
 }: let
   cfg = config.my_nix;
 in {
+  imports = [
+    ../_modules/console
+    ../_modules/security
+    ../_modules/services/ntp.nix
+  ];
+
   networking = {
     hostName = lib.mkForce cfg.hostname;
   };

@@ -15,6 +15,7 @@
     (import ./modules/fish)
     (import ./modules/gtk)
     (import ./modules/audio)
+    (import ./modules/media)
     (import ./modules/anyrun)
     (import ./modules/ironbar)
     (import ./modules/hyprland)
@@ -71,6 +72,7 @@ in {
 
       # terminal
       ## emulator
+      ghostty
       alacritty # backup
       ## multiplexer
       zellij
@@ -80,6 +82,11 @@ in {
       # gui
       ## launcher
       fuzzel # backup
+      ## file manager
+      thunar
+      ## settings
+      nwg-look
+      pwvucontrol
 
       # communication
       legcord

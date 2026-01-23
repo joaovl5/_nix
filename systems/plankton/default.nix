@@ -1,0 +1,46 @@
+/*
+  ▜     ▌ ▗
+▛▌▐ ▀▌▛▌▙▘▜▘▛▌▛▌
+▙▌▐▖█▌▌▌▛▖▐▖▙▌▌▌
+▌
+
+Plankton is meant to be a slimmer system for containers and other
+applications requiring lightweight resource usage
+*/
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.my_nix;
+in {
+  imports = [
+    ../_modules/console
+    ../_modules/security
+    ../_modules/services/ntp.nix
+  ];
+
+  networking = {
+    hostName = lib.mkForce cfg.hostname;
+  };
+
+  users.mutableUsers = false;
+  users.users.root = {
+    hashedPasswordFile = config.sops.secrets.password_hash.path;
+  };
+
+  users.defaultUserShell = pkgs.dash;
+  users.users.root.shell = pkgs.dash;
+
+  services.openssh.enable = true;
+
+  programs = {
+    neovim.enable = true;
+    neovim.defaultEditor = true;
+    tmux.enable = true;
+    git.enable = true;
+  };
+
+  system.stateVersion = "25.11";
+}

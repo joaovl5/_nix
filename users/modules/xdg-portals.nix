@@ -12,12 +12,12 @@
         xdgOpenUsePortal = true;
         extraPortals = lib.mkForce (
           with pkgs; [
-            xdg-desktop-portal-wlr
-            # xdg-desktop-portal-gnome
+            # xdg-desktop-portal-wlr
+            xdg-desktop-portal-gnome
             # gnome-keyring
           ]
         );
-        config.common.default = lib.mkForce "*";
+        config.common.default = lib.mkForce "gnome";
       };
     };
 

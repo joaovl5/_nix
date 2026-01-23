@@ -1,21 +1,22 @@
 let
-  ironbar_pkg_name = "anyrun";
+  ironbar_pkg_name = "ironbar";
 in {
   nx = {pkgs, ...}: let
     ironbar_pkg = pkgs.${ironbar_pkg_name};
   in {
+    # service should manually be started by compositors
     systemd.user.services.ironbar = {
       enable = true;
       path = [pkgs.ironbar];
       description = "Ironbar unit";
-      # hyprland target is provided by home-manager
-      # wantedBy = ["hyprland-session.target"];
       after = ["dbus.service"];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.ironbar}/bin/ironbar";
+        ExecStart = "${ironbar_pkg}/bin/ironbar";
       };
     };
+
+    environment.systemPackages = with pkgs; [ironbar];
   };
   hm = {
     pkgs,

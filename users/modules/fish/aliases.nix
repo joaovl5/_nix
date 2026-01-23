@@ -39,6 +39,17 @@
       # replacing cmds
       # ls -> eza replacements already handled by home-manager
       "cat" = "bat";
+
+      ## nh
+      "n.s" = ''
+        nh os switch \
+          --verbose \
+          --show-trace \
+          --ask \
+          --max-jobs 24 \
+          --cores 24 \
+          --elevation-program run0
+      '';
     };
     programs.fish.shellAbbrs = {
       "mv" = "mv -v";
@@ -46,13 +57,21 @@
       "rm" = "rip";
       # apps
       "n" = "nvim";
+      ## systemd
+      "s" = "systemctl";
+      "s.s" = "systemctl status";
+      "s.r" = "systemctl restart";
+      "s.S" = "systemctl stop";
+      "su" = "systemctl --user";
+      "su.s" = "systemctl --user status";
+      "su.r" = "systemctl --user restart";
+      "su.S" = "systemctl --user stop";
+      "j.u" = "journalctl --user -xeu";
       ## tmux
       "t" = "tmux";
       "t.a" = "tmux attach";
       "t.l" = "tmux list-sessions";
       "t.k" = "tmux kill-session";
-      ## nh
-      "n.s" = "nh os switch --verbose --show-trace";
     };
   };
 }

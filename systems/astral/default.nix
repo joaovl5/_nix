@@ -2,11 +2,18 @@
   pkgs,
   config,
   lib,
-  inputs,
   ...
 }: let
   cfg = config.my_nix;
 in {
+  imports = [
+    ../_modules/console
+    ../_modules/security
+    ../_modules/services/login.nix
+    ../_modules/services/pipewire.nix
+    ../_modules/services/ntp.nix
+  ];
+
   networking = {
     hostName = lib.mkForce cfg.hostname;
   };
@@ -17,35 +24,29 @@ in {
     shell = pkgs.bash;
   };
 
-  # terminal shell
-  programs.fish.enable = true;
-
-  # xwayland
-  programs.xwayland.enable = true;
-
-  # scans network, detects hostnames
-  services.avahi.enable = true;
-  # automount media devices (cameras, phones, etc)
-  services.gvfs.enable = true;
-  # auth backend
-  security.polkit.enable = true;
-  # ssh daemon and agent
+  # Services
+  services.avahi.enable = true; # scans network, detects hostnames
+  services.gvfs.enable = true; # automount media devices
   services.openssh.enable = true;
-  programs.ssh.startAgent = true;
   services.flatpak.enable = true;
-  programs.dconf.enable = true;
   services.xserver.enable = false;
   services.dbus.enable = true;
   services.dbus.implementation = lib.mkForce "dbus";
   services.dbus.packages = with pkgs; [dconf];
 
-  # disable privileged ports
-  boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
+  # Programs
+  programs.fish.enable = true; # shell
+  programs.xwayland.enable = true; # x11 compat
+  programs.ssh.startAgent = true;
+  programs.dconf.enable = true; # dependency
 
+  # Virtualisation Support
   virtualisation.spiceUSBRedirection.enable = true;
   virtualisation.containers.enable = true;
+  virtualisation.libvirtd.enable = true;
+  # rootless docker setup
   virtualisation.docker = {
-    enable = false; # we use rootless instead
+    enable = false;
     # storageDriver = "btrfs";
     autoPrune = {
       enable = true;
@@ -56,9 +57,6 @@ in {
       setSocketVariable = true;
     };
   };
-  virtualisation.libvirtd = {
-    enable = true;
-  };
 
   documentation.man.generateCaches = true;
 
@@ -68,28 +66,12 @@ in {
     docker
     docker-compose
 
-    # gui
-    ## components
-    ### bar
-    ironbar
-    ## file manager
-    thunar
-    ## terminal
-    ghostty
-    kitty
-    ## audio
-    openal
-    pulseaudio
-    ## gui settings
-    nwg-look
-    pwvucontrol
-
     # utils
     neovim # text editing
     ## terminal
     starship # shell prompt
     tmux # terminal multiplexer
-    sops # secrets thing
+    sops # secrets tool
     ### nix
     nh # better cli
     nix-prefetch-scripts
