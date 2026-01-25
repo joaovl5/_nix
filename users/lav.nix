@@ -28,6 +28,7 @@
     (import ./modules/obs)
     (import ./modules/ghostty)
     (import ./modules/zen-browser)
+    (import ./modules/neovim)
   ];
   module_imports = extract_imports modules;
 in {

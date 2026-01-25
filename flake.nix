@@ -141,12 +141,12 @@
         modules = [
           disko.nixosModules.default
           sops-nix.nixosModules.sops
-          ./modules/options.nix
-          ./modules/secrets.nix
-          ./hardware/modules/grub.nix
-          ./systems/modules/home-manager.nix
-          ./systems/modules/nix.nix
-          ./systems/modules/lix.nix
+          ./_modules/options.nix
+          ./_modules/secrets.nix
+          ./hardware/_modules/grub.nix
+          ./systems/_modules/home-manager.nix
+          ./systems/_modules/nix.nix
+          ./systems/_modules/lix.nix
         ];
       };
 
@@ -172,9 +172,9 @@
         ];
 
         ### other/special
-        iso.modules = [
-          ./modules/iso.nix
-        ];
+        # iso.modules = [
+        #   ./modules/iso.nix
+        # ];
       };
 
       # ---------------

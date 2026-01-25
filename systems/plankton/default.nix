@@ -30,8 +30,8 @@ in {
     hashedPasswordFile = config.sops.secrets.password_hash.path;
   };
 
-  users.defaultUserShell = pkgs.dash;
-  users.users.root.shell = pkgs.dash;
+  users.defaultUserShell = lib.mkDefault pkgs.dash;
+  users.users.root.shell = lib.mkDefault pkgs.dash;
 
   services.openssh.enable = true;
 

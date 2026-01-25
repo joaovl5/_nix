@@ -1,0 +1,13 @@
+= __dots_nvim
+
+== what
+
+houses my neovim configuration
+
+== why
+
+why what
+
+== why asciidoc for the readme
+
+i don't know yet

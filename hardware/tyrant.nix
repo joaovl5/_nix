@@ -6,10 +6,10 @@
   ...
 }: let
   cfg = config.my_nix;
-  disko_cfg = import ./disko/server_1.nix {primary_device = "/dev/sda";};
+  disko_cfg = import ./_disko/server_1.nix {primary_device = "/dev/sda";};
 in {
   imports = [
-    ./modules/grub.nix
+    ./_modules/grub.nix
     disko_cfg
     inputs.nixpkgs.nixosModules.notDetected
   ];

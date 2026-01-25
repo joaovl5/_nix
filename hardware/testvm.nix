@@ -9,8 +9,8 @@
   cfg = config.my_nix;
 in {
   imports = [
-    ./modules/grub.nix
-    ./disko/testvm_btrfs.nix
+    ./_modules/grub.nix
+    ./_disko/testvm_btrfs.nix
     (modulesPath + "/profiles/qemu-guest.nix")
     inputs.nixpkgs.nixosModules.notDetected
   ];

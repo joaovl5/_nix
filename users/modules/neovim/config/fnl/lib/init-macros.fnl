@@ -1,0 +1,16 @@
+;; fennel-ls: macro-file
+
+(fn do-req [mod key ...]
+  "Require a module and immediately call a function from it.
+  (do-req :telescope.builtin :find_files {:hidden true})"
+  `(let [name# (require ,mod)
+         fun# (. name# ,key)]
+     (fun# ,...)))
+
+(fn let-req [[name mod] expr]
+  "Require a module, bind it to a name, and evaluate an expression.
+  (let-req [ts :telescope.builtin] (ts.find_files {:hidden true}))"
+  `(let [,name (require ,mod)]
+     ,expr))
+
+{: do-req : let-req}
