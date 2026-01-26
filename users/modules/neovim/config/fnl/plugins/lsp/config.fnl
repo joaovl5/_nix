@@ -1,12 +1,6 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
-
-(import-macros {: do-req : let-req} :./lib/init-macros)
+(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
 (local n (require :lib/nvim))
-
-(add :neovim/nvim-lspconfig)
-(add :b0o/schemastore.nvim)
 
 (fn set_python_path [path]
   (let [clients (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)
@@ -36,46 +30,41 @@
     (on_dir (or (: (vim.iter (vim.fs.parents fname)) :find has_fls_cfg)
                 (vim.fs.root 0 :.git)))))
 
-(let [schemastore (require :schemastore)
-      lspconfig (require :lspconfig)
-      mason_inst (require :mason-tool-installer)
-      blink_capabilities (do-req :blink.cmp :get_lsp_capabilities)
-      servers {:basedpyright {:on_attach do_basedpyright_attach
-                              :settings {:basedpyright {:analysis {:autoSearchPaths true
-                                                                   :useLibraryCodeForTypes true
-                                                                   :typeCheckingMode :recommended
-                                                                   :diagnosticMode :workspace
-                                                                   :reportUnknownParameterType false
-                                                                   :reportExplicitAny false}}}}
-               :lua_ls {:cmd [:lua-language-server]
-                        :settings {:Lua {:completion {:callSnippet :Replace}}}}
-               :fennel_ls {:cmd [:fennel-ls]
-                           :single_file_support true
-                           :root_dir get_fennel_root_dir}
-               :jsonls {:cmd [:jsonls]
-                        :settings {:json {:schemas (schemastore.json.schemas)}}}
-               :nixd {:cmd [:nixd]}
-               :taplo {:cmd [:taplo]}
-               :marksman {:cmd [:marksman]}
-               :stylua {:cmd [:stylua]}
-               :yamlls {:cmd [:yaml-language-server]}
-               :nil {:cmd [:nil]
-                     :filetypes [:nix]
-                     :root_markers [:flake.nix :.git]
-                     :settings {:nil {:nix {:flake {:autoArchive true
-                                                    :autoEvalInputs true
-                                                    :nixpkgsInputName :nixpkgs}}}}}}
-      install_list [:jsonls]]
-  (mason_inst.setup {:ensure_installed install_list})
-  (each [server config (pairs servers)]
-    (set config.capabilities
-         (vim.tbl_deep_extend :force {} blink_capabilities
-                              (or config.capabilities {})))
-    (vim.lsp.config server config)
-    (vim.lsp.enable server))
-  ;; we disable autoinstall here since mason-tool-installer replaces this
-  (do-req :mason-lspconfig :setup
-          {:ensure_installed {}
-           :automatic_installation false
-           :handlers (fn [name]
-                       ((. (. lspconfig name) :setup) (or (?. servers name) {})))}))
+(fn mk_lsp []
+  "Setup language servers."
+  (let [schemastore (require :schemastore)
+        blink_capabilities (do-req :blink.cmp :get_lsp_capabilities)
+        servers {:basedpyright {:on_attach do_basedpyright_attach
+                                :settings {:basedpyright {:analysis {:autoSearchPaths true
+                                                                     :useLibraryCodeForTypes true
+                                                                     :typeCheckingMode :recommended
+                                                                     :diagnosticMode :workspace
+                                                                     :reportUnknownParameterType false
+                                                                     :reportExplicitAny false}}}}
+                 :lua_ls {:cmd [:lua-language-server]
+                          :settings {:Lua {:completion {:callSnippet :Replace}}}}
+                 :fennel_ls {:cmd [:fennel-ls]
+                             :single_file_support true
+                             :root_dir get_fennel_root_dir}
+                 :jsonls {:cmd [:jsonls]
+                          :settings {:json {:schemas (schemastore.json.schemas)}}}
+                 :nixd {:cmd [:nixd]}
+                 :taplo {:cmd [:taplo]}
+                 :marksman {:cmd [:marksman]}
+                 :stylua {:cmd [:stylua]}
+                 :yamlls {:cmd [:yaml-language-server]}
+                 :nil {:cmd [:nil]
+                       :filetypes [:nix]
+                       :root_markers [:flake.nix :.git]
+                       :settings {:nil {:nix {:flake {:autoArchive true
+                                                      :autoEvalInputs true
+                                                      :nixpkgsInputName :nixpkgs}}}}}}]
+    (each [server config (pairs servers)]
+      (set config.capabilities
+           (vim.tbl_deep_extend :force (or config.capabilities {})
+                                blink_capabilities))
+      (vim.lsp.config server config)
+      (vim.lsp.enable server))))
+
+(plugin :neovim/nvim-lspconfig {:dependencies [:b0o/schemastore.nvim]
+                                :config mk_lsp})

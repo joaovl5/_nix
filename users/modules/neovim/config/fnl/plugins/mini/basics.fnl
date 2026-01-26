@@ -1,30 +1,15 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
+(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(import-macros {: do-req : let-req} :./lib/init-macros)
-
-(now (fn []
-       (let-req [basics :mini.basics]
-                (basics.setup {:options {:basic false}
-                               ; save w/ `<C-s>` and other things
-                               :mappings {:basic true
-                                          ; <C-hjkl> window nav
-                                          :windows true
-                                          ; disable <M-hjkl> insert mode nav
-                                          :move_with_alt false}}))))
-
-; local now = MiniDeps.now
-;
-; now(function()
-;     require('mini.basics').setup {
-;                                   options = { basic = false },
-;                                   mappings = {
-;                                               -- save w/ `<C-s>` among other things
-;                                               basic = true,
-;                                               -- Create `<C-hjkl>` mappings for window navigation
-;                                               windows = true,
-;                                               -- Disable `<M-hjkl>` mappings for navigation in Insert and Command modes
-;                                               move_with_alt = false,}
-;                                   ,}
-;
-;     end)
+(plugin :nvim-mini/mini.basics
+        {:version "*"
+         :opts {:options {; basic options - not needed
+                          :basic false
+                          ; visual stuff
+                          :extra_ui true
+                          :win_borders :solid}}
+         :mappings {; <C-s> save
+                    :basic true
+                    ; <C-hjkl> window nav mappings
+                    :windows true
+                    ; disable <M-hjkl> cursor nav in insert/command modes
+                    :move_with_alt true}})

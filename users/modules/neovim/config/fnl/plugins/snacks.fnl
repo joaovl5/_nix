@@ -1,13 +1,8 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
+(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(import-macros {: do-req : let-req} :./lib/init-macros)
-
-(now (fn []
-       (add :folke/snacks.nvim)
-       (do-req :snacks :setup ; config snacks plugins
-               ; optimize big file views
-               {:bigfile {:enabled true}
+(plugin :folke/snacks.nvim
+        {:opts {; optimize big file views
+                :bigfile {:enabled true}
                 ; loads files faster
                 :quickfile {:enabled true}
                 ; notifications
@@ -34,4 +29,4 @@
                            :refresh 50}
                 ; ui-related
                 :input {:enabled true}
-                :image {:enabled true}})))
+                :image {:enabled true}}})

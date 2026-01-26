@@ -1,7 +1,5 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
-
-(import-macros {: do-req : let-req} :./lib/init-macros)
+(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(local {: nil?} (require :./lib/utils))
 
 (set _G.Config.themes [{:source :nyoom-engineering/oxocarbon.nvim
                         :names [:oxocarbon]}
@@ -24,8 +22,7 @@
                                 :oasis-twilight
                                 :oasis-rose]}])
 
-(now (fn []
-       (each [_ theme (ipairs _G.Config.themes)]
-         (add theme.source)
-         (when (not= theme.post_add nil)
-           (theme.post_add)))))
+(icollect [_ t (ipairs _G.Config.themes)]
+  (plugin t.source {:lazy false
+                    :config #(when (not (nil? t.post_add))
+                               t.post_add)}))

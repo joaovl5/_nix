@@ -21,7 +21,19 @@
       viAlias = true;
       vimAlias = true;
       extraLuaPackages = ps: [
+        ps.luarocks
         ps.fennel
+      ];
+      extraPackages = with pkgs; [
+        (with fenix;
+          complete.withComponents [
+            "cargo"
+            "clippy"
+            "rust-src"
+            "rustc"
+            "rustfmt"
+          ])
+        rust-analyzer-nightly
       ];
     };
 
