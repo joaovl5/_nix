@@ -10,7 +10,7 @@
     here = assert (flake_path != null); "${flake_path}/users/modules/xplr";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/settings";
   in {
-    xdg.configFile."xplr/" = {
+    xdg.configFile."xplr" = {
       source = configSrc;
       recursive = true;
       force = true;

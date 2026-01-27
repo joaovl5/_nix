@@ -13,6 +13,7 @@
     xdg.configFile."nvim/" = {
       source = configSrc;
       recursive = true;
+      force = true;
     };
 
     programs.neovim = {

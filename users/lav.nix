@@ -60,11 +60,15 @@ in {
 
     ## cli tools
     ### nix
-    ## services
     ### gpg
-    services.gpg-agent = {
-      enable = true;
-      enableSshSupport = true;
+    services = {
+      syncthing = {
+        enable = true;
+      };
+      gpg-agent = {
+        enable = true;
+        enableSshSupport = true;
+      };
     };
 
     # etc
