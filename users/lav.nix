@@ -29,6 +29,7 @@
     (import ./modules/ghostty)
     (import ./modules/zen-browser)
     (import ./modules/neovim)
+    (import ./modules/xplr)
   ];
   module_imports = extract_imports modules;
 in {

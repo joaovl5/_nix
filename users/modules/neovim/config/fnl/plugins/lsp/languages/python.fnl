@@ -3,7 +3,8 @@
 
 (plugin :AckslD/swenv.nvim
         {:config (fn []
-                   (do-req :swenv :setup {:post_set_venv #(vim.cmd :Lsp)})
+                   (do-req :swenv :setup
+                           {:post_set_venv #(vim.cmd :LspRestart)})
                    (n.autocmd :FileType
                               {:pattern [:python]
                                :callback (fn []

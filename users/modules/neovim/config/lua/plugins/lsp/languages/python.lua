@@ -5,7 +5,7 @@ local function _1_()
     local name_2_auto = require("swenv")
     local fun_3_auto = name_2_auto.setup
     local function _2_()
-      return vim.cmd("Lsp")
+      return vim.cmd("LspRestart")
     end
     fun_3_auto({post_set_venv = _2_})
   end

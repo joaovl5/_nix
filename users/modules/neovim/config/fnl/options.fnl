@@ -7,6 +7,11 @@
              [:undofile true]
              [:shada "'100,<50,s10,:1000,/100,@100,h"]
              [:termguicolors true]
+             ; ## SESSION
+             [:sessionoptions
+              ;; tabpages+globals required for preserving
+              ;; tabs and tab names
+              "curdir,folds,globals,help,tabpages,terminal,winsize"]
              ; ## UI
              [:updatetime 1000]
              [:timeoutlen 300]

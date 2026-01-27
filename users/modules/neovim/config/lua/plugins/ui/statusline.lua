@@ -1,6 +1,6 @@
 -- [nfnl] fnl/plugins/ui/statusline.fnl
 local function opt_req(m)
-  local ok, mod = pcall(require, m)
+  local ok, _ = pcall(require, m)
   return ok
 end
 local function incline_render(props)
@@ -39,4 +39,20 @@ local function incline_render(props)
     return {icon, " ", " ", {filename, gui = _5_}}
   end
 end
-return {{"beauwilliams/statusline.lua", dependencies = {"nvim-lua/lsp-status.nvim"}, opts = {match_colorscheme = true, tabline = true, lsp_diagnostics = true, ale_diagnostics = true}}, {"b0o/incline.nvim", opts = {window = {padding = 0, margin = {horizontal = 1, vertical = 0}}, render = incline_render}}}
+local function _8_()
+  return require("wlsample.evil_line")
+end
+local function _9_()
+  local function _10_(input)
+    if (nil ~= input) then
+      return vim.cmd(("Tabby rename_tab " .. input))
+    else
+      return nil
+    end
+  end
+  return vim.ui.input({prompt = "Enter name for tab: "}, _10_)
+end
+local function _12_(tabid)
+  return tabid()
+end
+return {{"windwp/windline.nvim", config = _8_, event = "VeryLazy"}, {"nanozuki/tabby.nvim", event = "VeryLazy", keys = {{"<leader>qr", _9_, desc = "Rename"}, {"<leader>qw", "<cmd>Tabby pick_window<cr>", desc = "Pick window"}, {"<leader>qq", "<cmd>Tabby jump_to_tab<cr>", desc = "Jump mode"}}, opts = {preset = "tab_only", option = {theme = {fill = "TabLineFill", head = "TabLine", current_tab = "TabLineSel", tab = "TabLine", win = "TabLine", tail = "TabLine"}, nerdfont = true, lualine_theme = nil, tab_name = {tab_fallback = _12_}, buf_name = {mode = "shorten"}}}}, {"b0o/incline.nvim", opts = {window = {padding = 0, margin = {horizontal = 1, vertical = 0}}, render = incline_render}}}
