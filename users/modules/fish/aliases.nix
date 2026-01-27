@@ -39,17 +39,6 @@
       # replacing cmds
       # ls -> eza replacements already handled by home-manager
       "cat" = "bat";
-
-      ## nh
-      "n.s" = ''
-        nh os switch \
-          --verbose \
-          --show-trace \
-          --ask \
-          --max-jobs 24 \
-          --cores 24 \
-          --elevation-program run0
-      '';
     };
     programs.fish.shellAbbrs = {
       "mv" = "mv -v";

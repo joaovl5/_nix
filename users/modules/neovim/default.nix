@@ -20,6 +20,9 @@
       enable = true;
       viAlias = true;
       vimAlias = true;
+      plugins = with pkgs.vimPlugins; [
+        parinfer-rust
+      ];
       extraLuaPackages = ps: [
         ps.luarocks
         ps.fennel

@@ -3,6 +3,7 @@ set -gx GRAVEYARD "$HOME/.trash"
 mkdir -p $GRAVEYARD
 # set default editor
 set -gx EDITOR nvim
+set -gx NVIM_APPNAME nvim
 # nvim for man pages
 set -gx MANPAGER "nvim +Man!"
 set -gx MANWIDTH 999
