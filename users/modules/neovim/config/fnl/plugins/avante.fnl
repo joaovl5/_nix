@@ -1,20 +1,20 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
+(import-macros {: plugin : key} :./lib/init-macros)
 
-(import-macros {: do-req : let-req} :./lib/init-macros)
-
-(later (fn []
-         (add {:source :yetone/avante.nvim
-               :monitor :main
-               :depends [:nvim-lua/plenary.nvim
-                         :MunifTanjim/nui.nvim
-                         :echasnovski/mini.icons
-                         :HakonHarnes/img-clip.nvim]
-               :hooks {:post_checkout (fn [] (vim.cmd :make))}})
-         (do-req :img-clip :setup)
-         (do-req :avante :setup
-                 {:provider :openai
-                  :providers {:claude {:model :claude-sonnet-4-5-20250929}
-                              :openai {:model :gpt-5.1}}
-                  :behavior {}
-                  :selector {:provider :telescope :provider_opts {}}})))
+(let [img-clip (plugin :HakonHarnes/img-clip.nvim
+                       {:event :VeryLazy
+                        :opts {:default {:embed_image_as_base64 false
+                                         :prompt_for_file_name false
+                                         :drag_and_drop {:insert_mode true}}}
+                        :keys [(key :<leader>p :<cmd>PasteImage<cr>
+                                    {:desc "Paste image from clipboard"})]})]
+  (plugin :yetone/avante.nvim
+          {:branch :main
+           :event :VeryLazy
+           :dependencies [:nvim-lua/plenary.nvim
+                          :MunifTanjim/nui.nvim
+                          :echasnovski/mini.icons
+                          img-clip]
+           :build #(vim.cmd :make)
+           :opts {:provider :openai
+                  :providers {:openai {:model :gpt-5.1}}
+                  :selector {:provider :telescope :provider_opts {}}}}))

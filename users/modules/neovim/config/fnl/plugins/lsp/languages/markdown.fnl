@@ -1,9 +1,5 @@
-(local {: now : add : later}
-       {:now MiniDeps.now :add MiniDeps.add :later MiniDeps.later})
+(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(import-macros {: do-req : let-req} :./lib/init-macros)
-
-(add :OXY2DEV/markview.nvim)
-(do-req :markview :setup
-        {:preview {:filetypes [:markdown :quarto :rmd :typst :Avante]
-                   :icon_provider :mini}})
+(let [filetypes [:markdown :quarto :rmd :typst :Avante]]
+  (plugin :OXY2DEV/markview.nvim
+          {:ft filetypes :opts {:preview {: filetypes :icon_provider :mini}}}))

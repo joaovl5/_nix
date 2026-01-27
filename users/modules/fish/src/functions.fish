@@ -1,3 +1,13 @@
+function n.s --wraps nh --description 'runs nh os switch'
+  command nh os switch \
+    --verbose \
+    --show-trace \
+    --ask \
+    --max-jobs 24 \
+    --cores 24 \
+    --elevation-program run0
+end
+
 function solve_all_conflicts --description 'try to solve all current git conflicts with mergiraf'
     set before (git diff --name-only --diff-filter=U | wc -l)
     for file in (git diff --name-only --diff-filter=U)
@@ -33,6 +43,6 @@ function md --wraps mkdir -d "Create a directory and cd into it"
     end
 end
 
-function sudo!!
+function !!
     eval sudo $history[1]
 end

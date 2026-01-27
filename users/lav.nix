@@ -79,6 +79,7 @@ in {
       zellij
       ## tui
       systemctl-tui
+      gdu # ncdu alternative (MUCH faster)
 
       # gui
       ## launcher
