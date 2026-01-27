@@ -10,7 +10,7 @@
     here = assert (flake_path != null); "${flake_path}/users/modules/neovim";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
   in {
-    xdg.configFile."nvim/" = {
+    xdg.configFile."nvim" = {
       source = configSrc;
       recursive = true;
       force = true;
