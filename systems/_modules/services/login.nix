@@ -20,7 +20,7 @@ in {
   ];
 
   services.displayManager.ly = {
-    enable = true;
+    enable = false;
   };
 
   # services.displayManager.sddm = {

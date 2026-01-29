@@ -1,14 +1,15 @@
 -- [nfnl] fnl/plugins/treesitter.fnl
 local n = require("lib/nvim")
-local languages = {"lua", "vimdoc", "markdown", "python", "javascript", "jsx", "typescript", "tsx", "html", "css", "scss"}
+local languages = {"lua", "vimdoc", "markdown", "javascript", "jsx", "typescript", "tsx", "html", "css", "scss"}
 local function isnt_lang_installed(lang)
   return (#vim.api.nvim_get_runtime_file(("parser/" .. lang .. ".*"), false) == 0)
 end
 local function _1_()
   do
     local ts = require("nvim-treesitter")
+    local should_install = false
     local to_install = vim.tbl_filter(isnt_lang_installed, languages)
-    if (#to_install > 0) then
+    if ((#to_install > 0) and false) then
       ts.install(to_install)
     else
     end

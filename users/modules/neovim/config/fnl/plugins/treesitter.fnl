@@ -5,7 +5,7 @@
 (local languages [:lua
                   :vimdoc
                   :markdown
-                  :python
+                  ; :python
                   :javascript
                   :jsx
                   :typescript
@@ -25,9 +25,10 @@
           ;                        {:branch :main})]
           :config (fn []
                     (let [ts (require :nvim-treesitter)
+                          should_install false
                           to_install (vim.tbl_filter isnt_lang_installed
                                                      languages)]
-                      (when (> (length to_install) 0)
+                      (when (and (> (length to_install) 0) false)
                         (ts.install to_install)))
                     (let [filetypes (accumulate [res [] _ lang (ipairs languages)]
                                       (vim.list_extend res
