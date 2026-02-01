@@ -28,12 +28,12 @@ in {
       extraCss = lib.readFile ./style.css;
       config = {
         plugins = [
-          "${anyrun_pkg}/lib/libapplications.so"
-          "${anyrun_pkg}/lib/libshell.so"
-          "${anyrun_pkg}/lib/libwebsearch.so"
-          "${anyrun_pkg}/lib/libkidex.so"
-          "${anyrun_pkg}/lib/libsymbols.so"
-          "${anyrun_pkg}/lib/libtranslate.so"
+          "${anyrun_pkg}/_lib/libapplications.so"
+          "${anyrun_pkg}/_lib/libshell.so"
+          "${anyrun_pkg}/_lib/libwebsearch.so"
+          "${anyrun_pkg}/_lib/libkidex.so"
+          "${anyrun_pkg}/_lib/libsymbols.so"
+          "${anyrun_pkg}/_lib/libtranslate.so"
         ];
         x = {fraction = 0.5;};
         y = {fraction = 0.02;};

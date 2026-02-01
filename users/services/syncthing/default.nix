@@ -4,7 +4,7 @@
   lib,
   ...
 } @ args: let
-  inherit (import ../../../lib/services.nix args) data_dir;
+  inherit (import ../../../_lib/services.nix args) data_dir;
   cfg = config.my_nix;
   secrets = config.sops.secrets;
   syncthing_dir = "${data_dir}/syncthing";

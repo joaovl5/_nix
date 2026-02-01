@@ -30,7 +30,7 @@
         "TZ" = mariadb_timezone;
       };
       volumes = [
-        "${nextcloud_mount_path}/mariadb:/var/lib/mysql"
+        "${nextcloud_mount_path}/mariadb:/var/_lib/mysql"
       ];
     };
     nextcloud_redis = {

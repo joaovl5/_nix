@@ -7,7 +7,7 @@
   ...
 } @ args: let
   inherit (lib) mkIf mkMerge;
-  inherit (import ../lib/modules.nix) extract_imports;
+  inherit (import ../_lib/modules.nix) extract_imports;
   cfg = config.my_nix;
 
   modules = [

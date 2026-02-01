@@ -4,7 +4,7 @@
   dev_3, # sata hdd
   ...
 }: let
-  inherit (import ../../lib/disko.nix) efi luks btrfs;
+  inherit (import ../../_lib/disko.nix) efi luks btrfs;
   inherit (btrfs) subvolume swap;
 in {
   disko.devices.disk.primary = {
