@@ -54,6 +54,9 @@
     programs.lutris = {
       enable = true;
     };
+    programs.mangohud = {
+      enable = true;
+    };
     home.packages = with pkgs; [
       glfw
       wineWowPackages.full

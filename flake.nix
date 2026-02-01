@@ -156,6 +156,7 @@
         lavpc.modules = [
           ./hardware/lavpc.nix
           ./systems/astral
+          ./systems/_modules/services/ollama.nix
           ./users/lav.nix
         ];
         testvm.modules = [

@@ -1,0 +1,4 @@
+- Respond succinctly - don't discard information but do not be verbose
+- Don't attempt hacky workarounds unless specifically asked to
+- Prefer asking for clarifying answers before diving into a task
+- Only use git commands when specifically requested or otherwise crucial to the task at hand

@@ -23,6 +23,37 @@
 
       settings = {
         gestures.hot-corners.enable = false;
+        outputs = let
+          main = "DP-4";
+          side = "HDMI-A-2";
+        in {
+          "${main}" = {
+            focus-at-startup = true;
+            scale = 1.333333;
+            mode = {
+              width = 3840;
+              height = 2160;
+              refresh = 240.08;
+            };
+            position = {
+              x = 1080;
+              y = 396;
+            };
+          };
+          "${side}" = {
+            scale = 1.0;
+            transform = {rotation = 90;};
+            mode = {
+              width = 1920;
+              height = 1080;
+              refresh = 100.0;
+            };
+            position = {
+              x = 0;
+              y = 240;
+            };
+          };
+        };
         workspaces = {
           "01" = {name = "01";};
           "02" = {name = "02";};
@@ -109,37 +140,6 @@
           "Mod+Shift+8".action.move-column-to-workspace = "08";
           "Mod+Shift+9".action.move-column-to-workspace = "09";
           "Mod+Shift+0".action.move-column-to-workspace = "10";
-        };
-        outputs = let
-          main = "DP-4";
-          side = "HDMI-A-2";
-        in {
-          "${main}" = {
-            focus-at-startup = true;
-            scale = 1.333333;
-            mode = {
-              width = 3840;
-              height = 2160;
-              refresh = 240.08;
-            };
-            position = {
-              x = 1080;
-              y = 396;
-            };
-          };
-          "${side}" = {
-            scale = 1.0;
-            transform = {rotation = 90;};
-            mode = {
-              width = 1920;
-              height = 1080;
-              refresh = 100.0;
-            };
-            position = {
-              x = 0;
-              y = 240;
-            };
-          };
         };
         input = {
           workspace-auto-back-and-forth = true;

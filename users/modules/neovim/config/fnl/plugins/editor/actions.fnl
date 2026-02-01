@@ -19,4 +19,6 @@
                  :resolve_timeout 100
                  :notify {:enabled true :on_empty true}
                  :backend_opts {:header_lines_to_remove 4
-                                :args [:--line-numbers]}}})]
+                                :args [:--line-numbers]}}})
+ ; interactive search+replace
+ (plugin :MagicDuck/grug-far.nvim {:opts {}})]

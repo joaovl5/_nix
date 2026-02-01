@@ -75,6 +75,7 @@ in {
     home.packages = with pkgs; [
       # core
       libreoffice
+      chromium
 
       # terminal
       ## emulator
@@ -112,6 +113,14 @@ in {
 
       ## vms
       virt-manager
+
+      ## etc move later
+      bit-logo
+      bagels
+      vllm
+      llama-cpp
+      llama-swap
+      python314Packages.huggingface-hub
 
       # dependencies
       pinentry-curses
