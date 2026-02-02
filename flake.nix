@@ -154,27 +154,27 @@
       hosts = {
         ### desktops
         lavpc.modules = [
-          ./hardware/lavpc.nix
+          ./hardware/lavpc
           ./systems/astral
           ./systems/_modules/services/ollama.nix
           ./users/lav.nix
         ];
         testvm.modules = [
-          ./hardware/testvm.nix
+          ./hardware/testvm
           ./systems/astral
           ./users/lav.nix
         ];
 
         ### servers
         tyrant.modules = [
-          ./hardware/tyrant.nix
+          ./hardware/tyrant
           ./systems/tyrant
           ./users/tyrant.nix
         ];
 
         ### other/special
         # iso.modules = [
-        #   ./modules/iso.nix
+        #   ./_modules/iso.nix
         # ];
       };
 

@@ -11,25 +11,25 @@
   cfg = config.my_nix;
 
   modules = [
-    (import ./modules/cli)
-    (import ./modules/fish)
-    (import ./modules/gtk)
-    (import ./modules/audio)
-    (import ./modules/media)
-    (import ./modules/anyrun)
-    (import ./modules/ironbar)
-    (import ./modules/hyprland)
-    (import ./modules/niri)
-    (import ./modules/gnome)
-    (import ./modules/xdg-portals.nix)
-    (import ./modules/gaming)
-    (import ./modules/coding)
-    (import ./modules/codex)
-    (import ./modules/obs)
-    (import ./modules/ghostty)
-    (import ./modules/zen-browser)
-    (import ./modules/neovim)
-    # (import ./modules/yazi)
+    (import ./_modules/cli)
+    (import ./_modules/fish)
+    (import ./_modules/gtk)
+    (import ./_modules/audio)
+    (import ./_modules/media)
+    (import ./_modules/anyrun)
+    (import ./_modules/ironbar)
+    (import ./_modules/hyprland)
+    (import ./_modules/niri)
+    (import ./_modules/gnome)
+    (import ./_modules/xdg-portals.nix)
+    (import ./_modules/gaming)
+    (import ./_modules/coding)
+    (import ./_modules/codex)
+    (import ./_modules/obs)
+    (import ./_modules/ghostty)
+    (import ./_modules/zen-browser)
+    (import ./_modules/neovim)
+    # (import ./_modules/yazi)
   ];
   module_imports = extract_imports modules;
 in {
@@ -115,6 +115,7 @@ in {
       virt-manager
 
       ## etc move later
+      jq
       bit-logo
       bagels
       vllm

@@ -10,6 +10,8 @@ in {
     ../_modules/console
     ../_modules/security
     ../_modules/services/ntp.nix
+    ../_modules/console
+    {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
   networking = {

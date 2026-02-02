@@ -8,8 +8,8 @@
   cfg = config.my_nix;
 in {
   imports = [
-    ./_modules/grub.nix
-    ./_disko/lavpc_v2.nix
+    ../_modules/grub.nix
+    ../_disko/lavpc_v2.nix
     "${modulesPath}/installer/scan/not-detected.nix"
   ];
 
@@ -17,7 +17,8 @@ in {
   my_nix.username = "lav";
   my_nix.email = "vieiraleao2005+lavpc@gmail.com";
   my_nix.name = "João Pedro";
-  my_nix.flake_location = "/home/lav/my_nix";
+
+  # todo
   my_nix.monitor_layout = {
     "DP-4" = {
       primary = true;

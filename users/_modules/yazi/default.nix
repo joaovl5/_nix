@@ -8,7 +8,7 @@
   }: let
     cfg = nixos_config.my_nix;
     flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/modules/yazi";
+    here = assert (flake_path != null); "${flake_path}/users/_modules/yazi";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
   in {
     programs.yazi = {

@@ -1,5 +1,14 @@
-{lib, ...}: let
+{
+  lib,
+  config,
+  ...
+}: let
   inherit (lib) mkOption types;
+  cfg = config.my_nix;
+
+  # todo - attempt to use `users.users.<name>.home` later - currently it's failing due to eager eval issues
+  # will break when using a mac
+  user_home = "/home/${cfg.username}";
 in {
   options.my_nix = {
     # system-level
@@ -15,10 +24,11 @@ in {
 
     flake_location = mkOption {
       description = "Location where flake for system will reside";
-      type = types.nullOr types.str;
-      default = null;
+      type = types.str;
+      default = "${user_home}/my_nix";
     };
 
+    # servers
     is_server = mkOption {
       description = "Enable to activate certain server-specific tweaks not meant for desktops";
       type = types.bool;
@@ -28,7 +38,7 @@ in {
     # desktops
     monitor_layout = mkOption {
       description = "Fixed layout for monitor(s)";
-      # todo: type this
+      # todo: type this with submodules
       type = types.nullOr types.attrs;
       default = null;
       /*

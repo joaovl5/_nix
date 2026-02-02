@@ -1,16 +1,17 @@
 {
   pkgs,
-  config,
   lib,
   modulesPath,
   ...
-}: let
+} @ args: let
+  public_data = import ../../_modules/public.nix args;
+
   ssh_port = 2222;
   ssh_authorized_keys = [
     # all host keys should go here
     # - git_ro_key
     # - servers/etc
-    config.public.ssh_key
+    public_data.ssh_key
   ];
 
   user = "iso";
@@ -18,6 +19,8 @@ in {
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     ../plankton
+    ../_modules/console
+    {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
   # faster build time

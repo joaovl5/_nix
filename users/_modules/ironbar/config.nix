@@ -1,6 +1,6 @@
 {pkgs, ...}: let
-  progress_script = pkgs.writeShellScript "progress" (builtins.readFile ../../scripts/progress.sh);
-  sysinfo_script = pkgs.writeShellScript "sysinfo" (builtins.readFile ../../scripts/sysinfo.sh);
+  progress_script = pkgs.writeShellScript "progress" (builtins.readFile ../../_scripts/progress.sh);
+  sysinfo_script = pkgs.writeShellScript "sysinfo" (builtins.readFile ../../_scripts/sysinfo.sh);
   sysinfo_cmd = "${sysinfo_script} -p ${progress_script}";
   # minimal bar without full addons
   base_bar = {

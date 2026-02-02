@@ -49,4 +49,5 @@ in {
   environment.variables.LD_LIBRARY_PATH = lib.mkForce [
     "/run/current-system/sw/lib"
   ];
+  environment.variables.NIX_REMOTE = "daemon";
 }

@@ -14,11 +14,11 @@ in {
 
   imports = with inputs; [
     hm.nixosModules.home-manager
-    ./services/technitium-dns
-    ./services/minio
-    ./services/nextcloud
-    ./services/syncthing
-    ./services/traefik
+    ./_services/technitium-dns
+    ./_services/minio
+    ./_services/nextcloud
+    ./_services/syncthing
+    ./_services/traefik
   ];
 
   # environment.shells = [pkgs.fish];

@@ -15,13 +15,6 @@ in {
 
   # stores public data (public keys)
   # anything else will use sops-nix
-  options.public = let
-    inherit (lib) mkDefault;
-    public_data = import "${mysecrets}/public.nix";
-  in {
-    ssh_key = mkDefault public_data.ssh_key.main;
-    age_key = mkDefault public_data.age_key.main;
-  };
 
   config.sops = lib.mkForce {
     defaultSopsFile = "${mysecrets}/.sops.yaml";
