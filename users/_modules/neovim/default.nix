@@ -23,10 +23,11 @@
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
-      extraLuaPackages = ps: [
-        ps.luarocks
-        ps.fennel
-      ];
+      extraLuaPackages = ps:
+        with ps; [
+          luarocks
+          fennel
+        ];
       extraPackages = with pkgs; [
         (with fenix;
           complete.withComponents [
@@ -37,6 +38,7 @@
             "rustfmt"
           ])
         rust-analyzer-nightly
+        tree-sitter
       ];
     };
 
@@ -44,6 +46,7 @@
       # deps
       fd
       ripgrep
+      tree-sitter
 
       # language support
       prettierd

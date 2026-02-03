@@ -122,6 +122,7 @@ in {
       llama-cpp
       llama-swap
       python314Packages.huggingface-hub
+      cursor-cli
 
       # dependencies
       pinentry-curses

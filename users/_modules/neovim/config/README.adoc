@@ -1,7 +1,7 @@
 = __dots_nvim
 
 == what
-
+a
 houses my neovim configuration
 
 == why
