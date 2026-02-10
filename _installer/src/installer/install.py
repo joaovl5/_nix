@@ -174,12 +174,7 @@ class NixOSInstaller:
     def _handle_disko(self) -> None:
         _nix_disko_cmd = [
             "sudo",
-            "nix",
-            "--experimental-features",
-            "nix-command flakes",
-            "run",
-            "github:nix-community/disko/latest",
-            "--",
+            "disko",
             "--yes-wipe-all-disks",
             "--mode",
             "destroy,format,mount",
