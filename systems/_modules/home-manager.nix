@@ -5,7 +5,7 @@
   config,
   system,
   ...
-}: {
+} @ args: {
   imports = with inputs; [
     hm.nixosModules.home-manager
   ];
@@ -19,6 +19,8 @@
       inherit inputs;
       inherit system;
       nixos_config = config;
+      secrets = inputs.mysecrets;
+      public = import ../../_modules/public.nix args;
     };
     overwriteBackup = true;
   };

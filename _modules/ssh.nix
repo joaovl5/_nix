@@ -1,4 +1,20 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  ...
+} @ args: let
+  public_data = import ./public.nix args;
+  cfg = config.my_nix;
+
+  ssh_authorized_keys = [
+    # all host keys should go here
+    # - git_ro_key
+    # - servers/etc
+    public_data.ssh_key
+  ];
+
+  user = cfg.user;
+in {
   # ssh daemon
   services.openssh = {
     enable = lib.mkDefault true;
@@ -17,5 +33,9 @@
     startAgent = true;
     pubkeyAcceptedKeyTypes = lib.mkForce ["ssh-ed25519"];
     hostKeyAlgorithms = lib.mkForce ["ssh-ed25519"];
+  };
+
+  users.users."${user}" = {
+    openssh.authorizedKeys = ssh_authorized_keys;
   };
 }

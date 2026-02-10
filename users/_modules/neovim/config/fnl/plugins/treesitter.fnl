@@ -10,22 +10,20 @@
                   :jsx
                   :typescript
                   :tsx
+                  :fennel
                   :html
                   :css
                   :scss])
 
-[(plugin :nvim-treesitter/nvim-treesitter
-         {:lazy false
-          :branch :main
-          :build ":TSUpdate"
-          :config (fn []
-                    (let [ts (require :nvim-treesitter)]
-                      (ts.setup {})
-                      (ts.install languages))
-                    (let [filetypes (accumulate [res [] _ lang (ipairs languages)]
-                                      (vim.list_extend res
-                                                       (vim.treesitter.language.get_filetypes lang)))]
-                      (n.autocmd :FileType
-                                 {:pattern filetypes
-                                  :callback (fn [ev]
-                                              (vim.treesitter.start ev.buf))})))})]
+(let [ts (require :nvim-treesitter.config)]
+  (ts.setup {:auto_install false}))
+
+(let [filetypes (accumulate [res [] _ lang (ipairs languages)]
+                  (vim.list_extend res
+                                   (vim.treesitter.language.get_filetypes lang)))]
+  (n.autocmd :FileType
+             {:pattern filetypes
+              :callback (fn [ev]
+                          (vim.treesitter.start ev.buf))}))
+
+[]

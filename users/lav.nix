@@ -29,12 +29,16 @@
     (import ./_modules/ghostty)
     (import ./_modules/zen-browser)
     (import ./_modules/neovim)
+    (import ./_modules/espanso)
     # (import ./_modules/yazi)
   ];
   module_imports = extract_imports modules;
 in {
   imports =
     module_imports.nx
+    ++ [
+      ./_services/post_install
+    ]
     ++ (with inputs; [
       nix-flatpak.nixosModules.nix-flatpak
       hm.nixosModules.home-manager
@@ -47,7 +51,11 @@ in {
 
     isNormalUser = true;
     shell = pkgs.fish;
-    extraGroups = ["wheel" "libvirt"];
+    extraGroups = [
+      "wheel"
+      "libvirt"
+      "input" # required for espanso
+    ];
   };
 
   home-manager.users.${cfg.username} = {config, ...}: {
@@ -125,6 +133,7 @@ in {
       cursor-cli
 
       # dependencies
+      rsync
       pinentry-curses
       bc
       perl

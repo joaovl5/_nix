@@ -1,9 +1,11 @@
 {
   pkgs,
   lib,
+  config,
   modulesPath,
   ...
 } @ args: let
+  cfg = config.my_nix;
   public_data = import ../../_modules/public.nix args;
 
   ssh_port = 2222;
@@ -14,14 +16,23 @@
     public_data.ssh_key
   ];
 
-  user = "iso";
+  user = "nixos";
 in {
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     ../plankton
+    ../_modules/security
+    ../_modules/services/ntp.nix
     ../_modules/console
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
+
+  my_nix = {
+    hostname = "my_iso";
+    username = user;
+    email = "vieiraleao2005+my_iso@gmail.com";
+    name = "João Pedro";
+  };
 
   # faster build time
   isoImage.squashfsCompression = "gzip -Xcompression-level 1";
@@ -36,13 +47,16 @@ in {
   };
 
   services.openssh = {
-    ports = lib.mkForce ssh_port;
+    ports = lib.mkForce [ssh_port];
     passwordAuthentication = false;
-    permitRootLogin = false;
+    permitRootLogin = "no";
   };
 
   users.users."${user}" = {
-    openssh.authorizedKeys = ssh_authorized_keys;
+    isNormalUser = true;
+    shell = pkgs.fish;
+    extraGroups = ["wheel"];
+    openssh.authorizedKeys.keys = ssh_authorized_keys;
   };
 
   environment.systemPackages = with pkgs; [

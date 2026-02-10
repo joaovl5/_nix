@@ -1,37 +1,26 @@
 {
   pkgs,
+  lib,
   config,
   ...
 }: let
   cfg = config.my_nix;
-  flake_path = cfg.flake_location;
   username = cfg.username;
   user_home = config.users.users.${username}.home;
+
+  install_script = pkgs.writeScript "my_post_install" ''
+    ${lib.readFile ./src/handle_post_install.py}
+  '';
 in {
-  # handle post-install on-boot tasks
-  systemd.services.my_post_install_boot = {
+  # handle post-install tasks, during boot
+  systemd.services.my_post_install = {
     wantedBy = ["multi-user.target"];
+    path = with pkgs; [
+      uv
+    ];
     serviceConfig = {
       Type = "simple";
-      # todo
-      ExecStart = pkgs.writeShellScript "my_post_install_boot" ''
-        # Copy SSH+AGE keys
-      '';
-    };
-  };
-  # handle post-install on-login tasks
-  systemd.user.services.my_post_install_user = {
-    wantedBy = ["default.target"];
-    unitConfig = {
-      ConditionPathExists = "!${flake_path}";
-    };
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = pkgs.writeShellScript "my_post_install_user" ''
-        flake_path="${flake_path}"
-        repo_uri="git@github.com:joaovl5/_nix.git"
-        git clone "$repo_uri" "$flake_path"
-      '';
+      ExecStart = "${install_script} --user ${username} ${user_home}";
     };
   };
 }

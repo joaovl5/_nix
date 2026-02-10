@@ -1,13 +1,51 @@
 -- [nfnl] fnl/plugins/lsp/completions.fnl
-local n = require("lib/nvim")
-local function _1_()
-  vim.api.nvim_set_keymap("i", "<Esc>", "pumvisible() ? \"\\<C-e><Esc>\" : \"\\<Esc>\"", {expr = true, silent = true})
-  vim.api.nvim_set_keymap("i", "<C-c>", "pumvisible() ? \"\\<C-e><C-c>\" : \"\\<C-c>\"", {expr = true, silent = true})
-  vim.api.nvim_set_keymap("i", "<BS>", "pumvisible() ? \"\\<C-e><BS>\" : \"\\<BS>\"", {expr = true, silent = true})
-  vim.api.nvim_set_keymap("i", "<Tab>", "pumvisible() ? (complete_info().selected == -1 ? \"\\<C-n>\" : \"\\<C-y>\") : \"\\<Tab>\"", {expr = true, silent = true})
-  vim.api.nvim_set_keymap("i", "<A-j>", "pumvisible() ? \"\\<C-n>\" : \"\\<A-j>\"", {expr = true, silent = true})
-  vim.api.nvim_set_keymap("i", "<A-k>", "pumvisible() ? \"\\<C-p>\" : \"\\<A-k>\"", {expr = true, silent = true})
-  vim.g.coq_settings = {auto_start = "shut-up", ["keymap.bigger_preview"] = nil, ["keymap.jump_to_mark"] = nil, ["keymap.pre_select"] = true, ["completion.always"] = true, ["display.preview.border"] = "solid", ["keymap.recommended"] = false}
-  return nil
+local function setup_blink()
+  local blink = require("blink.cmp")
+  local colorful_menu = require("colorful-menu")
+  local mini_icons = require("mini.icons")
+  local _icon_data
+  local function _1_(ctx)
+    return mini_icons.get("lsp", ctx.kind)
+  end
+  _icon_data = _1_
+  local _icon_hl
+  local function _2_(ctx)
+    local _let_3_ = _icon_data(ctx)
+    local _ = _let_3_[1]
+    local hl = _let_3_[2]
+    local _0 = _let_3_[3]
+    return (hl or ctx.kind_hl)
+  end
+  _icon_hl = _2_
+  local _icon
+  local function _4_(ctx)
+    local _let_5_ = _icon_data(ctx)
+    local icon = _let_5_[1]
+    local _ = _let_5_[2]
+    local _0 = _let_5_[3]
+    return ((icon or ctx.kind_icon) .. ctx.icon_gap)
+  end
+  _icon = _4_
+  local _cm_text
+  local function _6_(ctx)
+    return colorful_menu.blink_components_text(ctx)
+  end
+  _cm_text = _6_
+  local _cm_hl
+  local function _7_(ctx)
+    return colorful_menu.blink_components_highlight(ctx)
+  end
+  _cm_hl = _7_
+  local comp_icon = {text = _icon, highlight = _icon_hl}
+  local comp_kind = {highlight = _icon_hl}
+  local comp_label = {text = _cm_text, highlight = _cm_hl}
+  local function _8_(cmp)
+    if cmp.snippet_active() then
+      return cmp.accept()
+    else
+      return cmp.select_and_accept()
+    end
+  end
+  return blink.setup({keymap = {preset = "none", ["<Tab>"] = {_8_, "snippet_forward", "fallback"}, ["<S-Tab>"] = {"snippet_backward", "fallback"}, ["<A-j>"] = {"select_next"}, ["<A-k>"] = {"select_prev"}, ["<C-d>"] = {"scroll_documentation_down"}, ["<C-u>"] = {"scroll_documentation_up"}, ["<C-k>"] = {"show_signature", "hide_signature"}}, appearance = {nerd_font_variant = "mono"}, completion = {ghost_text = {enabled = true}, keyword = {range = "full"}, accept = {auto_brackets = {enabled = false}}, list = {selection = {preselect = true}}, documentation = {auto_show = true, auto_show_delay_ms = 0, window = {border = "none", direction_priority = {menu_south = {"e", "w", "s"}, menu_north = {"e", "w", "n"}}}}, menu = {border = "none", min_width = 30, scrolloff = 4, direction_priority = {"s", "n"}, auto_show = true, auto_show_delay_ms = 0, draw = {padding = 1, gap = 1, components = {label = comp_label, kind_icon = comp_icon, kind = comp_kind}, columns = {{"kind_icon", "kind", gap = 1}, {"label", gap = 1}}}}}, sources = {default = {"lsp", "path", "snippets", "buffer"}}, signature = {enabled = true, trigger = {show_on_keyword = true, show_on_insert = true}, window = {min_width = 1, max_width = 200, max_height = 30, border = "none"}}, cmdline = {keymap = {preset = "inherit"}, completion = {menu = {auto_show = true}}}, fuzzy = {sorts = {"exact", "score", "sort_text"}, implementation = "prefer_rust_with_warning"}})
 end
-return {{"ms-jpq/coq_nvim", branch = "coq", build = "COQdeps", init = _1_, lazy = false}}
+return {{dir = _G.plugin_dirs["blink-cmp"], event = "VeryLazy", config = setup_blink}}

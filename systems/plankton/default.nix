@@ -20,7 +20,7 @@ in {
     ../_modules/security
     ../_modules/services/ntp.nix
     ../_modules/console
-    {my_system.title = lib.readFile ./assets/title.txt;}
+    {my_system.title = lib.mkDefault (lib.readFile ./assets/title.txt);}
   ];
 
   networking = {
@@ -31,9 +31,6 @@ in {
   users.users.root = {
     hashedPasswordFile = config.sops.secrets.password_hash.path;
   };
-
-  users.defaultUserShell = lib.mkDefault pkgs.dash;
-  users.users.root.shell = lib.mkDefault pkgs.dash;
 
   services.openssh.enable = true;
 

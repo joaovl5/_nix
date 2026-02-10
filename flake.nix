@@ -22,6 +22,8 @@
     ## disko
     disko.url = "git+https://github.com/nix-community/disko?shallow=1";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    ## deployment
+    deploy-rs.url = "git+https://github.com/serokell/deploy-rs?shallow=1";
     ## secrets management
     sops-nix.url = "git+https://github.com/Mic92/sops-nix?shallow=1";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
@@ -77,6 +79,7 @@
     nixpkgs,
     disko,
     sops-nix,
+    deploy-rs,
     hm,
     fup,
     ...
@@ -98,8 +101,9 @@
 
       ## these overlays get applied on *all* channels
       sharedOverlays = with inputs; [
-        self.overlay
+        self.overlays.default
         nur.overlays.default
+        deploy-rs.overlays.default
         # neovim.overlays.default
         niri.overlays.niri
         fenix.overlays.default
@@ -172,10 +176,16 @@
           ./users/tyrant.nix
         ];
 
+        testservervm.modules = [
+          ./hardware/testservervm
+          ./systems/tyrant
+          ./users/tyrant.nix
+        ];
+
         ### other/special
-        # iso.modules = [
-        #   ./_modules/iso.nix
-        # ];
+        iso.modules = [
+          ./systems/iso
+        ];
       };
 
       # ---------------
@@ -185,8 +195,39 @@
         self.nixosConfigurations.iso.config.system.build.isoImage;
 
       # ---------------
+      # Deployment
+      # ---------------
+      deploy = let
+        mk_deploy = host_system: {
+          user = "root";
+          path =
+            deploy-rs.lib.x86_64-linux.activate.nixos
+            self.nixosConfigurations.${host_system};
+        };
+      in {
+        sshUser = "root";
+        sudo = "run0";
+        remoteBuild = false;
+
+        nodes = {
+          tyrant = {
+            hostname = "tyrant";
+            profiles.system = mk_deploy "tyrant";
+          };
+        };
+      };
+
+      # ---------------
+      # Checks
+      # ---------------
+      checks =
+        builtins.mapAttrs
+        (system: deployLib: deployLib.deployChecks self.deploy)
+        deploy-rs.lib;
+
+      # ---------------
       # Other settings
       # ---------------
-      overlay = import ./overlays;
+      overlays.default = import ./overlays;
     };
 }

@@ -7,7 +7,6 @@
   cfg = config.my_nix;
 in {
   imports = [
-    ../_modules/console
     ../_modules/security
     ../_modules/services/login.nix
     ../_modules/services/pipewire.nix

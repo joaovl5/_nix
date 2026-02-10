@@ -10,4 +10,4 @@ local function build_parinfer(params)
     return nil
   end
 end
-return {{"bakpakin/fennel.vim", ft = "fennel"}, {"eraserhd/parinfer-rust", build = build_parinfer}}
+return {{"eraserhd/parinfer-rust", build = build_parinfer}}

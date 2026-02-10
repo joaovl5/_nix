@@ -1,12 +1,11 @@
 -- [nfnl] fnl/plugins/treesitter.fnl
 local n = require("lib/nvim")
-local languages = {"lua", "vimdoc", "markdown", "python", "javascript", "jsx", "typescript", "tsx", "html", "css", "scss"}
-local function _1_()
-  do
-    local ts = require("nvim-treesitter")
-    ts.setup({})
-    ts.install(languages)
-  end
+local languages = {"lua", "vimdoc", "markdown", "python", "javascript", "jsx", "typescript", "tsx", "fennel", "html", "css", "scss"}
+do
+  local ts = require("nvim-treesitter.config")
+  ts.setup({auto_install = false})
+end
+do
   local filetypes
   do
     local res = {}
@@ -15,9 +14,9 @@ local function _1_()
     end
     filetypes = res
   end
-  local function _2_(ev)
+  local function _1_(ev)
     return vim.treesitter.start(ev.buf)
   end
-  return n.autocmd("FileType", {pattern = filetypes, callback = _2_})
+  n.autocmd("FileType", {pattern = filetypes, callback = _1_})
 end
-return {{"nvim-treesitter/nvim-treesitter", branch = "main", build = ":TSUpdate", config = _1_, lazy = false}}
+return {}

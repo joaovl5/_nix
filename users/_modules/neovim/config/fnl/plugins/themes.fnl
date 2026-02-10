@@ -9,6 +9,13 @@
                        {:source :embark-theme/vim :names [:embark]}
                        {:source :eldritch-theme/eldritch.nvim
                         :names [:eldritch :eldritch-dark :eldritch-minimal]}
+                       {:source :serhez/teide.nvim
+                        :post_add (fn []
+                                    (do-req :teide :setup
+                                            {:style :darker
+                                             :transparent true
+                                             :dim_inactive true}))
+                        :names [:teide-darker :teide-dark :teide-dimmed]}
                        {:source :uhs-robert/oasis.nvim
                         :names [:oasis-midnight
                                 :oasis-abyss

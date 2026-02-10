@@ -33,7 +33,7 @@
 (fn mk_lsp []
   "Setup language servers."
   (let [schemastore (require :schemastore)
-        coq (require :coq)
+        blink (require :blink.cmp)
         servers {:basedpyright {:on_attach do_basedpyright_attach
                                 :settings {:basedpyright {:analysis {:autoSearchPaths true
                                                                      :useLibraryCodeForTypes true
@@ -61,7 +61,7 @@
                                                       :nixpkgsInputName :nixpkgs}}}}}}]
     (each [server config (pairs servers)]
       (vim.lsp.config server config)
-      (vim.lsp.config server (coq.lsp_ensure_capabilities))
+      (vim.lsp.config server (blink.get_lsp_capabilities))
       (vim.lsp.enable server))))
 
 (plugin :neovim/nvim-lspconfig {:dependencies [:b0o/schemastore.nvim]

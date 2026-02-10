@@ -10,5 +10,4 @@
                         "\n\nSTDERR: " res.stderr)
                     vim.log.levels.ERROR))))
 
-[(plugin :bakpakin/fennel.vim {:ft :fennel})
- (plugin :eraserhd/parinfer-rust {:build build_parinfer})]
+[(plugin :eraserhd/parinfer-rust {:build build_parinfer})]

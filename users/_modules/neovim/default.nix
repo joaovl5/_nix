@@ -1,4 +1,11 @@
 {
+  nx = {pkgs, ...}: {
+    # environment = {
+    #   sessionVariables = {
+    #     LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
+    #   };
+    # };
+  };
   hm = {
     pkgs,
     lib,
@@ -10,6 +17,39 @@
     flake_path = cfg.flake_location;
     here = assert (flake_path != null); "${flake_path}/users/_modules/neovim";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
+
+    treesitter = let
+      nts = pkgs.vimPlugins.nvim-treesitter;
+    in
+      nts.withPlugins (_: nts.allGrammars);
+
+    grammarsPath = pkgs.symlinkJoin {
+      name = "nvim-treesitter-grammars";
+      paths = treesitter.dependencies;
+    };
+
+    plugins_set =
+      {
+        inherit treesitter;
+      }
+      // (with pkgs.vimPlugins; {
+        inherit
+          parinfer-rust
+          blink-cmp
+          blink-pairs
+          friendly-snippets
+          lspkind-nvim
+          colorful-menu-nvim
+          ;
+      });
+
+    add_rtp_lines = lib.join "\n" (lib.mapAttrsToList (name: package: ''
+        vim.opt.runtimepath:append('${package}')
+        _G.plugin_dirs['${name}'] = '${package}'
+      '') (plugins_set
+        // {
+          inherit grammarsPath;
+        }));
   in {
     # xdg.configFile."nvim" = {
     #   source = configSrc;
@@ -17,12 +57,24 @@
     #   force = true;
     # };
 
-    programs.neovim = {
+    programs.neovim = let
+    in {
       enable = true;
-      initLua = lib.mkOrder 1001 (lib.readFile ./init.lua);
+      initLua = let
+      in
+        lib.mkOrder 1001 ''
+          _G.plugin_dirs = {}
+
+          ${add_rtp_lines}
+
+          ${lib.readFile ./init.lua}
+        '';
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+
+      plugins = lib.attrValues plugins_set;
+
       extraLuaPackages = ps:
         with ps; [
           luarocks
@@ -39,6 +91,8 @@
           ])
         rust-analyzer-nightly
         tree-sitter
+        lua5_1
+        luarocks
       ];
     };
 

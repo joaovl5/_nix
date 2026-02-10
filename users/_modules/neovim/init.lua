@@ -37,6 +37,13 @@ if vim.loop.fs_stat(fnl_definition_paths) then
 	end
 else
 end
-require("lazy").setup(plugins, { ui = { border = "rounded" } })
+require("lazy").setup(plugins, {
+	ui = {
+		border = "rounded",
+	},
+	performance = {
+		rtp = { reset = false },
+	},
+})
 
 require("options")

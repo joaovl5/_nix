@@ -30,11 +30,11 @@ local function get_fennel_root_dir(bufnr, on_dir)
 end
 local function mk_lsp()
   local schemastore = require("schemastore")
-  local coq = require("coq")
+  local blink = require("blink.cmp")
   local servers = {basedpyright = {on_attach = do_basedpyright_attach, settings = {basedpyright = {analysis = {autoSearchPaths = true, useLibraryCodeForTypes = true, typeCheckingMode = "recommended", diagnosticMode = "workspace", reportExplicitAny = false, reportUnknownParameterType = false}}}}, lua_ls = {cmd = {"lua-language-server"}, settings = {Lua = {completion = {callSnippet = "Replace"}}}}, fennel_ls = {cmd = {"fennel-ls"}, single_file_support = true, root_dir = get_fennel_root_dir}, jsonls = {cmd = {"jsonls"}, settings = {json = {schemas = schemastore.json.schemas()}}}, nixd = {cmd = {"nixd"}}, taplo = {cmd = {"taplo"}}, marksman = {cmd = {"marksman"}}, stylua = {cmd = {"stylua"}}, yamlls = {cmd = {"yaml-language-server"}}, ["nil"] = {cmd = {"nil"}, filetypes = {"nix"}, root_markers = {"flake.nix", ".git"}, settings = {["nil"] = {nix = {flake = {autoArchive = true, autoEvalInputs = true, nixpkgsInputName = "nixpkgs"}}}}}}
   for server, config in pairs(servers) do
     vim.lsp.config(server, config)
-    vim.lsp.config(server, coq.lsp_ensure_capabilities())
+    vim.lsp.config(server, blink.get_lsp_capabilities())
     vim.lsp.enable(server)
   end
   return nil
