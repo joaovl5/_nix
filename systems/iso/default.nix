@@ -38,7 +38,7 @@ in {
   isoImage.squashfsCompression = "gzip -Xcompression-level 1";
 
   # enable SSH in the boot process
-  systemd.services.sshd.wantedBy = pkgs.lib.mkForce ["multi-user.target"];
+  systemd.services.sshd.wantedBy = lib.mkForce ["multi-user.target"];
 
   programs = {
     fish = {
@@ -61,5 +61,14 @@ in {
 
   environment.systemPackages = with pkgs; [
     neovim
+    tmux
+    btop
+    glances
+
+    # installer deps
+    rsync
+    git
+    disko
+    nixos-facter
   ];
 }
