@@ -215,11 +215,21 @@ class NixOSInstaller:
             "/mnt/root/{.ssh,.age}", "ssh/age dirs at /mnt/root", sudo=True
         )
         _ = self._c.run_command(
-            command=["cp", f"{self._tmp_dir}/.ssh/id_*", f"/mnt/root/.ssh"],
+            command=[
+                "sudo",
+                "cp",
+                f"{self._tmp_dir}/.ssh/id_*",
+                f"/mnt/root/.ssh",
+            ],
             description="Copying SSH keys into mounted partition",
         )
         _ = self._c.run_command(
-            command=["cp", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
+            command=[
+                "sudo",
+                "cp",
+                f"{self._tmp_dir}/.age/*",
+                f"{self._host_home}/.age",
+            ],
             description="Copying AGE keys into mounted partition",
         )
 
