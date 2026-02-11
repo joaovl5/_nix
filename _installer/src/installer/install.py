@@ -120,12 +120,12 @@ class NixOSInstaller:
         # move keys
         self._ensure_dir(f"{self._host_home}/{{.ssh,.age}}", "ssh/age dirs")
         _ = self._c.run_command(
-            command=["mv", f"{self._tmp_dir}/.ssh/id_*", f"{self._host_home}/.ssh"],
-            description="Moving SSH keys into remote host's home",
+            command=["cp", f"{self._tmp_dir}/.ssh/id_*", f"{self._host_home}/.ssh"],
+            description="Copying SSH keys into remote host's home",
         )
         _ = self._c.run_command(
-            command=["mv", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
-            description="Moving AGE keys into remote host's home",
+            command=["cp", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
+            description="Copying AGE keys into remote host's home",
         )
 
     def _clone_repositories(self) -> None:
@@ -216,11 +216,11 @@ class NixOSInstaller:
         )
         _ = self._c.run_command(
             command=["cp", f"{self._tmp_dir}/.ssh/id_*", f"/mnt/root/.ssh"],
-            description="Moving SSH keys into mounted partition",
+            description="Copying SSH keys into mounted partition",
         )
         _ = self._c.run_command(
             command=["cp", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
-            description="Moving AGE keys into mounted partition",
+            description="Copying AGE keys into mounted partition",
         )
 
     def _handle_gen_ssh_keys(self) -> None:
@@ -249,6 +249,7 @@ class NixOSInstaller:
         _install_cmd = [
             "sudo",
             "nixos-install",
+            # "--impure",  # needed for accessing `/root/facter.json`
             "--no-root-password",
             "--cores",
             "0",
