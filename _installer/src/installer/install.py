@@ -186,6 +186,24 @@ class NixOSInstaller:
             description=f"Running disko w/ `{self.flake_disko_file}`",
         )
 
+    def _handle_install(self) -> None:
+        _nix_install_cmd = [
+            "sudo",
+            "nixos-install",
+            "--no-root-password",
+            "--cores",
+            "0",
+            "--root",
+            "/mnt",
+            "--flake",
+            f"{self._flake_dir}#{self.flake_host}",
+        ]
+
+        _ = self._c.run_command(
+            command=_nix_install_cmd,
+            description=f"Installing NixOS for `{self.flake_host}`",
+        )
+
     def run(self) -> None:
         # - assumes user has root privileges
 
@@ -193,6 +211,9 @@ class NixOSInstaller:
         self._clone_repositories()
         self._setup_keyfiles()
         self._handle_disko()
+        self._handle_install()
+        # !!!!!!!! TODO !!!!!!!!!!
+        # !! COPY KEYS TO /root/*** FOR POST INSTALL SERVICE
         # clone repositories
         # handle disko
         # handle nixos-install

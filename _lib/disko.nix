@@ -13,6 +13,11 @@
     };
   };
 
+  mbr = {size ? "1M"}: {
+    inherit size;
+    type = "EF02";
+  };
+
   luks = {
     name ? "crypted",
     size ? "100%",

@@ -2,7 +2,7 @@
   primary_device, # nvme ssd
   ...
 }: let
-  inherit (import ../../_lib/disko.nix) efi luks btrfs;
+  inherit (import ../../_lib/disko.nix) mbr luks btrfs;
   inherit (btrfs) subvolume;
 in {
   disko.devices.disk.primary = {
@@ -11,7 +11,7 @@ in {
     content = {
       type = "gpt";
       partitions = {
-        esp = efi {};
+        boot = mbr {};
         luks_p1 = luks {name = "p1";} {
           type = "btrfs";
           subvolumes = {
