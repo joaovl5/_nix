@@ -32,7 +32,7 @@ in {
     type = "lvm_vg";
     lvs.system = {
       size = "100%";
-      content = luks {name = "p1";} {
+      content = {
         type = "btrfs";
         subvolumes = {
           "@root" = subvolume {mp = "/";};
