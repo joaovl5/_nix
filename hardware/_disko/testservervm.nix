@@ -30,13 +30,10 @@ in {
   };
   disko.devices.lvm_vg.main_pool = {
     type = "lvm_vg";
-    lvs.system = {
-      size = "100%";
-      content = {
-        type = "btrfs";
-        subvolumes = {
-          "@root" = subvolume {mp = "/";};
-        };
+    lvs.system = luks {name = "p1";} {
+      type = "btrfs";
+      subvolumes = {
+        "@root" = subvolume {mp = "/";};
       };
     };
   };
