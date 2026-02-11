@@ -6,6 +6,7 @@
   }: let
     cfg = nixos_config.my_nix;
   in {
+    # TODO add merging stuff
     programs.git = {
       enable = true;
       settings = {
