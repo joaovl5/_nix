@@ -254,12 +254,14 @@ class NixOSInstaller:
         ) as writer:
             _cfg_cmd = ["git", "config", "--global"]
             self._c.run_command(
-                [*_cfg_cmd, "user.email", "nixos-installer@local"],
-                "Setting git email",
+                command=[*_cfg_cmd, "user.email", "nixos-installer@local"],
+                description="Setting git email",
+                writer=writer,
             )
             self._c.run_command(
-                [*_cfg_cmd, "user.name", "nixos-installer"],
-                "Setting git username",
+                command=[*_cfg_cmd, "user.name", "nixos-installer"],
+                description="Setting git username",
+                writer=writer,
             )
 
             def run_git_command(cmd: list[str], description: str) -> None:

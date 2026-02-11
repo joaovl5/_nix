@@ -45,26 +45,46 @@ in {
     };
   };
 
-  config = mkMerge [
-    (mkIf luks_cfg.ssh.enable {
-      boot.initrd = {
-        # [!] assumes facter will already define kernel modules for networking
-        network = {
+  config = {
+    boot.initrd = {
+      # [!] assumes facter will already define kernel modules for networking
+      network = {
+        enable = true;
+        udhcpc.enable = true;
+        flushBeforeStage2 = true;
+        ssh = {
           enable = true;
-          udhcpc.enable = true;
-          flushBeforeStage2 = true;
-          ssh = {
-            enable = true;
-            port = luks_cfg.ssh.port;
-            authorizedKeys = luks_cfg.ssh.authorized_keys;
-            hostKeys = luks_cfg.ssh.host_key_files;
-          };
-          postCommands = ''
-            # Automatically ask for password upon SSH login
-            echo 'cryptsetup-askpass || echo "Unlock was successful, exiting SSH session" && exit 1' >> /root/.profile
-          '';
+          port = luks_cfg.ssh.port;
+          authorizedKeys = luks_cfg.ssh.authorized_keys;
+          hostKeys = luks_cfg.ssh.host_key_files;
         };
+        postCommands = ''
+          # Automatically ask for password upon SSH login
+          echo 'cryptsetup-askpass || echo "Unlock was successful, exiting SSH session" && exit 1' >> /root/.profile
+        '';
       };
-    })
-  ];
+    };
+  };
+  # config = mkMerge [
+  #   (mkIf luks_cfg.ssh.enable {
+  #     boot.initrd = {
+  #       # [!] assumes facter will already define kernel modules for networking
+  #       network = {
+  #         enable = true;
+  #         udhcpc.enable = true;
+  #         flushBeforeStage2 = true;
+  #         ssh = {
+  #           enable = true;
+  #           port = luks_cfg.ssh.port;
+  #           authorizedKeys = luks_cfg.ssh.authorized_keys;
+  #           hostKeys = luks_cfg.ssh.host_key_files;
+  #         };
+  #         postCommands = ''
+  #           # Automatically ask for password upon SSH login
+  #           echo 'cryptsetup-askpass || echo "Unlock was successful, exiting SSH session" && exit 1' >> /root/.profile
+  #         '';
+  #       };
+  #     };
+  #   })
+  # ];
 }
