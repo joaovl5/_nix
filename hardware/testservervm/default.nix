@@ -31,6 +31,7 @@ in {
   networking.usePredictableInterfaceNames = true;
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.loader.grub.efiSupport = false;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;
