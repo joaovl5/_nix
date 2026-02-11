@@ -2,7 +2,9 @@
   pkgs,
   lib,
   config,
+  inputs,
   modulesPath,
+  system,
   ...
 } @ args: let
   cfg = config.my_nix;
@@ -68,7 +70,7 @@ in {
     # installer deps
     rsync
     git
-    disko
+    inputs.disko.packages.${system}.default
     nixos-facter
   ];
 }

@@ -113,7 +113,7 @@ class NixOSInstaller:
         final_cmd: list[str] = []
         if sudo:
             final_cmd.append("sudo")
-        final_cmd += ["mkdir", "-p", path]
+        final_cmd += ["mkdir", "-v", "-p", path]
         _ = self._c.run_command(
             command=final_cmd,
             description=f"Ensuring existence of {path_description}",
@@ -246,7 +246,7 @@ class NixOSInstaller:
             "git",
         ]
 
-        with self._c._panel_session(
+        with self._c.panel_session(
             title="Git commands execution",
             prelude=[
                 f"Repository: {repo_path}",
@@ -333,29 +333,34 @@ class NixOSInstaller:
             run_git(["commit", "-m", _msg], "Writing update commit message")
 
     def _handle_copy_keys(self) -> None:
-        self._ensure_dir(
-            "/mnt/root/{.ssh,.age}", "ssh/age dirs at /mnt/root", sudo=True
-        )
-        _ = self._c.run_command(
-            command=[
-                "sudo",
-                "cp",
-                "-v",
-                f"{self._tmp_dir}/.ssh/id_*",
-                f"/mnt/root/.ssh",
+        dirs_glob = "{.ssh,.age}"
+        target_dirs = [
+            "/mnt/root",
+            "/root",
+        ]
+        _cp = ["sudo", "cp", "-v"]
+        with self._c.panel_session(
+            title="Copying SSH/AGE keys",
+            prelude=[
+                "Target directories:",
+                *[f"-> {x}/{dirs_glob}" for x in target_dirs],
             ],
-            description="Copying SSH keys into mounted partition",
-        )
-        _ = self._c.run_command(
-            command=[
-                "sudo",
-                "cp",
-                "-v",
-                f"{self._tmp_dir}/.age/*",
-                f"{self._host_home}/.age",
-            ],
-            description="Copying AGE keys into mounted partition",
-        )
+        ) as writer:
+            for target_dir in target_dirs:
+                target_glob = f"{target_dir}/{dirs_glob}"
+                self._ensure_dir(
+                    target_glob, f"ssh/age dirs at {target_dir}", sudo=True
+                )
+                _ = self._c.run_command(
+                    command=[*_cp, f"{self._tmp_dir}/.ssh/id_*", f"{target_dir}/.ssh"],
+                    description="Copying SSH keys",
+                    writer=writer,
+                )
+                _ = self._c.run_command(
+                    command=[*_cp, f"{self._tmp_dir}/.age/*", f"{target_dir}/.age"],
+                    description="Copying AGE keys",
+                    writer=writer,
+                )
 
     def _handle_gen_ssh_keys(self) -> None:
         if GEN_SSH_KEY_INITRD:
@@ -383,7 +388,6 @@ class NixOSInstaller:
         _install_cmd = [
             "sudo",
             "nixos-install",
-            # "--impure",  # needed for accessing `/root/facter.json`
             "--no-root-password",
             "--cores",
             "0",

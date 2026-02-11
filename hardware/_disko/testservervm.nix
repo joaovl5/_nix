@@ -11,29 +11,22 @@ in {
     content = {
       type = "gpt";
       partitions = {
-        boot = mbr {};
-        root = {
-          size = "100%";
+        bios = mbr {};
+        boot = {
+          size = "1G";
           content = {
-            type = "lvm_pv";
-            vg = "main_pool";
+            mountpoint = "/boot";
+            type = "filesystem";
+            format = "vfat";
           };
         };
-        # luks_p1 = luks {name = "p1";} {
-        #   type = "btrfs";
-        #   subvolumes = {
-        #     "@root" = subvolume {mp = "/";};
-        #   };
-        # };
-      };
-    };
-  };
-  disko.devices.lvm_vg.main_pool = {
-    type = "lvm_vg";
-    lvs.system = luks {name = "p1";} {
-      type = "btrfs";
-      subvolumes = {
-        "@root" = subvolume {mp = "/";};
+
+        luks_p1 = luks {name = "p1";} {
+          type = "btrfs";
+          subvolumes = {
+            "@root" = subvolume {mp = "/";};
+          };
+        };
       };
     };
   };

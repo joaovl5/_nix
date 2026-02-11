@@ -20,6 +20,7 @@ in {
 
   my_facter.enable = true;
   my_luks.ssh.enable = true;
+  my_luks.ssh.use_dhcp = true;
 
   time.timeZone = cfg.timezone;
 

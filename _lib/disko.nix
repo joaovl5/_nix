@@ -16,6 +16,7 @@
   mbr = {size ? "1M"}: {
     inherit size;
     type = "EF02";
+    attributes = [0];
   };
 
   luks = {

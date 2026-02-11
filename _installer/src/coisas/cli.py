@@ -102,7 +102,7 @@ class CLI:
         return text
 
     @contextmanager
-    def _panel_session(
+    def panel_session(
         self,
         *,
         title: str,
@@ -190,7 +190,7 @@ class CLI:
                 writer.set_failed()
             return returncode
 
-        with self._panel_session(title=title, prelude=[]) as panel_writer:
+        with self.panel_session(title=title, prelude=[]) as panel_writer:
             command_index = panel_writer.append_line(command_line, style="dim")
             if process.stdout is not None:
                 for line in process.stdout:
@@ -351,7 +351,7 @@ class CLI:
             )
             return
 
-        with self._panel_session(title=title, prelude=prelude) as panel_writer:
+        with self.panel_session(title=title, prelude=prelude) as panel_writer:
             if not src_dir.is_dir():
                 panel_writer.append_line(
                     "Source directory does not exist, skipping.",
@@ -445,7 +445,7 @@ class SshCLI(CLI):
         prelude = [
             f"From {src_dir} to {dest_dir}",
         ]
-        with self._panel_session(title=title, prelude=prelude) as panel_writer:
+        with self.panel_session(title=title, prelude=prelude) as panel_writer:
             if not src_dir.is_dir():
                 panel_writer.append_line(
                     "Source directory does not exist, skipping.",
@@ -460,7 +460,7 @@ class SshCLI(CLI):
                 return 0
 
             _ = self.run_command(
-                command=["mkdir", "-p", dest_dir],
+                command=["mkdir", "-v", "-p", dest_dir],
                 description="Ensuring destination directory exists",
                 writer=panel_writer,
             )
@@ -486,7 +486,7 @@ class SshCLI(CLI):
         prelude = [
             f"From {src_dir} to {dest_dir}",
         ]
-        with self._panel_session(title=title, prelude=prelude) as panel_writer:
+        with self.panel_session(title=title, prelude=prelude) as panel_writer:
             _ensure_dir(dest_dir)
             panel_writer.append_line(
                 "Ensured destination directory exists.", style="dim"
