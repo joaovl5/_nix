@@ -89,17 +89,46 @@ class NixOSInstaller:
             raise NixOSInstallerError("Home can't be empty")
         return home
 
+    @cached_property
+    def _host_user(self) -> str:
+        p = self._c._run_command(
+            [
+                "echo",
+                "-n",  # necessary for not returning a new-line
+                "$(whoami)",
+            ]
+        )
+        _ = p.wait(timeout=5)
+        if not p.stdout:
+            raise NixOSInstallerError("Couldn't get `stdout` whilst getting $(whoami)")
+        home = p.stdout.read()
+        if len(home) == 0:
+            raise NixOSInstallerError("$(whoami) output can't be empty")
+        return home
+
     def _handle_disk_encryption_keys(self) -> None:
         pass
 
     def _ensure_dir(self, path: str, path_description: str, sudo: bool = False) -> None:
-        final_cmd = []
+        final_cmd: list[str] = []
         if sudo:
             final_cmd.append("sudo")
         final_cmd += ["mkdir", "-p", path]
         _ = self._c.run_command(
             command=final_cmd,
             description=f"Ensuring existence of {path_description}",
+        )
+
+    def _ensure_chown(self, path: str) -> None:
+        _cmd = [
+            "sudo",
+            "chown",
+            "-R",
+            f"{self._host_user}:users",  # TODO logic for getting group later
+            path,
+        ]
+        _ = self._c.run_command(
+            _cmd, description=f"Ensuring {self._host_user} owns {path}"
         )
 
     def _handle_keys(self) -> None:
@@ -223,6 +252,15 @@ class NixOSInstaller:
                 f"Repository: {repo_path}",
             ],
         ) as writer:
+            _cfg_cmd = ["git", "config", "--global"]
+            self._c.run_command(
+                [*_cfg_cmd, "user.email", "nixos-installer@local"],
+                "Setting git email",
+            )
+            self._c.run_command(
+                [*_cfg_cmd, "user.name", "nixos-installer"],
+                "Setting git username",
+            )
 
             def run_git_command(cmd: list[str], description: str) -> None:
                 _ = self._c.run_command(
@@ -254,17 +292,20 @@ class NixOSInstaller:
         )
 
         # 2) adding facter config to git
+        _facter_final_path = f"{_facter_secrets_dir}/{self.flake_host}.json"
         self._ensure_dir(_facter_secrets_dir, "facter directory on secrets repo")
         _ = self._c.run_command(
             command=[
+                "sudo",
                 "cp",
                 "-v",
                 _facter_target,
                 # WARNING THIS AND OTHER LOGIC ASSUMES FLAKE HOST IS THE SAME AS THE MACHINE'S HOSTNAME
-                f"{_facter_secrets_dir}/{self.flake_host}.json",
+                _facter_final_path,
             ],
             description="Copying facter config to secrets repository",
         )
+        self._ensure_chown(_facter_final_path)
 
         _msg = f"[my-installer][new-facter-cfg]:{self.flake_host}"
         with self._with_git(self._secrets_dir, push=True) as run_git:
