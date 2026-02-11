@@ -13,7 +13,7 @@ in {
     ./disko.nix
   ];
 
-  my_nix.hostname = "tyrantvm";
+  my_nix.hostname = "testservervm";
   my_nix.username = "tyrant";
   my_nix.email = "vieiraleao2005+testservervm@gmail.com";
   my_nix.name = "Tyrant";
