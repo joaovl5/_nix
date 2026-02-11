@@ -19,6 +19,10 @@ in {
       auto-optimise-store = true;
       experimental-features = ["nix-command" "flakes"];
 
+      allowed-impure-host-deps = [
+        (lib.mkIf config.my_facter.enable config.my_facter.report_path)
+      ];
+
       substituters = [
         "https://nix-community.cachix.org"
         "https://cache.nixos.org/"
