@@ -31,13 +31,13 @@ in {
 
       authorized_keys = mkOption {
         description = "Authorized keys to connect through SSH";
-        type = with types; listOf str;
+        type = types.listOf types.str;
         default = default_ssh_authorized_keys;
       };
 
       host_key_files = mkOption {
         description = "File paths to use as ssh host keys";
-        type = with types; listOf str;
+        type = types.listOf types.str;
         default = [
           "/etc/secrets/initrd/ssh_host_ed25519_key"
         ];

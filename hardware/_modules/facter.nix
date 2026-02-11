@@ -19,7 +19,7 @@
   # installer tool is pre-configured to use this location (/mnt/root/facter.json)
 in {
   options.my_facter = {
-    enable = mkEnableOption "Enable nixos-facter" // {default = false;};
+    enable = mkEnableOption "Enable nixos-facter" // {default = true;};
     report_path = mkOption {
       description = "Report path for nixos-facter";
       type = types.path;
