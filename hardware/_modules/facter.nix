@@ -6,7 +6,7 @@
 }: let
   inherit (lib) mkOption mkIf mkEnableOption types;
 
-  DEFAULT_FACTER_PATH = "/root/facter.json";
+  # DEFAULT_FACTER_PATH = "/root/facter.json";
 
   facter_cfg = config.my_facter;
   # wonky workaround to reading absolute paths, as to avoid using `--impure` explicitly
@@ -26,12 +26,14 @@ in {
     report_path = mkOption {
       description = "Report path for nixos-facter";
       type = types.path;
-      default = DEFAULT_FACTER_PATH;
+      # default = DEFAULT_FACTER_PATH;
     };
   };
 
   config = mkIf facter_cfg.enable {
-  
-    hardware.facter.reportPath = facter_cfg.report_path;
+    hardware.facter.reportPath = assert (
+      facter_cfg.report_path != "" && facter_cfg.report_path != null
+    );
+      facter_cfg.report_path;
   };
 }
