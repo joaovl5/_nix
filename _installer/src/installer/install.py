@@ -6,8 +6,11 @@ from rich.console import Console
 
 from coisas.cli import SshCLI
 
-# TODO move to argument
+# TODO move all to arguments
 AGE_KEYFILE: str = "key.txt"
+GEN_SSH_KEY_INITRD: bool = True
+GEN_SSH_KEY_INITRD_NAME: str = "ssh_host_ed25519_key"
+GEN_SSH_KEY_INITRD_DIR: str = "etc/secrets/initrd"  # without /mnt
 
 
 def get_ssh_console() -> Console:
@@ -86,6 +89,16 @@ class NixOSInstaller:
     def _handle_disk_encryption_keys(self) -> None:
         pass
 
+    def _ensure_dir(self, path: str, path_description: str, sudo: bool = False) -> None:
+        final_cmd = []
+        if sudo:
+            final_cmd.append("sudo")
+        final_cmd += ["mkdir", "-p", path]
+        _ = self._c.run_command(
+            command=final_cmd,
+            description=f"Ensuring existence of {path_description}",
+        )
+
     def _handle_keys(self) -> None:
         # for now, leaves hardcoded to copy user's ssh/age keys
         # TODO create dynamic key gen system
@@ -105,17 +118,14 @@ class NixOSInstaller:
         )
 
         # move keys
-        _ = self._c.run_command(
-            ["mkdir", "-p", f"{self._host_home}/{{.ssh,.age}}"],
-            description="Ensuring ssh/age dirs exist",
-        )
+        self._ensure_dir(f"{self._host_home}/{{.ssh,.age}}", "ssh/age dirs")
         _ = self._c.run_command(
             command=["mv", f"{self._tmp_dir}/.ssh/id_*", f"{self._host_home}/.ssh"],
             description="Moving SSH keys into remote host's home",
         )
         _ = self._c.run_command(
             command=["mv", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
-            description="Moving AGE into remote host's home",
+            description="Moving AGE keys into remote host's home",
         )
 
     def _clone_repositories(self) -> None:
@@ -172,7 +182,7 @@ class NixOSInstaller:
         )
 
     def _handle_disko(self) -> None:
-        _nix_disko_cmd = [
+        _disko_cmd = [
             "sudo",
             "disko",
             "--yes-wipe-all-disks",
@@ -182,12 +192,61 @@ class NixOSInstaller:
         ]
 
         _ = self._c.run_command(
-            command=_nix_disko_cmd,
+            command=_disko_cmd,
             description=f"Running disko w/ `{self.flake_disko_file}`",
         )
 
+    def _handle_facter(self) -> None:
+        _facter_cmd = [
+            "sudo",
+            "nixos-facter",
+            "-o",
+            "/mnt/root/facter.json",
+        ]
+
+        self._ensure_dir("/mnt/root", "/mnt/root", sudo=True)
+        _ = self._c.run_command(
+            command=_facter_cmd,
+            description=f"Running nixos-facter",
+        )
+
+    def _handle_copy_keys(self) -> None:
+        self._ensure_dir(
+            "/mnt/root/{.ssh,.age}", "ssh/age dirs at /mnt/root", sudo=True
+        )
+        _ = self._c.run_command(
+            command=["cp", f"{self._tmp_dir}/.ssh/id_*", f"/mnt/root/.ssh"],
+            description="Moving SSH keys into mounted partition",
+        )
+        _ = self._c.run_command(
+            command=["cp", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
+            description="Moving AGE keys into mounted partition",
+        )
+
+    def _handle_gen_ssh_keys(self) -> None:
+        if GEN_SSH_KEY_INITRD:
+            initrd_key_dir = f"/mnt/{GEN_SSH_KEY_INITRD_DIR}"
+            self._ensure_dir(
+                path=initrd_key_dir,
+                path_description="initrd secrets directory",
+                sudo=True,
+            )
+            _ = self._c.run_command(
+                command=[
+                    "sudo",
+                    "ssh-keygen",
+                    "-t",
+                    "ed25519",
+                    "-N",
+                    "",
+                    "-f",
+                    f"{initrd_key_dir}/{GEN_SSH_KEY_INITRD_NAME}",
+                ],
+                description="Generating host ssh key for initrd",
+            )
+
     def _handle_install(self) -> None:
-        _nix_install_cmd = [
+        _install_cmd = [
             "sudo",
             "nixos-install",
             "--no-root-password",
@@ -200,7 +259,7 @@ class NixOSInstaller:
         ]
 
         _ = self._c.run_command(
-            command=_nix_install_cmd,
+            command=_install_cmd,
             description=f"Installing NixOS for `{self.flake_host}`",
         )
 
@@ -211,6 +270,9 @@ class NixOSInstaller:
         self._clone_repositories()
         self._setup_keyfiles()
         self._handle_disko()
+        self._handle_facter()
+        self._handle_copy_keys()
+        self._handle_gen_ssh_keys()
         self._handle_install()
         # !!!!!!!! TODO !!!!!!!!!!
         # !! COPY KEYS TO /root/*** FOR POST INSTALL SERVICE

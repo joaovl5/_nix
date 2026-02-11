@@ -123,6 +123,7 @@ in {
       virt-manager
 
       ## etc move later
+      delta
       jq
       bit-logo
       bagels
