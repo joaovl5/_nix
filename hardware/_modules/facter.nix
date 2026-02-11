@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: let
   inherit (lib) mkOption mkIf mkEnableOption types;
@@ -26,7 +27,7 @@ in {
     report_path = mkOption {
       description = "Report path for nixos-facter";
       type = types.path;
-      # default = DEFAULT_FACTER_PATH;
+      default = "${inputs.mysecrets}/facter/${config.my_nix.hostname}.json";
     };
   };
 

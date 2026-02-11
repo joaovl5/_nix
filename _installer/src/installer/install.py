@@ -1,16 +1,19 @@
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
 from uuid import uuid4
 from attrs import define, field
 from rich.console import Console
 
-from coisas.cli import SshCLI
+from coisas.cli import PanelWriter, SshCLI
 
 # TODO move all to arguments
 AGE_KEYFILE: str = "key.txt"
 GEN_SSH_KEY_INITRD: bool = True
 GEN_SSH_KEY_INITRD_NAME: str = "ssh_host_ed25519_key"
 GEN_SSH_KEY_INITRD_DIR: str = "etc/secrets/initrd"  # without /mnt
+FLAKE_SECRETS_INPUT_NAME: str = "mysecrets"
 
 
 def get_ssh_console() -> Console:
@@ -120,11 +123,16 @@ class NixOSInstaller:
         # move keys
         self._ensure_dir(f"{self._host_home}/{{.ssh,.age}}", "ssh/age dirs")
         _ = self._c.run_command(
-            command=["cp", f"{self._tmp_dir}/.ssh/id_*", f"{self._host_home}/.ssh"],
+            command=[
+                "cp",
+                "-v",
+                f"{self._tmp_dir}/.ssh/id_*",
+                f"{self._host_home}/.ssh",
+            ],
             description="Copying SSH keys into remote host's home",
         )
         _ = self._c.run_command(
-            command=["cp", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
+            command=["cp", "-v", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
             description="Copying AGE keys into remote host's home",
         )
 
@@ -196,12 +204,47 @@ class NixOSInstaller:
             description=f"Running disko w/ `{self.flake_disko_file}`",
         )
 
+    @contextmanager
+    def _with_git(
+        self,
+        repo_path: str,
+        push: bool = False,
+    ) -> Generator[Callable[[list[str], str], None]]:
+        _git = [
+            "cd",
+            repo_path,
+            "&&",
+            "git",
+        ]
+
+        with self._c._panel_session(
+            title="Git commands execution",
+            prelude=[
+                f"Repository: {repo_path}",
+            ],
+        ) as writer:
+
+            def run_git_command(cmd: list[str], description: str) -> None:
+                _ = self._c.run_command(
+                    command=[*_git, *cmd],
+                    description=description,
+                    writer=writer,
+                )
+
+            yield run_git_command
+
+            if push:
+                run_git_command(["push", "-u"], "Pushing to origin")
+
     def _handle_facter(self) -> None:
+        # 1) creating facter config
+        _facter_target = f"{self._tmp_dir}/facter.json"
+        _facter_secrets_dir = f"{self._secrets_dir}/facter"
         _facter_cmd = [
             "sudo",
             "nixos-facter",
             "-o",
-            "/mnt/root/facter.json",
+            _facter_target,
         ]
 
         self._ensure_dir("/mnt/root", "/mnt/root", sudo=True)
@@ -209,6 +252,42 @@ class NixOSInstaller:
             command=_facter_cmd,
             description=f"Running nixos-facter",
         )
+
+        # 2) adding facter config to git
+        self._ensure_dir(_facter_secrets_dir, "facter directory on secrets repo")
+        _ = self._c.run_command(
+            command=[
+                "cp",
+                "-v",
+                _facter_target,
+                # WARNING THIS AND OTHER LOGIC ASSUMES FLAKE HOST IS THE SAME AS THE MACHINE'S HOSTNAME
+                f"{_facter_secrets_dir}/{self.flake_host}.json",
+            ],
+            description="Copying facter config to secrets repository",
+        )
+
+        _msg = f"[my-installer][new-facter-cfg]:{self.flake_host}"
+        with self._with_git(self._secrets_dir, push=True) as run_git:
+            run_git(["add", "."], "Adding facter config to git")
+            run_git(["commit", "-m", _msg], "Writing facter commit message")
+
+        # 3) updating flake inputs for secrets repository
+        _ = self._c.run_command(
+            [
+                "nix",
+                "flake",
+                "update",
+                FLAKE_SECRETS_INPUT_NAME,
+                "--flake",
+                self._flake_dir,
+            ],
+            description="Updating secrets input on flake",
+        )
+
+        _msg = f"[my-installer][update-secrets][new-facter-cfg]:{self.flake_host}"
+        with self._with_git(self._flake_dir, push=True) as run_git:
+            run_git(["add", "."], "Adding updated lockfile to git")
+            run_git(["commit", "-m", _msg], "Writing update commit message")
 
     def _handle_copy_keys(self) -> None:
         self._ensure_dir(
@@ -218,6 +297,7 @@ class NixOSInstaller:
             command=[
                 "sudo",
                 "cp",
+                "-v",
                 f"{self._tmp_dir}/.ssh/id_*",
                 f"/mnt/root/.ssh",
             ],
@@ -227,6 +307,7 @@ class NixOSInstaller:
             command=[
                 "sudo",
                 "cp",
+                "-v",
                 f"{self._tmp_dir}/.age/*",
                 f"{self._host_home}/.age",
             ],
