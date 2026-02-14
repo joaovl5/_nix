@@ -18,9 +18,9 @@ in {
 
     environment.systemPackages = with pkgs; [ironbar];
   };
-  hm = args: let
+  hm = {pkgs, ...}: let
     # ironbar_pkg = pkgs.${ironbar_pkg_name};
-    ironbar_cfg = import ./config.nix args;
+    ironbar_cfg = import ./config.nix {inherit pkgs;};
   in {
     xdg.configFile."ironbar/config.json".text = builtins.toJSON ironbar_cfg;
     xdg.configFile."ironbar/style.css".source = ./style.css;

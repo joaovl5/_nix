@@ -1,5 +1,9 @@
-{config, ...} @ args: let
-  inherit (import ../../../_lib/services.nix args) data_dir;
+{
+  pkgs,
+  config,
+  ...
+}: let
+  inherit (import ../../../_lib/services.nix {inherit pkgs config;}) make_docker_service data_dir;
   syncthing_dir = "${data_dir}/syncthing";
 in {
   services.syncthing = {

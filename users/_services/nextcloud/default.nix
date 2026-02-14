@@ -1,9 +1,10 @@
 {
   config,
+  pkgs,
   lib,
   ...
-} @ args: let
-  inherit (import ../../../_lib/services.nix args) make_docker_service data_dir;
+}: let
+  inherit (import ../../../_lib/services.nix {inherit pkgs config;}) make_docker_service data_dir;
   inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
   cfg = config.my_nix.nextcloud;
   mount_path = "${data_dir}/nextcloud";

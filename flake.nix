@@ -200,23 +200,42 @@
       # Deployment
       # ---------------
       deploy = let
-        mk_deploy = host_system: {
-          user = "root";
+        mk_deploy = {
+          host_system,
+          ssh_user ? "root",
+          user ? "root",
+        }: {
+          inherit user;
+          sshUser = ssh_user;
           path =
             deploy-rs.lib.x86_64-linux.activate.nixos
             self.nixosConfigurations.${host_system};
         };
-      in {
-        sshUser = "root";
-        sudo = "run0";
-        remoteBuild = false;
-
-        nodes = {
-          tyrant = {
-            hostname = "tyrant";
-            profiles.system = mk_deploy "tyrant";
+        mk_node = {
+          host_system,
+          hostname ? host_system,
+          ssh_user ? "root",
+          user ? "root",
+        }: {
+          ${host_system} = {
+            inherit hostname;
+            profiles.system = mk_deploy {inherit host_system ssh_user user;};
           };
         };
+      in {
+        # sshUser = "root";
+        # sudo = "run0";
+        remoteBuild = false;
+        sudo = "run0 --user";
+
+        nodes =
+          # (mk_node {host_system = "tyrant";}) //
+          mk_node {
+            host_system = "testservervm";
+            hostname = "192.168.122.169";
+            ssh_user = "tyrant";
+            user = "root";
+          };
       };
 
       # ---------------

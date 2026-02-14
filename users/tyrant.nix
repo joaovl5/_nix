@@ -59,6 +59,11 @@ in {
       ## utils
       ripgrep
       neovim
+
+      ## monitoring
+      glances
+      btop
+      htop
     ];
   };
 }
