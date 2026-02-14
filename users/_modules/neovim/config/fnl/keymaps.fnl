@@ -9,14 +9,9 @@
   (tset opts 2 what)
   opts)
 
-(var terminals {})
-
-(fn toggle_term [name cmd]
+(fn toggle_term [_ cmd]
   "Toggles (or creates) a terminal instance by its id"
-  (local {: Terminal} (require :toggleterm.terminal))
-  (when (= (. terminals name) nil)
-    (tset terminals name (Terminal:new {: cmd :hidden true :direction :float})))
-  (: (. terminals name) :toggle))
+  (Snacks.terminal.toggle cmd {}))
 
 ; # GENERAL
 (n.map [:n] :<Esc> :<cmd>nohlsearch<CR> {:desc "Clear Search Highlights"})
@@ -167,6 +162,23 @@
                  (let [worksp (require :workspace-diagnostics)]
                    (worksp.populate_workspace_diagnostics client 0)))))])
 
+; ## Debugging
+(wk.add [(km :<leader>d {:group :Debug})
+         (km :<leader>ds {:group :Session})
+         (km :<leader>dsn {:desc "New Session"} ":DapNew<CR>")
+         (km :<leader>dsc {:desc "Continue Session"} ":DapContinue<CR>")
+         (km :<leader>db {:desc :Breakpoint} ":DapToggleBreakpoint<CR>")
+         (km :<leader>dj {:desc "Step over"} ":DapStepOver<CR>")
+         (km :<leader>dl {:desc "Step into"} ":DapStepInto<CR>")
+         (km :<leader>dr {:desc :Repl} ":DapToggleRepl<CR>")
+         (km :<leader>de {:desc "Eval under cursor"}
+             (fn [] (do-req :dapui :eval)))
+         (km :<leader>dx {:desc "Eval expression"}
+             (fn []
+               (vim.ui.input {:prompt "Expression to evaluate"}
+                             (fn [input] (do-req :dapui :eval input)))))
+         (km :<leader>dd {:desc "Toggle UI"} (fn [] (do-req :dapui :toggle)))])
+
 ; ## Notes (FIXME)
 (wk.add [(km :<leader>n {:group :Notes})
          (km :<leader>na {:desc "Add note"} ":Obsidian new<CR>")
@@ -191,11 +203,9 @@
 
 ; ## Terminal
 
-(n.map [:n :t] :<A-/> "<cmd>ToggleTerm direction=horizontal size=20 name=x<CR>"
-       {:desc "Toggle Terminal"})
+(n.map [:n :t] :<A-/> #(Snacks.terminal.toggle) {:desc "Toggle Terminal"})
 
-(n.map [:n :t] :<C-/> "<cmd>ToggleTerm direction=vertical size=60 name=y<CR>"
-       {:desc "Toggle Terminal"})
+(n.map [:n :t] :<C-/> #(Snacks.terminal.toggle) {:desc "Toggle Terminal"})
 
 ; ## Explorer
 (wk.add [(km :<leader>E {:desc "Explore root"}

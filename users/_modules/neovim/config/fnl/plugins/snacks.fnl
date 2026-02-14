@@ -45,6 +45,8 @@
                            :date_format "%R"
                            :more_format " ↓ %d lines "
                            :refresh 50}
+                ; terminal
+                :terminal {}
                 ; picker
                 :picker {:prompt "> "
                          :show_delay 1000
@@ -71,6 +73,9 @@
                             :sections [{:section :header}
                                        {:section :keys :gap 1 :padding 1}
                                        {:section :startup}]}
-                :styles {:input {:border false} :scratch {:border false}}
+                :styles {:input {:border false}
+                         :scratch {:border false}
+                         :split {:position :bottom :height 25 :border false}
+                         :float {:border true :width 0.99 :height 0.99}}
                 :input {:enabled true}
                 :image {:enabled true}}})
