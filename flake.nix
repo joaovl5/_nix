@@ -86,7 +86,8 @@
     fup,
     ...
   } @ inputs:
-    fup.lib.mkFlake {
+    fup.lib.mkFlake (import ./outputs inputs)
+    // fup.lib.mkFlake {
       inherit self inputs; # required
 
       ## supported systems

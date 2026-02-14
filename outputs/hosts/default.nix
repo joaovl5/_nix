@@ -1,0 +1,63 @@
+inputs: let
+  DEFAULT_SYSTEM = "x86_64-linux";
+  DEFAULT_CHANNEL = "unstable";
+
+  DESKTOP_MODULES = [
+    ../../systems/astral
+    ../../users/lav.nix
+  ];
+
+  SERVER_MODULES = [
+    ../../systems/tyrant
+    ../../users/tyrant.nix
+  ];
+
+  _m = obj: obj.nixOsModules.default;
+
+  # will assume hardware/<xxx> module matches <name>
+  _h = name: modules: extra:
+    {
+      ${name}.modules =
+        [
+          "${../../hardware}/${name}"
+        ]
+        ++ modules;
+    }
+    // extra;
+in {
+  hostDefaults = {
+    system = DEFAULT_SYSTEM;
+    channelName = DEFAULT_CHANNEL;
+
+    # for module imports
+    specialArgs = {
+      inherit inputs;
+      system = DEFAULT_SYSTEM;
+    };
+
+    # shared modules
+    modules = with inputs; [
+      (_m disko)
+      (_m sops-nix)
+      ../../_modules/options.nix
+      ../../_modules/secrets.nix
+      ../../hardware/_modules/grub.nix
+      ../../systems/_modules/home-manager.nix
+      ../../systems/_modules/nix.nix
+      ../../systems/_modules/lix.nix
+    ];
+  };
+
+  hosts =
+    ## desktops
+    (_h "lavpc" (DESKTOP_MODULES
+      ++ [
+        ../../systems/_modules/ollama.nix
+      ]) {})
+    // (_h "testvm" DESKTOP_MODULES {})
+    ## servers
+    // (_h "tyrant" SERVER_MODULES {})
+    // (_h "testservervm" SERVER_MODULES {})
+    ## other / special
+    // (_h "iso" [../../systems/iso] {});
+}
