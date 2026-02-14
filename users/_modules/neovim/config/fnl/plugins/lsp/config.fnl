@@ -81,6 +81,7 @@
 
 [(plugin :nvimtools/none-ls.nvim
          {:dependencies [:nvim-lua/plenary.nvim :nvimtools/none-ls-extras.nvim]
+          :event :VeryLazy
           :opts (fn []
                   (let [nu (. (require :null-ls) :builtins)
                         no #(require (.. :none-ls. $1))]
@@ -108,6 +109,7 @@
                                (no :code_actions.eslint_d)]}))})
  (plugin :neovim/nvim-lspconfig
          {:config mk_lsp
+          :event :VeryLazy
           :dependencies [:b0o/schemastore.nvim
-                         (plugin ":artemave/workspace-diagnostics.nvim"
+                         (plugin :artemave/workspace-diagnostics.nvim
                                  {:opts {}})]})]

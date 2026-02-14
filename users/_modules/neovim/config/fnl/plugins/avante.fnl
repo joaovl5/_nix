@@ -8,7 +8,7 @@
                         :keys [(key :<leader>p :<cmd>PasteImage<cr>
                                     {:desc "Paste image from clipboard"})]})]
   (plugin :yetone/avante.nvim
-          {:branch :main
+          {:version false
            :event :VeryLazy
            :dependencies [:nvim-lua/plenary.nvim
                           :MunifTanjim/nui.nvim
@@ -17,4 +17,4 @@
            :build #(vim.cmd :make)
            :opts {:provider :openai
                   :providers {:openai {:model :gpt-5.1}}
-                  :selector {:provider :telescope :provider_opts {}}}}))
+                  :selector {:provider :snacks :provider_opts {}}}}))

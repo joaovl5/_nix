@@ -16,4 +16,4 @@ local function _1_()
   end
   return n.autocmd("FileType", {pattern = {"python"}, callback = _3_})
 end
-return {"AckslD/swenv.nvim", config = _1_}
+return {"AckslD/swenv.nvim", event = "VeryLazy", config = _1_}

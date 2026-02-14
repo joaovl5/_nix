@@ -2,6 +2,7 @@
 
 (plugin :lukas-reineke/indent-blankline.nvim
         {:main :ibl
+         :event :VeryLazy
          :config (fn []
                    (let [ibl (require :ibl)
                          hk (require :ibl.hooks)

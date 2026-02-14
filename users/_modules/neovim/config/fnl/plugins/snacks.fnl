@@ -7,6 +7,8 @@
                :<A-j> (k :list_down)
                :<A-k> (k :list_up)
                :<CR> (k :confirm)
+               :<A-S-k> (k :toggle_hidden)
+               :<A-S-l> (k :toggle_ignored)
                :<C-h> (k :history_back)
                :<C-l> (k :history_forward)
                :<A-w> (k :cycle_win)
@@ -52,7 +54,19 @@
                          :show_delay 1000
                          :layout {:preset :vscode
                                   :layout {:width 0.7 :row 10 :border :none}}
-                         :sources {:files {:exclude [:*.lua]}}
+                         :sources (let [filter {:filter (fn [x _]
+                                                          (not (vim.endswith (or (?. x
+                                                                                     :file)
+                                                                                 "")
+                                                                             :.lua)))}
+                                        exc {:hidden true
+                                             :include [:.env]
+                                             :exclude [:*.lua]
+                                             : filter}]
+                                    {:files exc
+                                     :grep exc
+                                     :explorer exc
+                                     :recent {: filter}})
                          :matcher {:fuzzy true
                                    :smartcase true
                                    :cwd_bonus true

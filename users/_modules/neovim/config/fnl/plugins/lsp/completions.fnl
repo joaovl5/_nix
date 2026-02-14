@@ -49,7 +49,7 @@
                                       :scrolloff 4
                                       :direction_priority [:s :n]
                                       :auto_show true
-                                      :auto_show_delay_ms 0
+                                      :auto_show_delay_ms 5
                                       :draw {:padding 1
                                              :gap 1
                                              :components {:label comp_label
@@ -59,7 +59,20 @@
                                                         2 :kind
                                                         :gap 1}
                                                        {1 :label :gap 1}]}}}
-                  :sources {:default [:lsp :path :snippets :buffer]}
+                  :sources (let [sources [:lsp :path :snippets :buffer]
+                                 debug_sources [:dap
+                                                :lsp
+                                                :path
+                                                :snippets
+                                                :buffer]]
+                             {:default sources
+                              :per_filetype {:dap-repl debug_sources
+                                             :dap-view debug_sources}
+                              :providers {:dap {:name :dap
+                                                :module :blink.compat.sources
+                                                :enabled (fn []
+                                                           (do-req :cmp_dap
+                                                                   :is_dap_buffer))}}})
                   :signature {:enabled true
                               :trigger {:show_on_keyword true
                                         :show_on_insert true}
@@ -74,4 +87,7 @@
                           ;; prefer rust impl
                           :implementation :prefer_rust_with_warning}})))
 
-[{:dir _G.plugin_dirs.blink-cmp :event :VeryLazy :config setup_blink}]
+[{:dir _G.plugin_dirs.blink-cmp
+  :event :InsertEnter
+  :config setup_blink
+  :dependencies [(plugin :saghen/blink.compat {:lazy true})]}]

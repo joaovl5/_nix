@@ -3,4 +3,4 @@ local img_clip = {"HakonHarnes/img-clip.nvim", event = "VeryLazy", opts = {defau
 local function _1_()
   return vim.cmd("make")
 end
-return {"yetone/avante.nvim", branch = "main", event = "VeryLazy", dependencies = {"nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim", "echasnovski/mini.icons", img_clip}, build = _1_, opts = {provider = "openai", providers = {openai = {model = "gpt-5.1"}}, selector = {provider = "telescope", provider_opts = {}}}}
+return {"yetone/avante.nvim", event = "VeryLazy", dependencies = {"nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim", "echasnovski/mini.icons", img_clip}, build = _1_, opts = {provider = "openai", providers = {openai = {model = "gpt-5.1"}}, selector = {provider = "snacks", provider_opts = {}}}, version = false}

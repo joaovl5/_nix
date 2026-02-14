@@ -11,4 +11,4 @@ local function _2_(sel)
 end
 zox_ev_after_action = _2_
 local zoxide_cfg = {prompt_title = "\226\136\159 Zoxide Pick \226\175\190", mappings = {default = {action = zox_ev_action, after_action = zox_ev_after_action}}}
-return {"nvim-telescope/telescope.nvim", dependencies = {"nvim-lua/popup.nvim", "nvim-lua/plenary.nvim", "jvgrootveld/telescope-zoxide"}, opts = {zoxide = zoxide_cfg}}
+return {"nvim-telescope/telescope.nvim", dependencies = {"nvim-lua/popup.nvim", "nvim-lua/plenary.nvim", "jvgrootveld/telescope-zoxide"}, event = "VeryLazy", opts = {zoxide = zoxide_cfg}}

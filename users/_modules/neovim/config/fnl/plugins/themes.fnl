@@ -30,6 +30,7 @@
                                 :oasis-rose]}])
 
 (icollect [_ t (ipairs _G.Config.themes)]
-  (plugin t.source {:lazy false
+  (plugin t.source {:lazy true
+                    :priority 1000
                     :config #(when (not (nil? t.post_add))
                                t.post_add)}))

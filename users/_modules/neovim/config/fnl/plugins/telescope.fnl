@@ -13,4 +13,5 @@
           {:dependencies [:nvim-lua/popup.nvim
                           :nvim-lua/plenary.nvim
                           :jvgrootveld/telescope-zoxide]
+           :event :VeryLazy
            :opts {:zoxide zoxide_cfg}}))

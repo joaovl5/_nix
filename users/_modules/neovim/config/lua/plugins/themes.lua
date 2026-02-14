@@ -22,7 +22,7 @@ for _, t in ipairs(_G.Config.themes) do
       return nil
     end
   end
-  val_28_ = {t.source, config = _4_, lazy = false}
+  val_28_ = {t.source, lazy = true, priority = 1000, config = _4_}
   if (nil ~= val_28_) then
     i_27_ = (i_27_ + 1)
     tbl_26_[i_27_] = val_28_
