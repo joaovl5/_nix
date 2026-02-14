@@ -57,12 +57,9 @@
     #   force = true;
     # };
 
-    programs.neovim = let
-    in {
+    programs.neovim = {
       enable = true;
-      initLua = let
-      in
-        lib.mkOrder 1001 ''
+      initLua = lib.mkOrder 1001 ''
           _G.plugin_dirs = {}
 
           ${add_rtp_lines}

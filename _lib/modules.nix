@@ -5,7 +5,7 @@ let
     map
     (module: module.${attr})
     (builtins.filter
-      (module: !isNull (module.${attr} or null))
+      (module: (module.${attr} or null) != null)
       modules);
   combine_module_attrs = modules: attr: {
     imports = filter_module_attrs modules attr;

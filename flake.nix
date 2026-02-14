@@ -76,11 +76,9 @@
 
   outputs = {
     self,
-    nixpkgs,
     disko,
     sops-nix,
     deploy-rs,
-    hm,
     fup,
     ...
   } @ inputs:

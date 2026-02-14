@@ -139,7 +139,16 @@
              :<cmd>SmartBackspaceToggle<CR>)
          (km :<leader>_t {:desc "Choose themes"} :<cmd>Themery<CR>)])
 
-; ## Keymaps
+; ## Diagnostics
+; (more on plugins/editor/actions.fnl)
+(wk.add [(km :<leader>x {:group :Diagnostics})
+         (km :<leader>xp {:desc "Populate diagnostics"}
+             (fn []
+               (each [_ client (ipairs (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)}))]
+                 (let [worksp (require :workspace-diagnostics)]
+                   (worksp.populate_workspace_diagnostics client 0)))))])
+
+; ## Notes (FIXME)
 (wk.add [(km :<leader>n {:group :Notes})
          (km :<leader>na {:desc "Add note"} ":Obsidian new<CR>")
          (km :<leader>nn {:desc "Quick switch"} ":Obsidian quick_switch<CR>")

@@ -8,7 +8,7 @@ in {
   nix = {
     generateRegistryFromInputs = lib.mkDefault true;
     daemonCPUSchedPolicy = lib.mkDefault (
-      if (cfg.is_server)
+      if cfg.is_server
       then "batch"
       else "idle"
     );

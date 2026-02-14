@@ -1,4 +1,4 @@
-{...}: {
+_: {
   ## WIP
   # easyeffects
   # notif

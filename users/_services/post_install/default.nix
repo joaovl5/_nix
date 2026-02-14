@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.my_nix;
-  username = cfg.username;
+  inherit (cfg) username;
   user_home = config.users.users.${username}.home;
 
   install_script = pkgs.writeScript "my_post_install" ''

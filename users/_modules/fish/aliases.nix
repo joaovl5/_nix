@@ -1,5 +1,5 @@
 {
-  hm = {...}: {
+  hm = _: {
     /*
     # navigation
     alias .. "cd .."

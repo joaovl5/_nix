@@ -13,7 +13,7 @@
     public_data.ssh_key
   ];
 
-  user = cfg.user;
+  inherit (cfg) user;
 in {
   # ssh daemon
   services.openssh = {

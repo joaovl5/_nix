@@ -5,7 +5,7 @@
     ...
   }: let
     cfg = config.my_nix;
-    secrets = config.sops.secrets;
+    inherit (config.sops) secrets;
     home_path = config.users.users.${cfg.username}.home;
     sync_dir = "${home_path}/${cfg.shared_data_dirname}";
   in {

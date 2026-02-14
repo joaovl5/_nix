@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # this is lavpc-only, make conditional by hosts later
   monitor = let
     main = "DP-4";

@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # Kernel Params and Options
   boot.kernelParams = [
     # make it harder to influence slab cache layout

@@ -1,5 +1,5 @@
 {
-  hm = {...}: {
+  hm = _: {
     programs.lazygit = {
       enable = true;
       settings = {

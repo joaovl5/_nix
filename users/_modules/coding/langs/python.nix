@@ -1,5 +1,5 @@
 {
-  nx = {...}: {
+  nx = _: {
     programs.nix-ld.enable = true;
   };
   hm = {pkgs, ...}: {

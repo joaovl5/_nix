@@ -2,7 +2,7 @@ let
   params = {primary_device = "/dev/sda";};
   disko_cfg = ../_disko/testservervm.nix;
 in
-  {...}: (
+  _: (
     import disko_cfg params
     // {
       boot.loader.grub.enable = false;

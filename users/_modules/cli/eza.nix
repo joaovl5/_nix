@@ -1,5 +1,5 @@
 {
-  hm = {...}: {
+  hm = _: {
     programs.eza = {
       enable = true;
       git = true;

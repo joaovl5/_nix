@@ -20,5 +20,19 @@
                  :notify {:enabled true :on_empty true}
                  :backend_opts {:header_lines_to_remove 4
                                 :args [:--line-numbers]}}})
+ ; trouble - see todo/errors/etc
+ (plugin :folke/trouble.nvim
+         {:cmd :Trouble
+          :dependencies []
+          :opts {}
+          :keys [(key :<leader>xx "<cmd>Trouble diagnostics toggle<cr>"
+                      {:desc "Trouble (global)"})
+                 (key :<leader>xX
+                      "<cmd>Trouble diagnostics toggle filter.buf=0<cr>"
+                      {:desc "Trouble (buffer)"})
+                 (key :<leader>xl "<cmd>Trouble loclist toggle<cr>"
+                      {:desc "Trouble locations"})
+                 (key :<leader>xl "<cmd>Trouble qflist toggle<cr>"
+                      {:desc "Quick fixes"})]})
  ; interactive search+replace
  (plugin :MagicDuck/grug-far.nvim {:opts {}})]

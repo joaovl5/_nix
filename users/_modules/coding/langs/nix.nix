@@ -9,6 +9,9 @@
       # lsp
       nixd
       nil
+      # linter
+      statix
+      deadnix
       # formatter
       alejandra
     ];

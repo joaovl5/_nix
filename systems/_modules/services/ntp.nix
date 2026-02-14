@@ -1,4 +1,4 @@
-{...}: {
+_: {
   services.timesyncd.enable = false;
   services.ntp.enable = false;
   services.chrony = {

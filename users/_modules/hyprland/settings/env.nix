@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # env = {
   #   # Wayland/System
   #   ## xdg stuff

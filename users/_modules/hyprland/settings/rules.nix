@@ -1,4 +1,4 @@
-{...}: {
+_: {
   windowrule = [
     # ignore maximize requests from apps
     "match:class *, suppress_event maximize"

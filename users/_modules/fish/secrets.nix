@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  secrets = nixos_config.sops.secrets;
+  inherit (nixos_config.sops) secrets;
   mk_secret = name: path: ''set -gx ${name} "$(cat ${path})"'';
   # var = name: value: "set -gx ${name} ${lib.escapeShellArg value}";
 in ''

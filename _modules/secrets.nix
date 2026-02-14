@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  mysecrets = inputs.mysecrets;
+  inherit (inputs) mysecrets;
   cfg = config.my_nix;
 in {
   imports = [

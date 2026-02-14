@@ -60,9 +60,7 @@ in {
 
   home-manager.users.${cfg.username} = {config, ...}: {
     imports =
-      module_imports.hm
-      ++ [
-      ];
+      module_imports.hm;
 
     home.stateVersion = "23.11";
 

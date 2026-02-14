@@ -96,7 +96,7 @@ in {
         # flushBeforeStage2 = true;
         ssh = {
           enable = true;
-          port = luks_cfg.ssh.port;
+          inherit (luks_cfg.ssh) port;
           authorizedKeys = luks_cfg.ssh.authorized_keys;
           # Generated on first boot via system.activationScripts.generateInitrdHostKey
           hostKeys = [ssh_initrd_key_path];

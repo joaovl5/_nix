@@ -100,19 +100,27 @@ end
 n.map({"i"}, "<C-h>", _14_)
 wk.add({km("<leader>m", {group = "Map"}), km("<leader>mm", {desc = "Toggle"}, "<cmd>lua MiniMap.toggle()<CR>"), km("<leader>mf", {desc = "Focus"}, "<cmd>lua MiniMap.toggle_focus()<CR>"), km("<leader>mr", {desc = "Refresh"}, "<cmd>lua MiniMap.refresh()<CR>")})
 wk.add({km("<leader>_", {group = "Other"}), km("<leader>_b", {desc = "Toggle Smartbackspace"}, "<cmd>SmartBackspaceToggle<CR>"), km("<leader>_t", {desc = "Choose themes"}, "<cmd>Themery<CR>")})
+local function _15_()
+  for _, client in ipairs(vim.lsp.get_clients({bufnr = vim.api.nvim_get_current_buf()})) do
+    local worksp = require("workspace-diagnostics")
+    worksp.populate_workspace_diagnostics(client, 0)
+  end
+  return nil
+end
+wk.add({km("<leader>x", {group = "Diagnostics"}), km("<leader>xp", {desc = "Populate diagnostics"}, _15_)})
 wk.add({km("<leader>n", {group = "Notes"}), km("<leader>na", {desc = "Add note"}, ":Obsidian new<CR>"), km("<leader>nn", {desc = "Quick switch"}, ":Obsidian quick_switch<CR>"), km("<leader>n/", {desc = "Grep notes"}, ":Obsidian search<CR>"), km("<leader>nt", {desc = "Grep tags"}, ":Obsidian tags<CR>"), km("<leader>nr", {desc = "Rename"}, ":Obsidian rename<CR>"), km("<leader>nf", {desc = "Follow link"}, ":Obsidian follow_link<CR>"), km("<leader>nb", {desc = "Backlinks"}, ":Obsidian backlinks<CR>"), km("<leader>nl", {desc = "Links"}, ":Obsidian links<CR>"), km("<leader>nt", {desc = "Table of contents"}, ":Obsidian toc<CR>"), km("<leader>nP", {desc = "Paste image"}, ":Obsidian paste_img<CR>"), km("<leader>nx", {desc = "Extract into note", mode = {"v"}}, ":Obsidian extract_note<CR>"), km("<leader>na", {desc = "Link new note", mode = {"v"}}, ":Obsidian link_new<CR>"), km("<leader>nl", {desc = "Link a note", mode = {"v"}}, ":Obsidian link<CR>")})
 n.map({"n", "i"}, "<A-;>", ":Obsidian toggle_checkbox<CR>")
 n.map({"n", "t"}, "<C-/>", "<cmd>ToggleTerm direction=horizontal size=20<CR>", {desc = "Toggle Terminal"})
 n.map({"n", "t"}, "<A-/>", "<cmd>ToggleTerm direction=horizontal size=20<CR>", {desc = "Toggle Terminal"})
 n.map({"n", "t"}, "<A-]>", "<cmd>ToggleTerm direction=vertical size=60<CR>", {desc = "Toggle Terminal"})
 n.map({"n", "t"}, "<C-]>", "<cmd>ToggleTerm direction=vertical size=60<CR>", {desc = "Toggle Terminal"})
-local function _15_()
+local function _16_()
   return MiniFiles.open()
 end
-local function _16_()
+local function _17_()
   return MiniFiles.open(vim.api.nvim_buf_get_name(0))
 end
-wk.add({km("<leader>E", {desc = "Explore root"}, _15_), km("<leader>e", {desc = "Explore at file"}, _16_)})
+wk.add({km("<leader>E", {desc = "Explore root"}, _16_), km("<leader>e", {desc = "Explore at file"}, _17_)})
 _G.MiniFilesMappings = {close = "q", go_in = "l", go_in_plus = "L", go_out = "h", go_out_plus = "H", mark_goto = "'", mark_set = "m", reset = "<BS>", reveal_cwd = "@", show_help = "?", synchronize = "=", trim_left = "<", trim_right = ">"}
 local show_dotfiles = false
 local function minifiles_filter(f)
@@ -136,8 +144,8 @@ local function open_sys()
   local path = fs_entry.path
   return vim.ui.open(path)
 end
-local function _18_(args)
+local function _19_(args)
   local buf_id = args.data.buf_id
   return wk.add({km("<leader>bh", {desc = "Toggle Hidden Files", buffer = buf_id}, toggle_hidden), km("<leader>bS", {desc = "Make focused dir CWD", buffer = buf_id}, set_cwd), km("<leader>bO", {desc = "Open w/ system handler", buffer = buf_id}, open_sys)})
 end
-return n.autocmd("User", {pattern = "MiniFilesBufferCreate", callback = _18_})
+return n.autocmd("User", {pattern = "MiniFilesBufferCreate", callback = _19_})

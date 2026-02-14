@@ -15,12 +15,16 @@
                                     {:python {:pythonPath path}})))
       (client.notify :workspace/didChangeConfiguration {:settings nil}))))
 
+(fn populate_diagnostics [client bufnr]
+  (do-req :workspace-diagnostics :populate_workspace_diagnostics client bufnr))
+
 (fn do_basedpyright_attach [client bufnr]
   (n.usercmd bufnr :LspPyrightOrganizeImports {:desc "Organize Imports"}
              #(client:exec_cmd {:command :basedpyright.organizeimports
                                 :arguments {vim.uri_from_bufnr bufnr}}))
   (n.usercmd bufnr :LspPyrightSetPythonPath
-             {:desc "Set Python Path" :nargs 1 :complete :file} set_python_path))
+             {:desc "Set Python Path" :nargs 1 :complete :file} set_python_path)
+  (populate_diagnostics client bufnr))
 
 (fn get_fennel_root_dir [bufnr on_dir]
   (let [fname (vim.api.nvim_buf_get_name bufnr)
@@ -48,7 +52,16 @@
                              :root_dir get_fennel_root_dir}
                  :jsonls {:cmd [:jsonls]
                           :settings {:json {:schemas (schemastore.json.schemas)}}}
-                 :nixd {:cmd [:nixd]}
+                 :nixd {:cmd [:nixd]
+                        :settings {:nixd {:nixpkgs {:expr "import <nixpkgs> {}"}
+                                          :formatting {:command [:alejandra]}
+                                          :options {:home-manager {;; In case of using home-manager standalone, replace to:
+                                                                   ;;  "expr": "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.<name>.options"
+                                                                   :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.<name>.options.home-manager.users.type.getSubOptions []"}
+                                                    :nixos {:expr (let [nixos_hostname :lavpc]
+                                                                    (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
+                                                                        nixos_hostname
+                                                                        :.options))}}}}}
                  :taplo {:cmd [:taplo]}
                  :marksman {:cmd [:marksman]}
                  :stylua {:cmd [:stylua]}
@@ -62,7 +75,25 @@
     (each [server config (pairs servers)]
       (vim.lsp.config server config)
       (vim.lsp.config server (blink.get_lsp_capabilities))
+      (vim.lsp.config server {:on_attach populate_diagnostics})
       (vim.lsp.enable server))))
 
-(plugin :neovim/nvim-lspconfig {:dependencies [:b0o/schemastore.nvim]
-                                :config mk_lsp})
+[(plugin :nvimtools/none-ls.nvim
+         {:dependencies [:nvim-lua/plenary.nvim :nvimtools/none-ls-extras.nvim]
+          :opts (fn []
+                  (let [nu (. (require :null-ls) :builtins)
+                        no #(require (.. :none-ls. $1))]
+                    {:sources [; nix 
+                               nu.formatting.alejandra
+                               nu.diagnostics.statix
+                               nu.code_actions.statix
+                               nu.diagnostics.deadnix
+                               ; js-like
+                               nu.formatting.prettierd
+                               (no :formatting.jq)
+                               (no :diagnostics.eslint_d)
+                               (no :code_actions.eslint_d)]}))})
+ (plugin :neovim/nvim-lspconfig
+         {:dependencies [:b0o/schemastore.nvim
+                         (plugin ":artemave/workspace-diagnostics.nvim"
+                                 {:opts {}})]} :config mk_lsp)]
