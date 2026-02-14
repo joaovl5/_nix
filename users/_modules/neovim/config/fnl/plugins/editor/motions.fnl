@@ -2,22 +2,25 @@
 
 [; relative line nums will only include digits 1 throught 5 for comfort)
  (plugin :mluders/comfy-line-numbers.nvim {:opts true})
- ; leap motions
- (plugin "https://codeberg.org/andyg/leap.nvim"
-         {:dependencies [:tpope/vim-repeat]
-          :config (fn []
-                    (let [leap (require :leap)
-                          leap_user (require :leap.user)]
-                      (set leap.opts.preview
-                           ; preview filter, reduce visual noise
-                           (fn [ch0 ch1 ch2]
-                             (not (or (ch1:match "%s")
-                                      (and (ch0:match "%a") (ch1:match "%a")
-                                           (ch2:match "%a"))))))
-                      (set leap.opts.equivalence_classes
-                           [" \t\r\n" "([{" ")]}" "'\"`"])
-                      (leap_user.set_repeat_keys :<enter> :<backspace>)))})
+ ; flash
+ (plugin :folke/flash.nvim
+         {:event :VeryLazy
+          :opts {:labels :fhdjskalgrueiwoqptvnmb
+                 :search {:multi_window false
+                          :forward true
+                          :wrap true
+                          :mode :exact}
+                 :jump {:nohlsearch true :autojump true}
+                 :label {:uppercase false
+                         :distance true
+                         :rainbow {:enabled true :shade 5}}
+                 :highlight {:backdrop true}
+                 :modes {:treesitter {:labels :fhdjskalgrueiwoqptvnmb
+                                      :highlight {:backdrop true
+                                                  :matches false}}}}})
  ; spider (improved w,e,b motions)
  (plugin :chrisgrieser/nvim-spider {:opts true})
+ ; monkey-like crazyness
+ (plugin :aaronik/treewalker.nvim {:opts {}})
  ; improved insert mode exp
  (plugin :sontungexpt/bim.nvim {:opts true})]

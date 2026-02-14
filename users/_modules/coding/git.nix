@@ -1,12 +1,8 @@
 {
-  hm = {
-    pkgs,
-    nixos_config,
-    ...
-  }: let
+  hm = {nixos_config, ...}: let
     cfg = nixos_config.my_nix;
   in {
-    # TODO add merging stuff
+    # TODO: ^1 add merging stuff
     programs.git = {
       enable = true;
       settings = {

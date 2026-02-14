@@ -1,9 +1,5 @@
 {
-  hm = {
-    lib,
-    pkgs,
-    ...
-  }: {
+  hm = _: {
     programs.zellij = {
       enable = true;
     };

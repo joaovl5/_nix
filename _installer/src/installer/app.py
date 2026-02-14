@@ -2,7 +2,6 @@ from pathlib import Path
 from cyclopts import App
 from rich.console import Console
 
-from coisas.cli import SshCLI
 from installer.install import NixOSInstaller, SecretsEncryptionParams
 
 app = App(

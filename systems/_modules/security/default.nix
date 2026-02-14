@@ -1,6 +1,6 @@
 {lib, ...}: {
   imports = [
-    # todo test later
+    # TODO: ^0 test later
     # ./kernel.nix
   ];
 

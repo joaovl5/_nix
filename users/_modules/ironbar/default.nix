@@ -18,11 +18,7 @@ in {
 
     environment.systemPackages = with pkgs; [ironbar];
   };
-  hm = {
-    pkgs,
-    lib,
-    ...
-  } @ args: let
+  hm = args: let
     # ironbar_pkg = pkgs.${ironbar_pkg_name};
     ironbar_cfg = import ./config.nix args;
   in {

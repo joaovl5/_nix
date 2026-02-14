@@ -26,7 +26,7 @@ in {
         };
         services.technitium_dns = {
           loadBalancer.servers = [
-            {url = "http://${host_ip}:${builtins.toString http_port}";}
+            {url = "http://${host_ip}:${toString http_port}";}
           ];
         };
       }))
@@ -38,7 +38,7 @@ in {
         };
         services.nextcloud = {
           loadBalancer.servers = [
-            {url = "http://${host_ip}:${builtins.toString http_port}";}
+            {url = "http://${host_ip}:${toString http_port}";}
           ];
         };
       }))

@@ -45,6 +45,7 @@
                                                                      :diagnosticMode :workspace
                                                                      :reportUnknownParameterType false
                                                                      :reportExplicitAny false}}}}
+                 :ruff {:server_capabilities {:hoverProvider false}}
                  :lua_ls {:cmd [:lua-language-server]
                           :settings {:Lua {:completion {:callSnippet :Replace}}}}
                  :fennel_ls {:cmd [:fennel-ls]
@@ -62,7 +63,7 @@
                                                                     (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
                                                                         nixos_hostname
                                                                         :.options))}}}}}
-                 :taplo {:cmd [:taplo]}
+                 ; :taplo {:cmd [:taplo]}
                  :marksman {:cmd [:marksman]}
                  :stylua {:cmd [:stylua]}
                  :yamlls {:cmd [:yaml-language-server]}
@@ -83,17 +84,30 @@
           :opts (fn []
                   (let [nu (. (require :null-ls) :builtins)
                         no #(require (.. :none-ls. $1))]
-                    {:sources [; nix 
+                    {:sources [; general 
+                               nu.diagnostics.gitleaks
+                               nu.diagnostics.proselint
+                               nu.hover.dictionary
+                               ; dockerfile
+                               nu.diagnostics.hadolint
+                               ; .sh
+                               nu.hover.printenv
+                               ; fish
+                               nu.diagnostics.fish
+                               ; nix 
                                nu.formatting.alejandra
                                nu.diagnostics.statix
                                nu.code_actions.statix
                                nu.diagnostics.deadnix
+                               ; python
+                               ;; TODO: ^0 setup mypy to use it : nu.diagnostics.mypy
                                ; js-like
                                nu.formatting.prettierd
                                (no :formatting.jq)
                                (no :diagnostics.eslint_d)
                                (no :code_actions.eslint_d)]}))})
  (plugin :neovim/nvim-lspconfig
-         {:dependencies [:b0o/schemastore.nvim
+         {:config mk_lsp
+          :dependencies [:b0o/schemastore.nvim
                          (plugin ":artemave/workspace-diagnostics.nvim"
-                                 {:opts {}})]} :config mk_lsp)]
+                                 {:opts {}})]})]

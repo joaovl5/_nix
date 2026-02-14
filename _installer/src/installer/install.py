@@ -6,9 +6,9 @@ from uuid import uuid4
 from attrs import define, field
 from rich.console import Console
 
-from coisas.cli import PanelWriter, SshCLI
+from coisas.cli import SshCLI
 
-# TODO move all to arguments
+# TODO: move all to arguments
 AGE_KEYFILE: str = "key.txt"
 GEN_SSH_KEY_INITRD: bool = True
 GEN_SSH_KEY_INITRD_NAME: str = "ssh_host_ed25519_key"
@@ -124,7 +124,7 @@ class NixOSInstaller:
             "sudo",
             "chown",
             "-R",
-            f"{self._host_user}:users",  # TODO logic for getting group later
+            f"{self._host_user}:users",  # TODO: logic for getting group later
             path,
         ]
         _ = self._c.run_command(
@@ -133,7 +133,7 @@ class NixOSInstaller:
 
     def _handle_keys(self) -> None:
         # for now, leaves hardcoded to copy user's ssh/age keys
-        # TODO create dynamic key gen system
+        # TODO: create dynamic key gen system
 
         # use a tmp dir at destination to avoid
         # permission errors w/ rsync, then move later
@@ -290,7 +290,7 @@ class NixOSInstaller:
         self._ensure_dir("/mnt/root", "/mnt/root", sudo=True)
         _ = self._c.run_command(
             command=_facter_cmd,
-            description=f"Running nixos-facter",
+            description="Running nixos-facter",
         )
 
         # 2) adding facter config to git
@@ -413,7 +413,7 @@ class NixOSInstaller:
         self._handle_copy_keys()
         self._handle_gen_ssh_keys()
         self._handle_install()
-        # !!!!!!!! TODO !!!!!!!!!!
+        # !!!!!!!! TODO: !!!!!!!!!!
         # !! COPY KEYS TO /root/*** FOR POST INSTALL SERVICE
         # clone repositories
         # handle disko

@@ -2,15 +2,13 @@
   hm = {
     pkgs,
     lib,
-    config,
-    nixos_config,
     ...
-  }: let
-    cfg = nixos_config.my_nix;
-    flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/_modules/yazi";
-    configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
-  in {
+  }:
+  # cfg = nixos_config.my_nix;
+  # flake_path = cfg.flake_location;
+  # here = assert (flake_path != null); "${flake_path}/users/_modules/yazi";
+  # configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
+  {
     programs.yazi = {
       enable = true;
       package = pkgs.yazi.override {_7zz = pkgs._7zz-rar;};

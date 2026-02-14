@@ -47,7 +47,7 @@ lib.mkMerge [
     };
 
     input = {
-      # todo use cfg
+      # TODO: ^0 use cfg
       kb_layout = "us";
       # us intl layout, avoids deadkeys, prefers compose key
       # more info on compose keys: http://xahlee.info/kbd/keyboard_whats_alt_graph__compose__dead_key.html

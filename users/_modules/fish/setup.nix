@@ -4,11 +4,7 @@
     programs.fish.enable = true;
   };
 
-  hm = {
-    config,
-    lib,
-    ...
-  } @ args: {
+  hm = {lib, ...} @ args: {
     programs.fish = {
       enable = true;
       shellInit = ''

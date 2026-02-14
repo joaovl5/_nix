@@ -1,5 +1,4 @@
 {
-  pkgs,
   config,
   lib,
   ...
@@ -9,7 +8,7 @@
   cfg = config.my_nix.technitium_dns;
   mount_path = "${data_dir}/technitium";
 in {
-  # TODO: make the bug of ther dns make dynamic config nixos valeu
+  # TODO: ^2 make the bug of ther dns make dynamic config nixos valeu
   options.my_nix.technitium_dns = {
     enable =
       mkEnableOption "Enable Technitium DNS"

@@ -1,11 +1,5 @@
 {
-  hm = {
-    pkgs,
-    nixos_config,
-    ...
-  }: let
-    cfg = nixos_config.my_nix;
-  in {
+  hm = {pkgs, ...}: {
     programs.vscode = {
       enable = true;
       package = pkgs.vscode.fhs;

@@ -8,28 +8,37 @@
     stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-25.11&shallow=1";
     unstable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
     nixpkgs.follows = "unstable";
-    nur.url = "git+https://github.com/nix-community/NUR?shallow=1";
-    nur.inputs.nixpkgs.follows = "unstable";
-
+    nur = {
+      url = "git+https://github.com/nix-community/NUR?shallow=1";
+      inputs.nixpkgs.follows = "unstable";
+    };
     # ---------------
     # core
     # ---------------
     ## home manager
-    hm.url = "git+https://github.com/nix-community/home-manager?shallow=1";
-    hm.inputs.nixpkgs.follows = "unstable";
+    hm = {
+      url = "git+https://github.com/nix-community/home-manager?shallow=1";
+      inputs.nixpkgs.follows = "unstable";
+    };
     ## flake utils lib
     fup.url = "git+https://github.com/gytis-ivaskevicius/flake-utils-plus?shallow=1";
     ## disko
-    disko.url = "git+https://github.com/nix-community/disko?shallow=1";
-    disko.inputs.nixpkgs.follows = "nixpkgs";
+    disko = {
+      url = "git+https://github.com/nix-community/disko?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## deployment
     deploy-rs.url = "git+https://github.com/serokell/deploy-rs?shallow=1";
     ## secrets management
-    sops-nix.url = "git+https://github.com/Mic92/sops-nix?shallow=1";
-    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix = {
+      url = "git+https://github.com/Mic92/sops-nix?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## private secrets repository
-    mysecrets.url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
-    mysecrets.flake = false;
+    mysecrets = {
+      url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
+      flake = false;
+    };
 
     # ---------------
     # pkgs
@@ -37,14 +46,9 @@
     ## neovim
     neovim.url = "git+https://github.com/nix-community/neovim-nightly-overlay?shallow=1";
     ## hyprland
-    # hyprland = {
-    #   url = "github:hyprwm/Hyprland?";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     hyprland-plugins = {
       url = "git+https://github.com/hyprwm/hyprland-plugins?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
-      # inputs.hyprland.follows = "hyprland";
     };
     ## niri
     niri = {
@@ -112,14 +116,14 @@
         stable.input = inputs.stable;
         unstable = {
           input = inputs.unstable;
-          overlaysBuilder = channels: [
-            (final: prev: {
-              # inherit
-              #   (channels.stable)
-              #   pipewire
-              #   ;
-            })
-          ];
+          # overlaysBuilder = channels: [
+          #   (final: prev: {
+          #     # inherit
+          #     #   (channels.stable)
+          #     #   pipewire
+          #     #   ;
+          #   })
+          # ];
         };
       };
 
@@ -220,7 +224,7 @@
       # ---------------
       checks =
         builtins.mapAttrs
-        (system: deployLib: deployLib.deployChecks self.deploy)
+        (_system: deployLib: deployLib.deployChecks self.deploy)
         deploy-rs.lib;
 
       # ---------------

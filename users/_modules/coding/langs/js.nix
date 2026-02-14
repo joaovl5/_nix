@@ -3,7 +3,7 @@
     node_pkg = pkgs.nodejs;
   in {
     # programs.npm = {
-    # todo
+    # TODO: ^1
     #   enable = true;
     #   package = node_pkg;
     #   settings = {

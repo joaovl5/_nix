@@ -4,11 +4,11 @@
   pkgs,
   ...
 } @ args: let
-  inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
+  inherit (lib) mkOption mkEnableOption types;
 
   public_data = import ../../_modules/public.nix args;
   default_ssh_authorized_keys = [
-    # TODO all host keys should go here
+    # all host keys should go here
     # - git_ro_key
     # - servers/etc
     public_data.ssh_key

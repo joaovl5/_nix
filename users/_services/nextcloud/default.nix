@@ -1,5 +1,4 @@
 {
-  pkgs,
   config,
   lib,
   ...
@@ -9,7 +8,7 @@
   cfg = config.my_nix.nextcloud;
   mount_path = "${data_dir}/nextcloud";
 in {
-  # TODO: make the bug of ther dns make dynamic config nixos valeu
+  # TODO: ^2 make the bug of ther dns make dynamic config nixos valeu
   options.my_nix.nextcloud = {
     enable =
       mkEnableOption "Enable Nextcloud"

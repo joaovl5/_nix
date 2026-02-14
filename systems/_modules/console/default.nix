@@ -19,7 +19,7 @@ in {
       greetings.generate_greeting
       {
         system_title = config.my_system.title;
-        show_qr = true; # todo
+        show_qr = true; # TODO: ^0
       };
   in {
     console = {

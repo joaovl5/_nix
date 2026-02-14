@@ -4,7 +4,9 @@
         {:opts {:formatters {:prettierd {:command :prettierd}
                              :fnlfmt {:command :fnlfmt}
                              :alejandra {:command :alejandra}}
-                :formatters_by_ft {:python [:ruff_format]
+                :formatters_by_ft {:python [:ruff_fix
+                                            :ruff_format
+                                            :ruff_organize_imports]
                                    :typescript [:prettierd]
                                    :javascript [:prettierd]
                                    :typescriptreact [:prettierd]

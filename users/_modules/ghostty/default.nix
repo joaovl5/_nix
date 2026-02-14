@@ -1,9 +1,5 @@
 {
-  hm = {
-    pkgs,
-    config,
-    ...
-  }: {
+  hm = {pkgs, ...}: {
     programs.ghostty = {
       enable = true;
       package = pkgs.ghostty;

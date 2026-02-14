@@ -106,7 +106,7 @@ in
         "${mod}, X, exec, ${quick_term}"
         ## File Explorer
         "${mod}, T, exec, ${explorer}"
-        ## Menus - todo
+        ## Menus
         "${mod}, SPACE, exec, ${launcher.menu}"
         "${mod}, C, exec, ${launcher.calc}"
         "${mod}, ${kc_semicolon}, exec, ${launcher.search}"

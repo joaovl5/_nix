@@ -8,7 +8,6 @@ Plankton is meant to be a slimmer system for containers and other
 applications requiring lightweight resource usage
 */
 {
-  pkgs,
   config,
   lib,
   ...

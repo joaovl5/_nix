@@ -34,13 +34,24 @@
 (n.map [:x] "<" :<gv {:noremap true})
 
 ; ## Motions
-; leaps
-(n.map [:n :x :o] :f "<Plug>(leap)")
-(n.map [:n :x :o] :F "<Plug>(leap-from-window)")
+; flash
+(n.map [:n :x :o] :s (fn [] (do-req :flash :jump)))
+(n.map [:n :x :o] :S (fn [] (do-req :flash :treesitter)))
+(n.map [:o] :r (fn [] (do-req :flash :remote) {:desc "Remote flash"}))
 ; nvim-spider
 (n.map [:n :x :o] :w (fn [] (do-req :spider :motion :w)))
 (n.map [:n :x :o] :e (fn [] (do-req :spider :motion :e)))
 (n.map [:n :x :o] :b (fn [] (do-req :spider :motion :b)))
+; treewalker
+(n.map [:n :x] "<A-[>" "<cmd>Treewalker Left<cr>")
+(n.map [:n :x] "<A-]>" "<cmd>Treewalker Right<cr>")
+(n.map [:n :x] :<A-k> "<cmd>Treewalker Up<cr>")
+(n.map [:n :x] :<A-j> "<cmd>Treewalker Down<cr>")
+;; swaps
+(n.map [:n :x] "<A-S-[>" "<cmd>Treewalker SwapLeft<cr>")
+(n.map [:n :x] "<A-S-]>" "<cmd>Treewalker SwapRight<cr>")
+(n.map [:n :x] :<A-K> "<cmd>Treewalker SwapUp<cr>")
+(n.map [:n :x] :<A-J> "<cmd>Treewalker SwapDown<cr>")
 
 ; # LEADER
 
@@ -56,7 +67,9 @@
 (wk.add [(km :<leader>w {:group :Window})
          (km :<leader>wr {:desc "Resize to default!!"}
              "<Cmd>lua MiniMisc.resize_window()<CR>")
-         (km :<leader>wz {:desc "Zoom Toggle"} "<Cmd>lua MiniMisc.zoom()<CR>")
+         (km :<leader>wz {:desc "Zen mode"}
+             (fn []
+               (do-req :zen-mode :toggle {})))
          (km :<leader>wd {:desc "Quit window"} :<Cmd>quit<CR>)
          (km :<leader>wD {:desc "Quit all windows"} :<Cmd>quitall<CR>)
          (km :<leader>ww {:desc "Alternate window buffers"} "<Cmd>b#<CR>")
@@ -65,26 +78,32 @@
 
 ; ## Buffer
 (wk.add [(km :<leader>b {:group :Buffer})
+         (km :<leader>bb {:desc "Toggle scratch"} #(Snacks.scratch))
+         (km :<leader>bB {:desc "Pick scratch"} #(Snacks.scratch.select))
          (km :<leader>bd {:desc "Delete buffer"}
              "<cmd>lua MiniBufremove.delete()<CR>")])
 
 ; ## Fuzzy stuff
 (wk.add [(km :<leader>f {:group :Fuzzy})
          (km "<leader>f:" {:desc "':' history"}
-             "<Cmd>Pick history scope=\":\"<CR>")
-         (km :<leader>fb {:desc :Buffers} "<Cmd>Telescope buffers<CR>")
-         (km :<leader>fd {:desc :Diagnostics} "<Cmd>Telescope diagnostics<CR>")
-         (km :<leader>fh {:desc "Help Tags"} "<Cmd>Telescope help_tags<CR>")
-         (km :<leader>fH {:desc :Highlights} "<Cmd>Telescope highlights<CR>")
+             #(Snacks.picker.command_history))
+         (km :<leader>fb {:desc :Buffers} #(Snacks.picker.buffers))
+         (km :<leader>fr {:desc :Recent} #(Snacks.picker.recent))
+         (km :<leader>fp {:desc :Projects} #(Snacks.picker.projects))
+         (km :<leader>fd {:desc :Diagnostics} #(Snacks.picker.diagnostics))
+         (km :<leader>fh {:desc "Help Tags"} #(Snacks.picker.help))
+         (km :<leader>fm {:desc "Man pages"} #(Snacks.picker.man))
+         (km :<leader>fH {:desc :Highlights} #(Snacks.picker.highlights))
          (km :<leader>fs {:desc :Symbols}
-             "<Cmd>Telescope lsp_workspace_symbols<CR>")
-         (km :<leader><leader> {:desc "Fuzzy Files"}
-             "<Cmd>Telescope find_files<CR>")
+             #(Snacks.picker.lsp_workspace_symbols))
+         (km :<leader>fS {:desc "Symbols (buffer)"}
+             #(Snacks.picker.lsp_symbols))
+         (km :<leader><leader> {:desc "Fuzzy Files"} #(Snacks.picker.smart))
          (km :<leader>. {:desc "Fuzzy Files (buffer dir)"}
              (fn []
                (let [buf_name (vim.api.nvim_buf_get_name 0)
                      buf_dir (vim.fs.dirname buf_name)]
-                 (do-req :fff :find_files_in_dir buf_dir))))
+                 (Snacks.picker.files {:cwd buf_dir}))))
          ; (km :<leader><leader> {:desc "Fuzzy Files"}
          ;     (fn [] (do-req :fff :find_files)))
          ; (km :<leader>. {:desc "Fuzzy Files (buffer dir)"}
@@ -92,7 +111,7 @@
          ;       (let [buf_name (vim.api.nvim_buf_get_name 0)
          ;             buf_dir (vim.fs.dirname buf_name)]
          ;         (do-req :fff :find_files_in_dir buf_dir))))
-         (km :<leader>/ {:desc "Live Grep"} "<Cmd>Telescope live_grep<CR>")
+         (km :<leader>/ {:desc "Live Grep"} #(Snacks.picker.grep))
          (km "<leader>\\" {:desc :Zoxide} "<Cmd>Telescope zoxide list<CR>")])
 
 ; ## Git
@@ -135,13 +154,13 @@
 ; ## Other
 
 (wk.add [(km :<leader>_ {:group :Other})
-         (km :<leader>_b {:desc "Toggle Smartbackspace"}
-             :<cmd>SmartBackspaceToggle<CR>)
          (km :<leader>_t {:desc "Choose themes"} :<cmd>Themery<CR>)])
 
 ; ## Diagnostics
 ; (more on plugins/editor/actions.fnl)
 (wk.add [(km :<leader>x {:group :Diagnostics})
+         (km :<leader>xm {:desc "Messages (noice)"} :<cmd>NoiceAll<CR>)
+         (km :<leader>xM {:desc :Messages} :<cmd>messages<CR>)
          (km :<leader>xp {:desc "Populate diagnostics"}
              (fn []
                (each [_ client (ipairs (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)}))]
@@ -172,16 +191,10 @@
 
 ; ## Terminal
 
-(n.map [:n :t] :<C-/> "<cmd>ToggleTerm direction=horizontal size=20<CR>"
+(n.map [:n :t] :<A-/> "<cmd>ToggleTerm direction=horizontal size=20 name=x<CR>"
        {:desc "Toggle Terminal"})
 
-(n.map [:n :t] :<A-/> "<cmd>ToggleTerm direction=horizontal size=20<CR>"
-       {:desc "Toggle Terminal"})
-
-(n.map [:n :t] "<A-]>" "<cmd>ToggleTerm direction=vertical size=60<CR>"
-       {:desc "Toggle Terminal"})
-
-(n.map [:n :t] "<C-]>" "<cmd>ToggleTerm direction=vertical size=60<CR>"
+(n.map [:n :t] :<C-/> "<cmd>ToggleTerm direction=vertical size=60 name=y<CR>"
        {:desc "Toggle Terminal"})
 
 ; ## Explorer

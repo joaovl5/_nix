@@ -1,13 +1,11 @@
 {
   pkgs,
   lib,
-  config,
   inputs,
   modulesPath,
   system,
   ...
 } @ args: let
-  cfg = config.my_nix;
   public_data = import ../../_modules/public.nix args;
 
   ssh_port = 2222;

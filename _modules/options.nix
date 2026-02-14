@@ -6,7 +6,7 @@
   inherit (lib) mkOption types;
   cfg = config.my_nix;
 
-  # todo - attempt to use `users.users.<name>.home` later - currently it's failing due to eager eval issues
+  # TODO: ^0 - attempt to use `users.users.<name>.home` later - currently it's failing due to eager eval issues
   # will break when using a mac
   user_home = "/home/${cfg.username}";
 in {

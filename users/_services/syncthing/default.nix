@@ -1,14 +1,6 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-} @ args: let
+{config, ...} @ args: let
   inherit (import ../../../_lib/services.nix args) data_dir;
-  cfg = config.my_nix;
-  inherit (config.sops) secrets;
   syncthing_dir = "${data_dir}/syncthing";
-  inherit (lib) mkIf mkMerge;
 in {
   services.syncthing = {
     enable = true;

@@ -32,7 +32,6 @@ in {
 
     settings = {
       PermitRootLogin = "no";
-      PasswordAuthentication = true; # todo remove later
     };
   };
 

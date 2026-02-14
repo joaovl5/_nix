@@ -2,8 +2,6 @@
   pkgs,
   config,
   inputs,
-  lib,
-  system,
   ...
 }: let
   cfg = config.my_nix;
@@ -36,7 +34,7 @@ in {
     }
   ];
 
-  home-manager.users.${cfg.username} = {config, ...}: {
+  home-manager.users.${cfg.username} = _: {
     home.stateVersion = "23.11";
 
     home.packages = with pkgs; [

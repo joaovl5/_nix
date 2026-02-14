@@ -1,23 +1,15 @@
 {
-  nx = {pkgs, ...}: {
-    # environment = {
-    #   sessionVariables = {
-    #     LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
-    #   };
-    # };
-  };
   hm = {
     pkgs,
     lib,
-    config,
-    nixos_config,
+    # config,
+    # nixos_config,
     ...
   }: let
-    cfg = nixos_config.my_nix;
-    flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/_modules/neovim";
-    configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
-
+    # cfg = nixos_config.my_nix;
+    # flake_path = cfg.flake_location;
+    # here = assert (flake_path != null); "${flake_path}/users/_modules/neovim";
+    # configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
     treesitter = let
       nts = pkgs.vimPlugins.nvim-treesitter;
     in
@@ -60,12 +52,14 @@
     programs.neovim = {
       enable = true;
       initLua = lib.mkOrder 1001 ''
-          _G.plugin_dirs = {}
+        _G.plugin_dirs = {}
+        _G.header = [[
+        ${lib.readFile ./assets/header.txt}]]
 
-          ${add_rtp_lines}
+        ${add_rtp_lines}
 
-          ${lib.readFile ./init.lua}
-        '';
+        ${lib.readFile ./init.lua}
+      '';
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
@@ -98,19 +92,16 @@
       fd
       ripgrep
       tree-sitter
+      curl
 
       # language support
+      gitleaks
       prettierd
       ## python
       basedmypy
       basedpyright
       ruff
       (python3.withPackages (ps: with ps; [debugpy]))
-      ## rust
-      # rust-analyzer
-      # # clippy
-      # rustfmt
-      # vscode-extensions.vadimcn.vscode-lldb.adapter
       ## js
       eslint_d
       typescript-language-server
@@ -125,6 +116,9 @@
       taplo
       ## markdown
       marksman
+      proselint
+      ## dockerfile
+      hadolint
     ];
   };
 }

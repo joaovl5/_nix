@@ -48,7 +48,7 @@
       container_name = "nextcloud_app";
       hostname = "nextcloud_app";
       ports = [
-        "${builtins.toString nextcloud_http_port}:80"
+        "${toString nextcloud_http_port}:80"
       ];
       depends_on = ["nextcloud_db" "nextcloud_redis"];
       environment = {

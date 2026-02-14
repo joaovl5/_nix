@@ -2,11 +2,8 @@
   pkgs,
   config,
   inputs,
-  lib,
-  system,
   ...
-} @ args: let
-  inherit (lib) mkIf mkMerge;
+}: let
   inherit (import ../_lib/modules.nix) extract_imports;
   cfg = config.my_nix;
 
@@ -58,7 +55,7 @@ in {
     ];
   };
 
-  home-manager.users.${cfg.username} = {config, ...}: {
+  home-manager.users.${cfg.username} = _: {
     imports =
       module_imports.hm;
 

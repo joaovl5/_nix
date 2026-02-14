@@ -1,9 +1,5 @@
 {
-  nx = {
-    lib,
-    pkgs,
-    ...
-  } @ args: let
+  nx = {pkgs, ...}: let
     hyprland_pkg = pkgs.hyprland;
   in {
     # programs.hyprland = {
@@ -100,13 +96,7 @@
     };
   };
 
-  hm = {
-    inputs,
-    system,
-    pkgs,
-    lib,
-    ...
-  } @ args: let
+  hm = {pkgs, ...} @ args: let
     hyprland_pkg = pkgs.hyprland;
   in {
     # write ~/.wayland-session for usage by display-manager later

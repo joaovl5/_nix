@@ -46,8 +46,8 @@ in {
   config = {
     services.minio = mkIf cfg.enable {
       enable = true;
-      listenAddress = "0.0.0.0:${builtins.toString cfg.listen_port}";
-      consoleAddress = "0.0.0.0:${builtins.toString cfg.console_port}";
+      listenAddress = "0.0.0.0:${toString cfg.listen_port}";
+      consoleAddress = "0.0.0.0:${toString cfg.console_port}";
       rootCredentialsFile = pkgs.writeText "minio-credentials-full" ''
         MINIO_ROOT_USER=${cfg.root_username}
         MINIO_ROOT_PASSWORD=${cfg.root_password}

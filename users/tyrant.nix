@@ -2,15 +2,15 @@
   pkgs,
   config,
   inputs,
-  lib,
-  system,
   ...
 }: let
   cfg = config.my_nix;
 in {
-  my_nix.technitium_dns.enable = true;
-  my_nix.nextcloud.enable = true;
-  my_nix.minio.enable = true;
+  my_nix = {
+    technitium_dns.enable = true;
+    nextcloud.enable = true;
+    minio.enable = true;
+  };
 
   imports = with inputs; [
     hm.nixosModules.home-manager
@@ -44,7 +44,7 @@ in {
     }
   ];
 
-  home-manager.users.tyrant = {config, ...}: {
+  home-manager.users.tyrant = _: {
     home.stateVersion = "23.11";
 
     services.gpg-agent = {

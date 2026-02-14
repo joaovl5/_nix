@@ -3,7 +3,6 @@
     inputs,
     lib,
     pkgs,
-    system,
     ...
   } @ args: let
     inherit (inputs) zen-browser;
@@ -35,13 +34,15 @@
         inherit search;
         inherit userChrome;
         inherit settings;
-        # handle extensions
-        extensions.packages = extension_cfg.extensions;
-        extensions.settings = extension_cfg.settings;
+        extensions = {
+          # handle extensions
+          packages = extension_cfg.extensions;
+          inherit (extension_cfg) settings;
+          force = true;
+        };
         # force overwriting of non-declarative stuff
         containersForce = true;
         spacesForce = true;
-        extensions.force = true;
       };
 
       policies = import ./policies.nix;

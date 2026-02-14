@@ -8,4 +8,5 @@
                       :cmdline true
                       :matchparen {:enabled true
                                    :cmdline true
-                                   :include_surrounding false}}}}]
+                                   :include_surrounding false}}}}
+ (plugin :folke/ts-comments.nvim {:opts {} :event :VeryLazy})]

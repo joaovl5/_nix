@@ -1,11 +1,4 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: let
-  cfg = config.my_nix;
-in {
+_: {
   services.xserver.xrandrHeads = let
     main = "DP-4";
     side = "HDMI-A-2";

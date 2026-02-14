@@ -1,30 +1,26 @@
+_:
+# mk_var = name: type: params: {
+#   inherit
+#     name
+#     type
+#     params
+#     ;
+# };
+# mk_match = trigger: replace: vars: {
+#   inherit
+#     trigger
+#     replace
+#     vars
+#     ;
+# };
+# mk_secret = trigger: secret_path: (
+#   mk_match trigger "{{secret}}" [
+#     (mk_var "secret" "shell" {cmd = "cat ${secret_path}";})
+#   ]
+# );
 {
-  secrets,
-  public,
-  ...
-}: let
-  mk_var = name: type: params: {
-    inherit
-      name
-      type
-      params
-      ;
-  };
-  mk_match = trigger: replace: vars: {
-    inherit
-      trigger
-      replace
-      vars
-      ;
-  };
-  mk_secret = trigger: secret_path: (
-    mk_match trigger "{{secret}}" [
-      (mk_var "secret" "shell" {cmd = "cat ${secret_path}";})
-    ]
-  );
-in {
   services.espanso.matches.base.matches = [
-    # TODO fix
+    # TODO: ^1 fix
     # Shortcuts
     # (mk_match "!day" "{{day}}" [(mk_var "day" "date" {format = "%m/%d/%Y";})])
     # (mk_match "!time" "{{time}}" [(mk_var "time" "date" {format = "%H:%M";})])
@@ -38,7 +34,7 @@ in {
     # (mk_match ";lg" public.links.github)
     # (mk_match ";ll" public.links.linkedin)
 
-    ## Coding Snippets - TODO move to nvim setup
+    ## Coding Snippets - TODO: ^1 move to nvim setup
 
     {
       trigger = "!3q";

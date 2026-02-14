@@ -1,5 +1,4 @@
 import subprocess
-import shlex
 from shlex import quote as shlex_quote
 from pathlib import Path
 from typing import Protocol, override
