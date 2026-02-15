@@ -1,4 +1,4 @@
-containers: spaces: {
+containers: _spaces: {
   # personal
   "mail" = {
     url = "https://mail.google.com/mail/u/0/#inbox";

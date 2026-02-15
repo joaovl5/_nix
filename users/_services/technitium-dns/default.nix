@@ -19,7 +19,7 @@ in
         (make_docker_service {
           service_name = "technitium_dns";
           compose_obj = import ./compose.nix {
-            http_port = opts.http_port;
+            inherit (opts) http_port;
             technitium_mount_path = mount_path;
           };
         })

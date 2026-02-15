@@ -3,7 +3,7 @@
   ...
 } @ args: let
   o = import ../../../_lib/options.nix args;
-  my = config.my;
+  inherit (config) my;
 in
   o.module "traefik" (with o; {
     enable = toggle "Enable Traefik" true;

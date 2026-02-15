@@ -17,7 +17,7 @@ in rec {
       ;
   });
   toggle = description: default: (opt description t.bool default);
-  module = name: options: generation_settings: module_config: let
+  module = name: options: _generation_settings: module_config: let
     opts = config.my.${name};
   in {
     options.my.${name} = options;
