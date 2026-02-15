@@ -1,10 +1,12 @@
 {
   mylib,
   config,
+  pkgs,
   ...
 }: let
   my = mylib.use config;
   o = my.options;
+  s = my.secrets;
 in
   #
   # Requisites:
@@ -23,13 +25,52 @@ in
     web = {
       ports = opt "Web UI ports" (t.listOf t.int) [1111];
     };
-  }) {} (opts: (o.when opts.enable {
-    services = {
-      resolved = {
-        extraConfig = ''
-          DNSStubListener=no
-          MulticastDNS=off
+  }) {} (opts: (o.when opts.enable (let
+    pkg = pkgs.pihole-ftl;
+    user = "pihole";
+    group = "pihole";
+
+    source_log_dir = "/var/log/pihole";
+    source_state_dir = "/var/lib/pihole";
+    target_log_link = "${opts.data_dir}/logs";
+    target_state_link = "${opts.data_dir}/lib";
+
+    pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
+  in {
+    sops.secrets = {
+      "pihole_api_key" = s.mk_secret "${s.dir}/dns.yaml" "pihole-api-key" {
+        owner = user;
+        inherit group;
+      };
+    };
+
+    system.activationScripts.ensure_data_directory = ''
+      echo "[!] Ensuring Pihole directories and symlinks"
+      mkdir -v -p ${opts.data_dir}
+      ln -sfn ${source_log_dir} ${target_log_link}
+      ln -sfn ${source_state_dir} ${target_state_link}
+    '';
+
+    systemd.services.pihole-pwhash = {
+      description = "Initialize Pi-hole API password hash";
+      requiredBy = ["pihole-ftl.service"];
+      before = ["pihole-ftl.service"];
+      serviceConfig = {
+        Type = "simple";
+        User = user;
+        Group = group;
+        ExecStart = pkgs.writeShellScript "exec_pihole_pwhash" ''
+          ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_api_key"})
         '';
+
+        inherit (pihole_ftl) AmbientCapabilities;
+      };
+    };
+
+    services = {
+      resolved.settings.Resolve = {
+        DNSStubListener = "no";
+        MulticastDNS = "off";
       };
       pihole-web = {
         enable = true;
@@ -37,17 +78,21 @@ in
       };
       pihole-ftl = {
         enable = true;
+        inherit user group;
+        package = pkg;
+
         openFirewallDNS = true;
         openFirewallDHCP = true;
-        openFirewallWebServer = true;
+        openFirewallWebserver = true;
         queryLogDeleter.enable = true;
         useDnsmasqConfig = true;
 
-        stateDirectory = "${opts.data_dir}/state";
-        logDirectory = "${opts.data_dir}/logs";
+        stateDirectory = source_state_dir;
+        logDirectory = source_log_dir;
         privacyLevel = opts.privacy_level;
 
         settings = {
+          misc.readOnly = false; # necessary for pwhash setup
           dhcp = {
             # setup this later
             active = false;
@@ -83,4 +128,4 @@ in
       # Type Path Mode User Group Age Argument
       "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
-  }))
+  })))

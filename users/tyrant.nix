@@ -29,9 +29,6 @@ in {
     };
   };
 
-  # environment.shells = [pkgs.fish];
-  programs.fish.enable = true;
-
   users.users.${cfg.username} = {
     isNormalUser = true;
     extraGroups = ["wheel" "libvirt"];
@@ -39,6 +36,9 @@ in {
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = ssh_authorized_keys;
   };
+
+  # environment.shells = [pkgs.fish];
+  programs.fish.enable = true;
 
   # allow sudo without password
   security.sudo.extraRules = [
