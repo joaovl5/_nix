@@ -10,9 +10,6 @@
 
   ssh_port = 2222;
   ssh_authorized_keys = [
-    # all host keys should go here
-    # - git_ro_key
-    # - servers/etc
     public_data.ssh_key
   ];
 
