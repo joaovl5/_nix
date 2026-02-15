@@ -5,7 +5,7 @@
     ...
   }: let
     inherit (lib) mkMerge mkIf;
-    cfg = nixos_config.my_nix;
+    cfg = nixos_config.my.nix;
   in {
     # better nix cli
     programs.nh = mkMerge [

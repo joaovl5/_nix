@@ -1,6 +1,6 @@
 {
   hm = {nixos_config, ...}: let
-    cfg = nixos_config.my_nix;
+    cfg = nixos_config.my.nix;
   in {
     # TODO: ^1 add merging stuff
     programs.git = {

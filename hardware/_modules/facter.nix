@@ -20,7 +20,7 @@
 in
   o.module "facter" (with o; {
     enable = toggle "Enable nixos-facter" true;
-    report_path = opt "Report path for nixos-facter" t.path "${inputs.mysecrets}/facter/${config.my_nix.hostname}.json";
+    report_path = opt "Report path for nixos-facter" t.path "${inputs.mysecrets}/facter/${config.my.nix.hostname}.json";
   }) {} (
     opts:
       o.when opts.enable {

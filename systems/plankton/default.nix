@@ -12,7 +12,7 @@ applications requiring lightweight resource usage
   lib,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   imports = [
     ../_modules/console

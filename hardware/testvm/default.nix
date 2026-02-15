@@ -6,7 +6,7 @@
   modulesPath,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   imports = [
     ../_modules/grub.nix
@@ -15,10 +15,10 @@ in {
     inputs.nixpkgs.nixosModules.notDetected
   ];
 
-  my_nix.hostname = "testvm";
-  my_nix.username = "tester";
-  my_nix.email = "vieiraleao2005+testvm@gmail.com";
-  my_nix.name = "Tester";
+  my.nix.hostname = "testvm";
+  my.nix.username = "tester";
+  my.nix.email = "vieiraleao2005+testvm@gmail.com";
+  my.nix.name = "Tester";
 
   time.timeZone = cfg.timezone;
 

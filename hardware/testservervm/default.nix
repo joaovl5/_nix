@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   imports = [
     ../_modules/grub.nix
@@ -13,10 +13,10 @@ in {
     ./disko.nix
   ];
 
-  my_nix.hostname = "testservervm";
-  my_nix.username = "tyrant";
-  my_nix.email = "vieiraleao2005+testservervm@gmail.com";
-  my_nix.name = "Tyrant";
+  my.nix.hostname = "testservervm";
+  my.nix.username = "tyrant";
+  my.nix.email = "vieiraleao2005+testservervm@gmail.com";
+  my.nix.name = "Tyrant";
 
   my.facter.enable = true;
   my.luks.ssh.enable = true;

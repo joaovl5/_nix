@@ -27,7 +27,7 @@ in {
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
-  my_nix = {
+  my.nix = {
     hostname = "my_iso";
     username = user;
     email = "vieiraleao2005+my_iso@gmail.com";

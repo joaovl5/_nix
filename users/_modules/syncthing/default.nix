@@ -4,7 +4,7 @@
     lib,
     ...
   }: let
-    cfg = config.my_nix;
+    cfg = config.my.nix;
     inherit (config.sops) secrets;
     home_path = config.users.users.${cfg.username}.home;
     sync_dir = "${home_path}/${cfg.shared_data_dirname}";

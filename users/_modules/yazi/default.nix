@@ -4,7 +4,7 @@
     lib,
     ...
   }:
-  # cfg = nixos_config.my_nix;
+  # cfg = nixos_config.my.nix;
   # flake_path = cfg.flake_location;
   # here = assert (flake_path != null); "${flake_path}/users/_modules/yazi";
   # configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";

@@ -3,7 +3,7 @@
   config,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   nix = {
     generateRegistryFromInputs = lib.mkDefault true;

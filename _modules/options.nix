@@ -4,13 +4,13 @@
   ...
 }: let
   inherit (lib) mkOption types;
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 
   # TODO: ^0 - attempt to use `users.users.<name>.home` later - currently it's failing due to eager eval issues
   # will break when using a mac
   user_home = "/home/${cfg.username}";
 in {
-  options.my_nix = {
+  options.my.nix = {
     # system-level
     hostname = mkOption {
       description = "System hostname";

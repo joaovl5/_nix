@@ -5,7 +5,7 @@
   ...
 } @ args: let
   o = import ../../../_lib/options.nix args;
-  cfg = config.my_nix;
+  cfg = config.my.nix;
   inherit (cfg) username;
   user_home = config.users.users.${username}.home;
 

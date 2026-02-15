@@ -26,7 +26,7 @@ in
             nextcloud_admin_password = opts.admin_password;
             nextcloud_trusted_domain = opts.hostname;
             nextcloud_mount_path = mount_path;
-            mariadb_timezone = config.my_nix.timezone;
+            mariadb_timezone = config.my.nix.timezone;
           };
         })
       ])

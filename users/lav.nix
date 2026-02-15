@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (import ../_lib/modules.nix) extract_imports;
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 
   modules = [
     (import ./_modules/cli)

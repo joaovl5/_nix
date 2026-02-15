@@ -4,7 +4,7 @@
   inputs,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   my = {
     technitium_dns.enable = true;

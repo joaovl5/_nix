@@ -5,7 +5,7 @@
   inputs,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
   disko_cfg = import ../_disko/server_1.nix {primary_device = "/dev/sda";};
 in {
   imports = [
@@ -14,11 +14,11 @@ in {
     inputs.nixpkgs.nixosModules.notDetected
   ];
 
-  my_nix.hostname = "tyrant";
-  my_nix.username = "tyrant";
-  my_nix.email = "vieiraleao2005+tyrant@gmail.com";
-  my_nix.name = "Tyrant";
-  my_nix.is_server = true;
+  my.nix.hostname = "tyrant";
+  my.nix.username = "tyrant";
+  my.nix.email = "vieiraleao2005+tyrant@gmail.com";
+  my.nix.name = "Tyrant";
+  my.nix.is_server = true;
 
   time.timeZone = cfg.timezone;
 

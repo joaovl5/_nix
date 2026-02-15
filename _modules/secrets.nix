@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (inputs) mysecrets;
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   imports = [
     # imports private secrets sops module

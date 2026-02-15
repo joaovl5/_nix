@@ -4,14 +4,14 @@
   modulesPath,
   ...
 }: let
-  cfg = config.my_nix;
+  cfg = config.my.nix;
 in {
   imports = [
     ../_modules/grub.nix
     ../_disko/lavpc_v2.nix
     "${modulesPath}/installer/scan/not-detected.nix"
   ];
-  my_nix = {
+  my.nix = {
     hostname = "lavpc";
     username = "lav";
     email = "vieiraleao2005+lavpc@gmail.com";
