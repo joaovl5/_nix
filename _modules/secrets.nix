@@ -1,89 +1,37 @@
-{
-  inputs,
-  config,
-  lib,
-  ...
-}: let
-  inherit (inputs) mysecrets;
-  cfg = config.my.nix;
+{mylib, ...} @ args: let
+  # s = import ../_lib/secrets.nix args;
+  # TODO: ^1 - move usages of getting secret paths to `mylib.secrets`
+  # TODO: ^1 - move all usages of libs to use input mylib
+  s = mylib.secrets;
+  # s = (import mylib args).secrets;
 in {
   imports = [
-    # imports private secrets sops module
-    # this will leverage sops-nix
-    "${mysecrets}/sops.nix"
+    "${s.private_source}/sops.nix"
   ];
 
-  # stores public data (public keys)
-  # anything else will use sops-nix
-
-  config.sops = lib.mkForce {
-    defaultSopsFile = "${mysecrets}/.sops.yaml";
-
-    # make files for these
-    # how should they appear there?
-    # - injected in iso?
-    # - how to persist declaratively?
+  sops = {
+    defaultSopsFile = "${s.private_source}/.sops.yaml";
     age.keyFile = "/root/.age/key.txt";
 
     secrets = {
-      "password_hash" = {
-        sopsFile = "${mysecrets}/secrets/password_hashes.yaml";
-        key = "main";
-        owner = "root";
-        group = "root";
-        mode = "0400";
-        neededForUsers = true;
-      };
-
-      "password_hash_server" = {
-        sopsFile = "${mysecrets}/secrets/password_hashes.yaml";
-        key = "server";
-        owner = "root";
-        group = "root";
-        mode = "0400";
-        neededForUsers = true;
-      };
-      "personal_ssh_key" = {
-        sopsFile = "${mysecrets}/secrets/ssh_keys.yaml";
-        key = "personal_ssh_key";
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
+      "password_hash" = s.mk_secret "${s.dir}/password_hashes.yaml" "main" {neededForUsers = true;};
+      "password_hash_server" = s.mk_secret "${s.dir}/password_hashes.yaml" "server" {neededForUsers = true;};
+      "personal_ssh_key" = s.mk_secret "${s.dir}/ssh_keys.yaml" "personal_ssh_key" {};
 
       # api stuff
-      "openai_key" = {
-        sopsFile = "${mysecrets}/secrets/api_keys.yaml";
-        key = "openai";
-        owner = "${cfg.username}";
-      };
+      "openai_key" = s.mk_secret_user "${s.dir}/api_keys.yaml" "openai" {};
+      # "openai_key" = {
+      #   sopsFile = "${s.private_source}/secrets/api_keys.yaml";
+      #   key = "openai";
+      #   owner = "${cfg.username}";
+      # };
 
       # syncthing-related stuff
-      syncthing_server_id = {
-        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server_id";
-        owner = "${cfg.username}";
-      };
-      syncthing_gui_user = {
-        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server_gui_user";
-        owner = "${cfg.username}";
-      };
-      syncthing_gui_password = {
-        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "server_gui_password";
-        owner = "${cfg.username}";
-      };
-      syncthing_pem_cert = {
-        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "pem_cert";
-        owner = "${cfg.username}";
-      };
-      syncthing_pem_key = {
-        sopsFile = "${mysecrets}/secrets/syncthing/syncthing.yaml";
-        key = "pem_key";
-        owner = "${cfg.username}";
-      };
+      "syncthing_server_id" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_id" {};
+      "syncthing_gui_user" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_gui_user" {};
+      "syncthing_gui_password" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_gui_password" {};
+      "syncthing_pem_cert" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "pem_cert" {};
+      "syncthing_pem_key" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "pem_key" {};
     };
   };
 }

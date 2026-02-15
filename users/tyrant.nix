@@ -6,7 +6,7 @@
 } @ args: let
   cfg = config.my.nix;
 
-  public_data = import ../../_modules/public.nix args;
+  public_data = import ../_modules/public.nix args;
   ssh_authorized_keys = [
     public_data.ssh_key
   ];
