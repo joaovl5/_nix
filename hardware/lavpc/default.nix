@@ -8,7 +8,7 @@
 in {
   imports = [
     ../_modules/grub.nix
-    ../_disko/lavpc_v2.nix
+    ./disko.nix
     "${modulesPath}/installer/scan/not-detected.nix"
   ];
   my.nix = {

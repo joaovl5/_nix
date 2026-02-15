@@ -1,12 +1,17 @@
-{self, ...} @ inputs: let
-  _o = obj: obj.overlays.default;
+inputs: let
+  # OVERLAYS = with inputs; [
+  #   nur.overlays.default
+  #   deploy-rs.overlays.default
+  #   # neovim.overlays.default
+  #   niri.overlays.niri
+  #   fenix.overlays.default
+  # ];
+  _o = obj: {attr ? "default"}: obj.overlays.${attr};
   OVERLAYS = with inputs; [
-    (_o self)
-    (_o nur)
-    (_o deploy-rs)
-    # (_o neovim)
-    (_o niri)
-    (_o fenix)
+    (_o nur {})
+    (_o deploy-rs {})
+    (_o niri {attr = "niri";})
+    (_o fenix {})
   ];
 
   # list of packages to use from stable
@@ -24,9 +29,8 @@ in {
     unstable = {
       input = inputs.unstable;
       overlaysBuilder = channels: [
-        (USE_FROM_STABLE channels)
+        (_: _: USE_FROM_STABLE channels)
       ];
     };
   };
-  overlays.default = import ../../overlays;
 }

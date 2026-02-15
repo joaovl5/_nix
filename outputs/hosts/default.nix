@@ -12,14 +12,14 @@ inputs: let
     ../../users/tyrant.nix
   ];
 
-  _m = obj: obj.nixOsModules.default;
+  _m = obj: {attr ? "default"}: obj.nixosModules.${attr};
 
   # will assume hardware/<xxx> module matches <name>
   _h = name: modules: extra:
     {
       ${name}.modules =
         [
-          "${../../hardware}/${name}"
+          "${inputs.self}/hardware/${name}"
         ]
         ++ modules;
     }
@@ -34,11 +34,11 @@ in {
       inherit inputs;
       system = DEFAULT_SYSTEM;
     };
-
+    #
     # shared modules
     modules = with inputs; [
-      (_m disko)
-      (_m sops-nix)
+      (_m disko {})
+      (_m sops-nix {attr = "sops";})
       ../../_modules/options.nix
       ../../_modules/secrets.nix
       ../../hardware/_modules/grub.nix
@@ -50,10 +50,10 @@ in {
 
   hosts =
     ## desktops
-    (_h "lavpc" (DESKTOP_MODULES
+    _h "lavpc" (DESKTOP_MODULES
       ++ [
-        ../../systems/_modules/ollama.nix
-      ]) {})
+        ../../systems/_modules/services/ollama.nix
+      ]) {}
     // (_h "testvm" DESKTOP_MODULES {})
     ## servers
     // (_h "tyrant" SERVER_MODULES {})
