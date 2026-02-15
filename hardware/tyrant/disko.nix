@@ -1,6 +1,6 @@
 let
   params = {primary_device = "/dev/sda";};
-  disko_cfg = ../_disko/testservervm.nix;
+  disko_cfg = ../_disko/server_1.nix;
 in
   _: (
     import disko_cfg params

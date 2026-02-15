@@ -43,6 +43,7 @@
     # ---------------
     # pkgs
     # ---------------
+    # Desktop ---
     ## hyprland
     hyprland-plugins = {
       url = "git+https://github.com/hyprwm/hyprland-plugins?shallow=1";
@@ -74,173 +75,13 @@
     };
     ## flatpak support
     nix-flatpak.url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
+    # Server ---
+    nixos-dns = {
+      url = "git+https://github.com/Janik-Haag/nixos-dns?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {fup, ...} @ inputs:
     fup.lib.mkFlake (import ./outputs inputs);
-  # // fup.lib.mkFlake {
-  #   inherit self inputs; # required
-  #
-  #   ## supported systems
-  #   supportedSystems = [
-  #     "aarch64-linux"
-  #     "x86_64-linux"
-  #   ];
-  #
-  #   # ---------------
-  #   # Channels
-  #   # ---------------
-  #
-  #   channelsConfig.allowUnfree = true;
-  #
-  #   ## these overlays get applied on *all* channels
-  #   sharedOverlays = with inputs; [
-  #     self.overlays.default
-  #     nur.overlays.default
-  #     deploy-rs.overlays.default
-  #     # neovim.overlays.default
-  #     niri.overlays.niri
-  #     fenix.overlays.default
-  #   ];
-  #
-  #   ## fine-tuning channel cfg
-  #   channels = {
-  #     stable.input = inputs.stable;
-  #     unstable = {
-  #       input = inputs.unstable;
-  #       # overlaysBuilder = channels: [
-  #       #   (final: prev: {
-  #       #     # inherit
-  #       #     #   (channels.stable)
-  #       #     #   pipewire
-  #       #     #   ;
-  #       #   })
-  #       # ];
-  #     };
-  #   };
-  #
-  #   # ---------------
-  #   # Hosts
-  #   # ---------------
-  #
-  #   hostDefaults = let
-  #     default_system = "x86_64-linux";
-  #   in {
-  #     # default sys architecture
-  #     system = default_system;
-  #     # default channel
-  #     channelName = "unstable";
-  #     # args for module imports
-  #     specialArgs = {
-  #       inherit inputs;
-  #       system = default_system;
-  #     };
-  #     # modules for all hosts
-  #     modules = [
-  #       disko.nixosModules.default
-  #       sops-nix.nixosModules.sops
-  #       ./_modules/options.nix
-  #       ./_modules/secrets.nix
-  #       ./hardware/_modules/grub.nix
-  #       ./systems/_modules/home-manager.nix
-  #       ./systems/_modules/nix.nix
-  #       ./systems/_modules/lix.nix
-  #     ];
-  #   };
-  #
-  #   ## host-specific config
-  #   hosts = {
-  #     ### desktops
-  #     lavpc.modules = [
-  #       ./hardware/lavpc
-  #       ./systems/astral
-  #       ./systems/_modules/services/ollama.nix
-  #       ./users/lav.nix
-  #     ];
-  #     testvm.modules = [
-  #       ./hardware/testvm
-  #       ./systems/astral
-  #       ./users/lav.nix
-  #     ];
-  #
-  #     ### servers
-  #     tyrant.modules = [
-  #       ./hardware/tyrant
-  #       ./systems/tyrant
-  #       ./users/tyrant.nix
-  #     ];
-  #
-  #     testservervm.modules = [
-  #       ./hardware/testservervm
-  #       ./systems/tyrant
-  #       ./users/tyrant.nix
-  #     ];
-  #
-  #     ### other/special
-  #     iso.modules = [
-  #       ./systems/iso
-  #     ];
-  #   };
-  #
-  #   # ---------------
-  #   # Build
-  #   # ---------------
-  #   packages.x86_64-linux.build_iso =
-  #     self.nixosConfigurations.iso.config.system.build.isoImage;
-  #
-  #   # ---------------
-  #   # Deployment
-  #   # ---------------
-  #   deploy = let
-  #     mk_deploy = {
-  #       host_system,
-  #       ssh_user ? "root",
-  #       user ? "root",
-  #     }: {
-  #       inherit user;
-  #       sshUser = ssh_user;
-  #       path =
-  #         deploy-rs.lib.x86_64-linux.activate.nixos
-  #         self.nixosConfigurations.${host_system};
-  #     };
-  #     mk_node = {
-  #       host_system,
-  #       hostname ? host_system,
-  #       ssh_user ? "root",
-  #       user ? "root",
-  #     }: {
-  #       ${host_system} = {
-  #         inherit hostname;
-  #         profiles.system = mk_deploy {inherit host_system ssh_user user;};
-  #       };
-  #     };
-  #   in {
-  #     # sshUser = "root";
-  #     # sudo = "run0";
-  #     remoteBuild = false;
-  #     sudo = "run0 --user";
-  #
-  #     nodes =
-  #       # (mk_node {host_system = "tyrant";}) //
-  #       mk_node {
-  #         host_system = "testservervm";
-  #         hostname = "192.168.122.169";
-  #         ssh_user = "tyrant";
-  #         user = "root";
-  #       };
-  #   };
-  #
-  #   # ---------------
-  #   # Checks
-  #   # ---------------
-  #   checks =
-  #     builtins.mapAttrs
-  #     (_system: deployLib: deployLib.deployChecks self.deploy)
-  #     deploy-rs.lib;
-  #
-  #   # ---------------
-  #   # Other settings
-  #   # ---------------
-  #   overlays.default = import ./overlays;
-  # };
 }

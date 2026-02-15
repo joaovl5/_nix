@@ -1,4 +1,4 @@
-{mylib, ...} @ args: let
+{mylib, ...}: let
   # s = import ../_lib/secrets.nix args;
   # TODO: ^1 - move usages of getting secret paths to `mylib.secrets`
   # TODO: ^1 - move all usages of libs to use input mylib

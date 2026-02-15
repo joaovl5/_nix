@@ -1,63 +1,31 @@
-{primary_device, ...}: {
-  disko.devices = {
-    disk = {
-      primary = {
-        device = primary_device;
-        type = "disk";
-        content = {
-          type = "gpt";
-          partitions = {
-            boot = {
-              size = "1M";
-              type = "EF02"; # grub mbr
-              # attributes = [0];
-            };
-            root = {
-              size = "100%";
-              content = {
-                type = "lvm_pv";
-                vg = "main_pool";
-              };
-            };
+{primary_device, ...}: let
+  inherit (import ../../_lib/disko.nix) mbr luks btrfs;
+  inherit (btrfs) subvolume swap;
+in {
+  disko.devices.disk.primary = {
+    device = primary_device;
+    type = "disk";
+    content = {
+      type = "gpt";
+      partitions = {
+        bios = mbr {};
+        boot = {
+          size = "1G";
+          content = {
+            mountpoint = "/boot";
+            type = "filesystem";
+            format = "vfat";
           };
         };
-      };
-    };
-    lvm_vg = {
-      main_pool = {
-        type = "lvm_vg";
-        lvs = {
-          system = {
-            size = "100%";
-            content = {
-              type = "btrfs";
-              extraArgs = ["-f"]; # override existing
-              subvolumes = let
-                mk_subvol = {
-                  mp,
-                  opts ? [
-                    "compress=zstd:1"
-                    "noatime"
-                  ],
-                  extraOpts ? [],
-                }: {
-                  mountpoint = mp;
-                  mountOptions = opts ++ extraOpts;
-                };
-              in {
-                "@root" = mk_subvol {
-                  mp = "/";
-                  opts = [];
-                };
-                "@nix" = mk_subvol {mp = "/nix";};
-                "@logs" = mk_subvol {mp = "/var/logs";};
-                "@home" = mk_subvol {mp = "/home";};
-                "@swap" = {
-                  mountpoint = "/.swapvol";
-                  swap.swapfile.size = "10G";
-                };
-              };
-            };
+        luks = luks {name = "p1";} {
+          type = "btrfs";
+          subvolumes = {
+            "@root" = subvolume {mp = "/";};
+            "@nix" = subvolume {mp = "/nix";};
+            "@swap" = swap {sz = "32G";};
+            "@home" = subvolume {mp = "/home";};
+            "@logs" = subvolume {mp = "/var/logs";};
+            "@cache" = subvolume {mp = "/var/cache";};
           };
         };
       };

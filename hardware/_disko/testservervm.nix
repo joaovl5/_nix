@@ -1,7 +1,4 @@
-{
-  primary_device, # nvme ssd
-  ...
-}: let
+{primary_device, ...}: let
   inherit (import ../../_lib/disko.nix) mbr luks btrfs;
   inherit (btrfs) subvolume;
 in {
