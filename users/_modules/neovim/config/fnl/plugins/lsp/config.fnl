@@ -87,7 +87,6 @@
                         no #(require (.. :none-ls. $1))]
                     {:sources [; general 
                                nu.diagnostics.gitleaks
-                               nu.diagnostics.proselint
                                nu.hover.dictionary
                                ; dockerfile
                                nu.diagnostics.hadolint

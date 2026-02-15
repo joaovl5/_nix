@@ -14,7 +14,7 @@ inputs: let
 
   _m = obj: {attr ? "default"}: obj.nixosModules.${attr};
 
-  # will assume hardware/<xxx> module matches <name>
+  # assumes hardware/<name> module matches <name>
   _h = name: modules: extra: {
     ${name} =
       {
@@ -25,7 +25,7 @@ inputs: let
           ++ modules;
         specialArgs.mylib = import ../../_lib (let
           pkgs = import inputs.nixpkgs {
-            system = DEFAULT_SYSTEM; # TODO: ^0 change later
+            system = DEFAULT_SYSTEM;
           };
         in {
           inherit inputs;

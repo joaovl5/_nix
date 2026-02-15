@@ -59,6 +59,6 @@ local function _5_()
     return require(("none-ls." .. _241))
   end
   no = _6_
-  return {sources = {nu.diagnostics.gitleaks, nu.diagnostics.proselint, nu.hover.dictionary, nu.diagnostics.hadolint, nu.hover.printenv, nu.diagnostics.fish, nu.formatting.alejandra, nu.diagnostics.statix, nu.code_actions.statix, nu.diagnostics.deadnix, nu.formatting.prettierd, no("formatting.jq"), no("diagnostics.eslint_d"), no("code_actions.eslint_d")}}
+  return {sources = {nu.diagnostics.gitleaks, nu.hover.dictionary, nu.diagnostics.hadolint, nu.hover.printenv, nu.diagnostics.fish, nu.formatting.alejandra, nu.diagnostics.statix, nu.code_actions.statix, nu.diagnostics.deadnix, nu.formatting.prettierd, no("formatting.jq"), no("diagnostics.eslint_d"), no("code_actions.eslint_d")}}
 end
 return {{"nvimtools/none-ls.nvim", dependencies = {"nvim-lua/plenary.nvim", "nvimtools/none-ls-extras.nvim"}, event = "VeryLazy", opts = _5_}, {"neovim/nvim-lspconfig", config = mk_lsp, event = "VeryLazy", dependencies = {"b0o/schemastore.nvim", {"artemave/workspace-diagnostics.nvim", event = "LspAttach", opts = {}}}}}

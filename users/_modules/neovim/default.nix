@@ -116,7 +116,6 @@
       taplo
       ## markdown
       marksman
-      proselint
       ## dockerfile
       hadolint
     ];
