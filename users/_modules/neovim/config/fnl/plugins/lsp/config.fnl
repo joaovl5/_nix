@@ -112,4 +112,4 @@
           :event :VeryLazy
           :dependencies [:b0o/schemastore.nvim
                          (plugin :artemave/workspace-diagnostics.nvim
-                                 {:opts {}})]})]
+                                 {:event :LspAttach :opts {}})]})]

@@ -21,6 +21,7 @@ in {
 
   users.mutableUsers = false;
   users.users.root = {
+    hashedPassword = lib.mkForce null;
     hashedPasswordFile = config.sops.secrets.password_hash.path;
     shell = pkgs.bash;
   };
@@ -36,9 +37,11 @@ in {
     openssh.enable = true;
     flatpak.enable = true;
     xserver.enable = false;
-    dbus.enable = true;
-    dbus.implementation = lib.mkForce "dbus";
-    dbus.packages = with pkgs; [dconf];
+    dbus = {
+      enable = true;
+      implementation = lib.mkForce "dbus";
+      packages = with pkgs; [dconf];
+    };
   };
 
   # Programs

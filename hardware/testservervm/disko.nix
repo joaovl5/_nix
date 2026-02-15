@@ -9,7 +9,7 @@ in
       boot.loader.limine = {
         enable = true;
         biosDevice = params.primary_device;
-        forceMbr = true;
+        force = true;
         efiSupport = false;
       };
       # boot.loader.systemd-boot = {

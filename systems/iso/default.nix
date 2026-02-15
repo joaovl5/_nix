@@ -48,8 +48,10 @@ in {
 
   services.openssh = {
     ports = lib.mkForce [ssh_port];
-    passwordAuthentication = false;
-    permitRootLogin = "no";
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
   };
 
   users.users."${user}" = {

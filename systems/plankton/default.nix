@@ -28,6 +28,7 @@ in {
 
   users.mutableUsers = false;
   users.users.root = {
+    hashedPassword = lib.mkForce null;
     hashedPasswordFile = config.sops.secrets.password_hash.path;
   };
 

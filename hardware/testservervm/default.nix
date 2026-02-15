@@ -13,14 +13,19 @@ in {
     ./disko.nix
   ];
 
-  my.nix.hostname = "testservervm";
-  my.nix.username = "tyrant";
-  my.nix.email = "vieiraleao2005+testservervm@gmail.com";
-  my.nix.name = "Tyrant";
-
-  my.facter.enable = true;
-  my.luks.ssh.enable = true;
-  my.luks.ssh.use_dhcp = true;
+  my = {
+    nix = {
+      hostname = "testservervm";
+      username = "tyrant";
+      email = "vieiraleao2005+testservervm@gmail.com";
+      name = "Tyrant";
+    };
+    facter.enable = true;
+    luks.ssh = {
+      enable = true;
+      use_dhcp = true;
+    };
+  };
 
   time.timeZone = cfg.timezone;
 

@@ -20,6 +20,7 @@ in {
 
   users.mutableUsers = false;
   users.users.root = {
+    hashedPassword = lib.mkForce null;
     hashedPasswordFile = config.sops.secrets.password_hash_server.path;
     shell = pkgs.bash;
   };
@@ -37,22 +38,22 @@ in {
 
   # disable privileged ports
   boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
-  virtualisation.spiceUSBRedirection.enable = true;
-  virtualisation.containers.enable = true;
-  virtualisation.docker = {
-    enable = false; # we use rootless instead
-    # storageDriver = "btrfs";
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
+  virtualisation = {
+    spiceUSBRedirection.enable = true;
+    containers.enable = true;
+    docker = {
+      enable = false; # we use rootless instead
+      # storageDriver = "btrfs";
+      autoPrune = {
+        enable = true;
+        dates = "weekly";
+      };
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
     };
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-  };
-  virtualisation.libvirtd = {
-    enable = true;
+    libvirtd.enable = true;
   };
 
   environment.systemPackages = with pkgs; [
