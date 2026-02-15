@@ -12,6 +12,7 @@ in {
     ../_modules/services/pipewire.nix
     ../_modules/services/ntp.nix
     ../_modules/console
+    ../_modules/shell
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 

@@ -28,39 +28,11 @@
     alias cat 'bat -P'
     */
     programs.fish.shellAliases = {
-      # navigation
-      ".." = "cd ..";
-      "..." = "cd ../..";
-      "...." = "cd ../../..";
-      "....." = "cd ../../../..";
-      "grep" = "grep --color=auto";
-      "q" = "exit";
-      ":q" = "exit";
+      # most shell aliases already handled in shell-aliases module
       # replacing cmds
       # ls -> eza replacements already handled by home-manager
       "cat" = "bat";
-    };
-    programs.fish.shellAbbrs = {
-      "mv" = "mv -v";
-      "cp" = "cp -v";
       "rm" = "rip";
-      # apps
-      "n" = "nvim";
-      ## systemd
-      "s" = "systemctl";
-      "s.s" = "systemctl status";
-      "s.r" = "systemctl restart";
-      "s.S" = "systemctl stop";
-      "su" = "systemctl --user";
-      "su.s" = "systemctl --user status";
-      "su.r" = "systemctl --user restart";
-      "su.S" = "systemctl --user stop";
-      "j.u" = "journalctl --user -xeu";
-      ## tmux
-      "t" = "tmux";
-      "t.a" = "tmux attach";
-      "t.l" = "tmux list-sessions";
-      "t.k" = "tmux kill-session";
     };
   };
 }

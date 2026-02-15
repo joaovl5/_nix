@@ -2,9 +2,10 @@
   pkgs,
   config,
   inputs,
+  system,
   ...
 }: let
-  inherit (import ../_lib/modules.nix) extract_imports;
+  inherit (import ../_lib/modules) extract_imports;
   cfg = config.my.nix;
 
   modules = [
@@ -118,6 +119,7 @@ in {
       virt-manager
 
       ## etc move later
+      inputs.deploy-rs.packages.${system}.default
       delta
       jq
       bit-logo

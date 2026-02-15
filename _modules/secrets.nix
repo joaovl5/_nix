@@ -1,12 +1,17 @@
-{mylib, ...}: let
+{
+  mylib,
+  config,
+  ...
+}: let
   # s = import ../_lib/secrets.nix args;
   # TODO: ^1 - move usages of getting secret paths to `mylib.secrets`
   # TODO: ^1 - move all usages of libs to use input mylib
-  s = mylib.secrets;
+  my = mylib.use config;
+  s = my.secrets;
   # s = (import mylib args).secrets;
 in {
   imports = [
-    "${s.private_source}/sops.nix"
+    "${mylib.secrets.private_source}/sops.nix"
   ];
 
   sops = {

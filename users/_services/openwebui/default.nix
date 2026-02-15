@@ -3,8 +3,8 @@
   config,
   ...
 } @ args: let
-  o = import ../../../_lib/options.nix args;
-  inherit (import ../../../_lib/services.nix {inherit pkgs config;}) make_docker_service;
+  o = import ../../../_lib/options args;
+  inherit (import ../../../_lib/services {inherit pkgs config;}) make_docker_service;
   http_port = 3939;
 in
   o.module "openwebui" (with o; {

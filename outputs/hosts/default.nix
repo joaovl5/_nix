@@ -1,4 +1,4 @@
-{self, ...} @ inputs: let
+inputs: let
   DEFAULT_SYSTEM = "x86_64-linux";
   DEFAULT_CHANNEL = "unstable";
 
@@ -12,8 +12,6 @@
     ../../users/tyrant.nix
   ];
 
-  MYLIB_PATH = ../../_lib;
-
   _m = obj: {attr ? "default"}: obj.nixosModules.${attr};
 
   # will assume hardware/<xxx> module matches <name>
@@ -25,7 +23,7 @@
             "${inputs.self}/hardware/${name}"
           ]
           ++ modules;
-        specialArgs.mylib = import MYLIB_PATH (let
+        specialArgs.mylib = import ../../_lib (let
           pkgs = import inputs.nixpkgs {
             system = DEFAULT_SYSTEM; # TODO: ^0 change later
           };
@@ -33,7 +31,6 @@
           inherit inputs;
           inherit pkgs;
           inherit (pkgs) lib;
-          inherit (self.nixosConfigurations.${name}) config;
         });
       }
       // extra;

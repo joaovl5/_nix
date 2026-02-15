@@ -1,5 +1,5 @@
 {pkgs, ...} @ args: let
-  o = import ../../../_lib/options.nix args;
+  o = import ../../../_lib/options args;
 in
   o.module "minio" (with o; {
     enable = toggle "Enable Minio" false;

@@ -1,4 +1,4 @@
-# TODO: support for mixed-modules (hm/nx) (see ./modules.nix)
+# TODO: support for mixed-modules (hm/nx) (see ./modules)
 {
   lib,
   config,

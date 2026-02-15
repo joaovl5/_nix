@@ -3,8 +3,8 @@
   config,
   ...
 } @ args: let
-  o = import ../../../_lib/options.nix args;
-  inherit (import ../../../_lib/services.nix {inherit pkgs config;}) data_dir;
+  o = import ../../../_lib/options args;
+  inherit (import ../../../_lib/services {inherit pkgs config;}) data_dir;
   syncthing_dir = "${data_dir}/syncthing";
 in
   o.module "syncthing" (with o; {

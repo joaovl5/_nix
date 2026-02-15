@@ -1,5 +1,5 @@
 let
-  inherit (import ../../../_lib/modules.nix) combine_modules;
+  inherit (import ../../../_lib/modules) combine_modules;
   modules = [
     (import ./zoxide.nix)
     (import ./eza.nix)

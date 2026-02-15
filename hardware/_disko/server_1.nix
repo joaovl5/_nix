@@ -1,5 +1,5 @@
 {primary_device, ...}: let
-  inherit (import ../../_lib/disko.nix) mbr luks btrfs;
+  inherit (import ../../_lib/disko) mbr luks btrfs;
   inherit (btrfs) subvolume swap;
 in {
   disko.devices.disk.primary = {

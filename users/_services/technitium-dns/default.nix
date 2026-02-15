@@ -3,8 +3,8 @@
   pkgs,
   ...
 } @ args: let
-  o = import ../../../_lib/options.nix args;
-  inherit (import ../../../_lib/services.nix {inherit pkgs config;}) make_docker_service data_dir;
+  o = import ../../../_lib/options args;
+  inherit (import ../../../_lib/services {inherit pkgs config;}) make_docker_service data_dir;
   mount_path = "${data_dir}/technitium";
 in
   # TODO: ^2 make the bug of ther dns make dynamic config nixos valeu

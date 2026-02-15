@@ -11,20 +11,23 @@
     public_data.ssh_key
   ];
 in {
-  my = {
-    technitium_dns.enable = true;
-    minio.enable = true;
-    nextcloud.enable = true;
-  };
-
   imports = with inputs; [
     hm.nixosModules.home-manager
-    ./_services/technitium-dns
-    ./_services/minio
-    ./_services/nextcloud
-    ./_services/syncthing
-    ./_services/traefik
+    ./_units/pihole
+    # ./_services/technitium-dns
+    # ./_services/minio
+    # ./_services/nextcloud
+    # ./_services/syncthing
+    # ./_services/traefik
   ];
+
+  my = {
+    "unit.pihole" = {
+      enable = true;
+      dns.domain = "local";
+      dns.interface = "enp3s0f1";
+    };
+  };
 
   # environment.shells = [pkgs.fish];
   programs.fish.enable = true;
@@ -65,6 +68,7 @@ in {
       ## utils
       ripgrep
       neovim
+      jq
 
       ## monitoring
       glances

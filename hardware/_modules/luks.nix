@@ -1,5 +1,5 @@
 {pkgs, ...} @ args: let
-  o = import ../../_lib/options.nix args;
+  o = import ../../_lib/options args;
 
   public_data = import ../../_modules/public.nix args;
   default_ssh_authorized_keys = [

@@ -5,7 +5,7 @@
   raid_type ? "raid5",
   ...
 }: let
-  inherit (import ../../_lib/disko.nix) efi luks btrfs;
+  inherit (import ../../_lib/disko) efi luks btrfs;
   inherit (btrfs) subvolume;
   btrfs_content = {
     type = "btrfs";

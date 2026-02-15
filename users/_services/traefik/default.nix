@@ -2,7 +2,7 @@
   config,
   ...
 } @ args: let
-  o = import ../../../_lib/options.nix args;
+  o = import ../../../_lib/options args;
   inherit (config) my;
 in
   o.module "traefik" (with o; {

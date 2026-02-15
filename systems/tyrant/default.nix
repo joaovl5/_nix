@@ -11,6 +11,7 @@ in {
     ../_modules/security
     ../_modules/services/ntp.nix
     ../_modules/console
+    ../_modules/shell
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 

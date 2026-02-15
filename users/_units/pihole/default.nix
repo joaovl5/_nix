@@ -1,5 +1,10 @@
-{mylib, ...}: let
-  o = mylib.options;
+{
+  mylib,
+  config,
+  ...
+}: let
+  my = mylib.use config;
+  o = my.options;
 in
   #
   # Requisites:
@@ -10,7 +15,7 @@ in
   o.module "unit.pihole" (with o; {
     enable = toggle "Enable Pihole" false;
     privacy_level = opt "Pihole statistics privacy level, 0 = full, 3 = only anonymous" t.int 1;
-    data_dir = opt "Directory for pihole state data" t.str "${mylib.units.data_dir}/pihole";
+    data_dir = opt "Directory for pihole state data" t.str "${my.units.data_dir}/pihole";
     dns = {
       domain = opt "LAN domain" t.str "local";
       interface = opt "Network interface" t.str null;

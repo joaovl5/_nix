@@ -37,11 +37,18 @@ in {
     remoteBuild = false;
     sudo = "run0 --user";
 
-    nodes = _n {
-      host = "testservervm";
-      hostname = "192.168.122.169";
-      ssh_user = "tyrant";
-      user = "root";
-    };
+    nodes =
+      # _n {
+      #   host = "testservervm";
+      #   hostname = "192.168.122.169";
+      #   ssh_user = "tyrant";
+      #   user = "root";
+      # } //
+      _n {
+        host = "tyrant";
+        hostname = "192.168.15.13";
+        ssh_user = "tyrant";
+        user = "root";
+      };
   };
 }

@@ -11,3 +11,7 @@
 
 ## Instruction updates
 - If any tool usage, procedures, or code guidelines change, suggest updating this file to reflect them.
+
+## Nomenclature
+- Use `snake_case` for variables and functions.
+- Meta modules (helpers that do not directly alter config) should be prefixed with an underscore (e.g., `_modules/_mylib.nix`).
