@@ -18,9 +18,9 @@ in {
   my_nix.email = "vieiraleao2005+testservervm@gmail.com";
   my_nix.name = "Tyrant";
 
-  my_facter.enable = true;
-  my_luks.ssh.enable = true;
-  my_luks.ssh.use_dhcp = true;
+  my.facter.enable = true;
+  my.luks.ssh.enable = true;
+  my.luks.ssh.use_dhcp = true;
 
   time.timeZone = cfg.timezone;
 

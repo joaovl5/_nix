@@ -6,10 +6,10 @@
 }: let
   cfg = config.my_nix;
 in {
-  my_nix = {
+  my = {
     technitium_dns.enable = true;
-    nextcloud.enable = true;
     minio.enable = true;
+    nextcloud.enable = true;
   };
 
   imports = with inputs; [

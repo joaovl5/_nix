@@ -1,68 +1,33 @@
 {
   config,
   pkgs,
-  lib,
   ...
-}: let
+} @ args: let
+  o = import ../../../_lib/options.nix args;
   inherit (import ../../../_lib/services.nix {inherit pkgs config;}) make_docker_service data_dir;
-  inherit (lib) mkOption mkIf mkMerge mkEnableOption types;
-  cfg = config.my_nix.nextcloud;
   mount_path = "${data_dir}/nextcloud";
-in {
-  # TODO: ^2 make the bug of ther dns make dynamic config nixos valeu
-  options.my_nix.nextcloud = {
-    enable =
-      mkEnableOption "Enable Nextcloud"
-      // {
-        default = false;
-      };
-
-    http_port = mkOption {
-      description = "Port for Nextcloud's web UI";
-      type = types.int;
-      default = 1009;
-    };
-
-    admin_user = mkOption {
-      description = "Default admin user for Nextcloud";
-      type = types.str;
-      default = "admin";
-    };
-
-    admin_password = mkOption {
-      description = "Default admin password for Nextcloud";
-      type = types.str;
-      default = "adminchangeme";
-    };
-
-    hostname = mkOption {
-      description = "Hostname for local DNS";
-      type = types.str;
-      default = "cloud.bigbug";
-    };
-
-    host_ip = mkOption {
-      description = "IP for service, if it's hosted in another machine. Localhost by default.";
-      type = types.str;
-      default = "127.0.0.1";
-    };
-  };
-
-  config = mkIf cfg.enable (mkMerge [
-    (make_docker_service {
-      service_name = "nextcloud";
-      compose_obj = import ./compose.nix {
-        nextcloud_http_port = cfg.http_port;
-        nextcloud_admin_user = cfg.admin_user;
-        nextcloud_admin_password = cfg.admin_password;
-        nextcloud_trusted_domain = cfg.hostname;
-        nextcloud_mount_path = mount_path;
-        mariadb_timezone = config.my_nix.timezone;
-      };
-    })
-    # {
-    #   networking.firewall.allowedTCPPorts = [53];
-    #   networking.firewall.allowedUDPPorts = [53];
-    # }
-  ]);
-}
+in
+  # options.my.nextcloud (past)
+  o.module "nextcloud" (with o; {
+    enable = toggle "Enable nextcloud" false;
+    http_port = opt "Nextcloud's web UI port" t.int 1009;
+    admin_user = opt "Admin user" t.str "admin";
+    admin_password = opt "Admin password" t.str "adminchangeme";
+    hostname = opt "Local DNS hostname" t.str "cloud.bigbug";
+    host_ip = opt "IP for service" t.str "127.0.0.1";
+  }) {} (
+    opts:
+      o.when opts.enable (o.merge [
+        (make_docker_service {
+          service_name = "nextcloud";
+          compose_obj = import ./compose.nix {
+            nextcloud_http_port = opts.http_port;
+            nextcloud_admin_user = opts.admin_user;
+            nextcloud_admin_password = opts.admin_password;
+            nextcloud_trusted_domain = opts.hostname;
+            nextcloud_mount_path = mount_path;
+            mariadb_timezone = config.my_nix.timezone;
+          };
+        })
+      ])
+  )

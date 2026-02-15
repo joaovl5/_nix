@@ -1,14 +1,11 @@
 {
   config,
-  lib,
   inputs,
   ...
-}: let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-
+} @ args: let
+  o = import ../../_lib/options.nix args;
   # DEFAULT_FACTER_PATH = "/root/facter.json";
 
-  facter_cfg = config.my_facter;
   # wonky workaround to reading absolute paths, as to avoid using `--impure` explicitly
   # doesnt seem to be working, infinite recursion
   # facter_report_json =
@@ -20,20 +17,16 @@
   #   '';
   # facter_report = builtins.fromJSON facter_report_json;
   # installer tool is pre-configured to use this location (/mnt/root/facter.json)
-in {
-  options.my_facter = {
-    enable = mkEnableOption "Enable nixos-facter" // {default = true;};
-    report_path = mkOption {
-      description = "Report path for nixos-facter";
-      type = types.path;
-      default = "${inputs.mysecrets}/facter/${config.my_nix.hostname}.json";
-    };
-  };
-
-  config = mkIf facter_cfg.enable {
-    hardware.facter.reportPath = assert (
-      facter_cfg.report_path != "" && facter_cfg.report_path != null
-    );
-      facter_cfg.report_path;
-  };
-}
+in
+  o.module "facter" (with o; {
+    enable = toggle "Enable nixos-facter" true;
+    report_path = opt "Report path for nixos-facter" t.path "${inputs.mysecrets}/facter/${config.my_nix.hostname}.json";
+  }) {} (
+    opts:
+      o.when opts.enable {
+        hardware.facter.reportPath = assert (
+          opts.report_path != "" && opts.report_path != null
+        );
+          opts.report_path;
+      }
+  )
