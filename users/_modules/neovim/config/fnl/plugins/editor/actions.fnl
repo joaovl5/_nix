@@ -7,7 +7,7 @@
                  :languages {:python {:template {:annotation_convention :google_docstrings}}}}})
  ; pretty hover
  (plugin :Fildo7525/pretty_hover
-         {:event :VeryLazy
+         {:event :LspAttach
           :opts {:border :none
                  :wrap true
                  :multi_server true
@@ -16,7 +16,6 @@
  ; git
  (plugin :lewis6991/gitsigns.nvim
          {:opts {}
-          :event :VeryLazy
           :keys [(key :<leader>gb "<cmd>Gitsigns blame_line<cr>"
                       {:desc "Blame (line)"})
                  (key :<leader>gB "<cmd>Gitsigns blame<cr>"
@@ -33,7 +32,7 @@
                          (plugin :kosayoda/nvim-lightbulb
                                  {:opts {:autocmd {:enabled true}
                                          :ignore {:clients [:ruff :dev-tools]}}})]
-          :event :VeryLazy
+          :event :LspAttach
           :opts {:backend :delta
                  :picker :snacks
                  :resolve_timeout 100

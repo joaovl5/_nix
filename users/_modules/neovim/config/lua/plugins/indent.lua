@@ -13,4 +13,4 @@ local function _1_()
   hk.register(hl_setup, _2_)
   return ibl.setup({indent = {highlight = bg_hl, char = "\226\139\174"}, scope = {highlight = hl, char = "\226\139\174", show_exact_scope = true}})
 end
-return {"lukas-reineke/indent-blankline.nvim", main = "ibl", event = "VeryLazy", config = _1_}
+return {"lukas-reineke/indent-blankline.nvim", main = "ibl", event = "BufEnter", config = _1_}

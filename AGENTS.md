@@ -19,3 +19,4 @@
 
 - Use `snake_case` for variables and functions.
 - Meta modules (helpers that do not directly alter config) should be prefixed with an underscore (e.g., `_modules/_mylib.nix`).
+- Variables representing types (submodules) should be in PascalCase.

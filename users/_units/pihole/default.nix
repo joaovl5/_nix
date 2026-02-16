@@ -7,6 +7,8 @@
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
+
+  dns_cfg = config.my.dns;
 in
   #
   # Requisites:
@@ -19,11 +21,15 @@ in
     privacy_level = opt "Pihole statistics privacy level, 0 = full, 3 = only anonymous" t.int 1;
     data_dir = opt "Directory for pihole state data" t.str "${my.units.data_dir}/pihole";
     dns = {
-      domain = opt "LAN domain" t.str "local";
+      domain = opt "LAN domain" t.str "lan";
       interface = opt "Network interface" t.str null;
+      host_ip = opt "Host IP" t.str null;
+      host_domain = opt "Domain to resolve to host ip" t.str "pihole";
+      extra_hosts = opt "List of extra hosts for DNS, aside from those already in `my.dns.hosts`" (t.listOf t.str) [];
+      upstreams = opt "List of upstream DNS servers" (t.listOf t.str) dns_cfg.fallback_dns;
     };
     web = {
-      ports = opt "Web UI ports" (t.listOf t.int) [1111];
+      port = opt "Web UI ports" t.int 1111;
     };
   }) {} (opts: (o.when opts.enable (let
     pkg = pkgs.pihole-ftl;
@@ -74,7 +80,7 @@ in
       };
       pihole-web = {
         enable = true;
-        inherit (opts.web) ports;
+        ports = [opts.web.port];
       };
       pihole-ftl = {
         enable = true;
@@ -98,11 +104,18 @@ in
             active = false;
           };
           dns = {
-            inherit (opts.dns) domain interface;
+            inherit (opts.dns) domain interface upstreams;
             domainNeeded = true;
             expandHosts = true;
-            upstreams = ["1.1.1.1" "1.1.1.2"];
-            cnameRecords = [];
+
+            piholePTR = "HOSTNAMEFQDN"; # resolve machines' hostnames + domain (.lan)
+            hosts =
+              [
+                (with opts.dns; "${host_ip} ${host_domain}")
+              ]
+              ++ dns_cfg.hosts
+              ++ opts.dns.extra_hosts;
+            cnameRecords = dns_cfg.cname_records;
           };
           ntp = {
             ipv4.active = false;

@@ -1,16 +1,18 @@
 {
+  mylib,
   config,
   ...
-} @ args: let
-  o = import ../../../_lib/options args;
-  inherit (config) my;
+}: let
+  my = mylib.use config;
+  o = my.options;
+  cfg = config.my;
 in
   o.module "traefik" (with o; {
     enable = toggle "Enable Traefik" true;
   }) {} (
     opts:
       o.when opts.enable {
-        networking.firewall.allowedTCPPorts = [80];
+        networking.firewall.allowedTCPPorts = [80 8080];
         services.traefik = {
           enable = true;
           staticConfigOptions = {
@@ -22,27 +24,28 @@ in
             api.insecure = true;
           };
           dynamicConfigOptions.http = o.merge [
-            (o.when my.technitium_dns.enable (with my.technitium_dns; {
-              routers.technitium_dns = {
-                rule = "Host(`${hostname}`)";
-                service = "technitium_dns";
+            (o.when cfg."unit.pihole".enable (with cfg."unit.pihole"; {
+              routers.pihole = {
+                rule = "Host(`${dns.host_domain}`)";
+                service = "pihole";
                 entryPoints = ["web"];
               };
-              services.technitium_dns = {
+              services.pihole = {
                 loadBalancer.servers = [
-                  {url = "http://${host_ip}:${toString http_port}";}
+                  {url = "http://${dns.host_ip}:${toString web.port}";}
                 ];
               };
             }))
-            (o.when my.nextcloud.enable (with my.nextcloud; {
-              routers.nextcloud = {
-                rule = "Host(`${hostname}`)";
-                service = "nextcloud";
+
+            (o.when cfg."unit.litellm".enable (with cfg."unit.litellm"; {
+              routers.litellm = {
+                rule = "Host(`${web.host_domain}`)";
+                service = "litellm";
                 entryPoints = ["web"];
               };
-              services.nextcloud = {
+              services.litellm = {
                 loadBalancer.servers = [
-                  {url = "http://${host_ip}:${toString http_port}";}
+                  {url = "http://${web.host_ip}:${toString web.port}";}
                 ];
               };
             }))

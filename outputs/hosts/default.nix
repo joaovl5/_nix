@@ -56,6 +56,7 @@ in {
       ../../systems/_modules/home-manager.nix
       ../../systems/_modules/nix.nix
       ../../systems/_modules/lix.nix
+      ../../systems/_modules/dns
     ];
   };
 

@@ -14,18 +14,55 @@ in {
   imports = with inputs; [
     hm.nixosModules.home-manager
     ./_units/pihole
+    ./_units/litellm
+    ./_services/traefik
     # ./_services/technitium-dns
     # ./_services/minio
     # ./_services/nextcloud
     # ./_services/syncthing
-    # ./_services/traefik
   ];
 
-  my = {
+  my = let
+    ip_tyrant = "192.168.15.3";
+  in {
+    dns = {
+      hosts = [
+        "192.168.15.1 gateway.lan"
+        "${ip_tyrant} tyrant.lan"
+      ];
+      cname_records = [
+        "pi.lan,tyrant.lan"
+        "litellm.lan,tyrant.lan"
+      ];
+    };
+
     "unit.pihole" = {
       enable = true;
-      dns.domain = "local";
-      dns.interface = "enp3s0f1";
+      dns = {
+        domain = "lan";
+        interface = "enp3s0f1";
+        host_ip = ip_tyrant;
+        host_domain = "pihole.lan";
+      };
+    };
+
+    "unit.litellm" = {
+      enable = true;
+      web = {
+        host_ip = ip_tyrant;
+      };
+      config = {
+        model_list = [
+          {
+            model_name = "*";
+            litellm_params = {
+              model = "openai/*";
+              # read in ExecStart
+              api_key = "os.environ/OPENAI_KEY";
+            };
+          }
+        ];
+      };
     };
   };
 
