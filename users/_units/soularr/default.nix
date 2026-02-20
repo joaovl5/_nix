@@ -9,9 +9,7 @@
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
-  u = my.units;
   cfg = config.my;
-  nix_cfg = config.my.nix;
   inherit (o) t;
 in
   o.module "unit.soularr" (with o; {
@@ -24,27 +22,18 @@ in
     soularr = {
       interval = opt "Systemd timer calendar for Soularr runs" t.str "*:0/5";
     };
-    migration = {
-      interval = opt "Systemd timer calendar for migration" t.str "*:0/15";
-    };
   }) {} (opts:
     o.when opts.enable (let
       inherit (config) nixarr;
       lidarr_port = cfg."unit.nixarr".lidarr.port;
-      user = nix_cfg.username;
-      group = "users";
 
       # Soularr package from flake input
       soularr_pkg = inputs.soularr.packages.${system}.default;
 
-      # User-owned directories
-      data_dir = "${u.data_dir}/soularr/data/music";
-      state_dir = "${u.data_dir}/soularr/state";
-      config_dir = "${u.data_dir}/soularr/config";
-      downloads_dir = "${data_dir}/slskd_downloads";
-
-      # Root-owned target directory
-      target_music_dir = "${nixarr.mediaDir}/library/music";
+      # Directories - use nixarr.mediaDir directly (services run as root)
+      music_dir = "${nixarr.mediaDir}/library/music";
+      state_dir = "/var/lib/soularr";
+      config_dir = "/var/lib/soularr/config";
 
       # Runtime path for generated config.ini
       soularr_cfg_path = "${config_dir}/config.ini";
@@ -62,14 +51,14 @@ in
 [Lidarr]
 api_key = $LIDARR_API_KEY
 host_url = http://127.0.0.1:${toString lidarr_port}
-download_dir = ${downloads_dir}
+download_dir = ${music_dir}
 disable_sync = False
 
 [Slskd]
 api_key = $SLSKD_API_KEY
 host_url = http://127.0.0.1:${toString opts.slskd.port}
 url_base = /
-download_dir = ${downloads_dir}
+download_dir = ${music_dir}
 delete_searches = False
 stalled_timeout = 3600
 
@@ -132,8 +121,8 @@ EOF
           --slsk-username "$SLSKD_SOULSEEK_USERNAME" \
           --slsk-password "$SLSKD_SOULSEEK_PASSWORD" \
           --api-key "$SLSKD_API_KEY" \
-          --downloads "${downloads_dir}" \
-          --shared "${data_dir}" \
+          --downloads "${music_dir}" \
+          --shared "${music_dir}" \
           --remote-configuration
       '';
 
@@ -143,129 +132,65 @@ EOF
         cd "${config_dir}"
         exec ${soularr_pkg}/bin/soularr
       '';
-
-      # Migration script that runs as root
-      migrate_script = pkgs.writeShellScript "soularr-migrate" ''
-        set -euo pipefail
-
-        SOURCE_DIR="${downloads_dir}"
-        TARGET_DIR="${target_music_dir}"
-
-        # Check if source directory exists and has files
-        if [ ! -d "$SOURCE_DIR" ]; then
-          echo "Source directory does not exist: $SOURCE_DIR"
-          exit 0
-        fi
-
-        # Check if there are any files to migrate
-        if [ -z "$(ls -A "$SOURCE_DIR" 2>/dev/null)" ]; then
-          echo "No files to migrate"
-          exit 0
-        fi
-
-        echo "Migrating files from $SOURCE_DIR to $TARGET_DIR"
-
-        # Ensure target directory exists
-        mkdir -p "$TARGET_DIR"
-
-        # Use rsync to copy with proper ownership, then remove source
-        ${pkgs.rsync}/bin/rsync -av --chown=root:root --remove-source-files "$SOURCE_DIR/" "$TARGET_DIR/"
-
-        # Clean up empty directories in source
-        find "$SOURCE_DIR" -type d -empty -delete 2>/dev/null || true
-
-        echo "Migration complete"
-      '';
     in {
-      # SOPS secrets
+      # SOPS secrets (root-owned)
       sops.secrets = {
-        "soularr_lidarr_api_key" = s.mk_secret_user "${s.dir}/soularr.yaml" "lidarr_api_key" {
-          inherit group;
-        };
-        "soularr_slskd_api_key" = s.mk_secret_user "${s.dir}/soularr.yaml" "slskd_api_key" {
-          inherit group;
-        };
-        "soularr_slskd_username" = s.mk_secret_user "${s.dir}/soularr.yaml" "slskd_username" {
-          inherit group;
-        };
-        "soularr_slskd_password" = s.mk_secret_user "${s.dir}/soularr.yaml" "slskd_password" {
-          inherit group;
-        };
-        "soularr_slskd_soulseek_username" = s.mk_secret_user "${s.dir}/soularr.yaml" "slskd_soulseek_username" {
-          inherit group;
-        };
-        "soularr_slskd_soulseek_password" = s.mk_secret_user "${s.dir}/soularr.yaml" "slskd_soulseek_password" {
-          inherit group;
-        };
+        "soularr_lidarr_api_key" = s.mk_secret "${s.dir}/soularr.yaml" "lidarr_api_key" {};
+        "soularr_slskd_api_key" = s.mk_secret "${s.dir}/soularr.yaml" "slskd_api_key" {};
+        "soularr_slskd_username" = s.mk_secret "${s.dir}/soularr.yaml" "slskd_username" {};
+        "soularr_slskd_password" = s.mk_secret "${s.dir}/soularr.yaml" "slskd_password" {};
+        "soularr_slskd_soulseek_username" = s.mk_secret "${s.dir}/soularr.yaml" "slskd_soulseek_username" {};
+        "soularr_slskd_soulseek_password" = s.mk_secret "${s.dir}/soularr.yaml" "slskd_soulseek_password" {};
       };
 
       # Open Soulseek port
       networking.firewall.allowedTCPPorts = [50300];
 
-      # Ensure directories exist with proper ownership
-      systemd.tmpfiles.rules = [
-        "d ${u.data_dir}/soularr 0755 ${user} ${group} -"
-        "d ${u.data_dir}/soularr/data 0755 ${user} ${group} -"
-        "d ${data_dir} 0755 ${user} ${group} -"
-        "d ${downloads_dir} 0755 ${user} ${group} -"
-        "d ${state_dir} 0755 ${user} ${group} -"
-        "d ${state_dir}/slskd 0755 ${user} ${group} -"
-        "d ${config_dir} 0755 ${user} ${group} -"
-      ];
+      systemd = {
+        # Ensure directories exist
+        tmpfiles.rules = [
+          "d ${state_dir} 0755 root root -"
+          "d ${state_dir}/slskd 0755 root root -"
+          "d ${config_dir} 0755 root root -"
+        ];
 
-      # User service for native slskd (autostart at boot)
-      systemd.user.services.slskd = {
-        enable = true;
-        description = "[slskd] - Soulseek daemon";
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = start_slskd_script;
-          Restart = "on-failure";
-          RestartSec = "5s";
+        services = {
+          # System service for slskd
+          slskd = {
+            enable = true;
+            description = "[slskd] - Soulseek daemon";
+            serviceConfig = {
+              Type = "simple";
+              ExecStart = start_slskd_script;
+              Restart = "on-failure";
+              RestartSec = "5s";
+            };
+            wantedBy = ["multi-user.target"];
+          };
+
+          # System service for soularr (oneshot, triggered by timer)
+          soularr = {
+            enable = true;
+            description = "[soularr] - Soulseek downloader for Lidarr";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStartPre = generate_config_script;
+              ExecStart = run_soularr_script;
+            };
+            after = ["slskd.service"];
+            requires = ["slskd.service"];
+          };
         };
-        wantedBy = ["default.target"];
-      };
 
-      # User service for soularr (oneshot, triggered by timer)
-      systemd.user.services.soularr = {
-        enable = true;
-        description = "[soularr] - Soulseek downloader for Lidarr";
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStartPre = generate_config_script;
-          ExecStart = run_soularr_script;
-        };
-        after = ["slskd.service"];
-        requires = ["slskd.service"];
-      };
-
-      # User timer for soularr (autostart at boot)
-      systemd.user.timers.soularr = {
-        enable = true;
-        description = "Timer for Soularr service";
-        wantedBy = ["timers.target"];
-        timerConfig = {
-          OnCalendar = opts.soularr.interval;
-          Persistent = true;
-        };
-      };
-
-      # Migration service (runs as root to handle permission elevation)
-      systemd.services.soularr-migrate = {
-        description = "Migrate Soularr downloads to Lidarr media directory";
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = migrate_script;
-        };
-      };
-
-      # Migration timer (autostart at boot)
-      systemd.timers.soularr-migrate = {
-        description = "Timer for Soularr migration service";
-        wantedBy = ["timers.target"];
-        timerConfig = {
-          OnCalendar = opts.migration.interval;
-          Persistent = true;
+        # System timer for soularr
+        timers.soularr = {
+          enable = true;
+          description = "Timer for Soularr service";
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnCalendar = opts.soularr.interval;
+            Persistent = true;
+          };
         };
       };
     }))
