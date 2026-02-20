@@ -46,7 +46,10 @@
     # Desktop ---
 
     ## discord
-    nixcord.url = "git+https://github.com/FlameFlag/nixcord?shallow=1";
+    nixcord = {
+      url = "git+https://github.com/FlameFlag/nixcord?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## hyprland
     hyprland-plugins = {
       url = "git+https://github.com/hyprwm/hyprland-plugins?shallow=1";
@@ -77,15 +80,27 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ## flatpak support
-    nix-flatpak.url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
+    nix-flatpak = {
+      url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Server ---
     # dns
     nixos-dns = {
       url = "git+https://github.com/Janik-Haag/nixos-dns?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # atticd nix cache server thingy
+    atticd = {
+      url = "git+https://github.com/zhaofengli/attic?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # -arr programs
-    nixarr.url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
+    nixarr = {
+      url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # my soularr fork with a nix flake - TODO: put in my nur repo
     soularr.url = "git+https://github.com/joaovl5/soularr.git?shallow=1";
     # Other ---
