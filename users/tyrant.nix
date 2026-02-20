@@ -38,7 +38,7 @@ in {
         "radarr.lan,tyrant.lan"
         "sonarr.lan,tyrant.lan"
         "bazarr.lan,tyrant.lan"
-        "sls.soul.lan,tyrant.lan"
+        "soulseek.lan,tyrant.lan"
       ];
     };
 

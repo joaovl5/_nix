@@ -16,7 +16,7 @@ in
     enable = toggle "Enable Soularr" false;
     slskd = {
       host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
-      host = opt "Host domain (used for DNS)" t.str "sls.soul.lan";
+      host = opt "Host domain (used for DNS)" t.str "soulseek.lan";
       port = opt "Port for Slskd web UI" t.int 55090;
     };
     soularr = {
@@ -40,65 +40,65 @@ in
 
       # Script to generate config.ini at runtime from secrets
       generate_config_script = pkgs.writeShellScript "soularr-generate-config" ''
-        set -euo pipefail
+                set -euo pipefail
 
-        LIDARR_API_KEY=$(cat ${s.secret_path "soularr_lidarr_api_key"})
-        SLSKD_API_KEY=$(cat ${s.secret_path "soularr_slskd_api_key"})
+                LIDARR_API_KEY=$(cat ${s.secret_path "soularr_lidarr_api_key"})
+                SLSKD_API_KEY=$(cat ${s.secret_path "soularr_slskd_api_key"})
 
-        mkdir -p "${config_dir}"
+                mkdir -p "${config_dir}"
 
-        cat > "${soularr_cfg_path}" << EOF
-[Lidarr]
-api_key = $LIDARR_API_KEY
-host_url = http://127.0.0.1:${toString lidarr_port}
-download_dir = ${music_dir}
-disable_sync = False
+                cat > "${soularr_cfg_path}" << EOF
+        [Lidarr]
+        api_key = $LIDARR_API_KEY
+        host_url = http://127.0.0.1:${toString lidarr_port}
+        download_dir = ${music_dir}
+        disable_sync = False
 
-[Slskd]
-api_key = $SLSKD_API_KEY
-host_url = http://127.0.0.1:${toString opts.slskd.port}
-url_base = /
-download_dir = ${music_dir}
-delete_searches = False
-stalled_timeout = 3600
+        [Slskd]
+        api_key = $SLSKD_API_KEY
+        host_url = http://127.0.0.1:${toString opts.slskd.port}
+        url_base = /
+        download_dir = ${music_dir}
+        delete_searches = False
+        stalled_timeout = 3600
 
-[Release Settings]
-use_most_common_tracknum = True
-allow_multi_disc = True
-accepted_countries = Europe,Japan,United Kingdom,United States,[Worldwide],Australia,Canada
-skip_region_check = False
-accepted_formats = CD,Digital Media,Vinyl
+        [Release Settings]
+        use_most_common_tracknum = True
+        allow_multi_disc = True
+        accepted_countries = Europe,Japan,United Kingdom,United States,[Worldwide],Australia,Canada
+        skip_region_check = False
+        accepted_formats = CD,Digital Media,Vinyl
 
-[Search Settings]
-search_timeout = 5000
-maximum_peer_queue = 50
-minimum_peer_upload_speed = 0
-minimum_filename_match_ratio = 0.8
-allowed_filetypes = flac 24/192,flac 16/44.1,flac,mp3 320,mp3
-ignored_users =
-album_prepend_artist = False
-track_prepend_artist = True
-search_type = incrementing_page
-number_of_albums_to_grab = 10
-remove_wanted_on_failure = False
-title_blacklist =
-search_blacklist =
-search_source = missing
-enable_search_denylist = False
-max_search_failures = 3
+        [Search Settings]
+        search_timeout = 5000
+        maximum_peer_queue = 50
+        minimum_peer_upload_speed = 0
+        minimum_filename_match_ratio = 0.8
+        allowed_filetypes = flac 24/192,flac 16/44.1,flac,mp3 320,mp3
+        ignored_users =
+        album_prepend_artist = False
+        track_prepend_artist = True
+        search_type = incrementing_page
+        number_of_albums_to_grab = 10
+        remove_wanted_on_failure = False
+        title_blacklist =
+        search_blacklist =
+        search_source = missing
+        enable_search_denylist = False
+        max_search_failures = 3
 
-[Download Settings]
-download_filtering = True
-use_extension_whitelist = False
-extensions_whitelist = lrc,nfo,txt
+        [Download Settings]
+        download_filtering = True
+        use_extension_whitelist = False
+        extensions_whitelist = lrc,nfo,txt
 
-[Logging]
-level = INFO
-format = [%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s
-datefmt = %Y-%m-%dT%H:%M:%S%z
-EOF
+        [Logging]
+        level = INFO
+        format = [%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s
+        datefmt = %Y-%m-%dT%H:%M:%S%z
+        EOF
 
-        chmod 644 "${soularr_cfg_path}"
+                chmod 644 "${soularr_cfg_path}"
       '';
 
       # Script to start native slskd with secrets
