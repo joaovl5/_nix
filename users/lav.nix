@@ -22,12 +22,13 @@
     (import ./_modules/xdg-portals.nix)
     (import ./_modules/gaming)
     (import ./_modules/coding)
-    (import ./_modules/codex)
+    (import ./_modules/ai)
     (import ./_modules/obs)
     (import ./_modules/ghostty)
     (import ./_modules/zen-browser)
     (import ./_modules/neovim)
     (import ./_modules/espanso)
+    (import ./_modules/discord)
     # (import ./_modules/yazi)
   ];
   module_imports = extract_imports modules;
@@ -40,6 +41,7 @@ in {
     ++ (with inputs; [
       nix-flatpak.nixosModules.nix-flatpak
       hm.nixosModules.home-manager
+      nur.modules.nixos.default
     ]);
 
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -58,7 +60,10 @@ in {
 
   home-manager.users.${cfg.username} = _: {
     imports =
-      module_imports.hm;
+      [
+        inputs.nur.modules.homeManager.default
+      ]
+      ++ module_imports.hm;
 
     home.stateVersion = "23.11";
 
@@ -79,7 +84,6 @@ in {
     home.packages = with pkgs; [
       # core
       libreoffice
-      chromium
 
       # terminal
       ## emulator
@@ -89,9 +93,11 @@ in {
       zellij
       ## tui
       systemctl-tui
-      gdu # ncdu alternative (MUCH faster)
+      gdu # ncdu alternative (MUCH faster on SSDs)
 
       # gui
+      ungoogled-chromium
+      waylock ## locker
       ## launcher
       fuzzel # backup
       ## file manager
@@ -99,9 +105,6 @@ in {
       ## settings
       nwg-look
       pwvucontrol
-
-      # communication
-      legcord
 
       ## programming
       mergiraf # git merge helper
@@ -129,6 +132,7 @@ in {
       llama-swap
       python314Packages.huggingface-hub
       cursor-cli
+      chatbox
 
       # dependencies
       rsync

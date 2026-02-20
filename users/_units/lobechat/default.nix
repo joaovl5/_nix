@@ -1,3 +1,6 @@
+##
+## WIP
+##
 {
   mylib,
   config,
@@ -12,20 +15,21 @@
   inherit (o) t;
   inherit (lib) mkOption;
 
-  LiteLLMParams = t.attrs;
-  # LiteLLMParams = t.submodule (_: {
-  #   options = {
-  #     model = o.optional "LiteLLM model identifier" t.str {};
-  #     api_key = o.optional "LiteLLM API key" t.str {};
-  #   };
-  # });
+  LiteLLMParams = t.submodule (_: {
+    options = {
+      model = o.optional "LiteLLM model identifier" t.str {};
+      api_base = o.optional "LiteLLM API base URL" t.str {};
+      api_key = o.optional "LiteLLM API key" t.str {};
+      rpm = o.optional "Requests per minute limit" t.int {};
+      aws_region_name = o.optional "AWS region name" t.str {};
+    };
+  });
 
-  ModelInfo = t.attrs;
-  # ModelInfo = t.submodule (_: {
-  #   options = {
-  #     version = o.optional "Model info version" t.int {};
-  #   };
-  # });
+  ModelInfo = t.submodule (_: {
+    options = {
+      version = o.optional "Model info version" t.int {};
+    };
+  });
 
   Model = t.submodule (_: {
     options = {
@@ -87,10 +91,6 @@ in
         owner = user;
         inherit group;
       };
-      "litellm_master_key" = s.mk_secret "${s.dir}/api_keys.yaml" "litellm" {
-        owner = user;
-        inherit group;
-      };
     };
 
     users.users.${user} = {
@@ -111,7 +111,6 @@ in
         Group = group;
         ExecStart = pkgs.writeShellScript "exec_litellm" ''
           export OPENAI_KEY=$(cat ${s.secret_path "openai_key_litellm"})
-          export LITELLM_MASTER_KEY=$(cat ${s.secret_path "litellm_master_key"})
 
           litellm \
             --host ${opts.web.host} \

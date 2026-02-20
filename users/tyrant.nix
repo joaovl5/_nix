@@ -15,15 +15,14 @@ in {
     hm.nixosModules.home-manager
     ./_units/pihole
     ./_units/litellm
-    ./_services/traefik
-    # ./_services/technitium-dns
-    # ./_services/minio
-    # ./_services/nextcloud
-    # ./_services/syncthing
+    ./_units/nixarr
+    ./_units/soularr
+    ./_units/traefik
   ];
 
   my = let
     ip_tyrant = "192.168.15.3";
+    localhost = "0.0.0.0";
   in {
     dns = {
       hosts = [
@@ -33,6 +32,13 @@ in {
       cname_records = [
         "pi.lan,tyrant.lan"
         "litellm.lan,tyrant.lan"
+        "jellyfin.lan,tyrant.lan"
+        "prowlarr.lan,tyrant.lan"
+        "lidarr.lan,tyrant.lan"
+        "radarr.lan,tyrant.lan"
+        "sonarr.lan,tyrant.lan"
+        "bazarr.lan,tyrant.lan"
+        "sls.soul.lan,tyrant.lan"
       ];
     };
 
@@ -41,8 +47,8 @@ in {
       dns = {
         domain = "lan";
         interface = "enp3s0f1";
-        host_ip = ip_tyrant;
-        host_domain = "pihole.lan";
+        host_ip = localhost;
+        host_domain = "pi.lan";
       };
     };
 
@@ -54,15 +60,30 @@ in {
       config = {
         model_list = [
           {
-            model_name = "*";
+            model_name = "gpt-5-mini";
             litellm_params = {
-              model = "openai/*";
-              # read in ExecStart
+              model = "gpt-5-mini-2025-08-07";
+              api_base = "https://api.openai.com";
               api_key = "os.environ/OPENAI_KEY";
             };
           }
         ];
       };
+    };
+
+    "unit.nixarr" = {
+      enable = true;
+      jellyfin.host_ip = localhost;
+      prowlarr.host_ip = localhost;
+      lidarr.host_ip = localhost;
+      radarr.host_ip = localhost;
+      sonarr.host_ip = localhost;
+      bazarr.host_ip = localhost;
+    };
+
+    "unit.soularr" = {
+      enable = true;
+      slskd.host_ip = localhost;
     };
   };
 
@@ -106,6 +127,7 @@ in {
       ripgrep
       neovim
       jq
+      tmux
 
       ## monitoring
       glances

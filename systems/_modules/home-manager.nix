@@ -18,6 +18,7 @@
     extraSpecialArgs = {
       inherit inputs;
       inherit system;
+      inherit pkgs;
       nixos_config = config;
       secrets = inputs.mysecrets;
       public = import ../../_modules/public.nix args;

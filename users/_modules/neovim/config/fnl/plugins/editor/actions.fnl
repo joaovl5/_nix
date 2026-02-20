@@ -31,7 +31,11 @@
          {:dependencies [:nvim-lua/plenary.nvim
                          (plugin :kosayoda/nvim-lightbulb
                                  {:opts {:autocmd {:enabled true}
-                                         :ignore {:clients [:ruff :dev-tools]}}})]
+                                         :ignore {:clients [:ruff
+                                                            :dev-tools
+                                                            :nil
+                                                            :typescript-tools
+                                                            :marksman]}}})]
           :event :LspAttach
           :opts {:backend :delta
                  :picker :snacks

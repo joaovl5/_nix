@@ -105,6 +105,7 @@
       ## js
       eslint_d
       typescript-language-server
+      vscode-js-debug
       ## nix
       alejandra
       nixd

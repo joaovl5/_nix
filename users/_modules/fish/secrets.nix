@@ -4,4 +4,5 @@
   # var = name: value: "set -gx ${name} ${lib.escapeShellArg value}";
 in ''
   ${mk_secret "OPENAI_KEY" "${secrets.openai_key.path}"}
+  ${mk_secret "OPENAI_API_KEY" "${secrets.openai_key.path}"}
 ''
