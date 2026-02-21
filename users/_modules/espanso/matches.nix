@@ -21,7 +21,6 @@ args: let
   # );
 in {
   services.espanso.matches.base.matches = [
-    # TODO: ^1 fix
     # Shortcuts
     (mk_match "!day" "{{day}}" [(mk_var "day" "date" {format = "%m/%d/%Y";})])
     (mk_match "!time" "{{time}}" [(mk_var "time" "date" {format = "%H:%M";})])
