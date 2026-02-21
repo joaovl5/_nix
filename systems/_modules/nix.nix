@@ -46,6 +46,12 @@ in {
     };
   };
 
+  # cleans nix-shell gc stuff
+  services.angrr = {
+    enable = true;
+    settings.period = "7d";
+  };
+
   environment.variables.LD_LIBRARY_PATH = lib.mkForce [
     "/run/current-system/sw/lib"
   ];

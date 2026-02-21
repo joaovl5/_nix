@@ -2,6 +2,7 @@
   hm = {
     nixos_config,
     lib,
+    pkgs,
     ...
   }: let
     inherit (lib) mkMerge mkIf;
@@ -31,5 +32,19 @@
         nix-direnv.enable = true;
       };
     };
+
+    # faster direnv
+    services.lorri = {
+      enable = true;
+    };
+
+    home.packages = with pkgs; [
+      # runs software without installing
+      comma
+      # search packages
+      rippkgs
+      # edit flake inputs
+      flake-edit
+    ];
   };
 }

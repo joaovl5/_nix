@@ -118,6 +118,7 @@ in {
       ### system monitoring/inspection
       pciutils
       btop
+      glances
       ### etc
       tealdeer # tldr alternative
       pandoc
