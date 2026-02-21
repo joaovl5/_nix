@@ -1,2 +1,2 @@
 -- [nfnl] fnl/plugins/_sample.fnl
-return {"example/example", opts = {}, enabled = false}
+return { "example/example", opts = {}, enabled = false }

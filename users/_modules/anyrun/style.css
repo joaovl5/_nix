@@ -16,7 +16,6 @@ box.main {
   font-family: "IosevkaTerm Nerd Font Mono";
 }
 
-
 text {
   min-height: 30px;
   padding: 5px;
@@ -46,7 +45,6 @@ label.match {
   margin-top: 5px;
 }
 
-
 label.match.description {
   font-size: 14px;
   color: @desc-color;
@@ -69,7 +67,6 @@ label.plugin.info {
   /* animation: fade 0.1s linear; */
 }
 
-
 @keyframes fade {
   0% {
     opacity: 0;
@@ -79,4 +76,3 @@ label.plugin.info {
     opacity: 1;
   }
 }
-

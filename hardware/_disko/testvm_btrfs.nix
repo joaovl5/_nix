@@ -1,7 +1,4 @@
-{
-  primary_device,
-  ...
-}: {
+{primary_device, ...}: {
   disko.devices = {
     disk = {
       primary = {

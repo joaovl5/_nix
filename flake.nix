@@ -29,6 +29,7 @@
     };
     ## deployment
     deploy-rs.url = "git+https://github.com/serokell/deploy-rs?shallow=1";
+    deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
     ## secrets management
     sops-nix = {
       url = "git+https://github.com/Mic92/sops-nix?shallow=1";
@@ -43,6 +44,7 @@
     ## treefmt
     treefmt-nix = {
       url = "git+ssh://git@github.com/numtide/treefmt-nix.git?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     ## all nix systems
     all-systems = {
@@ -97,6 +99,7 @@
     nixos-dns = {
       url = "git+https://github.com/Janik-Haag/nixos-dns?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
     # atticd nix cache server thingy
     atticd = {
@@ -111,6 +114,7 @@
     };
     # my soularr fork with a nix flake - TODO: put in my nur repo
     soularr.url = "git+https://github.com/joaovl5/soularr.git?shallow=1";
+    soularr.inputs.nixpkgs.follows = "nixpkgs";
     # Other ---
     ## ai
     anthropic-skills.url = "git+https://github.com/anthropics/skills?shallow=1";

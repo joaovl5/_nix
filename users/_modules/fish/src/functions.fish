@@ -1,11 +1,11 @@
 function n.s --wraps nh --description 'runs nh os switch'
-  command nh os switch \
-    --verbose \
-    --show-trace \
-    --ask \
-    --max-jobs 24 \
-    --cores 24 \
-    --elevation-program run0
+    command nh os switch \
+        --verbose \
+        --show-trace \
+        --ask \
+        --max-jobs 24 \
+        --cores 24 \
+        --elevation-program run0
 end
 
 function solve_all_conflicts --description 'try to solve all current git conflicts with mergiraf'

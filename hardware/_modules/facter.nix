@@ -5,7 +5,6 @@
 } @ args: let
   o = import ../../_lib/options args;
   # DEFAULT_FACTER_PATH = "/root/facter.json";
-
   # wonky workaround to reading absolute paths, as to avoid using `--impure` explicitly
   # doesnt seem to be working, infinite recursion
   # facter_report_json =
