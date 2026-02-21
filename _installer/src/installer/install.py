@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
 from uuid import uuid4
+
 from attrs import define, field
 from rich.console import Console
 
@@ -413,9 +414,3 @@ class NixOSInstaller:
         self._handle_copy_keys()
         self._handle_gen_ssh_keys()
         self._handle_install()
-        # !!!!!!!! TODO: !!!!!!!!!!
-        # !! COPY KEYS TO /root/*** FOR POST INSTALL SERVICE
-        # clone repositories
-        # handle disko
-        # handle nixos-install
-        pass

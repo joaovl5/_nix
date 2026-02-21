@@ -39,6 +39,15 @@
       url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
       flake = false;
     };
+    #### quality-of-life
+    ## treefmt
+    treefmt-nix = {
+      url = "git+ssh://git@github.com/numtide/treefmt-nix.git?shallow=1";
+    };
+    ## all nix systems
+    all-systems = {
+      url = "git+ssh://git@github.com/nix-systems/default.git?shallow=1";
+    };
 
     # ---------------
     # pkgs
@@ -82,7 +91,6 @@
     ## flatpak support
     nix-flatpak = {
       url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     # Server ---
     # dns
