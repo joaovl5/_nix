@@ -16,13 +16,13 @@ repos:
 
   - repo: local
     hooks:
-      # - id: flake-format
-      #   name: flake-format
-      #   language: system
-      #   pass_filenames: false
-      #   entry: nix fmt
       - id: statix
         name: statix
         language: system
         pass_filenames: false
         entry: statix check -o errfmt
+      - id: deadnix
+        name: deadnix
+        language: system
+        pass_filenames: false
+        entry: deadnix

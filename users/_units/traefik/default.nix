@@ -2,7 +2,9 @@
   mylib,
   config,
   ...
-}: let
+} @ args: let
+  public = import ../../../_modules/public.nix args;
+
   my = mylib.use config;
   o = my.options;
   cfg = config.my;
@@ -41,6 +43,11 @@ in
             entryPoints = {
               web.address = ":80";
               web.asDefault = true;
+            };
+            certificatesResolvers.my_resolver.acme = {
+              email = public.emails.google_2;
+              storage = "acme.json";
+              httpChallenge.entrypoint = "web";
             };
             api.dashboard = true;
             api.insecure = true;
