@@ -1,0 +1,28 @@
+repos:
+  - repo: builtin
+    hooks:
+      # General
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=auto]
+      - id: fix-byte-order-marker
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      # Checks if configs parse
+      - id: check-toml
+      - id: check-yaml
+
+  - repo: local
+    hooks:
+      # - id: flake-format
+      #   name: flake-format
+      #   language: system
+      #   pass_filenames: false
+      #   entry: nix fmt
+      - id: statix
+        name: statix
+        language: system
+        pass_filenames: false
+        entry: statix check -o errfmt

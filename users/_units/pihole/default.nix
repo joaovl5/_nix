@@ -50,7 +50,7 @@ in
       };
     };
 
-    system.activationScripts.ensure_data_directory = ''
+    system.activationScripts.ensure_data_directory_pihole = ''
       echo "[!] Ensuring Pihole directories and symlinks"
       mkdir -v -p ${opts.data_dir}
       ln -sfn ${source_log_dir} ${target_log_link}

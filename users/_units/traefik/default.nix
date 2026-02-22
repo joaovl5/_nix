@@ -75,6 +75,12 @@ in
                   (with slskd; _h "slskd" host [(_u host_ip port)] {})
                 ]
               ))
+            (with cfg."unit.fxsync";
+              o.when enable (
+                mk_host [
+                  (_h "fxsync" host [(_u host_ip port)] {})
+                ]
+              ))
           ];
         };
       }

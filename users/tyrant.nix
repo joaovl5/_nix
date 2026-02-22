@@ -18,6 +18,7 @@ in {
     ./_units/nixarr
     ./_units/soularr
     ./_units/traefik
+    ./_units/fxsync
   ];
 
   my = let
@@ -39,6 +40,7 @@ in {
         "sonarr.lan,tyrant.lan"
         "bazarr.lan,tyrant.lan"
         "soulseek.lan,tyrant.lan"
+        "fxsync.lan,tyrant.lan"
       ];
     };
 
@@ -84,6 +86,12 @@ in {
     "unit.soularr" = {
       enable = true;
       slskd.host_ip = localhost;
+    };
+
+    "unit.fxsync" = {
+      enable = true;
+      host = "fxsync.lan";
+      host_ip = localhost;
     };
   };
 

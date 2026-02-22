@@ -50,6 +50,11 @@
     all-systems = {
       url = "git+ssh://git@github.com/nix-systems/default.git?shallow=1";
     };
+    ## options search
+    optnix = {
+      url = "sourcehut:~watersucks/optnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # ---------------
     # pkgs
@@ -74,17 +79,6 @@
         nixpkgs-stable.follows = "nixpkgs";
       };
     };
-    ## zen browser
-    zen-browser = {
-      url = "git+https://github.com/0xc000022070/zen-browser-flake?shallow=1";
-      inputs.nixpkgs.follows = "unstable";
-      inputs.home-manager.follows = "hm";
-    };
-    firefox-addons = {
-      ## support for declarative extensions
-      url = "git+https://gitlab.com/rycee/nur-expressions?dir=pkgs/firefox-addons&shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     ## rust nightly support
     fenix = {
       url = "git+https://github.com/nix-community/fenix?shallow=1";
@@ -92,7 +86,7 @@
     };
     ## flatpak support
     nix-flatpak = {
-      url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.6.0&shallow=1";
+      url = "git+https://github.com/gmodena/nix-flatpak/?ref=v0.7.0&shallow=1";
     };
     # Server ---
     # dns

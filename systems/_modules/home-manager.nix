@@ -3,6 +3,7 @@
   lib,
   pkgs,
   config,
+  options,
   system,
   ...
 } @ args: {
@@ -20,6 +21,7 @@
       inherit system;
       inherit pkgs;
       nixos_config = config;
+      nixos_options = options;
       secrets = inputs.mysecrets;
       public = import ../../_modules/public.nix args;
     };
