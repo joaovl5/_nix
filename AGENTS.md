@@ -4,6 +4,13 @@
 
 - Only work on code explicitly requested by the user.
 
+## Helpful Tooling
+
+- Searching nix and home-manager options
+  - `optnix -n -s nx <query>` - list of options if fuzzy search, more details if you give exact option name
+  - switch `-s nx` with `-s hm` for searching home-manager options
+  - these options also search declared options (some new ones may be missing if a system rebuild is pending)
+
 ## Required checks after changes
 
 - `nix fmt` - basic formatting, runs `treefmt` under the hood

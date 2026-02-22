@@ -391,6 +391,19 @@
         "type": "github"
       }
     },
+    "globals": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-V5MGBkJObCb3oCyNGQaN45lpIDkqwC7YGgAeZ3HHqFY=",
+        "path": "./globals",
+        "type": "path"
+      },
+      "original": {
+        "path": "./globals",
+        "type": "path"
+      }
+    },
     "hm": {
       "inputs": {
         "nixpkgs": [
@@ -793,10 +806,10 @@
     "mysecrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1771732899,
-        "narHash": "sha256-yjXAL1YyFBlpRUV8lAf2tUM2NOl3fdnwG9QualxMyiI=",
+        "lastModified": 1771752096,
+        "narHash": "sha256-Emi22HMF9YooOwUBE5FTYBQ4FvLaJ/by5K1ksYhQR4I=",
         "ref": "main",
-        "rev": "c76bd28b78ae6d8d72adf32664dda6cce25fd848",
+        "rev": "63c4bdc39333824b443ef2bdaf0418ce3461b684",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/joaovl5/__secrets.git"
@@ -1152,6 +1165,7 @@
         "disko": "disko",
         "fenix": "fenix",
         "fup": "fup",
+        "globals": "globals",
         "hm": "hm",
         "hyprland-plugins": "hyprland-plugins",
         "mysecrets": "mysecrets",

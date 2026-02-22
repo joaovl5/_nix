@@ -15,9 +15,10 @@ in
   o.module "unit.soularr" (with o; {
     enable = toggle "Enable Soularr" false;
     slskd = {
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
-      host = opt "Host domain (used for DNS)" t.str "soulseek.lan";
-      port = opt "Port for Slskd web UI" t.int 55090;
+      endpoint = my.units.endpoint {
+        port = 55090;
+        target = "soulseek";
+      };
     };
     soularr = {
       interval = opt "Systemd timer calendar for Soularr runs" t.str "*:0/5";
@@ -25,7 +26,7 @@ in
   }) {} (opts:
     o.when opts.enable (let
       inherit (config) nixarr;
-      lidarr_port = cfg."unit.nixarr".lidarr.port;
+      lidarr_port = cfg."unit.nixarr".lidarr.endpoint.port;
 
       # Soularr package from flake input
       soularr_pkg = inputs.soularr.packages.${system}.default;
@@ -56,7 +57,7 @@ in
 
         [Slskd]
         api_key = $SLSKD_API_KEY
-        host_url = http://127.0.0.1:${toString opts.slskd.port}
+        host_url = http://127.0.0.1:${toString opts.slskd.endpoint.port}
         url_base = /
         download_dir = ${music_dir}
         delete_searches = False
@@ -113,7 +114,7 @@ in
 
         exec ${pkgs.slskd}/bin/slskd \
           --app-dir "${state_dir}/slskd" \
-          --http-port ${toString opts.slskd.port} \
+          --http-port ${toString opts.slskd.endpoint.port} \
           --no-https \
           --slsk-listen-port 50300 \
           --username "$SLSKD_USERNAME" \
@@ -133,6 +134,10 @@ in
         exec ${soularr_pkg}/bin/soularr
       '';
     in {
+      my.vhosts.soulseek = {
+        inherit (opts.slskd.endpoint) target sources;
+      };
+
       # SOPS secrets (root-owned)
       sops.secrets = {
         "soularr_lidarr_api_key" = s.mk_secret "${s.dir}/soularr.yaml" "lidarr_api_key" {};

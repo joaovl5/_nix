@@ -1,0 +1,3 @@
+{
+  dns = import ./dns.nix;
+}

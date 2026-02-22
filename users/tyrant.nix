@@ -17,48 +17,25 @@ in {
     ./_units/litellm
     ./_units/nixarr
     ./_units/soularr
-    ./_units/traefik
+    ./_units/reverse-proxy
+    ./_units/octodns
     ./_units/fxsync
   ];
 
-  my = let
-    ip_tyrant = "192.168.15.3";
-    localhost = "0.0.0.0";
-  in {
-    dns = {
-      hosts = [
-        "192.168.15.1 gateway.lan"
-        "${ip_tyrant} tyrant.lan"
-      ];
-      cname_records = [
-        "pi.lan,tyrant.lan"
-        "litellm.lan,tyrant.lan"
-        "jellyfin.lan,tyrant.lan"
-        "prowlarr.lan,tyrant.lan"
-        "lidarr.lan,tyrant.lan"
-        "radarr.lan,tyrant.lan"
-        "sonarr.lan,tyrant.lan"
-        "bazarr.lan,tyrant.lan"
-        "soulseek.lan,tyrant.lan"
-        "fxsync.lan,tyrant.lan"
-      ];
+  my = {
+    "unit.octodns" = {
+      enable = true;
     };
 
     "unit.pihole" = {
       enable = true;
       dns = {
-        domain = "lan";
         interface = "enp3s0f1";
-        host_ip = localhost;
-        host_domain = "pi.lan";
       };
     };
 
     "unit.litellm" = {
       enable = true;
-      web = {
-        host_ip = ip_tyrant;
-      };
       config = {
         model_list = [
           {
@@ -75,23 +52,14 @@ in {
 
     "unit.nixarr" = {
       enable = true;
-      jellyfin.host_ip = localhost;
-      prowlarr.host_ip = localhost;
-      lidarr.host_ip = localhost;
-      radarr.host_ip = localhost;
-      sonarr.host_ip = localhost;
-      bazarr.host_ip = localhost;
     };
 
     "unit.soularr" = {
       enable = true;
-      slskd.host_ip = localhost;
     };
 
     "unit.fxsync" = {
       enable = true;
-      host = "fxsync.lan";
-      host_ip = localhost;
     };
   };
 

@@ -83,7 +83,7 @@
   (each [_ [opt val] (ipairs opts)]
     (set-opt opt val)))
 
-; clipboard os sync 
+; clipboard os sync
 (vim.schedule (fn [] (set vim.o.clipboard :unnamedplus)))
 
 ; filetype plugins and syntax enable (faster startup)

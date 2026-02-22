@@ -6,7 +6,9 @@
 }: let
   cfg = config.my.nix;
   home_path = config.users.users.${cfg.username}.home;
+  endpoint = import ./endpoint.nix {inherit lib;};
 in rec {
+  inherit endpoint;
   data_dir = "${home_path}/${cfg.private_data_dirname}/units";
 
   write_ini_from_attrset = name: attrset:

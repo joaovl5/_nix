@@ -50,7 +50,7 @@
 
 ; # LEADER
 
-; ## Tabs 
+; ## Tabs
 
 (wk.add [(km :<leader>q {:group :Tab})
          (km :<leader>qc {:desc :Create} :<cmd>tabnew<CR>)

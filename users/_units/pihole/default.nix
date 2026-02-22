@@ -2,34 +2,31 @@
   mylib,
   config,
   pkgs,
+  inputs,
   ...
 }: let
+  globals = import inputs.globals;
+
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
+  u = my.units;
 
+  inherit (globals.dns) tld;
   dns_cfg = config.my.dns;
 in
-  #
-  # Requisites:
-  # - declaratively setup pi-hole secrets
-  # - use octodns for managing zones
-  # - use nixos-dns for zones
-  # - manage state in centralized form
   o.module "unit.pihole" (with o; {
     enable = toggle "Enable Pihole" false;
     privacy_level = opt "Pihole statistics privacy level, 0 = full, 3 = only anonymous" t.int 1;
-    data_dir = opt "Directory for pihole state data" t.str "${my.units.data_dir}/pihole";
-    dns = {
-      domain = opt "LAN domain" t.str "lan";
-      interface = opt "Network interface" t.str null;
-      host_ip = opt "Host IP" t.str null;
-      host_domain = opt "Domain to resolve to host ip" t.str "pihole";
-      extra_hosts = opt "List of extra hosts for DNS, aside from those already in `my.dns.hosts`" (t.listOf t.str) [];
-      upstreams = opt "List of upstream DNS servers" (t.listOf t.str) dns_cfg.fallback_dns;
+    data_dir = opt "Directory for pihole state data" t.str "${u.data_dir}/pihole";
+    endpoint = u.endpoint {
+      port = 1111;
+      target = "pihole";
     };
-    web = {
-      port = opt "Web UI ports" t.int 1111;
+    dns = {
+      interface = opt "Network interface" t.str null;
+      extra_hosts = opt "List of extra hosts for DNS, aside from those managed by octodns" (t.listOf t.str) [];
+      upstreams = opt "List of upstream DNS servers" (t.listOf t.str) dns_cfg.fallback_dns;
     };
   }) {} (opts: (o.when opts.enable (let
     pkg = pkgs.pihole-ftl;
@@ -43,6 +40,10 @@ in
 
     pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
   in {
+    my.vhosts.pihole = {
+      inherit (opts.endpoint) target sources;
+    };
+
     sops.secrets = {
       "pihole_api_key" = s.mk_secret "${s.dir}/dns.yaml" "pihole-api-key" {
         owner = user;
@@ -80,7 +81,7 @@ in
       };
       pihole-web = {
         enable = true;
-        ports = [opts.web.port];
+        ports = [opts.endpoint.port];
       };
       pihole-ftl = {
         enable = true;
@@ -100,22 +101,18 @@ in
         settings = {
           misc.readOnly = false; # necessary for pwhash setup
           dhcp = {
-            # setup this later
             active = false;
           };
           dns = {
-            inherit (opts.dns) domain interface upstreams;
+            domain = tld;
+            inherit (opts.dns) interface upstreams;
             domainNeeded = true;
             expandHosts = true;
 
-            piholePTR = "HOSTNAMEFQDN"; # resolve machines' hostnames + domain (.lan)
-            hosts =
-              [
-                (with opts.dns; "${host_ip} ${host_domain}")
-              ]
-              ++ dns_cfg.hosts
-              ++ opts.dns.extra_hosts;
-            cnameRecords = dns_cfg.cname_records;
+            piholePTR = "HOSTNAMEFQDN";
+            # DNS records now managed by octodns
+            hosts = opts.dns.extra_hosts;
+            cnameRecords = [];
           };
           ntp = {
             ipv4.active = false;

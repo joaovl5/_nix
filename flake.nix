@@ -40,6 +40,10 @@
       url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
       flake = false;
     };
+    globals = {
+      url = "path:./globals";
+      flake = false;
+    };
     #### quality-of-life
     ## treefmt
     treefmt-nix = {

@@ -1,0 +1,4 @@
+{
+  tld = "trll.ing";
+  extraZoneConfig = {};
+}
