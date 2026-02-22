@@ -11,13 +11,47 @@
 
   octodns_config = inputs.self.packages.x86_64-linux.octodns;
 
+  pihole6api = pkgs.python3Packages.buildPythonPackage {
+    pname = "pihole6api";
+    version = "0.2.1";
+    src = inputs.pihole6api-src;
+    doCheck = false;
+    pyproject = true;
+    build-system = with pkgs.python313Packages; [
+      setuptools
+      wheel
+    ];
+    dependencies = with pkgs.python313Packages; [
+      packaging
+      requests
+    ];
+  };
+
+  octodns-pihole = pkgs.python3Packages.buildPythonPackage {
+    pname = "octodns-pihole";
+    version = "0.1.0";
+    src = inputs.octodns-pihole-src;
+    doCheck = false;
+    pyproject = true;
+    build-system = with pkgs.python313Packages; [
+      setuptools
+      wheel
+    ];
+    dependencies = with pkgs.python313Packages; [
+      pkgs.octodns
+      packaging
+      requests
+      pihole6api
+    ];
+  };
+
   # Python environment with octodns and providers
   # NOTE: octodns-pihole is not in nixpkgs — needs packaging separately
-  octodns_env = pkgs.python3.withPackages (_ps: [
+  octodns_env = pkgs.python3.withPackages (_: [
     pkgs.octodns
     pkgs.octodns-providers.bind
     pkgs.octodns-providers.cloudflare
-    # TODO: add octodns-pihole when packaged
+    octodns-pihole
   ]);
 in
   o.module "unit.octodns" (with o; {
@@ -32,7 +66,7 @@ in
           Type = "oneshot";
           ExecStart = pkgs.writeShellScript "octodns-sync" ''
             set -euo pipefail
-            export PIHOLE_PASSWORD=$(cat ${s.secret_path "pihole_api_key"})
+            export PIHOLE_PASSWORD=$(cat ${s.secret_path "pihole_password"})
             export CLOUDFLARE_TOKEN=$(cat ${s.secret_path "cloudflare_api_token"})
             ${octodns_env}/bin/octodns-sync --config-file=${octodns_config} --doit
           '';

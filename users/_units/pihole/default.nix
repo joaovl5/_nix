@@ -45,7 +45,11 @@ in
     };
 
     sops.secrets = {
-      "pihole_api_key" = s.mk_secret "${s.dir}/dns.yaml" "pihole-api-key" {
+      "pihole_password_hash" = s.mk_secret "${s.dir}/dns.yaml" "pihole-password-hash" {
+        owner = user;
+        inherit group;
+      };
+      "pihole_password" = s.mk_secret "${s.dir}/dns.yaml" "pihole-password" {
         owner = user;
         inherit group;
       };
@@ -67,7 +71,7 @@ in
         User = user;
         Group = group;
         ExecStart = pkgs.writeShellScript "exec_pihole_pwhash" ''
-          ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_api_key"})
+          ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_password_hash"})
         '';
 
         inherit (pihole_ftl) AmbientCapabilities;

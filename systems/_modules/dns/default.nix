@@ -16,6 +16,7 @@ in
   o.module "dns" (with o; {
     enable = toggle "Enable DNS presets" true;
     tld = opt "Top-level domain" t.str globals.dns.tld;
+    tld_nameservers = opt "Nameservers for TLD" (t.listOf t.str) globals.dns.nameservers;
     main_dns = opt "List of DNS servers" (t.listOf t.str) [
       "192.168.15.13"
     ];
@@ -46,6 +47,7 @@ in
       enable = true;
       baseDomains.${tld} = {
         a.data = builtins.head opts.main_dns;
+        # ns.data = opts.tld_nameservers;
       };
 
       subDomains =
