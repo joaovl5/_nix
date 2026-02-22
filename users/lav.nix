@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   inputs,
   system,
   ...
@@ -32,6 +33,13 @@
     # (import ./_modules/yazi)
   ];
   module_imports = extract_imports modules;
+
+  # required for consuming in optnix
+  computed_hm_imports =
+    [
+      inputs.nur.modules.homeManager.default
+    ]
+    ++ module_imports.hm;
 in {
   imports =
     module_imports.nx
@@ -44,108 +52,113 @@ in {
       nur.modules.nixos.default
     ]);
 
-  # environment.sessionVariables.NIXOS_OZONE_WL = "1";
-
-  users.users.${cfg.username} = {
-    hashedPasswordFile = config.sops.secrets.password_hash.path;
-
-    isNormalUser = true;
-    shell = pkgs.fish;
-    extraGroups = [
-      "wheel"
-      "libvirt"
-      "input" # required for espanso
-    ];
+  options.hm_modules = lib.mkOption {
+    description = "Home-manager modules for Optnix";
+    default = computed_hm_imports;
   };
 
-  home-manager.users.${cfg.username} = _: {
-    imports =
-      [
-        inputs.nur.modules.homeManager.default
-      ]
-      ++ module_imports.hm;
+  config = {
+    users.users.${cfg.username} = {
+      hashedPasswordFile = config.sops.secrets.password_hash.path;
 
-    home.stateVersion = "23.11";
-
-    ## cli tools
-    ### nix
-    ### gpg
-    services = {
-      syncthing = {
-        enable = true;
-      };
-      gpg-agent = {
-        enable = true;
-        enableSshSupport = true;
-      };
+      isNormalUser = true;
+      shell = pkgs.fish;
+      extraGroups = [
+        "wheel"
+        "libvirt"
+        "input" # required for espanso
+      ];
     };
 
-    # etc
-    home.packages = with pkgs; [
-      # core
-      libreoffice
+    home-manager.users.${cfg.username} = let
+      inherit (config) hm_modules;
+    in
+      _: {
+        imports =
+          hm_modules;
 
-      # terminal
-      ## emulator
-      ghostty
-      alacritty # backup
-      ## multiplexer
-      zellij
-      ## tui
-      systemctl-tui
-      gdu # ncdu alternative (MUCH faster on SSDs)
+        home.stateVersion = "23.11";
 
-      # gui
-      ungoogled-chromium
-      waylock ## locker
-      ## launcher
-      fuzzel # backup
-      ## file manager
-      thunar
-      ## settings
-      nwg-look
-      pwvucontrol
+        ## cli tools
+        ### nix
+        ### gpg
+        services = {
+          syncthing = {
+            enable = true;
+          };
+          gpg-agent = {
+            enable = true;
+            enableSshSupport = true;
+          };
+        };
 
-      ## programming
-      mergiraf # git merge helper
-      dbeaver-bin # db ide thing
-      ### rust
-      (with fenix;
-        combine [
-          default.toolchain
-          latest.rust-src
-        ])
-      ### js :(
-      nodejs
+        # etc
+        home.packages = with pkgs; [
+          # core
+          libreoffice
 
-      ## vms
-      virt-manager
+          # terminal
+          ## emulator
+          ghostty
+          alacritty # backup
+          ## multiplexer
+          zellij
+          ## tui
+          systemctl-tui
+          gdu # ncdu alternative (MUCH faster on SSDs)
 
-      ## etc move later
-      inputs.deploy-rs.packages.${system}.default
-      delta
-      jq
-      bit-logo
-      bagels
-      vllm
-      llama-cpp
-      llama-swap
-      python314Packages.huggingface-hub
-      cursor-cli
-      chatbox
+          # gui
+          ungoogled-chromium
+          waylock ## locker
+          ## launcher
+          fuzzel # backup
+          ## file manager
+          thunar
+          ## settings
+          nwg-look
+          pwvucontrol
 
-      # dependencies
-      rsync
-      pinentry-curses
-      bc
-      perl
-      runapp
-      libnotify
-      playerctl
-      wl-clipboard # wl-paste/...
-      cliphist
-      xclip
-      unzip
-    ];
+          ## programming
+          mergiraf # git merge helper
+          dbeaver-bin # db ide thing
+          ### rust
+          (with fenix;
+            combine [
+              default.toolchain
+              latest.rust-src
+            ])
+          ### js :(
+          nodejs
+
+          ## vms
+          virt-manager
+
+          ## etc move later
+          inputs.deploy-rs.packages.${system}.default
+          delta
+          jq
+          bit-logo
+          bagels
+          vllm
+          llama-cpp
+          llama-swap
+          python314Packages.huggingface-hub
+          cursor-cli
+          chatbox
+
+          # dependencies
+          rsync
+          pinentry-curses
+          bc
+          perl
+          runapp
+          libnotify
+          playerctl
+          wl-clipboard # wl-paste/...
+          cliphist
+          xclip
+          unzip
+        ];
+      };
   };
 }

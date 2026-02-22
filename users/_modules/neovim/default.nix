@@ -98,7 +98,7 @@
       gitleaks
       prettierd
       ## python
-      basedmypy
+      ty
       basedpyright
       ruff
       (python3.withPackages (ps: with ps; [debugpy]))

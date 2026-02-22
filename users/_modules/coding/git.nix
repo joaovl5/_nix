@@ -1,5 +1,9 @@
 {
-  hm = {nixos_config, ...}: let
+  hm = {
+    nixos_config,
+    pkgs,
+    ...
+  }: let
     cfg = nixos_config.my.nix;
   in {
     # TODO: ^1 add merging stuff
@@ -10,5 +14,9 @@
         user.name = cfg.name;
       };
     };
+
+    home.packages = with pkgs; [
+      prek
+    ];
   };
 }

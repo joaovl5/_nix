@@ -40,7 +40,7 @@
 }
 
 /* Update background color of the #browser area (it's visible near the
-  rounded corner of the web page) so it blends with sidebery color with 
+  rounded corner of the web page) so it blends with sidebery color with
   vertical nav-bar. */
 #browser {
   background-color: var(--lwt-accent-color) !important;
