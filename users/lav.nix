@@ -44,6 +44,7 @@ in {
     module_imports.nx
     ++ [
       ./_services/post_install
+      ./_units
     ]
     ++ (with inputs; [
       nix-flatpak.nixosModules.nix-flatpak

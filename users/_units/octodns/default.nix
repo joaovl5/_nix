@@ -46,7 +46,7 @@
   };
 
   # Python environment with octodns and providers
-  # NOTE: octodns-pihole is not in nixpkgs — needs packaging separately
+  # octodns-pihole is not in nixpkgs — needs packaging separately
   octodns_env = pkgs.python3.withPackages (_: [
     pkgs.octodns
     pkgs.octodns-providers.bind

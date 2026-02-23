@@ -18,7 +18,7 @@ in
   o.module "unit.pihole" (with o; {
     enable = toggle "Enable Pihole" false;
     privacy_level = opt "Pihole statistics privacy level, 0 = full, 3 = only anonymous" t.int 1;
-    data_dir = opt "Directory for pihole state data" t.str "${u.data_dir}/pihole";
+    data_dir = optional "Directory for pihole state data" t.str {};
     endpoint = u.endpoint {
       port = 1111;
       target = "pihole";
@@ -29,14 +29,18 @@ in
       upstreams = opt "List of upstream DNS servers" (t.listOf t.str) dns_cfg.fallback_dns;
     };
   }) {} (opts: (o.when opts.enable (let
+    computed_data_dir =
+      if opts.data_dir != null
+      then opts.data_dir
+      else "${u.data_dir}/pihole";
     pkg = pkgs.pihole-ftl;
     user = "pihole";
     group = "pihole";
 
     source_log_dir = "/var/log/pihole";
     source_state_dir = "/var/lib/pihole";
-    target_log_link = "${opts.data_dir}/logs";
-    target_state_link = "${opts.data_dir}/lib";
+    target_log_link = "${computed_data_dir}/logs";
+    target_state_link = "${computed_data_dir}/lib";
 
     pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
   in {
@@ -57,7 +61,7 @@ in
 
     system.activationScripts.ensure_data_directory_pihole = ''
       echo "[!] Ensuring Pihole directories and symlinks"
-      mkdir -v -p ${opts.data_dir}
+      mkdir -v -p ${computed_data_dir}
       ln -sfn ${source_log_dir} ${target_log_link}
       ln -sfn ${source_state_dir} ${target_state_link}
     '';

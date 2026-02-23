@@ -9,9 +9,12 @@
       container_name = "firefox_syncstorage";
       environment = {
         SYNC_HOST = "0.0.0.0";
-        SYNC_HUMAN_LOGS = "1";
+        SYNC_HUMAN_LOGS = "true";
         SYNC_MASTER_SECRET = "$SYNC_MASTER_SECRET";
         SYNC_SYNCSTORAGE__DATABASE_URL = "mysql://$MARIADB_USER:$MARIADB_PASSWORD@syncstorage_db:3306/syncstorage";
+        SYNC_SYNCSTORAGE__ENABLED = "true";
+        # SYNC_SYNCSTORAGE__ENABLE_QUOTA = "true";
+        # SYNC_SYNCSTORAGE__ENFORCE_QUOTA = "true";
         SYNC_TOKENSERVER__ENABLED = "true";
         SYNC_TOKENSERVER__RUN_MIGRATIONS = "true";
         SYNC_TOKENSERVER__NODE_TYPE = "mysql";

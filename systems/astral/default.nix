@@ -79,7 +79,9 @@ in {
     enable = true;
     nixos = {
       enable = true;
-      includeAllModules = true;
+      # not using this and it's causing issues
+      # optnix also does not need this
+      includeAllModules = false;
     };
     doc = {enable = true;};
     dev = {enable = true;};

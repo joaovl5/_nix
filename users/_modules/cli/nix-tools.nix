@@ -4,6 +4,7 @@
     config,
     ...
   }: {
+    documentation.nixos.options.warningsAreErrors = false;
     systemd.timers."refresh-nps-cache" = {
       wantedBy = ["timers.target"];
       timerConfig = {

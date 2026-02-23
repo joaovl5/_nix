@@ -18,6 +18,7 @@ in {
       cloudflare = {
         class = "octodns_cloudflare.CloudflareProvider";
         token = "env/CLOUDFLARE_TOKEN";
+        strict_supports = false;
       };
     };
     zones."${tld}." = inputs.nixos-dns.utils.octodns.generateZoneAttrs ["pihole" "cloudflare"];

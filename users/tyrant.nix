@@ -13,13 +13,7 @@
 in {
   imports = with inputs; [
     hm.nixosModules.home-manager
-    ./_units/pihole
-    ./_units/litellm
-    ./_units/nixarr
-    ./_units/soularr
-    ./_units/reverse-proxy
-    ./_units/octodns
-    ./_units/fxsync
+    ./_units
   ];
 
   my = {
@@ -36,18 +30,6 @@ in {
 
     "unit.litellm" = {
       enable = true;
-      config = {
-        model_list = [
-          {
-            model_name = "gpt-5-mini";
-            litellm_params = {
-              model = "gpt-5-mini-2025-08-07";
-              api_base = "https://api.openai.com";
-              api_key = "os.environ/OPENAI_KEY";
-            };
-          }
-        ];
-      };
     };
 
     "unit.nixarr" = {
