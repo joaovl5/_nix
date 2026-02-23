@@ -12,6 +12,8 @@
   modules = [
     (import ./_modules/cli)
     (import ./_modules/fish)
+    (import ./_modules/nushell)
+    (import ./_modules/starship)
     (import ./_modules/gtk)
     (import ./_modules/audio)
     (import ./_modules/media)

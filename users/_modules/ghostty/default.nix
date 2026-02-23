@@ -22,6 +22,17 @@
 
         quit-after-last-window-closed = false;
 
+        cursor-style = "underline";
+
+        shell-integration = "detect";
+        shell-integration-features = [
+          "sudo"
+          "cursor"
+          "title"
+          "ssh-env"
+          "ssh-terminfo"
+        ];
+
         # gtk-only
         gtk-toolbar-style = "flat";
         gtk-tabs-location = "bottom";
@@ -33,17 +44,19 @@
         macos-icon = "retro";
 
         keybind = [
-          "alt+ctrl+k=scroll_page_up"
-          "alt+ctrl+j=scroll_page_down"
           "alt+q=close_surface"
           "alt+shift+0=reload_config"
           "alt+equal=increase_font_size:1"
           "alt+minus=decrease_font_size:1"
           "alt+enter=new_tab"
+          "alt+k=scroll_page_up"
+          "alt+j=scroll_page_down"
           "alt+l=next_tab"
           "alt+h=previous_tab"
           "alt+c=copy_to_clipboard"
           "alt+v=paste_from_clipboard"
+          "alt+p=toggle_command_palette"
+          "global:alt+backquote=toggle_quick_terminal"
         ];
       };
     };
