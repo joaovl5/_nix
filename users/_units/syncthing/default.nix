@@ -43,12 +43,12 @@ in
 
     pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
   in {
-    sops.secrets = {
-      "pihole_api_key" = s.mk_secret "${s.dir}/dns.yaml" "pihole-api-key" {
-        owner = user;
-        inherit group;
-      };
-    };
+    # sops.secrets = {
+    #   "pihole_api_key" = s.mk_secret "${s.dir}/dns.yaml" "pihole-api-key" {
+    #     owner = user;
+    #     inherit group;
+    #   };
+    # };
 
     system.activationScripts.ensure_data_directory = ''
       echo "[!] Ensuring Pihole directories and symlinks"

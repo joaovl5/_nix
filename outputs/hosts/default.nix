@@ -50,6 +50,7 @@ in {
     modules = with inputs; [
       (_m disko {})
       (_m sops-nix {attr = "sops";})
+      (_m nixos-dns {attr = "dns";})
       ../../_modules/options.nix
       ../../_modules/secrets.nix
       ../../hardware/_modules/grub.nix

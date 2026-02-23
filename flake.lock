@@ -391,6 +391,19 @@
         "type": "github"
       }
     },
+    "globals": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-03rbPTwiY2Pvgk7HdOrA5ZksqG7j/KX8GizDltINLH0=",
+        "path": "./globals",
+        "type": "path"
+      },
+      "original": {
+        "path": "./globals",
+        "type": "path"
+      }
+    },
     "hm": {
       "inputs": {
         "nixpkgs": [
@@ -793,10 +806,10 @@
     "mysecrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1771732899,
-        "narHash": "sha256-yjXAL1YyFBlpRUV8lAf2tUM2NOl3fdnwG9QualxMyiI=",
+        "lastModified": 1771758215,
+        "narHash": "sha256-BX9wW5tTMaSC8goHEc5cAefKKmlaAiYBUvj4OInME3E=",
         "ref": "main",
-        "rev": "c76bd28b78ae6d8d72adf32664dda6cce25fd848",
+        "rev": "ad905ba42906ef6455cecb900fcda2c8a4b13263",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/joaovl5/__secrets.git"
@@ -1048,6 +1061,23 @@
         "url": "https://github.com/nix-community/NUR"
       }
     },
+    "octodns-pihole-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1770915826,
+        "narHash": "sha256-6pUanEEezAIfNtQB7ia0FThzMv99iI84oTtHOmcIxSE=",
+        "ref": "refs/heads/main",
+        "rev": "566a863bc67e18ced24906e7838fa6cff0f471be",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/roosnic1/octodns-pihole"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/roosnic1/octodns-pihole"
+      }
+    },
     "optnix": {
       "inputs": {
         "flake-compat": "flake-compat_6",
@@ -1067,6 +1097,23 @@
         "owner": "~watersucks",
         "repo": "optnix",
         "type": "sourcehut"
+      }
+    },
+    "pihole6api-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766505417,
+        "narHash": "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI=",
+        "ref": "refs/heads/main",
+        "rev": "e87c651ce0e084bc5f15c529d6103c524ee98d64",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/sbarbett/pihole6api"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/sbarbett/pihole6api"
       }
     },
     "pre-commit-hooks": {
@@ -1152,6 +1199,7 @@
         "disko": "disko",
         "fenix": "fenix",
         "fup": "fup",
+        "globals": "globals",
         "hm": "hm",
         "hyprland-plugins": "hyprland-plugins",
         "mysecrets": "mysecrets",
@@ -1164,7 +1212,9 @@
           "unstable"
         ],
         "nur": "nur",
+        "octodns-pihole-src": "octodns-pihole-src",
         "optnix": "optnix",
+        "pihole6api-src": "pihole6api-src",
         "sops-nix": "sops-nix",
         "soularr": "soularr",
         "stable": "stable",

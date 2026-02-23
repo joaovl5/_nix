@@ -26,11 +26,10 @@
     (import ./_modules/ai)
     (import ./_modules/obs)
     (import ./_modules/ghostty)
-    (import ./_modules/zen-browser)
+    (import ./_modules/browsing)
     (import ./_modules/neovim)
     (import ./_modules/espanso)
     (import ./_modules/discord)
-    # (import ./_modules/yazi)
   ];
   module_imports = extract_imports modules;
 
@@ -45,6 +44,7 @@ in {
     module_imports.nx
     ++ [
       ./_services/post_install
+      ./_units
     ]
     ++ (with inputs; [
       nix-flatpak.nixosModules.nix-flatpak

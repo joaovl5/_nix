@@ -85,7 +85,7 @@
           :opts (fn []
                   (let [nu (. (require :null-ls) :builtins)
                         no #(require (.. :none-ls. $1))]
-                    {:sources [; general 
+                    {:sources [; general
                                nu.diagnostics.gitleaks
                                nu.hover.dictionary
                                ; dockerfile
@@ -94,7 +94,7 @@
                                nu.hover.printenv
                                ; fish
                                nu.diagnostics.fish
-                               ; nix 
+                               ; nix
                                nu.formatting.alejandra
                                nu.diagnostics.statix
                                nu.code_actions.statix

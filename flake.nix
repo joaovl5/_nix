@@ -40,6 +40,10 @@
       url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
       flake = false;
     };
+    globals = {
+      url = "path:./globals";
+      flake = false;
+    };
     #### quality-of-life
     ## treefmt
     treefmt-nix = {
@@ -95,6 +99,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
+    octodns-pihole-src = {
+      url = "git+https://github.com/roosnic1/octodns-pihole?shallow=1";
+      flake = false;
+    };
+    ## dependency
+    pihole6api-src = {
+      url = "git+https://github.com/sbarbett/pihole6api?shallow=1";
+      flake = false;
+    };
+
     # atticd nix cache server thingy
     atticd = {
       url = "git+https://github.com/zhaofengli/attic?shallow=1";

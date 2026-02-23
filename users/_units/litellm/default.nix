@@ -63,12 +63,13 @@ in
   # - use nixos-dns for zones
   # - manage state in centralized form
   o.module "unit.litellm" (with o; {
-    enable = toggle "Enable Pihole" false;
+    enable = toggle "Enable LiteLLM" false;
+    endpoint = u.endpoint {
+      port = 2222;
+      target = "litellm";
+    };
     web = {
       host = opt "Interface to bind to" t.str "0.0.0.0";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
-      host_domain = opt "Host Domain (used for DNS)" t.str "litellm.lan";
-      port = opt "Web UI ports" t.int 2222;
       num_workers = opt "Worker count for web server" t.int 4;
     };
     config = {
@@ -82,6 +83,10 @@ in
     litellm_config = import ./config.nix opts;
     litellm_config_yaml = u.write_yaml_from_attrset "litellm_config.yaml" litellm_config;
   in {
+    my.vhosts.litellm = {
+      inherit (opts.endpoint) target sources;
+    };
+
     sops.secrets = {
       "openai_key_litellm" = s.mk_secret "${s.dir}/api_keys.yaml" "openai" {
         owner = user;
@@ -115,7 +120,7 @@ in
 
           litellm \
             --host ${opts.web.host} \
-            --port ${toString opts.web.port} \
+            --port ${toString opts.endpoint.port} \
             --num_workers ${toString opts.web.num_workers} \
             --config ${litellm_config_yaml}
 

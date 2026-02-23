@@ -6,6 +6,7 @@
 }: let
   my = mylib.use config;
   o = my.options;
+  u = my.units;
   inherit (o) t;
 in
   {
@@ -25,41 +26,56 @@ in
       peer_port = opt "Peer port for torrent connections, set to forwarded port of VPN if using one." t.int 55055;
     };
     jellyfin = {
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
-      host = opt "Host domain (used for DNS)" t.str "jellyfin.lan";
-      port = opt "Port for Jellyfin" t.int 8096;
+      endpoint = u.endpoint {
+        port = 8096;
+        target = "jellyfin";
+      };
     };
     # indexing
     prowlarr = {
-      port = opt "Port for Prowlarr" t.int 55057;
-      host = opt "Host domain (used for DNS)" t.str "prowlarr.lan";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
+      endpoint = u.endpoint {
+        port = 55057;
+        target = "prowlarr";
+      };
     };
     # music
     lidarr = {
-      port = opt "Port for Lidarr" t.int 55058;
-      host = opt "Host domain (used for DNS)" t.str "lidarr.lan";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
+      endpoint = u.endpoint {
+        port = 55058;
+        target = "lidarr";
+      };
     };
     # movies
     radarr = {
-      port = opt "Port for Radarr" t.int 55059;
-      host = opt "Host domain (used for DNS)" t.str "radarr.lan";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
+      endpoint = u.endpoint {
+        port = 55059;
+        target = "radarr";
+      };
     };
     # series
     sonarr = {
-      port = opt "Port for Sonarr" t.int 55060;
-      host = opt "Host domain (used for DNS)" t.str "sonarr.lan";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
+      endpoint = u.endpoint {
+        port = 55060;
+        target = "sonarr";
+      };
     };
     # subs
     bazarr = {
-      port = opt "Port for Bazarr" t.int 55061;
-      host = opt "Host domain (used for DNS)" t.str "bazarr.lan";
-      host_ip = opt "Host IP (used for DNS)" t.str "127.0.0.1";
+      endpoint = u.endpoint {
+        port = 55061;
+        target = "bazarr";
+      };
     };
   }) {} (opts: (o.when opts.enable {
+    my.vhosts = {
+      jellyfin = {inherit (opts.jellyfin.endpoint) target sources;};
+      prowlarr = {inherit (opts.prowlarr.endpoint) target sources;};
+      lidarr = {inherit (opts.lidarr.endpoint) target sources;};
+      radarr = {inherit (opts.radarr.endpoint) target sources;};
+      sonarr = {inherit (opts.sonarr.endpoint) target sources;};
+      bazarr = {inherit (opts.bazarr.endpoint) target sources;};
+    };
+
     nixarr = {
       enable = true;
 
@@ -76,33 +92,32 @@ in
       # Jellyfin
       jellyfin = {
         enable = true;
-        # inherit (opts.jellyfin) port;
       };
 
       # -arrs
       lidarr = {
         enable = true;
-        inherit (opts.lidarr) port;
+        inherit (opts.lidarr.endpoint) port;
       };
 
       radarr = {
         enable = true;
-        inherit (opts.radarr) port;
+        inherit (opts.radarr.endpoint) port;
       };
 
       sonarr = {
         enable = true;
-        inherit (opts.sonarr) port;
+        inherit (opts.sonarr.endpoint) port;
       };
 
       prowlarr = {
         enable = true;
-        inherit (opts.prowlarr) port;
+        inherit (opts.prowlarr.endpoint) port;
       };
 
       bazarr = {
         enable = true;
-        inherit (opts.bazarr) port;
+        inherit (opts.bazarr.endpoint) port;
       };
     };
 

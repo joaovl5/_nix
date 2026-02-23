@@ -9,9 +9,12 @@
       container_name = "firefox_syncstorage";
       environment = {
         SYNC_HOST = "0.0.0.0";
-        SYNC_HUMAN_LOGS = "1";
+        SYNC_HUMAN_LOGS = "true";
         SYNC_MASTER_SECRET = "$SYNC_MASTER_SECRET";
         SYNC_SYNCSTORAGE__DATABASE_URL = "mysql://$MARIADB_USER:$MARIADB_PASSWORD@syncstorage_db:3306/syncstorage";
+        SYNC_SYNCSTORAGE__ENABLED = "true";
+        # SYNC_SYNCSTORAGE__ENABLE_QUOTA = "true";
+        # SYNC_SYNCSTORAGE__ENFORCE_QUOTA = "true";
         SYNC_TOKENSERVER__ENABLED = "true";
         SYNC_TOKENSERVER__RUN_MIGRATIONS = "true";
         SYNC_TOKENSERVER__NODE_TYPE = "mysql";
@@ -71,27 +74,31 @@
         MARIADB_PASSWORD = "$MARIADB_PASSWORD";
         DOMAIN = "$DOMAIN";
       };
-      entrypoint = ["bash" "-c" ''
-        IS_DONE=10
-        while [ $$IS_DONE -gt 0 ]; do
-            echo "INSERT IGNORE INTO services (id, service, pattern) VALUES ('1', 'sync-1.5', '{node}/1.5/{uid}');
-            INSERT INTO nodes (id, service, node, available, current_load, capacity, downed, backoff)
-            VALUES ('1', '1', '$$DOMAIN', '1', '0', '5', '0', '0') ON DUPLICATE KEY UPDATE node='$$DOMAIN';"|mysql --host=tokenserver_db --user=$$MARIADB_USER --password=$$MARIADB_PASSWORD tokenserver
-            RC=$$?
-            echo "mysql return code was $$RC"
-            if [ $$RC == 0 ] ; then
-            IS_DONE=0
-            echo 'Done!'
-            exit 0
-            else
-            echo 'Waiting for tables...'
-            sleep 5
-            ((IS_DONE--))
-            fi
-        done
-        echo 'Giving up, sorry'
-        exit 42
-      ''];
+      entrypoint = [
+        "bash"
+        "-c"
+        ''
+          IS_DONE=10
+          while [ $$IS_DONE -gt 0 ]; do
+              echo "INSERT IGNORE INTO services (id, service, pattern) VALUES ('1', 'sync-1.5', '{node}/1.5/{uid}');
+              INSERT INTO nodes (id, service, node, available, current_load, capacity, downed, backoff)
+              VALUES ('1', '1', '$$DOMAIN', '1', '0', '5', '0', '0') ON DUPLICATE KEY UPDATE node='$$DOMAIN';"|mysql --host=tokenserver_db --user=$$MARIADB_USER --password=$$MARIADB_PASSWORD tokenserver
+              RC=$$?
+              echo "mysql return code was $$RC"
+              if [ $$RC == 0 ] ; then
+              IS_DONE=0
+              echo 'Done!'
+              exit 0
+              else
+              echo 'Waiting for tables...'
+              sleep 5
+              ((IS_DONE--))
+              fi
+          done
+          echo 'Giving up, sorry'
+          exit 42
+        ''
+      ];
     };
   };
 }
