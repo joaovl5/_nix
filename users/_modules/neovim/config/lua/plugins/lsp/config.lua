@@ -20,7 +20,10 @@ local function populate_diagnostics(client, bufnr)
 end
 local function do_basedpyright_attach(client, bufnr)
 	local function _2_()
-		return client:exec_cmd({ command = "basedpyright.organizeimports", arguments = { [vim.uri_from_bufnr] = bufnr } })
+		return client:exec_cmd({
+			command = "basedpyright.organizeimports",
+			arguments = { [vim.uri_from_bufnr] = bufnr },
+		})
 	end
 	n.usercmd(bufnr, "LspPyrightOrganizeImports", { desc = "Organize Imports" }, _2_)
 	n.usercmd(
@@ -92,7 +95,9 @@ local function mk_lsp()
 			filetypes = { "nix" },
 			root_markers = { "flake.nix", ".git" },
 			settings = {
-				["nil"] = { nix = { flake = { autoArchive = true, autoEvalInputs = true, nixpkgsInputName = "nixpkgs" } } },
+				["nil"] = {
+					nix = { flake = { autoArchive = true, autoEvalInputs = true, nixpkgsInputName = "nixpkgs" } },
+				},
 			},
 		},
 	}

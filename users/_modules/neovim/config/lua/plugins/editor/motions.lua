@@ -10,7 +10,9 @@ return {
 			jump = { nohlsearch = true, autojump = true },
 			label = { distance = true, rainbow = { enabled = true, shade = 5 }, uppercase = false },
 			highlight = { backdrop = true },
-			modes = { treesitter = { labels = "fhdjskalgrueiwoqptvnmb", highlight = { backdrop = true, matches = false } } },
+			modes = {
+				treesitter = { labels = "fhdjskalgrueiwoqptvnmb", highlight = { backdrop = true, matches = false } },
+			},
 		},
 	},
 	{ "chrisgrieser/nvim-spider", opts = true },

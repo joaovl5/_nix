@@ -8,10 +8,22 @@ local function _1_()
 		executable = { command = "js-debug", args = { "${port}" } },
 	}
 	dap.configurations.typescript = {
-		{ type = "pwa-node", request = "launch", name = "Launch File", program = "${file}", cwd = "${workspaceFolder}" },
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Launch File",
+			program = "${file}",
+			cwd = "${workspaceFolder}",
+		},
 	}
 	dap.configurations.javascript = {
-		{ type = "pwa-node", request = "launch", name = "Launch File", program = "${file}", cwd = "${workspaceFolder}" },
+		{
+			type = "pwa-node",
+			request = "launch",
+			name = "Launch File",
+			program = "${file}",
+			cwd = "${workspaceFolder}",
+		},
 	}
 	return nil
 end

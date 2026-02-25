@@ -3,7 +3,10 @@ return {
 	{
 		"danymat/neogen",
 		cmd = "Neogen",
-		opts = { enabled = true, languages = { python = { template = { annotation_convention = "google_docstrings" } } } },
+		opts = {
+			enabled = true,
+			languages = { python = { template = { annotation_convention = "google_docstrings" } } },
+		},
 	},
 	{
 		"Fildo7525/pretty_hover",

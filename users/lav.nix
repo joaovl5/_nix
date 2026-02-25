@@ -3,7 +3,6 @@
   config,
   lib,
   inputs,
-  system,
   ...
 }: let
   inherit (import ../_lib/modules) extract_imports;
