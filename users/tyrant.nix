@@ -21,6 +21,10 @@ in {
       enable = true;
     };
 
+    "unit.traefik" = {
+      enable = true;
+    };
+
     "unit.pihole" = {
       enable = true;
       dns = {

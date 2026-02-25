@@ -16,7 +16,7 @@
   inherit (globals.dns) tld;
   inherit (config.my) vhosts;
 in
-  o.module "traefik" (with o; {
+  o.module "unit.traefik" (with o; {
     enable = toggle "Enable Traefik reverse proxy" false;
   }) {} (opts:
     lib.mkMerge [
