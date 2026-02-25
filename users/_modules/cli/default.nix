@@ -10,6 +10,7 @@ let
     (import ./lazygit.nix)
     (import ./tmux)
     (import ./zellij)
+    (import ./intellishell)
   ];
 in
   combine_modules modules
