@@ -99,7 +99,7 @@
     };
 
     home.shellAliases = {
-      "+s" = "nh os switch --elevation-program run0 --diff";
+      "+s" = "nh os switch --elevation-program run0 --diff always";
       "+S" = "+n --show-trace --verbose";
       "+d" = "deploy";
       "+D" = "deploy --skip-checks";
