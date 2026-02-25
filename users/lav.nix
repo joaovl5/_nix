@@ -137,7 +137,6 @@ in {
 
           ## etc move later
           inputs.deploy-rs.packages.${system}.default
-          delta
           jq
           bit-logo
           bagels

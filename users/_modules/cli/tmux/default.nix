@@ -28,5 +28,12 @@
 
       extraConfig = lib.readFile ./tmux.conf;
     };
+
+    home.shellAliases = {
+      ",t" = "tmux";
+      ",ta" = "tmux attach";
+      ",tl" = "tmux list-sessions";
+      ",tk" = "tmux kill-session";
+    };
   };
 }

@@ -26,20 +26,16 @@ in
       # apps
       ## nvim
       "n" = "nvim";
-      ## tmux
-      "t" = "tmux";
-      "t.a" = "tmux attach";
-      "t.l" = "tmux list-sessions";
-      "t.k" = "tmux kill-session";
       ## systemd
-      "s" = "systemctl";
-      "s.s" = "systemctl status";
-      "s.r" = "systemctl restart";
-      "s.S" = "systemctl stop";
-      "su" = "systemctl --user";
-      "su.s" = "systemctl --user status";
-      "su.r" = "systemctl --user restart";
-      "su.S" = "systemctl --user stop";
-      "j.u" = "journalctl --user -xeu";
+      ",s" = "systemctl";
+      ",ss" = "systemctl status";
+      ",sr" = "systemctl restart";
+      ",sS" = "systemctl stop";
+      ",sj" = "journalctl -fxe --unit";
+      ",u" = "systemctl --user";
+      ",us" = "systemctl --user status";
+      ",ur" = "systemctl --user restart";
+      ",uS" = "systemctl --user stop";
+      ",uj" = "journalctl -fxe --user-unit";
     };
   }))
