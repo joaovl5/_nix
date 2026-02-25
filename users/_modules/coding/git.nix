@@ -54,6 +54,7 @@
 
         signing = {signByDefault = true;};
       };
+      # testing
       git-cliff = {
         enable = true;
       };
@@ -72,7 +73,9 @@
     };
 
     home.packages = with pkgs; [
+      commitizen
       prek
+      # testing
       cocogitto
     ];
   };
