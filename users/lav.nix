@@ -121,7 +121,6 @@ in {
           pwvucontrol
 
           ## programming
-          mergiraf # git merge helper
           dbeaver-bin # db ide thing
           ### rust
           (with fenix;
@@ -136,7 +135,6 @@ in {
           virt-manager
 
           ## etc move later
-          inputs.deploy-rs.packages.${system}.default
           jq
           bit-logo
           bagels

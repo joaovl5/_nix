@@ -98,12 +98,24 @@
       };
     };
 
+    home.shellAliases = {
+      "+s" = "nh os switch --elevation-program run0 --diff";
+      "+S" = "+n --show-trace --verbose";
+      "+d" = "deploy";
+      "+D" = "deploy --skip-checks";
+      "?" = "nps --color=always -e=true --truncate=true";
+      "?nx" = "optnix -s nx";
+      "?hm" = "optnix -s hm";
+    };
+
     # faster direnv
     services.lorri = {
       enable = true;
     };
 
     home.packages = with pkgs; [
+      # deploy-rs
+      inputs.deploy-rs.packages.${system}.default
       # runs software without installing
       comma
       # search packages

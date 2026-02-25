@@ -11,52 +11,51 @@
     signing_key_path = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
   in {
     # TODO: ^1 add merging stuff
-    programs.git = {
-      enable = true;
-      signing = {
-        signByDefault = true;
-      };
-      settings = {
-        init = {
-          defaultBranch = "main";
-        };
-        checkout = {
-          workers = 0; # use all cores
-        };
-        color = {
-          ui = "auto";
-        };
-        diff = {
-          external = lib.getExe pkgs.difftastic;
-          algorithm = "histogram";
-          colorMoved = true;
-        };
-        gpg = {
-          format = "ssh";
-        };
-        push = {
-          autoSetupRemote = true;
-        };
-        user = {
-          inherit (cfg) email name;
-          signingKey = signing_key_path;
-        };
-        rerere = {
-          enabled = true;
-          autoupdate = true;
+    programs = {
+      delta = {
+        enable = true;
+        enableGitIntegration = true;
+        options = {
+          light = false;
+          line-numbers = true;
+          navigate = true;
+          side-by-side = true;
         };
       };
-    };
+      git = {
+        enable = true;
+        settings = {
+          checkout = {workers = 0;};
+          color = {ui = "auto";};
+          diff = {
+            algorithm = "histogram";
+            colorMoved = true;
+            external = lib.getExe pkgs.difftastic;
+          };
+          gpg = {format = "ssh";};
+          init = {defaultBranch = "main";};
+          push = {autoSetupRemote = true;};
+          merge.mergiraf = {
+            name = "mergiraf";
+            driver = "${lib.getExe pkgs.mergiraf} merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L";
+          };
+          rerere = {
+            autoupdate = true;
+            enabled = true;
+          };
+          user = {
+            inherit (cfg) email name;
+            signingKey = signing_key_path;
+          };
+        };
+        attributes = [
+          "* merge=mergiraf"
+        ];
 
-    programs.delta = {
-      enable = true;
-      enableGitIntegration = true;
-
-      options = {
-        navigate = true;
-        light = false;
-        side-by-side = true;
-        line-numbers = true;
+        signing = {signByDefault = true;};
+      };
+      git-cliff = {
+        enable = true;
       };
     };
 
@@ -74,6 +73,7 @@
 
     home.packages = with pkgs; [
       prek
+      cocogitto
     ];
   };
 }
