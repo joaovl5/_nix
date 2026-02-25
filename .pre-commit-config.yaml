@@ -31,3 +31,8 @@ repos:
         language: system
         pass_filenames: false
         entry: nix fmt
+      - id: commitizen
+        name: commitizen
+        language: system
+        pass_filenames: false
+        entry: cz check --rev-range v0.1.0..HEAD
