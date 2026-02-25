@@ -49,14 +49,12 @@
           "alt+equal=increase_font_size:1"
           "alt+minus=decrease_font_size:1"
           "alt+enter=new_tab"
-          "alt+k=scroll_page_up"
-          "alt+j=scroll_page_down"
-          "alt+l=next_tab"
-          "alt+h=previous_tab"
+          "alt+bracket_left=scroll_page_up"
+          "alt+bracket_right=scroll_page_down"
+          "alt+h=next_tab"
+          "alt+l=previous_tab"
           "alt+c=copy_to_clipboard"
           "alt+v=paste_from_clipboard"
-          "alt+p=toggle_command_palette"
-          "global:alt+backquote=toggle_quick_terminal"
         ];
       };
     };

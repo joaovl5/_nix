@@ -93,6 +93,7 @@
       ripgrep
       tree-sitter
       curl
+      imagemagick
 
       # language support
       gitleaks
@@ -101,7 +102,10 @@
       ty
       basedpyright
       ruff
-      (python3.withPackages (ps: with ps; [debugpy]))
+      (python3.withPackages (ps:
+        with ps; [
+          debugpy
+        ]))
       ## js
       eslint_d
       typescript-language-server

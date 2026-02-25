@@ -15,8 +15,8 @@
           width = 6;
           height = 3;
           padding = {
-            left = 1;
-            top = 3;
+            left = 2;
+            top = 4;
             bottom = 3;
           };
         };
