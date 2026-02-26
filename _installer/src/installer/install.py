@@ -187,7 +187,9 @@ class NixOSInstaller:
         _git_clone = [
             "env",
             "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=accept-new",
-            "git",
+            *_NIX_RUN,
+            "nixpkgs#git",
+            "--",
             "clone",
             "--depth",
             "1",
@@ -217,21 +219,24 @@ class NixOSInstaller:
             return
 
         _nix_sops_cmd = [
-            "nix-shell",
-            "-p",
-            "sops",
+            "env",
+            f'SOPS_AGE_KEY_FILE="$HOME/.age/{AGE_KEYFILE}"',
+            *_NIX_RUN,
+            "nixpkgs#sops",
+            "--",
         ]
-        sops_run_cmd = (
-            f'SOPS_AGE_KEY_FILE="$HOME/.age/{AGE_KEYFILE}" '
-            f"sops -d --extract '{self.encryption_params.sops_file_key}' "
-            f"{self._secrets_dir}/{self.encryption_params.sops_file} "
-            f"> {self.encryption_params.keyfile_location}"
-        )
+        _sops_run_cmd = [
+            "-d",
+            "--extract",
+            f"'{self.encryption_params.sops_file_key}'",
+            f"{self._secrets_dir}/{self.encryption_params.sops_file}",
+            ">",
+            f"{self.encryption_params.keyfile_location}",
+        ]
         _ = self._c.run_command(
             command=[
                 *_nix_sops_cmd,
-                "--run",
-                sops_run_cmd,
+                *_sops_run_cmd,
             ],
             description="Decrypting disk keyfile into temporary location for Disko",
         )
@@ -264,7 +269,9 @@ class NixOSInstaller:
             "cd",
             repo_path,
             "&&",
-            "git",
+            *_NIX_RUN,
+            "nixpkgs#git",
+            "--",
         ]
 
         with self._c.panel_session(
@@ -273,7 +280,7 @@ class NixOSInstaller:
                 f"Repository: {repo_path}",
             ],
         ) as writer:
-            _cfg_cmd = ["git", "config", "--global"]
+            _cfg_cmd = [*_git, "config", "--global"]
             self._c.run_command(
                 command=[*_cfg_cmd, "user.email", "nixos-installer@local"],
                 description="Setting git email",
@@ -361,7 +368,7 @@ class NixOSInstaller:
             "/mnt/root",
             "/root",
         ]
-        _cp = ["sudo", "cp", "-v"]
+        _cp = [*self._SUDO, "cp", "-v"]
         with self._c.panel_session(
             title="Copying SSH/AGE keys",
             prelude=[
@@ -395,7 +402,7 @@ class NixOSInstaller:
             )
             _ = self._c.run_command(
                 command=[
-                    "sudo",
+                    *self._SUDO,
                     "ssh-keygen",
                     "-t",
                     "ed25519",
@@ -409,7 +416,7 @@ class NixOSInstaller:
 
     def _handle_install(self) -> None:
         _install_cmd = [
-            "sudo",
+            *self._SUDO,
             "nixos-install",
             "--no-root-password",
             "--cores",

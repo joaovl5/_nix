@@ -61,6 +61,13 @@ class CLI:
         """Display an informative message."""
         self.console.print(f"[blue][bold]🛈 :[/bold][/blue] {msg}")
 
+    def _resolve_command(self, command: list[str]) -> list[str]:
+        """Return the actual command list that will be executed.
+
+        Subclasses (e.g. SshCLI) override this to include the SSH wrapper.
+        """
+        return command
+
     def _run_command(
         self,
         command: list[str],
@@ -84,20 +91,11 @@ class CLI:
         clean = line.rstrip("\n").replace("\t", "    ")
         return clean
 
-    def _format_status_line(self, line: str, status: str) -> Text:
-        width = max(self.console.size.width - 6, 20)
-        available = width - len(status) - 1
-        left = line
-        if len(left) > available:
-            if available <= 3:
-                left = left[:available]
-            else:
-                left = left[: available - 3] + "..."
-        padding = max(width - len(left) - len(status), 1)
+    def _format_status_line(self, line: str, status: str, failed: bool = False) -> Text:
         text = Text()
-        text.append(left, style="dim")
-        text.append(" " * padding)
-        text.append(status, style="green")
+        text.append(line, style="dim")
+        style = "red bold" if failed else "green"
+        text.append(f" {status}", style=style)
         return text
 
     @contextmanager
@@ -106,16 +104,26 @@ class CLI:
         *,
         title: str,
         prelude: list[str],
+        max_lines: int | None = None,
     ):
         lines: list[Text] = []
         for line in prelude:
             lines.append(Text(line, style="dim"))
 
+        if max_lines is None:
+            max_lines = min(self.console.size.height // 2, 30)
+
         border_style = "cyan"
+        show_all = False
 
         def refresh() -> None:
             text = Text()
-            for line in lines:
+            visible = lines
+            if not show_all and max_lines is not None and len(lines) > max_lines:
+                hidden = len(lines) - max_lines
+                text.append(f"... ({hidden} more lines above)\n", style="dim italic")
+                visible = lines[-max_lines:]
+            for line in visible:
                 text.append(line)
                 text.append("\n")
             live.update(Panel(text, title=title, border_style=border_style))
@@ -141,8 +149,9 @@ class CLI:
             refresh()
 
         def set_failed() -> None:
-            nonlocal border_style
+            nonlocal border_style, show_all
             border_style = "red"
+            show_all = True
             refresh()
 
         text = Text()
@@ -170,6 +179,7 @@ class CLI:
         command_line: str,
         process: subprocess.Popen[str],
         writer: PanelWriterLike | None = None,
+        full_command: str | None = None,
     ) -> int:
         if writer is not None:
             command_index = writer.append_line(command_line, style="dim")
@@ -182,6 +192,14 @@ class CLI:
                 status_line = self._format_status_line(command_line, "OK")
                 writer.update_line(command_index, status_line)
             else:
+                if full_command and full_command != command_line:
+                    writer.append_line(f"Full command: {full_command}", style="dim")
+                status_line = self._format_status_line(
+                    command_line,
+                    f"FAILED ({returncode})",
+                    failed=True,
+                )
+                writer.update_line(command_index, status_line)
                 writer.append_line(
                     f"Failed with exit code {returncode}",
                     style="red",
@@ -201,6 +219,17 @@ class CLI:
                 status_line = self._format_status_line(command_line, "OK")
                 panel_writer.update_line(command_index, status_line)
             else:
+                if full_command and full_command != command_line:
+                    panel_writer.append_line(
+                        f"Full command: {full_command}",
+                        style="dim",
+                    )
+                status_line = self._format_status_line(
+                    command_line,
+                    f"FAILED ({returncode})",
+                    failed=True,
+                )
+                panel_writer.update_line(command_index, status_line)
                 panel_writer.append_line(
                     f"Failed with exit code {returncode}",
                     style="red",
@@ -224,6 +253,11 @@ class CLI:
         panel_title = description
         command_line = f"$ {joint_cmd}"
 
+        resolved = self._resolve_command(command)
+        full_command: str | None = None
+        if resolved != command:
+            full_command = f"$ {' '.join(resolved)}"
+
         try:
             process = self._run_command(command=command)
         except Exception as exc:
@@ -245,6 +279,7 @@ class CLI:
             command_line=command_line,
             process=process,
             writer=writer,
+            full_command=full_command,
         )
 
     def run_local_command(
@@ -405,11 +440,7 @@ class SshCLI(CLI):
             f"ssh -i {shlex_quote(str(self.identity))} -p {self.port}",
         ]
 
-    @override
-    def _run_command(
-        self,
-        command: list[str],
-    ) -> subprocess.Popen[str]:
+    def _build_ssh_command(self, command: list[str]) -> list[str]:
         # Join into a single shell string, but only quote arguments that contain
         # whitespace so globs like id_* still expand on the remote shell.
         # This preserves past behavior for rsync/mv while still handling args
@@ -421,7 +452,18 @@ class SshCLI(CLI):
             else:
                 parts.append(arg)
         remote_cmd = " ".join(parts)
-        ssh_command = self._ssh_base() + ["--", remote_cmd]
+        return self._ssh_base() + ["--", remote_cmd]
+
+    @override
+    def _resolve_command(self, command: list[str]) -> list[str]:
+        return self._build_ssh_command(command)
+
+    @override
+    def _run_command(
+        self,
+        command: list[str],
+    ) -> subprocess.Popen[str]:
+        ssh_command = self._build_ssh_command(command)
         return subprocess.Popen(
             ssh_command,
             stdout=subprocess.PIPE,
