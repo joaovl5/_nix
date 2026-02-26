@@ -179,6 +179,17 @@
                              (fn [input] (do-req :dapui :eval input)))))
          (km :<leader>dd {:desc "Toggle UI"} (fn [] (do-req :dapui :toggle)))])
 
+; ## AI
+(wk.add [(km :<leader>a {:group :CodeCompanion})
+         (km :<leader>aa {:desc :Actions :mode [:n :v]}
+             ":CodeCompanionActions<CR>")
+         (km :<leader>ac {:desc :Chat :mode [:n :v]}
+             ":CodeCompanionChat Toggle<CR>")
+         (km :<leader>ar {:desc "Run command" :mode [:n :v]}
+             ":CodeCompanionCmd<CR>")
+         (km :<leader>al {:desc "Inline Assist" :mode [:n :v]}
+             ":CodeCompanion<CR>")])
+
 ; ## Notes (FIXME)
 (wk.add [(km :<leader>n {:group :Notes})
          (km :<leader>na {:desc "Add note"} ":Obsidian new<CR>")

@@ -1,15 +1,17 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(let [filetypes [:markdown :Avante]]
+(let [filetypes [:markdown :codecompanion]]
   (plugin :OXY2DEV/markview.nvim
-          {:ft filetypes
+          {:lazy false
            :config (fn []
                      (let [presets (require :markview.presets)]
                        (do-req :markview :setup
                                {:markdown {:headings presets.headings.slanted
                                            :tables presets.tables.rounded}})
                        (do-req :markview :setup
-                               {:preview {: filetypes :icon_provider :mini}
+                               {:preview {: filetypes
+                                          :icon_provider :mini
+                                          :ignore_buftypes []}
                                 :markdown {:list_items {:wrap true
                                                         :shift_width 2
                                                         :marker_minus {:text "≕"
