@@ -5,6 +5,7 @@ let
     (import ./eza.nix)
     (import ./bat.nix)
     (import ./fzf.nix)
+    (import ./mosh.nix)
     (import ./fastfetch.nix)
     (import ./nix-tools.nix)
     (import ./lazygit.nix)
