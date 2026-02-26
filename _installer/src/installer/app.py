@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from cyclopts import App
 from rich.console import Console
 
@@ -25,6 +26,7 @@ def main(
     secrets_extract_disk_encryption_key: str | None = '["servers"]["tyrant"]',
     secrets_use_disk_encryption: bool = False,
     secrets_disk_encryption_keyfile_location: str = "/tmp/secret.key",
+    use_sudo: bool = True,
     port: int = 22,
 ) -> None:
     """Runs installer.
@@ -47,7 +49,7 @@ def main(
                                      This will assume the associated Disko file used is setup for Luks encryption.
         secrets_disk_encryption_keyfile_location: Place to mount the decrypted SOPS keyfile.
                                                   Should match the one on Disko's configuration.
-
+        use_sudo: Whether to prepend `sudo` to rootful commands, disable if you're root on the target host.
         port: SSH port to connect to.
     """
 
@@ -76,5 +78,6 @@ def main(
         flake_repo=flake_repo,
         encryption_params=encryption_params,
         port=port,
+        use_sudo=use_sudo,
     )
     installer.run()

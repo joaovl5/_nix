@@ -32,6 +32,15 @@ class SecretsEncryptionParams:
     keyfile_location: str
 
 
+_NIX_RUN = [
+    "nix",
+    "run",
+    "--option",
+    "experimental-features",
+    "nix-command flakes",
+]
+
+
 @define
 class NixOSInstaller:
     identity: Path
@@ -41,6 +50,7 @@ class NixOSInstaller:
     flake_disko_file: str
     encryption_params: SecretsEncryptionParams | None = None
     port: int = 22
+    use_sudo: bool = True
     _console: Console = field(init=False)
     _c: SshCLI = field(init=False)
     # temporary dir at destination for housing files
@@ -72,6 +82,13 @@ class NixOSInstaller:
                 "Attempted to get `_secrets_dir` without defining encryption_params"
             )
         return f"{self._tmp_dir}/secrets"
+
+    @cached_property
+    def _SUDO(self) -> list[str]:
+        x: list[str] = []
+        if self.use_sudo:
+            x.append("sudo")
+        return x
 
     @cached_property
     def _host_home(self) -> str:
@@ -113,7 +130,7 @@ class NixOSInstaller:
     def _ensure_dir(self, path: str, path_description: str, sudo: bool = False) -> None:
         final_cmd: list[str] = []
         if sudo:
-            final_cmd.append("sudo")
+            final_cmd += self._SUDO
         final_cmd += ["mkdir", "-v", "-p", path]
         _ = self._c.run_command(
             command=final_cmd,
@@ -122,7 +139,7 @@ class NixOSInstaller:
 
     def _ensure_chown(self, path: str) -> None:
         _cmd = [
-            "sudo",
+            *self._SUDO,
             "chown",
             "-R",
             f"{self._host_user}:users",  # TODO: logic for getting group later
@@ -220,9 +237,12 @@ class NixOSInstaller:
         )
 
     def _handle_disko(self) -> None:
+        # nix run github:nix-community/disko
         _disko_cmd = [
-            "sudo",
-            "disko",
+            *self._SUDO,
+            *_NIX_RUN,
+            "github:nix-community/disko",
+            "--",
             "--yes-wipe-all-disks",
             "--mode",
             "destroy,format,mount",
@@ -282,8 +302,10 @@ class NixOSInstaller:
         _facter_target = f"{self._tmp_dir}/facter.json"
         _facter_secrets_dir = f"{self._secrets_dir}/facter"
         _facter_cmd = [
-            "sudo",
-            "nixos-facter",
+            *self._SUDO,
+            *_NIX_RUN,
+            "nixpkgs#nixos-facter",
+            "--",
             "-o",
             _facter_target,
         ]
@@ -299,7 +321,7 @@ class NixOSInstaller:
         self._ensure_dir(_facter_secrets_dir, "facter directory on secrets repo")
         _ = self._c.run_command(
             command=[
-                "sudo",
+                *self._SUDO,
                 "cp",
                 "-v",
                 _facter_target,
