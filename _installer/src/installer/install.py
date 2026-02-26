@@ -8,6 +8,7 @@ from attrs import define, field
 from rich.console import Console
 
 from coisas.cli import SshCLI
+from coisas.command import GitCommand, NixRunCommand, ShellCommand, SudoCommand
 
 # TODO: move all to arguments
 AGE_KEYFILE: str = "key.txt"
@@ -30,15 +31,6 @@ class SecretsEncryptionParams:
     sops_file: str
     sops_file_key: str
     keyfile_location: str
-
-
-_NIX_RUN = [
-    "nix",
-    "run",
-    "--option",
-    "experimental-features",
-    "nix-command flakes",
-]
 
 
 @define
@@ -83,12 +75,10 @@ class NixOSInstaller:
             )
         return f"{self._tmp_dir}/secrets"
 
-    @cached_property
-    def _SUDO(self) -> list[str]:
-        x: list[str] = []
-        if self.use_sudo:
-            x.append("sudo")
-        return x
+    def _maybe_sudo(
+        self, cmd: ShellCommand | NixRunCommand | GitCommand
+    ) -> ShellCommand | NixRunCommand | GitCommand | SudoCommand:
+        return SudoCommand(inner=cmd) if self.use_sudo else cmd
 
     @cached_property
     def _host_home(self) -> str:
@@ -128,25 +118,19 @@ class NixOSInstaller:
         pass
 
     def _ensure_dir(self, path: str, path_description: str, sudo: bool = False) -> None:
-        final_cmd: list[str] = []
-        if sudo:
-            final_cmd += self._SUDO
-        final_cmd += ["mkdir", "-v", "-p", path]
+        cmd = ShellCommand("mkdir", ["-v", "-p", path])
         _ = self._c.run_command(
-            command=final_cmd,
+            command=self._maybe_sudo(cmd) if sudo else cmd,
             description=f"Ensuring existence of {path_description}",
         )
 
     def _ensure_chown(self, path: str) -> None:
-        _cmd = [
-            *self._SUDO,
-            "chown",
-            "-R",
-            f"{self._host_user}:users",  # TODO: logic for getting group later
-            path,
-        ]
+        cmd = ShellCommand(
+            "chown", ["-R", f"{self._host_user}:users", path]
+        )  # TODO: logic for getting group later
         _ = self._c.run_command(
-            _cmd, description=f"Ensuring {self._host_user} owns {path}"
+            self._maybe_sudo(cmd),
+            description=f"Ensuring {self._host_user} owns {path}",
         )
 
     def _handle_keys(self) -> None:
@@ -170,45 +154,39 @@ class NixOSInstaller:
         # move keys
         self._ensure_dir(f"{self._host_home}/{{.ssh,.age}}", "ssh/age dirs")
         _ = self._c.run_command(
-            command=[
-                "cp",
-                "-v",
-                f"{self._tmp_dir}/.ssh/id_*",
-                f"{self._host_home}/.ssh",
-            ],
+            command=ShellCommand(
+                "cp", ["-v", f"{self._tmp_dir}/.ssh/id_*", f"{self._host_home}/.ssh"]
+            ),
             description="Copying SSH keys into remote host's home",
         )
         _ = self._c.run_command(
-            command=["cp", "-v", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"],
+            command=ShellCommand(
+                "cp", ["-v", f"{self._tmp_dir}/.age/*", f"{self._host_home}/.age"]
+            ),
             description="Copying AGE keys into remote host's home",
         )
 
     def _clone_repositories(self) -> None:
-        _git_clone = [
-            "env",
-            "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=accept-new",
-            *_NIX_RUN,
-            "nixpkgs#git",
-            "--",
-            "clone",
-            "--depth",
-            "1",
-        ]
+        _git_env = {"GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=accept-new"}
         _ = self._c.run_command(
-            command=[
-                *_git_clone,
-                f"{self.flake_repo}",
-                self._flake_dir,
-            ],
+            command=GitCommand(
+                args=["clone", "--depth", "1", self.flake_repo, self._flake_dir],
+                env=_git_env,
+            ),
             description="Cloning Flake repository",
         )
         if self.encryption_params:
             _ = self._c.run_command(
-                command=[
-                    *_git_clone,
-                    self.encryption_params.repo_url,
-                    self._secrets_dir,
-                ],
+                command=GitCommand(
+                    args=[
+                        "clone",
+                        "--depth",
+                        "1",
+                        self.encryption_params.repo_url,
+                        self._secrets_dir,
+                    ],
+                    env=_git_env,
+                ),
                 description="Cloning Secrets repository",
             )
 
@@ -218,44 +196,34 @@ class NixOSInstaller:
         if not self.encryption_params:
             return
 
-        _nix_sops_cmd = [
-            "env",
-            f'SOPS_AGE_KEY_FILE="$HOME/.age/{AGE_KEYFILE}"',
-            *_NIX_RUN,
-            "nixpkgs#sops",
-            "--",
-        ]
-        _sops_run_cmd = [
-            "-d",
-            "--extract",
-            f"'{self.encryption_params.sops_file_key}'",
-            f"{self._secrets_dir}/{self.encryption_params.sops_file}",
-            ">",
-            f"{self.encryption_params.keyfile_location}",
-        ]
         _ = self._c.run_command(
-            command=[
-                *_nix_sops_cmd,
-                *_sops_run_cmd,
-            ],
+            command=NixRunCommand(
+                "nixpkgs#sops",
+                [
+                    "-d",
+                    "--extract",
+                    f"'{self.encryption_params.sops_file_key}'",
+                    f"{self._secrets_dir}/{self.encryption_params.sops_file}",
+                    ">",
+                    f"{self.encryption_params.keyfile_location}",
+                ],
+                env={"SOPS_AGE_KEY_FILE": f'"$HOME/.age/{AGE_KEYFILE}"'},
+            ),
             description="Decrypting disk keyfile into temporary location for Disko",
         )
 
     def _handle_disko(self) -> None:
-        # nix run github:nix-community/disko
-        _disko_cmd = [
-            *self._SUDO,
-            *_NIX_RUN,
+        cmd = NixRunCommand(
             "github:nix-community/disko",
-            "--",
-            "--yes-wipe-all-disks",
-            "--mode",
-            "destroy,format,mount",
-            f"{self._flake_dir}/{self.flake_disko_file}",
-        ]
-
+            [
+                "--yes-wipe-all-disks",
+                "--mode",
+                "destroy,format,mount",
+                f"{self._flake_dir}/{self.flake_disko_file}",
+            ],
+        )
         _ = self._c.run_command(
-            command=_disko_cmd,
+            command=self._maybe_sudo(cmd),
             description=f"Running disko w/ `{self.flake_disko_file}`",
         )
 
@@ -265,36 +233,32 @@ class NixOSInstaller:
         repo_path: str,
         push: bool = False,
     ) -> Generator[Callable[[list[str], str], None]]:
-        _git = [
-            "cd",
-            repo_path,
-            "&&",
-            *_NIX_RUN,
-            "nixpkgs#git",
-            "--",
-        ]
-
         with self._c.panel_session(
             title="Git commands execution",
             prelude=[
                 f"Repository: {repo_path}",
             ],
         ) as writer:
-            _cfg_cmd = [*_git, "config", "--global"]
             self._c.run_command(
-                command=[*_cfg_cmd, "user.email", "nixos-installer@local"],
+                command=GitCommand(
+                    repo_path=repo_path,
+                    args=["config", "--global", "user.email", "nixos-installer@local"],
+                ),
                 description="Setting git email",
                 writer=writer,
             )
             self._c.run_command(
-                command=[*_cfg_cmd, "user.name", "nixos-installer"],
+                command=GitCommand(
+                    repo_path=repo_path,
+                    args=["config", "--global", "user.name", "nixos-installer"],
+                ),
                 description="Setting git username",
                 writer=writer,
             )
 
             def run_git_command(cmd: list[str], description: str) -> None:
                 _ = self._c.run_command(
-                    command=[*_git, *cmd],
+                    command=GitCommand(repo_path=repo_path, args=cmd),
                     description=description,
                     writer=writer,
                 )
@@ -308,18 +272,12 @@ class NixOSInstaller:
         # 1) creating facter config
         _facter_target = f"{self._tmp_dir}/facter.json"
         _facter_secrets_dir = f"{self._secrets_dir}/facter"
-        _facter_cmd = [
-            *self._SUDO,
-            *_NIX_RUN,
-            "nixpkgs#nixos-facter",
-            "--",
-            "-o",
-            _facter_target,
-        ]
 
         self._ensure_dir("/mnt/root", "/mnt/root", sudo=True)
         _ = self._c.run_command(
-            command=_facter_cmd,
+            command=self._maybe_sudo(
+                NixRunCommand("nixpkgs#nixos-facter", ["-o", _facter_target])
+            ),
             description="Running nixos-facter",
         )
 
@@ -327,14 +285,17 @@ class NixOSInstaller:
         _facter_final_path = f"{_facter_secrets_dir}/{self.flake_host}.json"
         self._ensure_dir(_facter_secrets_dir, "facter directory on secrets repo")
         _ = self._c.run_command(
-            command=[
-                *self._SUDO,
-                "cp",
-                "-v",
-                _facter_target,
-                # WARNING THIS AND OTHER LOGIC ASSUMES FLAKE HOST IS THE SAME AS THE MACHINE'S HOSTNAME
-                _facter_final_path,
-            ],
+            command=self._maybe_sudo(
+                ShellCommand(
+                    "cp",
+                    [
+                        "-v",
+                        _facter_target,
+                        # WARNING THIS AND OTHER LOGIC ASSUMES FLAKE HOST IS THE SAME AS THE MACHINE'S HOSTNAME
+                        _facter_final_path,
+                    ],
+                )
+            ),
             description="Copying facter config to secrets repository",
         )
         self._ensure_chown(_facter_final_path)
@@ -346,14 +307,16 @@ class NixOSInstaller:
 
         # 3) updating flake inputs for secrets repository
         _ = self._c.run_command(
-            [
+            command=ShellCommand(
                 "nix",
-                "flake",
-                "update",
-                FLAKE_SECRETS_INPUT_NAME,
-                "--flake",
-                self._flake_dir,
-            ],
+                [
+                    "flake",
+                    "update",
+                    FLAKE_SECRETS_INPUT_NAME,
+                    "--flake",
+                    self._flake_dir,
+                ],
+            ),
             description="Updating secrets input on flake",
         )
 
@@ -368,7 +331,6 @@ class NixOSInstaller:
             "/mnt/root",
             "/root",
         ]
-        _cp = [*self._SUDO, "cp", "-v"]
         with self._c.panel_session(
             title="Copying SSH/AGE keys",
             prelude=[
@@ -382,12 +344,22 @@ class NixOSInstaller:
                     target_glob, f"ssh/age dirs at {target_dir}", sudo=True
                 )
                 _ = self._c.run_command(
-                    command=[*_cp, f"{self._tmp_dir}/.ssh/id_*", f"{target_dir}/.ssh"],
+                    command=self._maybe_sudo(
+                        ShellCommand(
+                            "cp",
+                            ["-v", f"{self._tmp_dir}/.ssh/id_*", f"{target_dir}/.ssh"],
+                        )
+                    ),
                     description="Copying SSH keys",
                     writer=writer,
                 )
                 _ = self._c.run_command(
-                    command=[*_cp, f"{self._tmp_dir}/.age/*", f"{target_dir}/.age"],
+                    command=self._maybe_sudo(
+                        ShellCommand(
+                            "cp",
+                            ["-v", f"{self._tmp_dir}/.age/*", f"{target_dir}/.age"],
+                        )
+                    ),
                     description="Copying AGE keys",
                     writer=writer,
                 )
@@ -401,34 +373,37 @@ class NixOSInstaller:
                 sudo=True,
             )
             _ = self._c.run_command(
-                command=[
-                    *self._SUDO,
-                    "ssh-keygen",
-                    "-t",
-                    "ed25519",
-                    "-N",
-                    "",
-                    "-f",
-                    f"{initrd_key_dir}/{GEN_SSH_KEY_INITRD_NAME}",
-                ],
+                command=self._maybe_sudo(
+                    ShellCommand(
+                        "ssh-keygen",
+                        [
+                            "-t",
+                            "ed25519",
+                            "-N",
+                            "",
+                            "-f",
+                            f"{initrd_key_dir}/{GEN_SSH_KEY_INITRD_NAME}",
+                        ],
+                    )
+                ),
                 description="Generating host ssh key for initrd",
             )
 
     def _handle_install(self) -> None:
-        _install_cmd = [
-            *self._SUDO,
+        cmd = ShellCommand(
             "nixos-install",
-            "--no-root-password",
-            "--cores",
-            "0",
-            "--root",
-            "/mnt",
-            "--flake",
-            f"{self._flake_dir}#{self.flake_host}",
-        ]
-
+            [
+                "--no-root-password",
+                "--cores",
+                "0",
+                "--root",
+                "/mnt",
+                "--flake",
+                f"{self._flake_dir}#{self.flake_host}",
+            ],
+        )
         _ = self._c.run_command(
-            command=_install_cmd,
+            command=self._maybe_sudo(cmd),
             description=f"Installing NixOS for `{self.flake_host}`",
         )
 

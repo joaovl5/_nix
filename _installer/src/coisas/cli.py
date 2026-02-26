@@ -5,10 +5,13 @@ from typing import Protocol, override
 from contextlib import contextmanager
 
 from attrs import define
+from rich.box import ASCII, ROUNDED
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
+
+from coisas.command import Command
 
 
 def _ensure_dir(path: Path) -> None:
@@ -91,11 +94,16 @@ class CLI:
         clean = line.rstrip("\n").replace("\t", "    ")
         return clean
 
-    def _format_status_line(self, line: str, status: str, failed: bool = False) -> Text:
+    def _format_status_line(
+        self, line: str | Text, status: str, failed: bool = False
+    ) -> Text:
         text = Text()
-        text.append(line, style="dim")
         style = "red bold" if failed else "green"
-        text.append(f" {status}", style=style)
+        text.append(f"{status} ", style=style)
+        if isinstance(line, Text):
+            text.append_text(line)
+        else:
+            text.append(line, style="dim")
         return text
 
     @contextmanager
@@ -113,8 +121,10 @@ class CLI:
         if max_lines is None:
             max_lines = min(self.console.size.height // 2, 30)
 
-        border_style = "cyan"
+        current_box = ASCII
+        border_style = "dim"
         show_all = False
+        failed = False
 
         def refresh() -> None:
             text = Text()
@@ -126,7 +136,9 @@ class CLI:
             for line in visible:
                 text.append(line)
                 text.append("\n")
-            live.update(Panel(text, title=title, border_style=border_style))
+            live.update(
+                Panel(text, title=title, border_style=border_style, box=current_box)
+            )
 
         def append_line(line: str | Text, style: str | None = None) -> int:
             if isinstance(line, Text):
@@ -149,7 +161,9 @@ class CLI:
             refresh()
 
         def set_failed() -> None:
-            nonlocal border_style, show_all
+            nonlocal border_style, show_all, current_box, failed
+            failed = True
+            current_box = ROUNDED
             border_style = "red"
             show_all = True
             refresh()
@@ -158,7 +172,7 @@ class CLI:
         for line in lines:
             text.append(line)
             text.append("\n")
-        panel = Panel(text, title=title, border_style=border_style)
+        panel = Panel(text, title=title, border_style=border_style, box=current_box)
         with Live(
             panel,
             console=self.console,
@@ -170,13 +184,16 @@ class CLI:
                 update_line=update_line,
                 set_failed=set_failed,
             )
+            if not failed:
+                current_box = ROUNDED
+                border_style = "green"
             refresh()
 
     def _stream_in_panel(
         self,
         *,
         title: str,
-        command_line: str,
+        command_line: str | Text,
         process: subprocess.Popen[str],
         writer: PanelWriterLike | None = None,
         full_command: str | None = None,
@@ -240,7 +257,7 @@ class CLI:
 
     def run_command(
         self,
-        command: list[str],
+        command: list[str] | Command,
         description: str,
         writer: PanelWriterLike | None = None,
     ) -> int:
@@ -249,17 +266,22 @@ class CLI:
         Returns the command's exit code.
         """
 
-        joint_cmd = " ".join(command)
-        panel_title = description
-        command_line = f"$ {joint_cmd}"
+        if isinstance(command, list):
+            command_line: str | Text = f"$ {' '.join(command)}"
+            executable = command
+        else:
+            command_line = command.render()
+            executable = command.build()
 
-        resolved = self._resolve_command(command)
+        panel_title = description
+
+        resolved = self._resolve_command(executable)
         full_command: str | None = None
-        if resolved != command:
+        if resolved != executable:
             full_command = f"$ {' '.join(resolved)}"
 
         try:
-            process = self._run_command(command=command)
+            process = self._run_command(command=executable)
         except Exception as exc:
             if writer is not None:
                 writer.append_line(f"Failed to run command: {exc}", style="red")
@@ -284,16 +306,21 @@ class CLI:
 
     def run_local_command(
         self,
-        command: list[str],
+        command: list[str] | Command,
         description: str,
         writer: PanelWriterLike | None = None,
     ) -> int:
-        joint_cmd = " ".join(command)
+        if isinstance(command, list):
+            command_line: str | Text = f"$ {' '.join(command)}"
+            executable = command
+        else:
+            command_line = command.render()
+            executable = command.build()
+
         panel_title = description
-        command_line = f"$ {joint_cmd}"
 
         try:
-            process = self._run_local_command(command=command)
+            process = self._run_local_command(command=executable)
         except Exception as exc:
             if writer is not None:
                 writer.append_line(f"Failed to run command: {exc}", style="red")
