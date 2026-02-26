@@ -67,10 +67,8 @@ in {
       ++ [
         ../../systems/_modules/services/ollama.nix
       ]) {}
-    // (_h "testvm" DESKTOP_MODULES {})
     ## servers
     // (_h "tyrant" SERVER_MODULES {})
-    // (_h "testservervm" SERVER_MODULES {})
     ## other / special
     // (_h "iso" [../../systems/iso] {});
 }
