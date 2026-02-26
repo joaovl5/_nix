@@ -9,12 +9,7 @@
   u = my.units;
   inherit (o) t;
 in
-  {
-    imports = [
-      inputs.nixarr.nixosModules.default
-    ];
-  }
-  // o.module "unit.nixarr" (with o; {
+  o.module "unit.nixarr" (with o; {
     enable = toggle "Enable -arr services" false;
     vpn = {
       enable = toggle "Enable vpn client for -arr services" false;
@@ -66,7 +61,7 @@ in
         target = "bazarr";
       };
     };
-  }) {} (opts: (o.when opts.enable {
+  }) {imports = _: [inputs.nixarr.nixosModules.default];} (opts: (o.when opts.enable {
     my.vhosts = {
       jellyfin = {inherit (opts.jellyfin.endpoint) target sources;};
       prowlarr = {inherit (opts.prowlarr.endpoint) target sources;};

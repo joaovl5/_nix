@@ -13,6 +13,15 @@
     };
   };
 
+  gpt = device: partitions: {
+    inherit device;
+    type = "disk";
+    content = {
+      type = "gpt";
+      inherit partitions;
+    };
+  };
+
   mbr = {size ? "1M"}: {
     inherit size;
     type = "EF02";

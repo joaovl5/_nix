@@ -2,16 +2,6 @@ inputs: let
   DEFAULT_SYSTEM = "x86_64-linux";
   DEFAULT_CHANNEL = "unstable";
 
-  DESKTOP_MODULES = [
-    ../../systems/astral
-    ../../users/lav.nix
-  ];
-
-  SERVER_MODULES = [
-    ../../systems/tyrant
-    ../../users/tyrant.nix
-  ];
-
   _m = obj: {attr ? "default"}: obj.nixosModules.${attr};
 
   # assumes hardware/<name> module matches <name>
@@ -35,7 +25,26 @@ inputs: let
       }
       // extra;
   };
+
+  SHARED_MODULES = with inputs; [
+    (_m disko {})
+    (_m sops-nix {attr = "sops";})
+    (_m nixos-dns {attr = "dns";})
+    (_m hm {attr = "home-manager";})
+    ../../_modules/options.nix
+    ../../_modules/secrets.nix
+    ../../hardware/_modules/grub.nix
+    ../../systems/_modules/home-manager.nix
+    ../../systems/_modules/nix.nix
+    ../../systems/_modules/lix.nix
+    ../../systems/_modules/shell
+    ../../systems/_modules/dns
+    ../../users/_units
+  ];
 in {
+  # is consumed for kexec tarball script
+  inherit SHARED_MODULES;
+
   hostDefaults = {
     system = DEFAULT_SYSTEM;
     channelName = DEFAULT_CHANNEL;
@@ -47,28 +56,19 @@ in {
     };
     #
     # shared modules
-    modules = with inputs; [
-      (_m disko {})
-      (_m sops-nix {attr = "sops";})
-      (_m nixos-dns {attr = "dns";})
-      ../../_modules/options.nix
-      ../../_modules/secrets.nix
-      ../../hardware/_modules/grub.nix
-      ../../systems/_modules/home-manager.nix
-      ../../systems/_modules/nix.nix
-      ../../systems/_modules/lix.nix
-      ../../systems/_modules/dns
-    ];
+    modules = SHARED_MODULES;
   };
 
   hosts =
     ## desktops
-    _h "lavpc" (DESKTOP_MODULES
-      ++ [
-        ../../systems/_modules/services/ollama.nix
-      ]) {}
+    _h "lavpc" [
+      ../../systems/astral
+      ../../users/lav.nix
+      ../../systems/_modules/services/ollama.nix
+    ] {}
     ## servers
-    // (_h "tyrant" SERVER_MODULES {})
+    // (_h "tyrant" [../../systems/tyrant] {})
+    // (_h "temperance" [../../systems/temperance] {})
     ## other / special
     // (_h "iso" [../../systems/iso] {});
 }

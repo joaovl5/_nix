@@ -1,76 +1,42 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: let
-  cfg = config.my.nix;
-in {
+_: {
   imports = [
-    ../_modules/console
-    ../_modules/security
-    ../_modules/services/ntp.nix
-    ../_modules/console
-    ../_modules/shell
-    {my_system.title = lib.readFile ./assets/title.txt;}
+    ../_bootstrap/server.nix
   ];
 
-  networking = {
-    hostName = lib.mkForce cfg.hostname;
-  };
+  my = {
+    server.enable = true;
+    host.title_file = ./assets/title.txt;
+    host.password.sops_key = "server";
 
-  users.mutableUsers = false;
-  users.users.root = {
-    hashedPassword = lib.mkForce null;
-    hashedPasswordFile = config.sops.secrets.password_hash_server.path;
-    shell = pkgs.bash;
-  };
-
-  # scans network, detects hostnames
-  services.avahi.enable = true;
-  # ssh daemon and agent
-  services.openssh = {
-    enable = true;
-
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
+    "unit.octodns" = {
+      enable = true;
     };
-  };
 
-  # disable privileged ports
-  boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
-  virtualisation = {
-    spiceUSBRedirection.enable = true;
-    containers.enable = true;
-    docker = {
-      enable = false; # we use rootless instead
-      # storageDriver = "btrfs";
-      autoPrune = {
-        enable = true;
-        dates = "weekly";
-      };
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
+    "unit.traefik" = {
+      enable = true;
+    };
+
+    "unit.pihole" = {
+      enable = true;
+      dns = {
+        interface = "enp3s0f1";
       };
     };
-    libvirtd.enable = true;
+
+    "unit.litellm" = {
+      enable = true;
+    };
+
+    "unit.nixarr" = {
+      enable = true;
+    };
+
+    "unit.soularr" = {
+      enable = true;
+    };
+
+    "unit.fxsync" = {
+      enable = true;
+    };
   };
-
-  environment.systemPackages = with pkgs; [
-    # virtualisation
-    docker
-    docker-compose
-
-    # utils
-    dconf
-    curl
-    wget
-    git
-    btop
-    wget
-  ];
-
-  system.stateVersion = "25.11";
 }
