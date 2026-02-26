@@ -10,8 +10,12 @@
   - `optnix -n -s nx <query>` - list of options if fuzzy search, more details if you give exact option name
   - switch `-s nx` with `-s hm` for searching home-manager options
   - these options also search declared options (some new ones may be missing if a system rebuild is pending)
+- Searching packages
+  - `nh search <query>`
 
 ## Required checks after changes
+
+In this order:
 
 - `nix fmt` - basic formatting, runs `treefmt` under the hood
 - `prek` - precommit hook has linters included

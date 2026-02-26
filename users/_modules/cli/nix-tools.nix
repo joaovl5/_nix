@@ -103,6 +103,7 @@
       "+S" = "+n --show-trace --verbose";
       "+d" = "deploy";
       "+D" = "deploy --skip-checks";
+      "+c" = "nh clean all --elevation-program run0";
       "?" = "nps --color=always -e=true --truncate=true";
       "?nx" = "optnix -s nx";
       "?hm" = "optnix -s hm";
