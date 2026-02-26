@@ -21,6 +21,11 @@ in {
       name = "Tyrant";
       is_server = true;
     };
+    luks = {
+      ssh = {
+        enable = true;
+      };
+    };
   };
 
   time.timeZone = cfg.timezone;
