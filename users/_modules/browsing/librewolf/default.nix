@@ -8,6 +8,9 @@
 
     allowed_sites = import ./allowed-sites.nix args;
   in {
+    imports = [
+      ./xdg.nix
+    ];
     programs.librewolf = {
       enable = true;
       settings = import ./settings.nix args;

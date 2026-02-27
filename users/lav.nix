@@ -95,9 +95,6 @@ in {
 
         # etc
         home.packages = with pkgs; [
-          # core
-          libreoffice
-
           # terminal
           ## emulator
           ghostty
@@ -109,7 +106,6 @@ in {
           gdu # ncdu alternative (MUCH faster on SSDs)
 
           # gui
-          ungoogled-chromium
           waylock ## locker
           ## launcher
           fuzzel # backup
