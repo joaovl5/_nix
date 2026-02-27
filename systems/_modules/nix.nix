@@ -17,7 +17,11 @@ in {
       trusted-users = [cfg.username];
       warn-dirty = false;
       auto-optimise-store = true;
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+        "pipe-operator" # if not using lix, is `pipe-operators`
+      ];
 
       substituters = [
         "https://nix-community.cachix.org"
