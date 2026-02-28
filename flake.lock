@@ -806,10 +806,10 @@
     "mysecrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1771758215,
-        "narHash": "sha256-BX9wW5tTMaSC8goHEc5cAefKKmlaAiYBUvj4OInME3E=",
+        "lastModified": 1772310533,
+        "narHash": "sha256-QZ61TzH3lptM/ZjfQs+Tfrd30OktmvX3LiWsMnFe2jw=",
         "ref": "main",
-        "rev": "ad905ba42906ef6455cecb900fcda2c8a4b13263",
+        "rev": "995fe0fe6f90d64431ddfc6a60a4bdffa614ab53",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/joaovl5/__secrets.git"
