@@ -130,6 +130,7 @@ in {
           virt-manager
 
           ## etc move later
+          copier
           jq
           bit-logo
           bagels

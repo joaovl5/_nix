@@ -16,6 +16,7 @@ in {
     settings = {
       trusted-users = [cfg.username];
       warn-dirty = false;
+      builders-use-substitutes = true;
       auto-optimise-store = true;
       experimental-features = [
         "nix-command"
