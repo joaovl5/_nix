@@ -1,3 +1,11 @@
+## v0.3.0 (2026-03-01)
+
+### Feat
+
+- [my-installer][update-secrets][new-facter-cfg]:temperance
+- [my-installer][update-secrets][new-facter-cfg]:temperance
+- **installer**: complete installation rework
+
 ## v0.2.1 (2026-02-28)
 
 ### Fix

@@ -21,6 +21,7 @@
           ];
         };
         git = {
+          overrideGpg = true;
           pagers = [
             {
               colorArg = "always";
