@@ -2,9 +2,10 @@
   pkgs,
   lib,
   config,
+  mylib,
   ...
-} @ args: let
-  o = import ../../../_lib/options args;
+}: let
+  o = (mylib.use config).options;
   cfg = config.my.nix;
   inherit (cfg) username;
   user_home = config.users.users.${username}.home;

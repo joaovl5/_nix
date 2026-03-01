@@ -5,6 +5,7 @@
   config,
   options,
   system,
+  mylib,
   ...
 } @ args: {
   imports = with inputs; [
@@ -17,9 +18,7 @@
     sharedModules = [];
     backupCommand = "${pkgs.rm-improved}/bin/rip";
     extraSpecialArgs = {
-      inherit inputs;
-      inherit system;
-      inherit pkgs;
+      inherit inputs system pkgs mylib;
       nixos_config = config;
       nixos_options = options;
       secrets = inputs.mysecrets;

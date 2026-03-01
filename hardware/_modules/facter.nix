@@ -1,9 +1,10 @@
 {
   config,
   inputs,
+  mylib,
   ...
-} @ args: let
-  o = import ../../_lib/options args;
+}: let
+  o = (mylib.use config).options;
 in
   o.module "facter" (with o; {
     enable = toggle "Enable nixos-facter" true;

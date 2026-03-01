@@ -1,8 +1,11 @@
-{nixos_config, ...}: let
-  inherit (nixos_config.sops) secrets;
+{
+  mylib,
+  nixos_config,
+  ...
+}: let
+  s = (mylib.use nixos_config).secrets;
   mk_secret = name: path: ''set -gx ${name} "$(cat ${path})"'';
-  # var = name: value: "set -gx ${name} ${lib.escapeShellArg value}";
 in ''
-  ${mk_secret "OPENAI_KEY" "${secrets.openai_key.path}"}
-  ${mk_secret "OPENAI_API_KEY" "${secrets.openai_key.path}"}
+  ${mk_secret "OPENAI_KEY" (s.secret_path "openai_key")}
+  ${mk_secret "OPENAI_API_KEY" (s.secret_path "openai_key")}
 ''

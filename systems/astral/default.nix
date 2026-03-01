@@ -2,9 +2,11 @@
   pkgs,
   config,
   lib,
+  mylib,
   ...
 }: let
   cfg = config.my.nix;
+  s = (mylib.use config).secrets;
 in {
   imports = [
     ../_modules/security
@@ -23,7 +25,7 @@ in {
   users.mutableUsers = false;
   users.users.root = {
     hashedPassword = lib.mkForce null;
-    hashedPasswordFile = config.sops.secrets.password_hash.path;
+    hashedPasswordFile = s.secret_path "password_hash";
     shell = pkgs.bash;
   };
 

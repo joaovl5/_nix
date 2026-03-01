@@ -3,10 +3,12 @@
   config,
   lib,
   inputs,
+  mylib,
   ...
 }: let
   inherit (import ../_lib/modules) extract_imports;
   cfg = config.my.nix;
+  s = (mylib.use config).secrets;
 
   modules = [
     (import ./_modules/cli)
@@ -60,7 +62,7 @@ in {
 
   config = {
     users.users.${cfg.username} = {
-      hashedPasswordFile = config.sops.secrets.password_hash.path;
+      hashedPasswordFile = s.secret_path "password_hash";
 
       isNormalUser = true;
       shell = pkgs.fish;

@@ -1,7 +1,12 @@
-{pkgs, ...} @ args: let
-  o = import ../../_lib/options args;
-
-  public_data = import ../../_modules/public.nix args;
+{
+  pkgs,
+  mylib,
+  config,
+  inputs,
+  ...
+}: let
+  o = (mylib.use config).options;
+  public_data = import ../../_modules/public.nix {inherit inputs;};
   default_ssh_authorized_keys = [
     public_data.ssh_key
   ];
