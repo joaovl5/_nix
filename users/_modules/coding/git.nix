@@ -73,10 +73,9 @@
     };
 
     home.packages = with pkgs; [
-      commitizen
       prek
-      # testing
-      cocogitto
+      git-cliff # actual changelogs
+      commitizen # only for generating commits
     ];
   };
 }
