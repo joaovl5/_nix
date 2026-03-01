@@ -59,7 +59,7 @@
     };
     home.packages = with pkgs; [
       glfw
-      wineWowPackages.full
+      wineWow64Packages.full
       winetricks
     ];
   };

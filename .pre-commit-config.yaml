@@ -26,16 +26,16 @@ repos:
         language: system
         pass_filenames: false
         entry: deadnix
-      - id: nix_check
-        name: nix_check
-        language: system
-        pass_filenames: false
-        entry: nix flake check
-      # - id: treefmt
-      #   name: treefmt
+      # - id: nix_check
+      #   name: nix_check
       #   language: system
       #   pass_filenames: false
-      #   entry: nix fmt
+      #   entry: nix flake check
+      - id: treefmt
+        name: treefmt
+        language: system
+        pass_filenames: false
+        entry: nix fmt
       - id: commitizen
         name: commitizen
         language: system
