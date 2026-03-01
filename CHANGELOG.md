@@ -1,3 +1,12 @@
+## v0.2.1 (2026-02-28)
+
+### Fix
+
+- **precommit**: remove nix check, readd treefmt
+- add use substituters, copier
+- **wine**: remove old pkg warning
+- **desktop**: fix default browser, remove unused pkgs
+
 ## v0.2.0 (2026-02-26)
 
 ### Feat
