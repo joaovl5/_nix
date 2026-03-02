@@ -1,2 +1,6 @@
 result
+.venv
+.ruff-cache
+__pycache__
+.claude
 .deploy-gc
