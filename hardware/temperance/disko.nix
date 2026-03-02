@@ -1,7 +1,7 @@
 let
   primary_device = "/dev/sda";
 
-  inherit (import ../../_lib/disko) mbr luks btrfs gpt;
+  inherit (import ../../_lib/disko) efi luks btrfs gpt;
   inherit (btrfs) subvolume swap;
 in
   _: {
@@ -10,19 +10,11 @@ in
       enable = true;
       biosDevice = primary_device;
       force = true;
-      efiSupport = false;
+      efiSupport = true;
     };
 
     disko.devices.disk.primary = gpt primary_device {
-      bios = mbr {};
-      boot = {
-        size = "1G";
-        content = {
-          mountpoint = "/boot";
-          type = "filesystem";
-          format = "vfat";
-        };
-      };
+      esp = efi {};
       luks = luks {name = "p1";} {
         type = "btrfs";
         subvolumes = {
