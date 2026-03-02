@@ -6,7 +6,9 @@
   ...
 }: let
   cfg = config.my.nix;
-  s = (mylib.use config).secrets;
+  my = mylib.use config;
+  o = my.options;
+  s = my.secrets;
 in {
   imports = [
     ../_modules/security
@@ -77,7 +79,7 @@ in {
   };
 
   # install documentation pages
-  documentation = {
+  documentation = o.def {
     enable = true;
     nixos = {
       enable = true;

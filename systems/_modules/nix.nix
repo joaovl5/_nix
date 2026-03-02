@@ -5,8 +5,9 @@
 }: let
   cfg = config.my.nix;
 in {
+  nixpkgs.config.allowUnfree = true;
   nix = {
-    generateRegistryFromInputs = lib.mkDefault true;
+    # generateRegistryFromInputs = lib.mkDefault true;
     daemonCPUSchedPolicy = lib.mkDefault (
       if cfg.is_server
       then "batch"
@@ -36,11 +37,6 @@ in {
         "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
         "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       ];
-
-      # extra-substituters = [
-      # ];
-      # extra-trusted-public-keys = [
-      # ];
     };
 
     # garbage collection
@@ -51,7 +47,7 @@ in {
     };
   };
 
-  # cleans nix-shell gc stuff
+  # cleans nix-shells
   services.angrr = {
     enable = true;
     settings.period = "7d";

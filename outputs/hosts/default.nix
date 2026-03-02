@@ -13,15 +13,9 @@ inputs: let
             "${inputs.self}/hardware/${name}"
           ]
           ++ modules;
-        specialArgs.mylib = import ../../_lib (let
-          pkgs = import inputs.nixpkgs {
-            system = DEFAULT_SYSTEM;
-          };
-        in {
-          inherit inputs;
-          inherit pkgs;
-          inherit (pkgs) lib;
-        });
+        specialArgs = inputs.self._utils.hosts.mk_extra_args {
+          pkgs = import inputs.nixpkgs {system = DEFAULT_SYSTEM;};
+        };
       }
       // extra;
   };
@@ -33,6 +27,7 @@ inputs: let
     (_m hm {attr = "home-manager";})
     ../../_modules/options.nix
     ../../_modules/secrets.nix
+    # ../../_modules/vm.nix
     ../../hardware/_modules/grub.nix
     ../../systems/_modules/home-manager.nix
     ../../systems/_modules/nix.nix
@@ -43,18 +38,23 @@ inputs: let
   ];
 in {
   # is consumed for kexec tarball script
-  inherit SHARED_MODULES;
+  _utils.hosts.shared_modules = SHARED_MODULES;
+  _utils.hosts.mk_extra_args = {pkgs, ...}: {
+    mylib = import ../../_lib {
+      inherit
+        inputs
+        pkgs
+        ;
+      inherit (pkgs) lib;
+    };
+    inherit inputs;
+    system = DEFAULT_SYSTEM;
+  };
 
   hostDefaults = {
     system = DEFAULT_SYSTEM;
     channelName = DEFAULT_CHANNEL;
 
-    # for module imports
-    specialArgs = {
-      inherit inputs;
-      system = DEFAULT_SYSTEM;
-    };
-    #
     # shared modules
     modules = SHARED_MODULES;
   };

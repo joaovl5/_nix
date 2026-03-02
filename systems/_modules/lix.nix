@@ -3,10 +3,13 @@
     (_final: prev: {
       inherit
         (prev.lixPackageSets.stable)
-        nixpkgs-review
         nix-eval-jobs
         nix-fast-build
+        # nix-direnv
+        nix-update
+        # nix-serve-ng
         colmena
+        # editline
         ;
     })
   ];

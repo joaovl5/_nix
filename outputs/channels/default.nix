@@ -13,24 +13,25 @@ inputs: let
     (_o niri {attr = "niri";})
     (_o fenix {})
   ];
-
   # list of packages to use from stable
-  USE_FROM_STABLE = channels:
-    with channels.stable; {
-      inherit
-        ncdu # just for testing
-        ;
-    };
+  # USE_FROM_STABLE = channels:
+  #   with channels.stable; {
+  #     inherit
+  #       ncdu # just for testing
+  #       ;
+  #   };
 in {
+  _channels.overlays = OVERLAYS;
+  # _channels.use_from_stable = USE_FROM_STABLE;
   channelsConfig.allowUnfree = true;
   sharedOverlays = OVERLAYS;
   channels = {
     stable.input = inputs.stable;
     unstable = {
       input = inputs.unstable;
-      overlaysBuilder = channels: [
-        (_: _: USE_FROM_STABLE channels)
-      ];
+      # overlaysBuilder = channels: [
+      #   (_: _: USE_FROM_STABLE channels)
+      # ];
     };
   };
 }

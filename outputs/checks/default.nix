@@ -23,5 +23,23 @@ in {
     ))
     // (builtins.mapAttrs
       (_system: deployLib: deployLib.deployChecks self.deploy)
-      deploy-rs.lib);
+      deploy-rs.lib)
+    // (each_system (pkgs: {
+      test_vm = pkgs.testers.runNixOSTest (
+        import ../../tests/vm
+        (
+          {
+            inherit
+              pkgs
+              self
+              ;
+          }
+          // (
+            self._utils.hosts.mk_extra_args {
+              inherit pkgs;
+            }
+          )
+        )
+      );
+    }));
 }
