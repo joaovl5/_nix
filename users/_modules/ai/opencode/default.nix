@@ -15,7 +15,7 @@
       enable = true;
       enableMcpIntegration = true;
       rules = ''
-        ${lib.readFile ./extra_instruct.md}
+        ${lib.readFile ../_prompts/general/system.md}
       '';
       skills = "${inputs.anthropic-skills}/skills";
       settings = {
