@@ -132,6 +132,7 @@ in {
           virt-manager
 
           ## etc move later
+          wireguard-tools
           copier
           jq
           bit-logo
