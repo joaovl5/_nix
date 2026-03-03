@@ -71,6 +71,7 @@ in
       external.name = optional "External interface name" t.str {};
       internal = {
         name = opt "Internal interface name" t.str "wg0";
+        privateKeyFile = optional "Override private key file for this interface" t.str {};
         subnet = {
           ip = opt "Subnet mask for internal interface (IP part)" t.str "11.1.0.0";
           mask = opt "Subnet mask for internal interface (mask part)" t.str "24";
@@ -190,7 +191,10 @@ in
             wireguard.interfaces.${internal.name} = {
               ips = ["${internal.subnet.ip}/${internal.subnet.mask}"];
               listenPort = internal.listen_port;
-              privateKeyFile = s.secret_path "wg_main_priv";
+              privateKeyFile =
+                if internal.privateKeyFile != null && internal.privateKeyFile != ""
+                then s.secret_path internal.privateKeyFile
+                else s.secret_path "wg_main_priv";
               peers = opts.extra_peers;
             };
           };
