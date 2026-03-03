@@ -71,7 +71,7 @@ in
       }
       (o.when opts.relay.enable (let
         peer_pub_key =
-          if opts.relay.peer.public_key
+          if opts.relay.peer.public_key != null
           then opts.relay.peer.public_key
           else main_pub_key;
 
