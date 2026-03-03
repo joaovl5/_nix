@@ -33,13 +33,7 @@
     }
     // opts);
 
-  nodes_list =
-    map (host: {
-      name = host.host;
-      value = _n host;
-    })
-    hosts;
-  nodes = builtins.listToAttrs nodes_list;
+  nodes = builtins.mapAttrs (name: host: _n (host // {host = name;})) hosts;
 in {
   deploy = {
     remoteBuild = false;

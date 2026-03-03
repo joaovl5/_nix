@@ -25,14 +25,7 @@
         ;
     };
 
-    matchblocks_list =
-      map (host: {
-        name = host.host;
-        value = _mb host;
-      })
-      hosts;
-
-    matchblocks = builtins.listToAttrs matchblocks_list;
+    matchblocks = builtins.mapAttrs (_name: _mb) hosts;
   in {
     programs.ssh = {
       matchBlocks = matchblocks;
