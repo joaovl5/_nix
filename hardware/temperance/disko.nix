@@ -8,8 +8,6 @@ in
     boot.loader.grub.enable = false;
     boot.loader.limine = {
       enable = true;
-      biosDevice = primary_device;
-      force = true;
       efiSupport = true;
     };
 
