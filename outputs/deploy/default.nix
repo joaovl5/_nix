@@ -1,9 +1,11 @@
 {
   self,
   deploy-rs,
+  globals,
   ...
 }: let
   DEFAULT_SYSTEM = "x86_64-linux";
+  inherit ((import globals)) hosts;
 
   _d = {
     host,
@@ -21,34 +23,22 @@
     ssh_user ? "root",
     user ? "root",
     opts ? {},
-  }: {
-    ${host} =
-      {
-        inherit hostname;
-        profiles.system = _d {
-          inherit host user;
-          sshUser = ssh_user;
-        };
-      }
-      // opts;
-  };
+    ...
+  }: ({
+      inherit hostname;
+      profiles.system = _d {
+        inherit host user;
+        sshUser = ssh_user;
+      };
+    }
+    // opts);
+
+  nodes = builtins.mapAttrs (name: host: _n (host // {host = name;})) hosts;
 in {
   deploy = {
     remoteBuild = false;
     sudo = "run0 --user";
 
-    nodes =
-      # _n {
-      #   host = "testservervm";
-      #   hostname = "192.168.122.169";
-      #   ssh_user = "tyrant";
-      #   user = "root";
-      # } //
-      _n {
-        host = "tyrant";
-        hostname = "192.168.15.13";
-        ssh_user = "tyrant";
-        user = "root";
-      };
+    inherit nodes;
   };
 }

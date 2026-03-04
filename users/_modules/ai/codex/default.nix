@@ -9,7 +9,7 @@
   hm = {lib, ...}: {
     programs.codex = {
       enable = true;
-      custom-instructions = lib.readFile ./extra_instruct.md;
+      custom-instructions = lib.readFile ../_prompts/general/system.md;
       settings = {
         approval_policy = "on-request";
         sandbox_mode = "workspace-write";

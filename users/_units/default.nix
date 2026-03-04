@@ -11,6 +11,7 @@ in {
     ./reverse-proxy
     ./octodns
     ./fxsync
+    ./wireguard
     unit_global_cfg
   ];
 }

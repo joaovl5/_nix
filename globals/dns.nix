@@ -1,5 +1,6 @@
 rec {
   tld = "trll.ing";
+  public_vhosts = ["jellyfin"];
   nameservers = [
     "aaron.ns.cloudflare.com"
     "bella.ns.cloudflare.com"

@@ -5,6 +5,7 @@ let
     (import ./opencode)
     (import ./codex)
     (import ./crush)
+    (import ./mcp)
   ];
 in
   combine_modules modules

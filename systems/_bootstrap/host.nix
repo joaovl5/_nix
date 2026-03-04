@@ -1,5 +1,5 @@
 /*
-base system for server systems to use
+base system for systems to use
 this is not meant to work by itself
 */
 {

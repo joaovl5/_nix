@@ -53,6 +53,10 @@
     pkgs.octodns-providers.cloudflare
     octodns-pihole
   ]);
+
+  vhost_policy_dir =
+    pkgs.writeTextDir "octodns_vhost_policy.py"
+    (builtins.readFile ./octodns_vhost_policy.py);
 in
   o.module "unit.octodns" (with o; {
     enable = toggle "Enable OctoDNS sync service" false;
@@ -60,15 +64,19 @@ in
     o.when opts.enable {
       systemd.services.octodns-sync = {
         description = "OctoDNS zone sync to Pi-hole and Cloudflare";
+        wantedBy = ["multi-user.target" "pihole-ftl.service"];
         after = ["network-online.target" "pihole-ftl.service"];
         wants = ["network-online.target"];
+        partOf = ["pihole-ftl.service"];
         serviceConfig = {
           Type = "oneshot";
+          RemainAfterExit = true;
           ExecStart = pkgs.writeShellScript "octodns-sync" ''
             set -euo pipefail
+            export PYTHONPATH="${vhost_policy_dir}:''${PYTHONPATH:-}"
             export PIHOLE_PASSWORD=$(cat ${s.secret_path "pihole_password"})
             export CLOUDFLARE_TOKEN=$(cat ${s.secret_path "cloudflare_api_token"})
-            ${octodns_env}/bin/octodns-sync --config-file=${octodns_config} --doit
+            ${octodns_env}/bin/octodns-sync --config-file=${octodns_config} --force --doit
           '';
         };
       };
