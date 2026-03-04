@@ -2,6 +2,41 @@
 
 ---
 
+## [0.4.0](https://github.com/joaovl5/_nix/compare/v0.3.0..v0.4.0) - 2026-03-04
+
+### 🚀 Features
+
+- [d095626](https://github.com/joaovl5/_nix/commit/d095626faec049cc4d1b2108e15393b3a8d2ef16) _(ai)_ Add opencode
+- [50a5330](https://github.com/joaovl5/_nix/commit/50a5330c8001750d40c61225ab3f14ca61f8d41c) _(ai)_ Add mcp, shared prompts
+- [4c2de69](https://github.com/joaovl5/_nix/commit/4c2de69e820b29c5077d57f6b52798049f97c64b) _(deploy)_ Centralize hosts cfg
+- [3606081](https://github.com/joaovl5/_nix/commit/3606081d814ac657f7875f308ecc5bc855312eae) Add wireguard server
+
+### 🐛 Bug Fixes
+
+- [58cc4f9](https://github.com/joaovl5/_nix/commit/58cc4f9d242f36abc1303834a464db9403e8e9db) _(commitizen)_ Remove cfg for tags
+- [ea2a3b1](https://github.com/joaovl5/_nix/commit/ea2a3b1ef95d2cc21e337d92c56155e24cda6cbc) _(temperance)_ Switch from mbr->efi
+- [ae37cc9](https://github.com/joaovl5/_nix/commit/ae37cc909b7feb62419f4b1204f4c74a136de41e) _(temperance)_ Efi support config
+
+### 💼 Other
+
+- [d00958c](https://github.com/joaovl5/_nix/commit/d00958c53208547ae5eb5454058e519da42390d2) Joao Pedro <vieiraleao2005@gmail.com>
+
+### 🚜 Refactor
+
+- [6ed3009](https://github.com/joaovl5/_nix/commit/6ed3009808e7970e0b1d7525e2f89f6772a95039) Replace `_lib` imports to use mylib
+- [d7c775e](https://github.com/joaovl5/_nix/commit/d7c775e2a7d520f69fa6307639f7d59aa3f17242) Misc. fixes
+
+### 📚 Documentation
+
+- [ef95ea6](https://github.com/joaovl5/_nix/commit/ef95ea66e0135b0005ec9a15f232a392ffe74762) _(git)_ Switch back to git-cliff for changelog
+
+### ⚙️ Miscellaneous Tasks
+
+- [d00958c](https://github.com/joaovl5/_nix/commit/d00958c53208547ae5eb5454058e519da42390d2) Remove unplanned todo
+- [2053541](https://github.com/joaovl5/_nix/commit/20535416cdde57bc8b71e6c4898ea9da65f8d93a) Update .gitignore
+- [6b71698](https://github.com/joaovl5/_nix/commit/6b716988bb30336b2e7918aa4c9dde368f044949) Update secrets in flake.lock
+- [e455714](https://github.com/joaovl5/_nix/commit/e4557140bc01001b6c17e0223208183f817b643b) Update globals input
+
 ## [0.3.0](https://github.com/joaovl5/_nix/compare/v0.2.1..v0.3.0) - 2026-03-01
 
 ### 🚀 Features
