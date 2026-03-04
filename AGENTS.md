@@ -4,6 +4,10 @@
 
 - Only work on code explicitly requested by the user.
 
+## Special Instructions
+
+- When altering the `globals/` directory, it's necessary to run `nix flake update globals` to update `flake.lock` with the new info.
+
 ## Helpful Tooling
 
 - Searching nix and home-manager options

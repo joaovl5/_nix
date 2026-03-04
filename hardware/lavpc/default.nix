@@ -54,7 +54,7 @@ in {
   services.blueman.enable = true;
 
   networking.useDHCP = lib.mkDefault true;
-  networking.usePredictableInterfaceNames = true;
+  networking.usePredictableInterfaceNames = lib.mkDefault true;
   boot = {
     initrd.availableKernelModules = ["nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"];
     initrd.kernelModules = [];
