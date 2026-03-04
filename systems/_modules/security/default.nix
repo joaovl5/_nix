@@ -19,15 +19,15 @@
 
   # Systemd Hardening/tweaks
   ## Handling logs
-  services.logrotate.enable = true;
-  services.journald = {
-    storage = "volatile"; # in-memory logs only
-    upload.enable = false; # disable remotely upload logs -- change later
-    extraConfig = ''
-      SystemMaxUse=500M
-      SystemMaxFileSize=50M
-    '';
-  };
+  services.logrotate.enable = lib.mkForce false;
+  # services.journald = {
+  #   storage = "volatile"; # in-memory logs only
+  #   upload.enable = false; # disable remotely upload logs -- change later
+  #   extraConfig = ''
+  #     SystemMaxUse=500M
+  #     SystemMaxFileSize=50M
+  #   '';
+  # };
   ## Disable Coredumps
   systemd.coredump.enable = false;
   security.pam.loginLimits = [

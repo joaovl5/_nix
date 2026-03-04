@@ -36,15 +36,24 @@ in
                 service = "api@internal";
                 entryPoints = ["websecure"];
                 tls.certResolver = "acme_resolver";
+                middlewares = ["lan-only"];
               };
             }
-            // lib.mapAttrs (_name: vhost: {
-              rule = "Host(`${vhost.target}.${tld}`)";
-              service = _name;
-              entryPoints = ["websecure"];
-              tls.certResolver = "acme_resolver";
-            })
+            // lib.mapAttrs (_name: vhost:
+              {
+                rule = "Host(`${vhost.target}.${tld}`)";
+                service = _name;
+                entryPoints = ["websecure"];
+                tls.certResolver = "acme_resolver";
+              }
+              // lan_only_middleware vhost.target)
             vhosts;
+
+          # Determine which vhosts need lan-only restriction
+          lan_only_middleware = name:
+            if builtins.elem name globals.dns.public_vhosts
+            then {}
+            else {middlewares = ["lan-only"];};
 
           # Generate services from vhosts
           services =
@@ -60,6 +69,7 @@ in
             description = "Prepare Traefik environment file";
             before = ["traefik.service"];
             requiredBy = ["traefik.service"];
+            partOf = ["traefik.service"];
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
@@ -103,6 +113,10 @@ in
             };
             dynamicConfigOptions.http = {
               inherit routers services;
+              middlewares.lan-only.ipAllowList.sourceRange = [
+                "192.168.15.0/24"
+                "127.0.0.1/32"
+              ];
             };
           };
         }
