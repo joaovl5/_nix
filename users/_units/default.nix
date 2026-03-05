@@ -5,6 +5,7 @@
 in {
   imports = [
     ./actual-budget
+    ./fail2ban
     ./pihole
     ./litellm
     ./nixarr
