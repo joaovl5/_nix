@@ -13,6 +13,7 @@ in {
     ./octodns
     ./fxsync
     ./wireguard
+    ./qbittorrent
     unit_global_cfg
   ];
 }

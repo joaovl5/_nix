@@ -41,6 +41,11 @@ rec {
         "unit.actual-budget" = {
           enable = true;
         };
+
+        "unit.qbittorrent" = {
+          enable = true;
+        };
+
         # host tunnel (inbound relay)
         "unit.wireguard" = {
           enable = true;
