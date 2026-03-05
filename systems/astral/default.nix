@@ -20,6 +20,8 @@ in {
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
+
   networking = {
     hostName = lib.mkForce cfg.hostname;
   };
