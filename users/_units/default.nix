@@ -4,6 +4,7 @@
   unit_global_cfg = globals.units;
 in {
   imports = [
+    ./actual-budget
     ./pihole
     ./litellm
     ./nixarr
