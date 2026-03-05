@@ -65,10 +65,10 @@ in {
     containers.enable = true;
     libvirtd.enable = true;
 
-    # rootless docker setup
+    # rootless + rootful docker setup
     docker = {
-      enable = false;
-      # storageDriver = "btrfs";
+      enable = true;
+      storageDriver = "btrfs";
       autoPrune = {
         enable = true;
         dates = "weekly";

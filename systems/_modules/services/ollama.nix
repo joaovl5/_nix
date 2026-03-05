@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   services.ollama = {
-    enable = true;
+    enable = false;
     package = pkgs.ollama-cuda;
     # loadModels = [
     #   "qwen3-vl:2b"

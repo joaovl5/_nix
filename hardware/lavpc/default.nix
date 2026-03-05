@@ -36,6 +36,7 @@ in {
   hardware = {
     ## nvidia
     graphics.enable = true;
+    nvidia-container-toolkit.enable = true;
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.latest;
       modesetting.enable = true;
