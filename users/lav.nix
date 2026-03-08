@@ -31,6 +31,7 @@
     (import ./_modules/ghostty)
     (import ./_modules/browsing)
     (import ./_modules/neovim)
+    (import ./_modules/emacs)
     (import ./_modules/espanso)
     (import ./_modules/discord)
   ];

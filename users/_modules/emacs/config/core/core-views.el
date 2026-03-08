@@ -1,0 +1,40 @@
+; dired config
+(defun handle-dired ()
+  (straight-use-package 'dirvish)
+  (require 'dirvish)
+  (global-set-key (kbd "C-c e") 'dirvish))
+
+(defun handle-projectile ()
+  (straight-use-package 'projectile)
+  (projectile-mode t))
+
+
+(defun handle-helm ()
+  (straight-use-package 'helm)
+  (straight-use-package 'helm-descbinds)
+  (straight-use-package 'helm-projectile)
+  (straight-use-package 'helm-org)
+  (helm-projectile-on)
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-c <SPC>") #'helm-find-files)
+  (global-set-key (kbd "C-c f p") #'helm-browse-project)
+  (global-set-key (kbd "C-c f b") #'helm-filtered-bookmarks)
+  (global-set-key (kbd "C-c f k") #'helm-descbinds)
+  (global-set-key (kbd "C-c f h") #'helm-org-agenda-files-headings)
+  (global-set-key (kbd "C-c f H") #'helm-org-in-buffer-headings)
+  (global-set-key (kbd "C-c f c") #'helm-org-capture-templates)
+  (global-set-key (kbd "C-c p p") #'helm-projectile-switch-project)
+  (global-set-key (kbd "C-c p f") #'helm-projectile-find-file)
+  (global-set-key (kbd "C-c p d") #'helm-projectile-find-dir)
+  (global-set-key (kbd "C-c p r") #'helm-projectile-recentf)
+  (global-set-key (kbd "C-c p /") #'helm-projectile-rg)
+  (global-set-key (kbd "C-c p F") #'helm-projectile-find-file-in-known-projects))
+
+  ; (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+  ; (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags)))
+
+(handle-dired)
+(handle-projectile)
+(handle-helm)
+
+(provide 'core-views)
