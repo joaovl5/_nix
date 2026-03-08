@@ -28,7 +28,7 @@
     (import ./_modules/coding)
     (import ./_modules/ai)
     (import ./_modules/obs)
-    (import ./_modules/ghostty)
+    (import ./_modules/term)
     (import ./_modules/browsing)
     (import ./_modules/neovim)
     (import ./_modules/emacs)
