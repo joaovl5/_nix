@@ -5,6 +5,8 @@
     # ---------------
     # nixpkgs
     # ---------------
+    emacs-bleeding-edge.url = "github:nix-community/emacs-overlay";
+    emacs-bleeding-edge.inputs.nixpkgs.follows = "nixpkgs";
     stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-25.11&shallow=1";
     unstable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
     nixpkgs.follows = "unstable";
