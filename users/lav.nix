@@ -63,6 +63,7 @@ in {
   };
 
   config = {
+    users.groups.uinput = {};
     users.users.${cfg.username} = {
       hashedPasswordFile = s.secret_path "password_hash";
 
@@ -71,9 +72,7 @@ in {
       extraGroups = [
         "wheel"
         "libvirt"
-        # required for espanso, kanata
         "input"
-        "uinput"
       ];
     };
 

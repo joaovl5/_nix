@@ -1,33 +1,38 @@
 {
-  nx = {lib, ...}: let
+  nx = {
+    pkgs,
+    lib,
+    ...
+  }: let
     keyboard_name = "internalKeyboard";
-    devices = [
-      "pci-0000:0d:00.0-usbv2-0:1:1.1-event-kbd"
-      "pci-0000:0f:00.4-usbv2-0:1.1:1.1-event-kbd"
-      "pci-0000:10:00.0-usbv2-0:1:1.1-event-kbd"
-    ];
+    config_file = pkgs.writeText "kanata-${keyboard_name}-config.kbd" ''
+      (defcfg
+        process-unmapped-keys yes
+        linux-continue-if-no-devs-found yes)
+
+      ${lib.readFile ./config.kbd}
+    '';
   in {
     boot.kernelModules = ["uinput"];
     hardware.uinput.enable = true;
+
     services.udev.extraRules = ''
       KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
     '';
-    users.groups.uinput = {};
 
-    # Add the Kanata service user to necessary groups
-    systemd.services."kanata-${keyboard_name}".serviceConfig = {
-      SupplementaryGroups = [
-        "input"
-        "uinput"
-      ];
+    users.groups.uinput = {
+      gid = lib.mkForce 989;
     };
 
-    services.kanata = {
+    systemd.user.services."kanata-${keyboard_name}" = {
       enable = true;
-      keyboards.${keyboard_name} = {
-        devices = map (x: "/dev/input/by-path/${x}") devices;
-        extraDefCfg = "process-unmapped-keys yes";
-        config = lib.readFile ./config.kbd;
+      description = "Kanata keyboard remapper for ${keyboard_name}";
+      wantedBy = ["default.target"];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.kanata}/bin/kanata --cfg ${config_file}";
+        Restart = "on-failure";
+        RestartSec = 3;
       };
     };
   };

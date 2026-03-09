@@ -15,6 +15,6 @@
 )
 
 (defalias
-  cap (tap-hold-press 200 200 lctl (layer-toggle arrows))
+  cap lctl
   ctl (tap-hold-press 200 200 caps (layer-toggle arrows))
 )
