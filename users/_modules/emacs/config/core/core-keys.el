@@ -90,6 +90,7 @@
    '("Y" . meow-sync-grab)
    '("z" . meow-pop-selection)
    '("'" . repeat)
+   '(":" . meow-M-x)
    '("<escape>" . ignore)))
 
 (straight-use-package 'meow)
@@ -97,9 +98,11 @@
 (meow-setup)
 (meow-global-mode 1)
 
-(setq windmove-create-window t)
+; (setq windmove-create-window t)
 
 (global-set-key (kbd "M-<tab>") 'other-window)
+(global-set-key (kbd "C-c |") 'split-window-right)
+(global-set-key (kbd "C-c -") 'split-window-below)
 (global-set-key (kbd "M-h") 'windmove-left)
 (global-set-key (kbd "M-j") 'windmove-down)
 (global-set-key (kbd "M-k") 'windmove-up)
@@ -109,8 +112,26 @@
 (global-set-key (kbd "<C-left>") (lambda () (interactive (shrink-window-horizontally 10))))
 (global-set-key (kbd "<C-right>") (lambda () (interactive) (enlarge-window-horizontally 10)))
 (global-set-key (kbd "C-c q") 'delete-window)
-(global-set-key (kbd "C-c Q") 'kill-emacs)
+(defun my-quit-emacs ()
+  "Save all buffers and quit Emacs without confirmation."
+  (interactive)
+  (save-some-buffers t)
+  (kill-emacs))
+(global-set-key (kbd "C-c Q") #'my-quit-emacs)
 (global-set-key (kbd "C-c ;") 'eval-expression)
+
+(defun my-scroll-half-down ()
+  "Scroll down half a page."
+  (interactive)
+  (scroll-up (/ (window-height) 2)))
+
+(defun my-scroll-half-up ()
+  "Scroll up half a page."
+  (interactive)
+  (scroll-down (/ (window-height) 2)))
+
+(global-set-key (kbd "M-d") 'my-scroll-half-down)
+(global-set-key (kbd "M-u") 'my-scroll-half-up)
 
 
 ;; handle keys

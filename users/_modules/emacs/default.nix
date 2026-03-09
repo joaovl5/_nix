@@ -9,6 +9,18 @@
     flake_path = cfg.flake_location;
     here = assert (flake_path != null); "${flake_path}/users/_modules/emacs";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
+
+    pkg = pkgs.emacs-unstable;
+    # pkg = pkgs.emacs-unstable-pgtk.overrideAttrs (old: {
+    #   configureFlags =
+    #     old.configureFlags
+    #     ++ [
+    #       # "--with-imagemagick"
+    #       "--with-json"
+    #       "--with-native-compilation=aot"
+    #       # ''CFLAGS="-O2 -mtune=native -fomit-frame-pointer"''
+    #     ];
+    # });
   in {
     xdg.configFile."emacs" = {
       source = configSrc;
@@ -24,7 +36,7 @@
 
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs-unstable-pgtk;
+      package = pkg;
       # extraPackages = _: [
       #   pkgs.nerd-fonts.iosevka
       # ];
@@ -32,6 +44,8 @@
 
     home.packages = with pkgs; [
       nerd-fonts.iosevka
+      poppler-utils
+      vips
     ];
   };
 }

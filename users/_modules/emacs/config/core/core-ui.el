@@ -8,6 +8,10 @@
 (line-number-mode t)
 (column-number-mode t)
 (size-indication-mode t)
+(setq use-dialog-box nil)
+(push '(tool-bar-lines . 0) default-frame-alist)
+(push '(menu-bar-lines . 0) default-frame-alist)
+(scroll-bar-mode -1)
 
 ;; enable y/n answers
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -43,11 +47,15 @@
                                                        "%b")))
 
 (defun handle-fonts ()
-  (straight-use-package 'nerd-icons)
+  (straight-use-package 'nerd-icons))
   ; (nerd-icons-font-family "Iosevka Nerd Font")
-  (add-to-list 'default-frame-alist
-               '(font . "Iosevka Nerd Font-15")
-               '(undecorated . t)))
+  ; (add-to-list 'default-frame-alist
+  ;              '(font . "Iosevka Nerd Font-15")
+  ;              '(undecorated . t))
+  ;
+  ; (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 140 :width 'expanded)
+  ; (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font")
+  ; (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font"))
 
 
 (defun handle-theme ()
@@ -88,13 +96,18 @@
   (straight-use-package 'highlight-indent-guides)
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
+(defun handle-scroll ()
+  (sup 'beacon)
+  (beacon-mode 1)
+  (pixel-scroll-precision-mode t))
+
 
 (handle-fonts)
 (handle-theme)
 (handle-modeline)
 (handle-helpful)
 (handle-indents)
-
+(handle-scroll)
 
 ;; NOTE(@lerax): dom 01 jun 2025 12:42:24
 ;; helm-descbinds became incompatible with which-key-mode ins 202402XX version

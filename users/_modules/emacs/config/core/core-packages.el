@@ -15,8 +15,17 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+
+(defalias 'sup 'straight-use-package)
+
 ;; organizes folders under emacs directory
-(straight-use-package 'no-littering)
+(sup 'no-littering)
 (require 'no-littering)
+
+(sup 'use-package)
+
+(defalias 'use 'use-package)
+
+(setq straight-use-package-by-default t)
 
 (provide 'core-packages)
