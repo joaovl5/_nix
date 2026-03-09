@@ -65,7 +65,7 @@ in {
       ../../systems/astral
       ../../users/lav.nix
       ../../systems/_modules/services/ollama.nix
-    ] {}
+    ] {channelName = "unstable-small";}
     ## servers
     // (_h "tyrant" [../../systems/tyrant] {})
     // (_h "temperance" [../../systems/temperance] {})

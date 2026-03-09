@@ -34,5 +34,8 @@ in {
       #   (_: _: USE_FROM_STABLE channels)
       # ];
     };
+    unstable-small = {
+      input = inputs.unstable-small;
+    };
   };
 }
