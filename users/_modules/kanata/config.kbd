@@ -1,0 +1,20 @@
+(defsrc
+  caps         h    j    k    l
+  lctl
+)
+
+(deflayer default
+  @cap         _    _    _    _
+  @ctl
+)
+
+(deflayer arrows
+  _
+              left down up rght
+  _
+)
+
+(defalias
+  cap (tap-hold-press 200 200 lctl (layer-toggle arrows))
+  ctl (tap-hold-press 200 200 caps (layer-toggle arrows))
+)

@@ -33,6 +33,7 @@
     (import ./_modules/neovim)
     (import ./_modules/emacs)
     (import ./_modules/espanso)
+    (import ./_modules/kanata)
     (import ./_modules/discord)
   ];
   module_imports = extract_imports modules;
@@ -70,7 +71,9 @@ in {
       extraGroups = [
         "wheel"
         "libvirt"
-        "input" # required for espanso
+        # required for espanso, kanata
+        "input"
+        "uinput"
       ];
     };
 
