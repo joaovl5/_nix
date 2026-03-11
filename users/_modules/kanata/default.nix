@@ -1,17 +1,27 @@
 {
+  hm = {
+    config,
+    nixos_config,
+    ...
+  }: let
+    cfg = nixos_config.my.nix;
+    flake_path = cfg.flake_location;
+    here = assert (flake_path != null); "${flake_path}/users/_modules/kanata";
+    configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
+  in {
+    xdg.configFile."kanata/config.kbd" = {
+      source = configSrc;
+      recursive = true;
+      force = true;
+    };
+  };
+
   nx = {
     pkgs,
     lib,
     ...
   }: let
     keyboard_name = "internalKeyboard";
-    config_file = pkgs.writeText "kanata-${keyboard_name}-config.kbd" ''
-      (defcfg
-        process-unmapped-keys yes
-        linux-continue-if-no-devs-found yes)
-
-      ${lib.readFile ./config.kbd}
-    '';
   in {
     boot.kernelModules = ["uinput"];
     hardware.uinput.enable = true;
@@ -30,7 +40,7 @@
       wantedBy = ["default.target"];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.kanata}/bin/kanata --cfg ${config_file}";
+        ExecStart = "${pkgs.kanata}/bin/kanata --cfg %h/.config/kanata/config.kbd";
         Restart = "on-failure";
         RestartSec = 3;
       };
