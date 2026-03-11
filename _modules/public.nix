@@ -9,4 +9,5 @@ in {
   wireguard_key_tyrant = public_data.wireguard_key.tyrant;
   inherit (public_data) emails;
   inherit (public_data) links;
+  inherit (public_data) azure-vpn;
 }

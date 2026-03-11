@@ -146,6 +146,10 @@ in {
           python314Packages.huggingface-hub
           cursor-cli
           chatbox
+          azure-cli
+          (openvpn.override {
+            openssl = openssl_legacy;
+          })
 
           # dependencies
           rsync
