@@ -6,18 +6,15 @@
     environment.variables."CODEX_HOME" = "${home_path}/.codex";
   };
 
-  hm = {
-    inputs,
-    lib,
-    ...
-  }: {
+  hm = {lib, ...}: {
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
       rules = ''
         ${lib.readFile ../_prompts/general/system.md}
       '';
-      skills = "${inputs.anthropic-skills}/skills";
+      agents = ../_prompts/agents;
+      skills = "${../_prompts/skills}";
       settings = {
       };
     };

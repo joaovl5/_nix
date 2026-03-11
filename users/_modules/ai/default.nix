@@ -3,8 +3,6 @@ let
   modules = [
     (import ./claude-code)
     (import ./opencode)
-    (import ./codex)
-    (import ./crush)
     (import ./mcp)
   ];
 in
