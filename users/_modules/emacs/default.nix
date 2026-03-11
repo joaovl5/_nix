@@ -37,9 +37,10 @@
     programs.emacs = {
       enable = true;
       package = pkg;
-      # extraPackages = _: [
-      #   pkgs.nerd-fonts.iosevka
-      # ];
+      extraPackages = epkgs: [
+        epkgs.org-roam
+        # epkgs.emacsql-sqlite3
+      ];
     };
 
     home.packages = with pkgs; [
