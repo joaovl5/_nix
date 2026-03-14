@@ -78,6 +78,7 @@
 (require 'core-core)
 (require 'core-keys)
 (require 'core-views)
+(require 'core-coding)
 
 (message "[!] loading modules...")
 

@@ -93,10 +93,23 @@
    '(":" . meow-M-x)
    '("<escape>" . ignore)))
 
-(straight-use-package 'meow)
-(require 'meow)
-(meow-setup)
-(meow-global-mode 1)
+
+(defun handle-meow ()
+  (require 'meow)
+  (meow-setup)
+  (meow-global-mode 1)
+  (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
+  (add-to-list 'meow-mode-state-list '(sly-mrepl-mode . insert))
+  (add-to-list 'meow-mode-state-list '(inferior-emacs-lisp-mode . insert))
+  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
+  (add-to-list 'meow-mode-state-list '(text-mode . insert))
+  (add-to-list 'meow-mode-state-list '(erc-mode . insert)))
+
+(use meow
+     :ensure t
+     :custom
+     (meow-use-clipboard t)
+     :init (handle-meow))
 
 ; (setq windmove-create-window t)
 
@@ -107,6 +120,7 @@
 (global-set-key (kbd "M-j") 'windmove-down)
 (global-set-key (kbd "M-k") 'windmove-up)
 (global-set-key (kbd "M-l") 'windmove-right)
+(global-set-key (kbd "M-s") 'save-buffer)
 (global-set-key (kbd "<C-up>") (lambda () (interactive) (shrink-window 10)))
 (global-set-key (kbd "<C-down>") (lambda () (interactive) (enlarge-window 10)))
 (global-set-key (kbd "<C-left>") (lambda () (interactive (shrink-window-horizontally 10))))
@@ -119,6 +133,7 @@
   (kill-emacs))
 (global-set-key (kbd "C-c Q") #'my-quit-emacs)
 (global-set-key (kbd "C-c ;") 'eval-expression)
+(global-set-key (kbd "C-l") 'completion-at-point)
 
 (defun my-scroll-half-down ()
   "Scroll down half a page."

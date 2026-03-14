@@ -9,16 +9,73 @@
   (straight-use-package 'projectile)
   (projectile-mode t))
 
+(defun handle-actions ()
+  (use consult
+       :ensure t
+       :bind (("C-c ." . consult-line)
+              ("C-c f h" . consult-history)
+              ("C-c f m" . consult-man)
+              ("C-c f d" . consult-flymake)
+              ("C-c f o" . consult-outline)
+              ("C-c f m" . consult-mark)
+              ("C-c f M" . consult-global-mark)
+              ("C-c /" . consult-ripgrep)
+              ("C-c <tab>" . consult-buffer)
+              ("C-c <spc>" . consult-find)
+              ("C-c f h" . consult-history))
+       :hook (completion-list-mode . consult-preview-at-point-mode)
+       :custom
+       (register-preview-delay 0.1)
+       (register-preview-function #'consult-register-format)
+       (xref-)))
 
-(defun handle-helm ()
-  (straight-use-package 'helm)
-  (straight-use-package 'helm-descbinds)
-  (straight-use-package 'helm-projectile)
-  (straight-use-package 'helm-org)
-  (helm-projectile-on))
+
+
+(defun handle-completions ()
+  (use corfu
+       :ensure t
+       :bind
+       (:map corfu-map
+             ("M-j" . corfu-next)
+             ("M-k" . corfu-previous)
+             ("M-d" . corfu-next-page)
+             ("M-u" . corfu-previous-page))
+       :custom
+       (corfu-auto t)
+       (corfu-preselect t)
+       (corfu-quit-no-match 'separator)
+       :init
+       (global-corfu-mode)
+       :config
+       (corfu-popupinfo-mode t))
+  (use emacs
+       :custom
+       (tab-always-indent complete)
+       (text-mode-ispell-word-completion nil)))
+
+(defun my-vertico-next-page (&optional n)
+  "Forward page in Vertico"
+  (interactive "p") ;; prefix args
+  (let ((steps (* (or n 1) vertico-count)))
+    (dotimes (_ steps)
+      (vertico-next))))
+
+(defun my-vertico-previous-page (&optional n)
+  "Backward page in Vertico"
+  (interactive "p") ;; prefix args
+  (let ((steps (* (or n 1) vertico-count)))
+    (dotimes (_ steps)
+      (vertico-previous))))
+
 
 (defun handle-minibuf ()
   (use vertico
+     :bind
+     (:map vertico-map
+           ("M-j" . vertico-next)
+           ("M-k" . vertico-previous)
+           ("M-d" . my-vertico-next-page)
+           ("M-u" . my-vertico-previous-page))
      :custom
      (vertico-count 20)
      (vertico-cycle t)
@@ -82,8 +139,9 @@
 
 
 (handle-dired)
+(handle-actions)
 (handle-projectile)
-; (handle-helm)
+(handle-completions)
 (handle-minibuf)
 
 (provide 'core-views)

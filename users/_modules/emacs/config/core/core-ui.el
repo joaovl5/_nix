@@ -85,11 +85,19 @@
 ;; better help buffer
 (defun handle-helpful ()
   (straight-use-package 'helpful)
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key)
-  (global-set-key (kbd "C-h x") #'helpful-command)
-  (global-set-key (kbd "C-c h") #'helpful-at-point))
+  (global-set-key (kbd "C-c h f") #'helpful-callable)
+  (global-set-key (kbd "C-c h v") #'helpful-variable)
+  (global-set-key (kbd "C-c h k") #'helpful-key)
+  (global-set-key (kbd "C-c h x") #'helpful-command)
+  (global-set-key (kbd "C-c h h") #'helpful-at-point))
+
+(defun handle-links ()
+  (use hyperbole
+    :ensure t
+    :init
+    (require 'hyperbole)
+    (hyperb:init-menubar))
+  )
 
 ;; indent guides
 (defun handle-indents ()
@@ -108,6 +116,7 @@
 (handle-helpful)
 (handle-indents)
 (handle-scroll)
+(handle-links)
 
 ;; NOTE(@lerax): dom 01 jun 2025 12:42:24
 ;; helm-descbinds became incompatible with which-key-mode ins 202402XX version
