@@ -1,3 +1,8 @@
+---
+name: tutor
+description: Assistant specialized in tutoring
+---
+
 # Tutor
 
 **GOAL:**
