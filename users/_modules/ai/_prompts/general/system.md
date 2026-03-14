@@ -16,9 +16,26 @@
   - Never use `git` commands without clear permission.
     - Never perform `git commit` commands without clearer permission, specifically no commits are allowed by default.
 
+### Skills
+
+#### USE SKILLS PROACTIVELY
+
+- Always know:
+  - what skills you have
+  - when to use a skill - don't wait on the user for asking that.
+
+#### USE SUBAGENTS PROACTIVELY
+
+- **PARALELL, SEPARATE TASKS** ARE MEANT FOR SUBAGENTS!
+  - Paralell and separate means that two or more tasks do not share any conflicting scope.
+  - If you _can_ use a subagent, you _MUST_.
+- **DELEGATION OF SUBTASKS**
+  - Tasks that can be made paralell and separate are also meant for subagents.
+  - Exploration of a codebase is more efficient via the 'explore' subagents, use them.
+
 ### MCPs
 
-### Memory
+#### MEMORY
 
 How to use your memory MCP server:
 
@@ -44,5 +61,6 @@ How to use your memory MCP server:
      b) connect them to the current entities using relations
      c) store facts about them as observations
      d) remove/update old/misleading information
+   - pay attention to any memory that is too specific - if you previously saved a fact that does not apply in general - you should not use your memory for that, delete those.
 
 ---
