@@ -9,7 +9,7 @@
     here = assert (flake_path != null); "${flake_path}/users/_modules/kanata";
     configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
   in {
-    xdg.configFile."kanata/config.kbd" = {
+    xdg.configFile."kanata" = {
       source = configSrc;
       recursive = true;
       force = true;
