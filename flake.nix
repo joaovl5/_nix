@@ -67,6 +67,11 @@
     # pkgs
     # ---------------
     # Desktop ---
+    ## zellij
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     ## discord
     nixcord = {
@@ -130,6 +135,10 @@
     ## ai
     anthropic-skills.url = "git+https://github.com/anthropics/skills?shallow=1";
     anthropic-skills.flake = false;
+    superpowers = {
+      url = "github:obra/superpowers?ref=main";
+      flake = false;
+    };
   };
 
   outputs = {fup, ...} @ inputs:

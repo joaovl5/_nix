@@ -139,13 +139,8 @@ in {
           copier
           jq
           bit-logo
-          bagels
-          vllm
-          llama-cpp
-          llama-swap
           python314Packages.huggingface-hub
           cursor-cli
-          chatbox
           azure-cli
           (openvpn.override {
             openssl = openssl_legacy;
@@ -153,6 +148,7 @@ in {
 
           # dependencies
           rsync
+          go-grip
           pinentry-curses
           bc
           perl

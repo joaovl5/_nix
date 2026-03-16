@@ -6,7 +6,11 @@
     environment.variables."CODEX_HOME" = "${home_path}/.codex";
   };
 
-  hm = {lib, ...}: {
+  hm = {
+    lib,
+    inputs,
+    ...
+  }: {
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
@@ -14,8 +18,26 @@
         ${lib.readFile ../_prompts/general/system.md}
       '';
       agents = ../_prompts/agents;
-      skills = "${../_prompts/skills}";
       settings = {
+        plugin = [
+          "@gotgenes/opencode-agent-identity"
+          "opencode-agent-skills"
+        ];
+      };
+    };
+
+    xdg.configFile = {
+      "opencode/superpowers" = {
+        source = inputs.superpowers;
+        recursive = true;
+      };
+
+      "opencode/plugins/superpowers.js".source =
+        inputs.superpowers + "/.opencode/plugins/superpowers.js";
+
+      "opencode/skills/superpowers" = {
+        source = inputs.superpowers + "/skills";
+        recursive = true;
       };
     };
   };
