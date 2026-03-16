@@ -13,6 +13,10 @@ inputs: let
     (_o niri {attr = "niri";})
     (_o fenix {})
     (_o emacs-bleeding-edge {})
+    (_: prev: {
+      # zjstatus zellij plugin
+      zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+    })
   ];
   # list of packages to use from stable
   # USE_FROM_STABLE = channels:
