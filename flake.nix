@@ -67,6 +67,8 @@
     # pkgs
     # ---------------
     # Desktop ---
+    ## audio
+    musnix = {url = "github:musnix/musnix";inputs.nixpkgs.follows = "nixpkgs";};
     ## zellij
     zjstatus = {
       url = "github:dj95/zjstatus";

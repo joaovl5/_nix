@@ -15,7 +15,7 @@ in {
   imports = [
     ../_modules/security
     ../_modules/services/login.nix
-    ../_modules/services/pipewire.nix
+    ../_modules/services/audio.nix
     ../_modules/services/ntp.nix
     ../_modules/services/azure-vpn.nix
     ../_modules/console
@@ -28,7 +28,7 @@ in {
     inherit (public_data.azure-vpn) gateway gateway_id identity routes;
   };
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
+  # boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
 
   networking = {
     hostName = lib.mkForce cfg.hostname;
