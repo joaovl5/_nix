@@ -30,6 +30,7 @@
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet))
   (meow-normal-define-key
+   '("\\ w" . visual-line-mode)
    '("0" . meow-expand-0)
    '("9" . meow-expand-9)
    '("8" . meow-expand-8)
@@ -134,6 +135,7 @@
 (global-set-key (kbd "C-c Q") #'my-quit-emacs)
 (global-set-key (kbd "C-c ;") 'eval-expression)
 (global-set-key (kbd "C-l") 'completion-at-point)
+(global-set-key (kbd "M-m") 'view-echo-area-messages)
 
 (defun my-scroll-half-down ()
   "Scroll down half a page."

@@ -42,7 +42,11 @@
       ;; If using org-roam-protocol
       (require 'org-roam-protocol))
 
-
+(use org-download
+     :ensure t
+     :bind (("C-c p p" . org-download-clipboard))
+     :init
+     (require 'org-download))
 
 
 (provide 'mod-org)

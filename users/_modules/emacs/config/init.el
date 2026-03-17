@@ -26,9 +26,15 @@
 ;; middle of a word.
 (setq-default word-wrap t)
 
+;; shut up about the themes
+(setq custom-safe-themes t)
 
 ;; Disable wrapping by default due to its performance cost.
 (setq-default truncate-lines t)
+
+;; clipboard sharing w/ system
+(setq select-enable-clipboard t
+      select-enable-primary t)
 
 ;;
 (setq vc-follow-symlinks nil)
@@ -89,20 +95,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(confirm-kill-processes nil)
- '(custom-safe-themes
-   '("720838034f1dd3b3da66f6bd4d053ee67c93a747b219d1c546c41c4e425daf93"
-     "7c3d62a64bafb2cc95cd2de70f7e4446de85e40098ad314ba2291fc07501b70c"
-     "b99ff6bfa13f0273ff8d0d0fd17cc44fab71dfdc293c7a8528280e690f084ef0"
-     "4b88b7ca61eb48bb22e2a4b589be66ba31ba805860db9ed51b4c484f3ef612a7"
-     "fffef514346b2a43900e1c7ea2bc7d84cbdd4aa66c1b51946aade4b8d343b55a"
-     "f053f92735d6d238461da8512b9c071a5ce3b9d972501f7a5e6682a90bf29725"
-     "38b43b865e2be4fe80a53d945218318d0075c5e01ddf102e9bec6e90d57e2134"
-     "0325a6b5eea7e5febae709dab35ec8648908af12cf2d2b569bedc8da0a3a81c1"
-     "19d62171e83f2d4d6f7c31fc0a6f437e8cec4543234f0548bad5d49be8e344cd"
-     "13096a9a6e75c7330c1bc500f30a8f4407bd618431c94aeab55c9855731a95e1"
-     "9b9d7a851a8e26f294e778e02c8df25c8a3b15170e6f9fd6965ac5f2544ef2a9"
-     default)))
+ '(confirm-kill-processes nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
