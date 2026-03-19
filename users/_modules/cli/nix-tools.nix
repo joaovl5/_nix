@@ -80,6 +80,9 @@
             description = "NixOS";
             options-list-file = optnix_lib.mkOptionsList {
               options = nixos_options;
+              excluded = [
+                "musnix.kernel.packages"
+              ];
             };
           };
           scopes."hm" = {

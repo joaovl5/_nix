@@ -63,6 +63,8 @@ in {
   };
 
   config = {
+    programs.dconf.enable = true;
+
     users.groups.uinput = {};
     users.users.${cfg.username} = {
       hashedPasswordFile = s.secret_path "password_hash";
@@ -135,6 +137,8 @@ in {
           virt-manager
 
           ## etc move later
+          zrythm
+          ardour
           wireguard-tools
           copier
           jq
