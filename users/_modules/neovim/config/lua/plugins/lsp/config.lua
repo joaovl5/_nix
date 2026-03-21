@@ -89,7 +89,6 @@ local function mk_lsp()
 		},
 		marksman = { cmd = { "marksman" } },
 		stylua = { cmd = { "stylua" } },
-		yamlls = { cmd = { "yaml-language-server" } },
 		["nil"] = {
 			cmd = { "nil" },
 			filetypes = { "nix" },

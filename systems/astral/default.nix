@@ -3,22 +3,32 @@
   config,
   lib,
   mylib,
+  inputs,
   ...
 }: let
   cfg = config.my.nix;
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
+  public_data = import ../../_modules/public.nix {inherit inputs;};
 in {
   imports = [
     ../_modules/security
     ../_modules/services/login.nix
-    ../_modules/services/pipewire.nix
+    ../_modules/services/audio.nix
     ../_modules/services/ntp.nix
+    ../_modules/services/azure-vpn.nix
     ../_modules/console
     ../_modules/shell
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
+
+  my.azure-vpn = {
+    enable = true;
+    inherit (public_data.azure-vpn) gateway gateway_id identity routes;
+  };
+
+  # boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
 
   networking = {
     hostName = lib.mkForce cfg.hostname;
@@ -63,10 +73,10 @@ in {
     containers.enable = true;
     libvirtd.enable = true;
 
-    # rootless docker setup
+    # rootless + rootful docker setup
     docker = {
-      enable = false;
-      # storageDriver = "btrfs";
+      enable = true;
+      storageDriver = "btrfs";
       autoPrune = {
         enable = true;
         dates = "weekly";
@@ -128,6 +138,8 @@ in {
       ### etc
       tealdeer # tldr alternative
       pandoc
+      typst
+      ## other etc
       wget
       curl
       dconf

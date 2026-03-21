@@ -1,41 +1,113 @@
 default_mode "normal"
-theme "catpuccin-mocha"
+theme "dracula"
+support_kitty_keyboard_protocol false
+
+copy_on_select true
 
 keybinds clear-defaults=true {
-  normal = {
-    bind "Ctrl a" { SwitchToMode "tmux"; }
-    bind "Ctrl z" { SwitchToMode "locked"; }
+  normal {
+    bind "Ctrl z" { SwitchToMode "Locked"; }
+    bind "Alt q" { CloseFocus; }
+    bind "Alt Enter" { NewTab; }
+    bind "Alt h" { MoveFocusOrTab "Left"; }
+    bind "Alt n" { MoveFocus "Down"; }
+    bind "Alt u" { MoveFocus "Up"; }
+    bind "Alt l" { MoveFocusOrTab "Right"; }
+    bind "Alt ," { SwitchToMode "RenameTab"; }
+    bind "Alt ." {
+      LaunchOrFocusPlugin "session-manager" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+    bind "Alt s" {
+      LaunchOrFocusPlugin "choose-tree" {
+        floating true
+        move_to_focused_tab true
+        show_plugins false
+      }
+    }
+    bind "Alt f" { ToggleFocusFullscreen; }
+    bind "Alt w" {
+      LaunchOrFocusPlugin "https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm" {
+        floating true
+      }
+    }
   }
 
   locked {
-    bind "Ctrl z" { SwitchToMode "tmux"; }
+    bind "Ctrl z" { SwitchToMode "Normal"; }
   }
 
   tmux {
-    bind "Ctrl s" { NewPane "Right"; SwitchToMode "normal"; }
-    bind "Ctrl v" { NewPane "Down"; SwitchToMode "normal"; }
+    bind "[" { SwitchToMode "Scroll"; }
+    bind "Ctrl a" { SwitchToMode "Normal"; }
+    bind "|" { NewPane "Right"; SwitchToMode "Normal"; }
+    bind "-" { NewPane "Down"; SwitchToMode "Normal"; }
     bind "," { SwitchToMode "RenameTab"; }
-    bind "h" { MoveFocus "Left"; }
-    bind "j" { MoveFocus "Down"; }
-    bind "k" { MoveFocus "Up"; }
-    bind "l" { MoveFocus "Right"; }
-    bind ">" { MovePane; }
+    bind "d" { Detach; }
     bind "H" { Resize "Left"; }
     bind "J" { Resize "Down"; }
     bind "K" { Resize "Up"; }
     bind "L" { Resize "Right"; }
-    bind "Ctrl h" { GoToNextTab; }
-    bind "Ctrl l" { GoToPreviousTab; }
-    bind "c" { NewTab; SwitchToMode "normal"; }
-    bind "x" { CloseFocus; SwitchToMode "normal"; }
-    bind "a" { EditScrollback; SwitchToMode "normal"; }
-    bind "Esc" "Space" "Enter" { SwitchToMode "normal"; }
+    bind "p" { GoToPreviousTab; SwitchToMode "Normal"; }
+    bind "n" { GoToNextTab; SwitchToMode "Normal"; }
+    bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
+    bind "Esc" "Enter" { SwitchToMode "Normal"; }
   }
 
-  RenameTab {
-    bind "Alt a" { SwitchToMode "tmux"; }
-    bind "Enter" { SwitchToMode "normal"; }
-    bind "Esc" { UndoRenameTab; SwitchToMode "normal"; }
+  session {
+    bind "Esc" "Enter" { SwitchToMode "Normal"; }
+    bind "w" {
+      LaunchOrFocusPlugin "session-manager" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+
+    bind "c" {
+      LaunchOrFocusPlugin "configuration" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+
+    bind "p" {
+      LaunchOrFocusPlugin "plugin-manager" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+
+    bind "s" {
+      LaunchOrFocusPlugin "zellij:share" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+
+    bind "l" {
+      LaunchOrFocusPlugin "zellij:layout-manager" {
+        floating true
+        move_to_focused_tab true
+      }
+      SwitchToMode "Normal"
+    }
+  }
+
+  renametab {
+    bind "Enter" { SwitchToMode "Normal"; }
+    bind "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+  }
+
+  shared_except "tmux" "locked" {
+    bind "Ctrl a" { SwitchToMode "Tmux"; }
+    bind "Ctrl x" { SwitchToMode "Session"; }
   }
 }
 
@@ -44,10 +116,31 @@ plugins {
   status-bar { path "status-bar"; }
   strider { path "strider"; }
   compact-bar { path "compact-bar"; }
-}
 
-ui {
-  pane_frames {
-    rounded_corners true
+  worktree location="https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm"
+  choose-tree location="https://github.com/laperlej/zellij-choose-tree/releases/download/v0.4.2/zellij-choose-tree.wasm"
+
+  zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
+      // Maximum number of characters to display
+      max_length 0 // 0 = unlimited
+      // String to append when truncated
+      overflow_str "..." // default
+      // Name of the pipe for zjstatus integration
+      pipe_name "zjstatus_hints" // default
+      // Hide hints in base mode (a.k.a. default mode)
+      // E.g. if you have set default_mode to "locked", then
+      // you can hide hints in the locked mode by setting this to true
+      hide_in_base_mode false // default
   }
 }
+
+load_plugins {
+    // Load at startup
+    zjstatus-hints
+    choose-tree
+    worktree
+}
+
+
+pane_frames false
+simplified_ui true

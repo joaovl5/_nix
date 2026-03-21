@@ -30,8 +30,32 @@ in {
 
   time.timeZone = cfg.timezone;
 
-  networking.useDHCP = lib.mkDefault true;
-  networking.usePredictableInterfaceNames = true;
+  networking = {
+    defaultGateway = {
+      address = "172.31.1.1";
+      interface = "enp1s0";
+    };
+    interfaces = {
+      enp1s0 = {
+        ipv4 = {
+          addresses = [
+            {
+              address = "89.167.107.74";
+              prefixLength = 32;
+            }
+          ];
+          routes = [
+            {
+              address = "172.31.1.1";
+              prefixLength = 32;
+            }
+          ];
+        };
+      };
+    };
+    useDHCP = false;
+    usePredictableInterfaceNames = true;
+  };
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;

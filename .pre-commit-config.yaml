@@ -20,7 +20,7 @@ repos:
         name: statix
         language: system
         pass_filenames: false
-        entry: statix check -o errfmt
+        entry: statix check -o errfmt -i **/emacs/config/**.nix
       - id: deadnix
         name: deadnix
         language: system

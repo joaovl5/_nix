@@ -5,12 +5,15 @@
     # ---------------
     # nixpkgs
     # ---------------
+    emacs-bleeding-edge.url = "github:nix-community/emacs-overlay";
+    emacs-bleeding-edge.inputs.nixpkgs.follows = "nixpkgs";
     stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-25.11&shallow=1";
     unstable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
+    unstable-small.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable-small&shallow=1";
     nixpkgs.follows = "unstable";
     nur = {
       url = "git+https://github.com/nix-community/NUR?shallow=1";
-      inputs.nixpkgs.follows = "unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     # ---------------
     # core
@@ -18,7 +21,7 @@
     ## home manager
     hm = {
       url = "git+https://github.com/nix-community/home-manager?shallow=1";
-      inputs.nixpkgs.follows = "unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     ## flake utils lib
     fup.url = "git+https://github.com/gytis-ivaskevicius/flake-utils-plus?shallow=1";
@@ -64,6 +67,16 @@
     # pkgs
     # ---------------
     # Desktop ---
+    ## audio
+    musnix = {
+      url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    ## zellij
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     ## discord
     nixcord = {
@@ -127,6 +140,10 @@
     ## ai
     anthropic-skills.url = "git+https://github.com/anthropics/skills?shallow=1";
     anthropic-skills.flake = false;
+    superpowers = {
+      url = "github:obra/superpowers?ref=main";
+      flake = false;
+    };
   };
 
   outputs = {fup, ...} @ inputs:

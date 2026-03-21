@@ -1,0 +1,31 @@
+(defcfg
+  process-unmapped-keys yes
+  linux-continue-if-no-devs-found yes)
+
+(defsrc
+  caps         h    j    k    l
+  lctl
+  lalt
+  d    u
+)
+
+(deflayer default
+  @cap         _    _    _    _
+  @ctl
+  @alt
+  _    _
+)
+
+(deflayer arrows
+  _
+              left down up rght
+  _
+  _
+              (mwheel-down 50 120) (mwheel-up 50 120)
+)
+
+(defalias
+  cap lctl
+  ctl (tap-hold-press 200 200 caps (layer-toggle arrows))
+  alt (tap-dance 200 (lalt (layer-while-held arrows)))
+)

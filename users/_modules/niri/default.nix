@@ -95,6 +95,7 @@
           "Mod+Shift+S".action.screenshot = {};
 
           "Mod+Return".action.spawn = term;
+          "Mod+Apostrophe".action.spawn = "emacs";
           "Mod+Space".action.spawn = launcher.menu;
 
           "Mod+H".action.focus-column-left-or-last = {};

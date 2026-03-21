@@ -44,15 +44,11 @@
         macos-icon = "retro";
 
         keybind = [
-          "alt+q=close_surface"
           "alt+shift+0=reload_config"
           "alt+equal=increase_font_size:1"
           "alt+minus=decrease_font_size:1"
-          "alt+enter=new_tab"
           "alt+bracket_left=scroll_page_up"
           "alt+bracket_right=scroll_page_down"
-          "alt+l=next_tab"
-          "alt+h=previous_tab"
           "alt+c=copy_to_clipboard"
           "alt+v=paste_from_clipboard"
         ];
