@@ -10,7 +10,6 @@
 
     signing_key_path = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
   in {
-    # TODO: ^1 add merging stuff
     programs = {
       delta = {
         enable = true;

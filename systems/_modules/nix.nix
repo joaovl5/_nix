@@ -23,6 +23,7 @@ in {
         "nix-command"
         "flakes"
         "pipe-operator" # if not using lix, is `pipe-operators`
+        "flake-self-attrs" # used for some projects using submodules
       ];
 
       substituters = [

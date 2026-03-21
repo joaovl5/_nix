@@ -23,7 +23,9 @@ In this order:
 
 - `nix fmt` - basic formatting, runs `treefmt` under the hood
 - `prek` - precommit hook has linters included
-- `nix flake check --all-systems` (after the other checks pass)
+  - prek only operates on git staged files, so you have to run `git add .` for `prek` to correctly check
+- IN SOME CASES (see more below): `nix flake check --all-systems` (after the other checks pass)
+  - **only** run `nix flake check` when nix code has been touched.
   - `nix flake check` will warn about unknown flake outputs `deploy` and `pkgs`; this is expected.
 
 ## Instruction updates

@@ -32,5 +32,9 @@
 
     "unit.fxsync" = {
     };
+
+    "unit.fail2ban" = {
+      enable = true;
+    };
   };
 }

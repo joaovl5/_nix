@@ -38,6 +38,14 @@ rec {
           vpn.enable = false; # our wireguard unit handles VPN
         };
 
+        "unit.actual-budget" = {
+          enable = true;
+        };
+
+        "unit.qbittorrent" = {
+          enable = true;
+        };
+
         # host tunnel (inbound relay)
         "unit.wireguard" = {
           enable = true;

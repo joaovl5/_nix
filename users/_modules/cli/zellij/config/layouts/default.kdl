@@ -1,6 +1,53 @@
 layout {
-  pane
-  pane size=1 borderless=true {
-    plugin location="zellij:compact-bar"
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+      plugin location="file:zjstatus" {
+        // hide_frame_for_single_pane "false"
+
+        format_left  "#[fg=#CBA6F7,bg=#181825,bold]{session}#[bg=#181825] {mode} {tabs}"
+        format_right "{pipe_zjstatus_hints} | #[fg=#89B4FA] #[fg=#74C7EC]{command_git_branch}#[fg=#CBA6F7]  #[fg=#CDD6F4,bold]{datetime}"
+        format_space "#[bg=#181825]"
+
+        format_center ""
+        pipe_zjstatus_hints_format "{output}"
+
+        mode_normal      "#[fg=#89B4FA,bold]󰿊 "
+        mode_tmux        "#[fg=#FAB387,bold] "
+        mode_rename_tab  "#[fg=#F2CDCD,bold] "
+        mode_rename_pane "#[fg=#F5C2E7,bold]󰏪 "
+        mode_resize      "#[fg=#F38BA8,bold]󰩨 "
+        mode_pane        "#[fg=#A6E3A1,bold] "
+        mode_tab         "#[fg=#74C7EC,bold]󰓩 "
+        mode_locked      "#[fg=#EBA0AC,bold]󰌾 "
+        mode_scroll      "#[fg=#CBA6F7,bold]󱕒 "
+        mode_enter_search "#[fg=#89DCEB,bold] "
+        mode_search      "#[fg=#B4BEFE,bold] "
+        mode_session     "#[fg=#94E2D5,bold] "
+        mode_move        "#[fg=#CDD6F4,bold] "
+        mode_prompt      "#[fg=#F9E2AF,bold] "
+        mode_default_to_mode "normal"
+
+        tab_normal               "#[fg=#7F849C,bg=#181825] {index} {name} {fullscreen_indicator}{sync_indicator}{floating_indicator}"
+        tab_active               "#[fg=#CDD6F4,bg=#181825,bold] {index} {name} {fullscreen_indicator}{sync_indicator}{floating_indicator}"
+        tab_fullscreen_indicator " "
+        tab_sync_indicator       "  "
+        tab_floating_indicator   "󰉈 "
+
+        border_enabled  "false"
+        border_char     "─"
+        border_format   "#[fg=#7F849C]{char}"
+        border_position "top"
+
+        command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
+        command_git_branch_format      "#[fg=#74C7EC] {stdout} "
+        command_git_branch_interval    "10"
+        command_git_branch_rendermode  "static"
+
+        datetime        "#[fg=#BAC2DE,bold] {format} "
+        datetime_format "%A, %d %b %Y %H:%M"
+        datetime_timezone "Europe/Berlin"
+      }
+    }
   }
 }

@@ -1,8 +1,21 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }: {
+  imports = [
+    inputs.musnix.nixosModules.musnix
+  ];
+
+  musnix = {
+    enable = true;
+    kernel = {
+      realtime = true;
+      packages = pkgs.linuxPackages_xanmod_latest;
+    };
+  };
+
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -13,6 +26,15 @@
     alsa.support32Bit = true;
     wireplumber.enable = true;
     jack.enable = true;
+  };
+
+  services.pipewire.extraConfig.pipewire."92-low-latency" = {
+    "context.properties" = {
+      "default.clock.rate" = 48000;
+      "default.clock.quantum" = 32;
+      "default.clock.min-quantum" = 32;
+      "default.clock.max-quantum" = 32;
+    };
   };
 
   environment.etc."openal/alsoft.conf".text = lib.mkDefault ''

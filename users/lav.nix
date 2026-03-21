@@ -28,10 +28,12 @@
     (import ./_modules/coding)
     (import ./_modules/ai)
     (import ./_modules/obs)
-    (import ./_modules/ghostty)
+    (import ./_modules/term)
     (import ./_modules/browsing)
     (import ./_modules/neovim)
+    (import ./_modules/emacs)
     (import ./_modules/espanso)
+    (import ./_modules/kanata)
     (import ./_modules/discord)
   ];
   module_imports = extract_imports modules;
@@ -61,6 +63,9 @@ in {
   };
 
   config = {
+    programs.dconf.enable = true;
+
+    users.groups.uinput = {};
     users.users.${cfg.username} = {
       hashedPasswordFile = s.secret_path "password_hash";
 
@@ -69,7 +74,7 @@ in {
       extraGroups = [
         "wheel"
         "libvirt"
-        "input" # required for espanso
+        "input"
       ];
     };
 
@@ -132,20 +137,22 @@ in {
           virt-manager
 
           ## etc move later
+          zrythm
+          ardour
           wireguard-tools
           copier
           jq
           bit-logo
-          bagels
-          vllm
-          llama-cpp
-          llama-swap
           python314Packages.huggingface-hub
           cursor-cli
-          chatbox
+          azure-cli
+          (openvpn.override {
+            openssl = openssl_legacy;
+          })
 
           # dependencies
           rsync
+          go-grip
           pinentry-curses
           bc
           perl

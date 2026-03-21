@@ -4,6 +4,8 @@
   unit_global_cfg = globals.units;
 in {
   imports = [
+    ./actual-budget
+    ./fail2ban
     ./pihole
     ./litellm
     ./nixarr
@@ -12,6 +14,7 @@ in {
     ./octodns
     ./fxsync
     ./wireguard
+    ./qbittorrent
     unit_global_cfg
   ];
 }

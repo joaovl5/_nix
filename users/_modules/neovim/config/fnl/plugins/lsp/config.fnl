@@ -66,7 +66,7 @@
                  ; :taplo {:cmd [:taplo]}
                  :marksman {:cmd [:marksman]}
                  :stylua {:cmd [:stylua]}
-                 :yamlls {:cmd [:yaml-language-server]}
+                 ; :yamlls {:cmd [:yaml-language-server] :args [:--stdio]}
                  :nil {:cmd [:nil]
                        :filetypes [:nix]
                        :root_markers [:flake.nix :.git]
