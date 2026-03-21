@@ -46,21 +46,22 @@
                                                        (abbreviate-file-name (buffer-file-name))
                                                        "%b")))
 
+;; Global font ownership lives here; Org-only typography stays in `mod-org.el`.
 (defun handle-fonts ()
-  (straight-use-package 'nerd-icons))
-  ; (nerd-icons-font-family "Iosevka Nerd Font")
-  ; (add-to-list 'default-frame-alist
-  ;              '(font . "Iosevka Nerd Font-15")
-  ;              '(undecorated . t))
-  ;
-  ; (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 140 :width 'expanded)
-  ; (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font")
-  ; (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font"))
+  (straight-use-package 'nerd-icons)
+
+  (when (member "Iosevka Nerd Font" (font-family-list))
+    (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 216)
+    (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font"))
+
+  (when (member "Noto Serif" (font-family-list))
+    (set-face-attribute 'variable-pitch nil :family "Noto Serif" :height 1.18)))
 
 
 (defun handle-theme ()
-  (straight-use-package 'doom-themes)
-  (load-theme 'doom-one t))
+  (sup 'doom-themes)
+  (sup 'kaolin-themes)
+  (load-theme 'kaolin-dark t))
 
 (defun handle-modeline ()
   (straight-use-package 'doom-modeline)
@@ -96,8 +97,8 @@
     :ensure t
     :init
     (require 'hyperbole)
-    (hyperb:init-menubar))
-  )
+    (hyperb:init-menubar)))
+
 
 ;; indent guides
 (defun handle-indents ()

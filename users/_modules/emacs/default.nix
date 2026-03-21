@@ -45,6 +45,8 @@
 
     home.packages = with pkgs; [
       nerd-fonts.iosevka
+      inter-nerdfont
+      anonymous-pro-fonts
       poppler-utils
       vips
     ];

@@ -101,17 +101,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Iosevka Nerd Font" :height 250))))
  '(dired-broken-symlink ((t (:background "brown" :foreground "navajo white" :weight bold))))
  '(doom-modeline ((t nil)))
  '(error ((t (:foreground "#ff6c6b"))))
- '(fixed-pitch ((t (:family "Iosevka Nerd Font" :height 230))))
- '(font-lock-function-name-face ((t (:family "Iosevka Nerd Font" :slant italic))))
- '(font-lock-variable-name-face ((t (:family "Iosevka Nerd Font" :weight bold))))
- '(line-number-current-line ((t (:foreground "yellow" :inherit line-number))))
- '(mode-line ((t (:family "Iosevka Nerd Font" :weight Bold)))))
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
-
+ '(line-number-current-line ((t (:foreground "yellow" :inherit line-number)))))
