@@ -20,6 +20,10 @@ in
   # ---------------
   // (import ./packages inputs)
   # ---------------
+  # Apps
+  # ---------------
+  // (import ./apps inputs)
+  # ---------------
   # Deployment
   # ---------------
   // (import ./deploy inputs)
