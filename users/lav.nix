@@ -116,6 +116,8 @@ in {
           waylock ## locker
           ## launcher
           fuzzel # backup
+          ## docs
+          libreoffice
           ## file manager
           thunar
           ## settings
