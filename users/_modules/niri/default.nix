@@ -48,6 +48,7 @@
           };
         };
       in {
+        prefer-no-csd = true;
         gestures.hot-corners.enable = false;
         outputs = {
           "${main}" = {
