@@ -5,14 +5,18 @@
 (defsrc
   caps         h    j    k    l
   lctl
+  lmet
   lalt
+  lsft
   d    u
 )
 
 (deflayer default
   @cap         _    _    _    _
   @ctl
+  @met
   @alt
+  @sft
   _    _
 )
 
@@ -21,11 +25,15 @@
               left down up rght
   _
   _
+  _
+  _
               (mwheel-down 50 120) (mwheel-up 50 120)
 )
 
 (defalias
-  cap lctl
-  ctl (tap-hold-press 200 200 caps (layer-toggle arrows))
-  alt (tap-dance 200 (lalt (layer-while-held arrows)))
+  cap (tap-hold 200 200 (one-shot 2000 lctl) lctl)
+  ctl caps
+  met (tap-hold 200 200 (one-shot 2000 lmet) lmet)
+  alt (tap-dance 200 ((one-shot 2000 lalt) (layer-while-held arrows)))
+  sft (tap-hold 200 200 (one-shot 2000 lsft) lsft)
 )
