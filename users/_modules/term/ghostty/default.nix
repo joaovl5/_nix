@@ -3,7 +3,7 @@
     programs.ghostty = {
       enable = true;
       package = pkgs.ghostty;
-      systemd.enable = true;
+      systemd.enable = false;
 
       settings = {
         font-size = 15;
