@@ -1,20 +1,4 @@
 {
-  nx = {
-    pkgs,
-    lib,
-    ...
-  }: {
-    systemd.user.services.float-checker-script = {
-      enable = true;
-      path = [pkgs.uv];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart =
-          pkgs.writeScript
-          "float_checker_script" (lib.readFile ./float_checker_script.py);
-      };
-    };
-  };
   hm = {
     pkgs,
     inputs,
