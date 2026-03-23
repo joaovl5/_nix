@@ -1,6 +1,16 @@
 ---
 name: Orchestrator
 description: Main agent for handling medium to high complexity tasks.
+model: openai/gpt-5.4
+reasoningEffort: xhigh
+textVerbosity: low
+mode: primary
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  task:
+    "*": allow
 ---
 
 # Orchestrator
