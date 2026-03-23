@@ -40,5 +40,3 @@
 - **DELEGATION OF SUBTASKS**
   - Tasks that can be made paralell and separate are also meant for subagents.
   - Exploration of a codebase is more efficient via the 'explore' subagents, use them.
-
-### MCPs
