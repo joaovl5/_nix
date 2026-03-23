@@ -94,7 +94,6 @@
 
 (defun handle-links ()
   (use hyperbole
-    :ensure t
     :init
     (require 'hyperbole)
     (hyperb:init-menubar)))

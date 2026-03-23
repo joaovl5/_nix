@@ -89,6 +89,7 @@
 (message "[!] loading modules...")
 
 (require 'mod-org)
+(require 'mod-lisp)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
