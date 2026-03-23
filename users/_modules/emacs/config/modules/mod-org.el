@@ -1,32 +1,30 @@
-;; Org defaults and behavior
+;; mod-org.el --- Org defaults and behavior  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; org-mode looks, and general config
+
+;;; Code:
 
 (require 'cl-lib)
 (require 'color)
 (require 'seq)
 
 (setq
- ;; Edit settings
  org-auto-align-tags nil
- ; org-tags-column 0
  org-catch-invisible-edits 'show-and-error
  org-special-ctrl-a/e t
  org-insert-heading-respect-content t
-
- ;; Org styling, hide markup etc.
  org-hide-emphasis-markers t
  org-pretty-entities t
  org-agenda-tags-column 0
- org-ellipsis " · ")
-
-(setq org-adapt-indentation t
-      org-hide-leading-stars t)
-
-(setq org-log-done t
-      org-tags-column -80)
-
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-edit-src-content-indentation 0)
+ org-ellipsis " · "
+ org-adapt-indentation t
+ org-hide-leading-stars t
+ org-log-done t
+ org-tags-column -80
+ org-src-fontify-natively t
+ org-src-tab-acts-natively t
+ org-edit-src-content-indentation 0)
 
 ;; Org face setup
 
@@ -176,15 +174,23 @@
   (apply #'svg-tag-make tag :face face :margin 0 properties))
 
 (defconst my/org-meta-icon-badge-style
-  '(:font-size 10
-    :height 0.68
-    :padding 0.7
+  '(:collection "material"
+    :height 0.8
+    :scale 0.72
+    :padding 0.15
     :radius 2
     :stroke 0)
   "Compact style for Org metadata icon badges.")
 
-(defun my/org-meta-icon-badge (label face)
-  (apply #'my/org-svg-tag label face my/org-meta-icon-badge-style))
+(defun my/org-meta-icon-badge (icon face &optional fallback)
+  (or (ignore-errors
+        (apply #'svg-lib-icon icon face my/org-meta-icon-badge-style))
+      (my/org-svg-tag (or fallback "?") face
+                      :font-size 14
+                      :height 0.9
+                      :padding 0.8
+                      :radius 2
+                      :stroke 0)))
 
 (defun my/org-svg-face-foreground (face)
   (my/org-face-color face :foreground nil
@@ -214,6 +220,17 @@
   "[A-Za-z]\\{3\\}"
   "Regexp fragment matching the weekday portion of an Org timestamp.")
 
+(defconst my/org-timestamp-day-only-re
+  my/org-timestamp-day-re
+  "Regexp fragment matching a weekday-only timestamp suffix.")
+
+(defconst my/org-timestamp-timed-suffix-re
+  (format "\\(?:%s %s\\|%s\\)"
+          my/org-timestamp-day-re
+          my/org-timestamp-time-re
+          my/org-timestamp-time-re)
+  "Regexp fragment matching a timestamp suffix that includes a time.")
+
 (defconst my/org-timestamp-suffix-re
   (format "\\(?:%s %s\\|%s\\|%s\\)"
           my/org-timestamp-day-re
@@ -227,32 +244,56 @@
   "Regexp matching an active Org date without a suffix.")
 
 (defconst my/org-active-date-prefix-regexp
-  (format "\\(<%s \\)%s>" my/org-timestamp-date-re my/org-timestamp-suffix-re)
+  (format "\\(<%s \\)%s>" my/org-timestamp-date-re my/org-timestamp-timed-suffix-re)
   "Regexp matching the left half of an active Org timestamp.")
 
+(defconst my/org-active-date-prefix-day-only-regexp
+  (format "\\(<%s \\)%s>" my/org-timestamp-date-re my/org-timestamp-day-only-re)
+  "Regexp matching the left half of an active all-day Org timestamp.")
+
 (defconst my/org-active-date-suffix-regexp
-  (format "<%s \\(%s>\\)" my/org-timestamp-date-re my/org-timestamp-suffix-re)
+  (format "<%s \\(%s>\\)" my/org-timestamp-date-re my/org-timestamp-timed-suffix-re)
   "Regexp matching the right half of an active Org timestamp.")
+
+(defconst my/org-active-date-suffix-day-only-regexp
+  (format "<%s \\(%s>\\)" my/org-timestamp-date-re my/org-timestamp-day-only-re)
+  "Regexp matching the right half of an active all-day Org timestamp.")
 
 (defconst my/org-inactive-date-regexp
   (format "\\(\\[%s\\]\\)" my/org-timestamp-date-re)
   "Regexp matching an inactive Org date without a suffix.")
 
 (defconst my/org-inactive-date-prefix-regexp
-  (format "\\(\\[%s \\)%s\\]" my/org-timestamp-date-re my/org-timestamp-suffix-re)
+  (format "\\(\\[%s \\)%s\\]" my/org-timestamp-date-re my/org-timestamp-timed-suffix-re)
   "Regexp matching the left half of an inactive Org timestamp.")
 
+(defconst my/org-inactive-date-prefix-day-only-regexp
+  (format "\\(\\[%s \\)%s\\]" my/org-timestamp-date-re my/org-timestamp-day-only-re)
+  "Regexp matching the left half of an inactive all-day Org timestamp.")
+
 (defconst my/org-inactive-date-suffix-regexp
-  (format "\\[%s \\(%s\\]\\)" my/org-timestamp-date-re my/org-timestamp-suffix-re)
+  (format "\\[%s \\(%s\\]\\)" my/org-timestamp-date-re my/org-timestamp-timed-suffix-re)
   "Regexp matching the right half of an inactive Org timestamp.")
+
+(defconst my/org-inactive-date-suffix-day-only-regexp
+  (format "\\[%s \\(%s\\]\\)" my/org-timestamp-date-re my/org-timestamp-day-only-re)
+  "Regexp matching the right half of an inactive all-day Org timestamp.")
 
 (defconst my/org-timestamp-badge-style
   '(:font-size 13
     :height 0.58
-    :padding 0.8
+    :padding 1.8
     :radius 1.6
     :stroke 0)
   "Compact style for timestamp SVG badges.")
+
+(defconst my/org-all-day-timestamp-badge-style
+  '(:font-size 10
+    :height 0.5
+    :padding 0.05
+    :radius 0
+    :stroke 0)
+  "More compact style for all-day timestamp SVG badges.")
 
 (defun my/org-format-timestamp-date (tag)
   (when (string-match my/org-timestamp-date-re tag)
@@ -274,12 +315,28 @@
 (defun my/org-make-timestamp-badge (label face &rest properties)
   (apply #'my/org-svg-tag label face (append properties my/org-timestamp-badge-style)))
 
+(defun my/org-make-all-day-timestamp-badge (label face &rest properties)
+  (apply #'my/org-svg-tag label face (append properties my/org-all-day-timestamp-badge-style)))
+
 (defun my/org-timestamp-badge-spec (date-face)
   `((,my/org-active-date-regexp
      . ((lambda (tag)
           (my/org-make-timestamp-badge
            (my/org-format-timestamp-date tag)
            ',date-face))))
+    (,my/org-active-date-prefix-day-only-regexp
+     . ((lambda (tag)
+          (my/org-make-all-day-timestamp-badge
+           (my/org-format-timestamp-date tag)
+           ',date-face
+           :crop-right t))))
+    (,my/org-active-date-suffix-day-only-regexp
+     . ((lambda (tag)
+          (my/org-make-all-day-timestamp-badge
+           (my/org-format-timestamp-suffix tag)
+           ',date-face
+           :crop-left t
+           :inverse t))))
     (,my/org-active-date-prefix-regexp
      . ((lambda (tag)
           (my/org-make-timestamp-badge
@@ -298,6 +355,19 @@
           (my/org-make-timestamp-badge
            (my/org-format-timestamp-date tag)
            ',date-face))))
+    (,my/org-inactive-date-prefix-day-only-regexp
+     . ((lambda (tag)
+          (my/org-make-all-day-timestamp-badge
+           (my/org-format-timestamp-date tag)
+           ',date-face
+           :crop-right t))))
+    (,my/org-inactive-date-suffix-day-only-regexp
+     . ((lambda (tag)
+          (my/org-make-all-day-timestamp-badge
+           (my/org-format-timestamp-suffix tag)
+           ',date-face
+           :crop-left t
+           :inverse t))))
     (,my/org-inactive-date-prefix-regexp
      . ((lambda (tag)
           (my/org-make-timestamp-badge
@@ -333,8 +403,8 @@
               '((":END:" . " ")
                 (":ID:" . "󰿀 ")
                 ("#+title:" . "󰛼 ")
-                ("title:" . "󰛼 ")
-                ))
+                ("title:" . "󰛼 ")))
+
   (prettify-symbols-mode 1))
 
 
@@ -441,7 +511,7 @@
      :init
      (require 'org-download))
 
-(use-package org-appear
+(use org-appear
   :commands (org-appear-mode)
   :hook (org-mode . org-appear-mode)
   :config
@@ -450,25 +520,25 @@
         org-appear-autolinks t
         org-appear-autosubmarkers t))
 
-(use-package svg-tag-mode
+(use svg-tag-mode
   :config
   ;; `svg-tag-mode` owns priority, progress, and date-oriented badges.
   (setq svg-tag-tags
         (append
          `(
-           ;; Metadata
-           (":PROPERTIES:" . ((lambda (_tag)
-                                 (my/org-meta-icon-badge "⚙" 'my/org-badge-muted-face))))
-           (":LOGBOOK:" . ((lambda (_tag)
-                              (my/org-meta-icon-badge "✎" 'my/org-badge-muted-face))))
-           ("CLOSED:" . ((lambda (_tag)
-                            (my/org-meta-icon-badge "✓" 'my/org-badge-date-face))))
-           ("CLOCK:" . ((lambda (_tag)
-                           (my/org-meta-icon-badge "◷" 'my/org-badge-date-face))))
+            ;; Metadata
+             (":PROPERTIES:" . ((lambda (_tag)
+                                  (my/org-meta-icon-badge "cog" 'my/org-badge-muted-face "⚙"))))
+             (":LOGBOOK:" . ((lambda (_tag)
+                                (my/org-meta-icon-badge "pencil" 'my/org-badge-muted-face "✎"))))
+             ("CLOSED:" . ((lambda (_tag)
+                              (my/org-meta-icon-badge "check" 'my/org-badge-date-face "✓"))))
+             ("CLOCK:" . ((lambda (_tag)
+                             (my/org-meta-icon-badge "clock-outline" 'my/org-badge-date-face "◷"))))
 
            ;; Todo states
-            ("TODO" . ((lambda (tag)
-                         (my/org-svg-tag tag 'my/org-badge-progress-face))))
+           ("TODO" . ((lambda (tag)
+                        (my/org-svg-tag tag 'my/org-badge-progress-face))))
            ("DONE" . ((lambda (tag)
                          (my/org-svg-tag tag 'my/org-badge-progress-done-face))))
 
@@ -479,11 +549,11 @@
 
            ;; Progress
            ("\\(\\[[0-9]\\{1,3\\}%\\]\\)" . ((lambda (tag)
-                                                       (my/svg-progress-percent (substring tag 1 -2)))))
+                                                     (my/svg-progress-percent (substring tag 1 -2)))))
            ("\\(\\[[0-9]\\+/[0-9]\\+\\]\\)" . ((lambda (tag)
-                                                        (my/svg-progress-count (substring tag 1 -1))))))
-          (my/org-timestamp-badge-spec 'my/org-badge-date-face)))
-  )
+                                                       (my/svg-progress-count (substring tag 1 -1))))))
+          (my/org-timestamp-badge-spec 'my/org-badge-date-face))))
+
 
 ;; Hook registration
 
