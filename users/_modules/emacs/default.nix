@@ -37,10 +37,12 @@
     programs.emacs = {
       enable = true;
       package = pkg;
-      extraPackages = epkgs: [
-        epkgs.org-roam
-        # epkgs.emacsql-sqlite3
-      ];
+      extraPackages = epkgs:
+        with epkgs; [
+          org-roam
+          parinfer-rust-mode
+          # epkgs.emacsql-sqlite3
+        ];
     };
 
     home.packages = with pkgs; [
