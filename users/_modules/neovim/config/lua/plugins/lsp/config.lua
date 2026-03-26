@@ -20,10 +20,7 @@ local function populate_diagnostics(client, bufnr)
 end
 local function do_basedpyright_attach(client, bufnr)
 	local function _2_()
-		return client:exec_cmd({
-			command = "basedpyright.organizeimports",
-			arguments = { [vim.uri_from_bufnr] = bufnr },
-		})
+		return client:exec_cmd({ command = "basedpyright.organizeimports", arguments = { [vim.uri_from_bufnr] = bufnr } })
 	end
 	n.usercmd(bufnr, "LspPyrightOrganizeImports", { desc = "Organize Imports" }, _2_)
 	n.usercmd(
@@ -33,6 +30,23 @@ local function do_basedpyright_attach(client, bufnr)
 		set_python_path
 	)
 	return populate_diagnostics(client, bufnr)
+end
+local function get_basedpyright_root_dir(bufnr, on_dir)
+	return on_dir(
+		vim.fs.root(
+			vim.api.nvim_buf_get_name(bufnr),
+			{
+				"uv.lock",
+				"pyrightconfig.json",
+				"pyproject.toml",
+				"setup.py",
+				"setup.cfg",
+				"requirements.txt",
+				"Pipfile",
+				".git",
+			}
+		)
+	)
 end
 local function get_fennel_root_dir(bufnr, on_dir)
 	local fname = vim.api.nvim_buf_get_name(bufnr)
@@ -55,11 +69,11 @@ local function mk_lsp()
 	servers = {
 		basedpyright = {
 			on_attach = do_basedpyright_attach,
+			root_dir = get_basedpyright_root_dir,
 			settings = {
 				basedpyright = {
 					analysis = {
 						autoSearchPaths = true,
-						useLibraryCodeForTypes = true,
 						typeCheckingMode = "recommended",
 						diagnosticMode = "workspace",
 						reportExplicitAny = false,
@@ -94,9 +108,7 @@ local function mk_lsp()
 			filetypes = { "nix" },
 			root_markers = { "flake.nix", ".git" },
 			settings = {
-				["nil"] = {
-					nix = { flake = { autoArchive = true, autoEvalInputs = true, nixpkgsInputName = "nixpkgs" } },
-				},
+				["nil"] = { nix = { flake = { autoArchive = true, autoEvalInputs = true, nixpkgsInputName = "nixpkgs" } } },
 			},
 		},
 	}
