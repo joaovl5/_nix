@@ -11,7 +11,7 @@
                        (do-req :markview :setup
                                {:preview {: filetypes
                                           :icon_provider :mini
-                                          :ignore_buftypes []}
+                                          :ignore_buftypes [:nofile]}
                                 :markdown {:list_items {:wrap true
                                                         :shift_width 2
                                                         :marker_minus {:text "≕"
