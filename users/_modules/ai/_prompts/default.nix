@@ -13,9 +13,10 @@
       ];
     };
   in {
-    home.file.".agents/skills" = {
-      source = merged_skills;
-      recursive = true;
+    hybrid-links.links.agents_skills = {
+      from = merged_skills;
+      to = "~/.agents/skills";
+      hybrid = false;
     };
   };
 }

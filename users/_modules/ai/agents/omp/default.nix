@@ -16,18 +16,26 @@
     system_prompt = ../../_prompts/general/system.md;
   in {
     home.packages = [pkgs.llm-agents.omp];
+    hybrid-links = {
+      links = {
+        omp_agents = {
+          from = prompt_agents;
+          to = "~/.omp/agent/agents";
+        };
+        omp_skills = {
+          from = prompt_skills;
+          to = "~/.omp/agent/skills";
+        };
+        omp_system = {
+          from = system_prompt;
+          to = "~/.omp/agent/SYSTEM.md";
+          recursive = false;
+        };
+      };
+    };
 
     home.file = {
       ".omp/agent/mcp.json".source = omp_mcp_config;
-      ".omp/agent/SYSTEM.md".source = system_prompt;
-      ".omp/agent/agents" = {
-        source = prompt_agents;
-        recursive = true;
-      };
-      ".omp/agent/skills" = {
-        source = prompt_skills;
-        recursive = true;
-      };
     };
   };
 }

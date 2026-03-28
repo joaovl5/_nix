@@ -70,12 +70,8 @@
               message = "hybrid-links.links.${name}.to must stay home-relative after stripping '~/'.";
             }
             {
-              assertion = link.recursive;
-              message = "hybrid-links.links.${name}.recursive must be true in v1.";
-            }
-            {
-              assertion = is_directory link.from;
-              message = "hybrid-links.links.${name}.from must point to a directory in v1.";
+              assertion = (!link.recursive) || is_directory link.from;
+              message = "hybrid-links.links.${name}.from must point to a directory when recursive = true.";
             }
           ]
           ++ lib.optionals link.hybrid [
@@ -110,7 +106,7 @@
         nameValuePair "hybrid-links/${name}" {
           source = source_from link;
           target = target_from link.to;
-          recursive = true;
+          inherit (link) recursive;
           inherit (link) force;
         }
     )

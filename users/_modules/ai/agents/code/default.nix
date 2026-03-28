@@ -18,6 +18,22 @@
     prompt_skills = ../../_prompts/skills;
     system_prompt = ../../_prompts/general/system.md;
   in {
+    hybrid-links.links = {
+      code_agents = {
+        from = prompt_agents;
+        to = "~/.code/agents";
+      };
+      code_skills = {
+        from = prompt_skills;
+        to = "~/.code/skills";
+      };
+      code_agents_md = {
+        from = system_prompt;
+        to = "~/.code/AGENTS.md";
+        recursive = false;
+      };
+    };
+
     home = {
       packages = [
         (lib.lowPrio pkgs.llm-agents.code)
@@ -27,26 +43,6 @@
 
       file = {
         ".code/config.toml".source = code_config;
-
-        ".code/AGENTS.md".source = system_prompt;
-        ".code/agents" = {
-          source = prompt_agents;
-          recursive = true;
-        };
-        ".code/skills" = {
-          source = prompt_skills;
-          recursive = true;
-        };
-
-        ".codex/AGENTS.md".source = system_prompt;
-        ".codex/agents" = {
-          source = prompt_agents;
-          recursive = true;
-        };
-        ".codex/skills" = {
-          source = prompt_skills;
-          recursive = true;
-        };
       };
     };
   };
