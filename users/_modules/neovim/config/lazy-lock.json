@@ -279,10 +279,6 @@
     "branch": "main",
     "commit": "123a9fb12e7229342f807ec9e6de478b1102b041"
   },
-  "twilight.nvim": {
-    "branch": "main",
-    "commit": "664e752f4a219801265cc3fc18782b457b58c1e1"
-  },
   "typescript-tools.nvim": {
     "branch": "master",
     "commit": "c2f5910074103705661e9651aa841e0d7eea9932"
