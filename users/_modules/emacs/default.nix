@@ -1,15 +1,5 @@
 {
-  hm = {
-    pkgs,
-    config,
-    nixos_config,
-    ...
-  }: let
-    cfg = nixos_config.my.nix;
-    flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/_modules/emacs";
-    configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
-
+  hm = {pkgs, ...}: let
     pkg = pkgs.emacs-unstable;
     # pkg = pkgs.emacs-unstable-pgtk.overrideAttrs (old: {
     #   configureFlags =
@@ -22,10 +12,9 @@
     #     ];
     # });
   in {
-    xdg.configFile."emacs" = {
-      source = configSrc;
-      recursive = true;
-      force = true;
+    hybrid-links.links.emacs = {
+      from = ./config;
+      to = "~/.config/emacs";
     };
 
     services.emacs = {

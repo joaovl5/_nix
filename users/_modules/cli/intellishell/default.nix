@@ -1,19 +1,10 @@
 {
-  hm = {
-    config,
-    nixos_config,
-    ...
-  }: let
-    cfg = nixos_config.my.nix;
-    flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/_modules/cli/intellishell";
-    data_src = config.lib.file.mkOutOfStoreSymlink "${here}/data";
-  in {
-    xdg.dataFile."intellishell_data" = {
-      source = data_src;
-      recursive = true;
-      force = true;
+  hm = {config, ...}: {
+    hybrid-links.links.intellishell_data = {
+      from = ./data;
+      to = "~/.local/share/intellishell_data";
     };
+
     programs.intelli-shell = {
       enable = true;
       enableFishIntegration = true;
