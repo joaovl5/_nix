@@ -14,18 +14,39 @@
 
       inherit mcp_servers;
     };
-    agent_browser_skill = ../../_prompts/skills/agent-browser/SKILL.md;
+    prompt_agents = ../../_prompts/agents;
+    prompt_skills = ../../_prompts/skills;
+    system_prompt = ../../_prompts/general/system.md;
   in {
     home = {
-      packages = [pkgs.llm-agents.code];
+      packages = [
+        (lib.lowPrio pkgs.llm-agents.code)
+      ];
 
       shellAliases.c = "coder";
 
       file = {
         ".code/config.toml".source = code_config;
 
-        ".code/skills/agent-browser/SKILL.md".source = agent_browser_skill;
-        ".codex/skills/agent-browser/SKILL.md".source = agent_browser_skill;
+        ".code/AGENTS.md".source = system_prompt;
+        ".code/agents" = {
+          source = prompt_agents;
+          recursive = true;
+        };
+        ".code/skills" = {
+          source = prompt_skills;
+          recursive = true;
+        };
+
+        ".codex/AGENTS.md".source = system_prompt;
+        ".codex/agents" = {
+          source = prompt_agents;
+          recursive = true;
+        };
+        ".codex/skills" = {
+          source = prompt_skills;
+          recursive = true;
+        };
       };
     };
   };
