@@ -1,18 +1,8 @@
 {
-  hm = {
-    config,
-    nixos_config,
-    ...
-  }: let
-    cfg = nixos_config.my.nix;
-    flake_path = cfg.flake_location;
-    here = assert (flake_path != null); "${flake_path}/users/_modules/kanata";
-    configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
-  in {
-    xdg.configFile."kanata" = {
-      source = configSrc;
-      recursive = true;
-      force = true;
+  hm = _: {
+    hybrid-links.links.kanata = {
+      from = ./config;
+      to = "~/.config/kanata";
     };
   };
 
