@@ -64,6 +64,12 @@ in
         in {
           networking.firewall.allowedTCPPorts = [80 443];
 
+          my."unit.traefik".backup.items.acme = {
+            kind = "path";
+            policy = "critical_infra";
+            path.paths = ["/var/lib/traefik/acme.json"];
+          };
+
           # Prepare env file with CF_DNS_API_TOKEN before traefik starts
           systemd.services.traefik-prepare-env = {
             description = "Prepare Traefik environment file";

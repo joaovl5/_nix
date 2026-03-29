@@ -48,6 +48,17 @@ in
       inherit (opts.endpoint) target sources;
     };
 
+    my."unit.pihole".backup.items.state = {
+      kind = "path";
+      policy = "critical_infra";
+      path = {
+        paths = [
+          source_state_dir
+          source_log_dir
+        ];
+      };
+    };
+
     sops.secrets = {
       "pihole_password_hash" = s.mk_secret "${s.dir}/dns.yaml" "pihole-password-hash" {
         owner = user;

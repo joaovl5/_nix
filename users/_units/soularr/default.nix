@@ -138,6 +138,12 @@ in
         inherit (opts.slskd.endpoint) target sources;
       };
 
+      my."unit.soularr".backup.items.state = {
+        kind = "path";
+        policy = "filesystem_snapshot";
+        path.paths = [state_dir];
+      };
+
       # SOPS secrets (root-owned)
       sops.secrets = {
         "soularr_lidarr_api_key" = s.mk_secret "${s.dir}/soularr.yaml" "lidarr_api_key" {};

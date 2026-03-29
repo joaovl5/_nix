@@ -44,6 +44,39 @@ in
     in
       lib.mkMerge [
         {
+          my."unit.fxsync".backup.items = {
+            syncstorage_db = {
+              kind = "mysql_dump";
+              policy = "sensitive_data";
+              mysql_dump = {
+                database = "syncstorage";
+                host = "127.0.0.1";
+                port = db_port_syncstorage;
+                username = db_user;
+                password_secret = {
+                  name = "fxsync_mariadb_password";
+                  file = "fxsync.yaml";
+                  key = "mariadb_password";
+                };
+              };
+            };
+            tokenserver_db = {
+              kind = "mysql_dump";
+              policy = "sensitive_data";
+              mysql_dump = {
+                database = "tokenserver";
+                host = "127.0.0.1";
+                port = db_port_tokenserver;
+                username = db_user;
+                password_secret = {
+                  name = "fxsync_mariadb_password";
+                  file = "fxsync.yaml";
+                  key = "mariadb_password";
+                };
+              };
+            };
+          };
+
           my.vhosts.fxsync = {
             inherit (opts.endpoint) target sources;
           };
