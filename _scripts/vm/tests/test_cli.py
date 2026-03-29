@@ -20,16 +20,30 @@ def test_parser_defaults() -> None:
     assert args.host == "demo-host"
     assert args.age_key is None
     assert args.ssh_key is None
+    assert args.cpu == 4
+    assert args.ram == 6192
 
 
 def test_parser_overrides() -> None:
     args = cli.build_parser().parse_args(
-        ["demo-host", "--age-key", "/tmp/age.txt", "--ssh-key", "/tmp/id_ed25519"]
+        [
+            "demo-host",
+            "--age-key",
+            "/tmp/age.txt",
+            "--ssh-key",
+            "/tmp/id_ed25519",
+            "--cpu",
+            "2",
+            "--ram",
+            "4096",
+        ]
     )
 
     assert args.host == "demo-host"
     assert args.age_key == "/tmp/age.txt"
     assert args.ssh_key == "/tmp/id_ed25519"
+    assert args.cpu == 2
+    assert args.ram == 4096
 
 
 def test_main_prints_user_facing_errors(
@@ -75,16 +89,18 @@ def test_main_orchestrates_bundle_build_and_run(
         bundle_dirs.append(bundle_dir)
         bundle_dir.mkdir(parents=True, exist_ok=True)
 
-    def fake_run_vm(runner_path: Path, bundle_dir: Path) -> int:
+    def fake_run_vm(runner_path: Path, bundle_dir: Path, cpu: int, ram: int) -> int:
         assert runner_path == expected_runner_path
         assert bundle_dir in bundle_dirs
         assert bundle_dir.exists()
+        assert cpu == 8
+        assert ram == 4096
         return 0
 
     monkeypatch.setattr(cli, "stage_bundle", fake_stage_bundle)
     monkeypatch.setattr(cli, "run_vm", fake_run_vm)
 
-    result = cli.main(["demo-host"])
+    result = cli.main(["demo-host", "--cpu", "8", "--ram", "4096"])
 
     assert result == 0
     assert len(bundle_dirs) == 1

@@ -9,7 +9,14 @@ import sys
 from tempfile import TemporaryDirectory
 
 from vm_wrapper.bundle import UserFacingError, resolve_inputs, stage_bundle
-from vm_wrapper.nix_runner import build_vm_runner, list_hosts, require_host, run_vm
+from vm_wrapper.nix_runner import (
+    DEFAULT_VM_CPU,
+    DEFAULT_VM_RAM,
+    build_vm_runner,
+    list_hosts,
+    require_host,
+    run_vm,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -17,6 +24,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("host")
     parser.add_argument("--age-key")
     parser.add_argument("--ssh-key")
+    parser.add_argument("--cpu", type=int, default=DEFAULT_VM_CPU)
+    parser.add_argument("--ram", type=int, default=DEFAULT_VM_RAM)
     return parser
 
 
@@ -38,7 +47,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         with TemporaryDirectory(prefix="vm-bundle-") as bundle_dir_str:
             bundle_dir = Path(bundle_dir_str)
             stage_bundle(bundle_dir, resolved)
-            return run_vm(runner_path=runner_path, bundle_dir=bundle_dir)
+            return run_vm(
+                runner_path=runner_path,
+                bundle_dir=bundle_dir,
+                cpu=args.cpu,
+                ram=args.ram,
+            )
     except UserFacingError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

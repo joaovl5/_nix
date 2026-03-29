@@ -17,6 +17,58 @@ RunCommand = Callable[
 ]
 RunVmCommand = Callable[[Path, Mapping[str, str] | None], int]
 
+DEFAULT_VM_CPU = 4
+DEFAULT_VM_RAM = 6192
+
+
+def _vm_launcher_from_build_output(host: str, output_path: Path) -> Path:
+    """Resolve the executable path inside a VM build output.
+
+    NixOS `config.system.build.vm` can currently evaluate to either:
+    - a direct executable script, or
+    - a directory containing `bin/run-<host>-vm`.
+    """
+
+    if output_path.is_file():
+        return output_path
+
+    if output_path.is_dir():
+        preferred = output_path / "bin" / f"run-{host}-vm"
+        if preferred.is_file():
+            return preferred
+
+        bin_dir = output_path / "bin"
+        if not bin_dir.is_dir():
+            raise UserFacingError(
+                "Failed to resolve VM runner path: vm build output has no `bin` directory."
+            )
+
+        candidates = sorted(
+            path
+            for path in bin_dir.iterdir()
+            if path.is_file()
+            and path.name.startswith("run-")
+            and path.name.endswith("-vm")
+        )
+
+        if len(candidates) == 1:
+            return candidates[0]
+
+        if len(candidates) == 0:
+            raise UserFacingError(
+                "Failed to resolve VM runner path: no `run-<host>-vm` script found in"
+                f" {bin_dir}."
+            )
+
+        raise UserFacingError(
+            "Failed to resolve VM runner path: multiple candidates found in"
+            f" {bin_dir}: {', '.join(path.name for path in candidates)}"
+        )
+
+    raise UserFacingError(
+        f"Failed to resolve VM runner path: unexpected output at {output_path}."
+    )
+
 
 def _default_run_command(
     command: Sequence[str],
@@ -42,6 +94,23 @@ def _merge_env(env: Mapping[str, str] | None) -> dict[str, str]:
     merged_env = os.environ.copy()
     if env is not None:
         merged_env.update(env)
+
+    return merged_env
+
+
+def _with_qemu_overrides(
+    env: Mapping[str, str] | None, *, cpu: int, ram: int
+) -> dict[str, str]:
+    merged_env = dict(env or {})
+    qemu_opts = os.environ.get("QEMU_OPTS", "")
+
+    override_opts = ""
+    if cpu != DEFAULT_VM_CPU or ram != DEFAULT_VM_RAM:
+        override_opts = f"-m {ram} -smp {cpu}"
+
+    combined_opts = " ".join(opt for opt in [qemu_opts, override_opts] if opt).strip()
+    if combined_opts:
+        merged_env["QEMU_OPTS"] = combined_opts
 
     return merged_env
 
@@ -130,15 +199,25 @@ def build_vm_runner(
             f"Failed to build VM runner for host '{host}'. nix did not return a runner path."
         )
 
-    return Path(runner_path)
+    vm_output_path = Path(runner_path)
+    return _vm_launcher_from_build_output(host=host, output_path=vm_output_path)
 
 
 def run_vm(
     runner_path: Path,
     bundle_dir: Path,
+    cpu: int,
+    ram: int,
     run_command: RunVmCommand = _default_run_vm_command,
 ) -> int:
-    return run_command(runner_path, {"VM_BUNDLE_DIR": str(bundle_dir)})
+    return run_command(
+        runner_path,
+        _with_qemu_overrides(
+            {"VM_BUNDLE_DIR": str(bundle_dir)},
+            cpu=cpu,
+            ram=ram,
+        ),
+    )
 
 
 def _format_command_error(prefix: str, error: CalledProcessError) -> str:
