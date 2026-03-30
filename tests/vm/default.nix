@@ -1,16 +1,18 @@
-{pkgs, ...} @ args: _: {
-  name = "test_vm";
+{
+  self,
+  inputs,
+  mylib,
+  system,
+  ...
+} @ args:
+mylib.tests.mk_test {
+  name = "vm_bundle_contract";
+  python_module_name = "vm_bundle_contract";
 
   node.pkgsReadOnly = false;
-  node.specialArgs = with args; {
-    inherit
-      self
-      inputs
-      mylib
-      system
-      ;
+  node.specialArgs = {
+    inherit self inputs mylib system;
   };
-  nodes.machine = import ./node.nix args;
 
-  testScript = pkgs.lib.readFile ./test.py;
+  nodes.machine = import ./node.nix args;
 }

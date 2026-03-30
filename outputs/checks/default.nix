@@ -15,13 +15,26 @@
   treefmt_eval = each_system (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
 in {
   formatter = each_system (pkgs: treefmt_eval.${pkgs.system}.config.build.wrapper);
-  checks =
-    (each_system (
-      pkgs: {
+  checks = each_system (
+    pkgs: let
+      extraArgs = self._utils.hosts.mk_extra_args {inherit pkgs;};
+      deployChecks =
+        if builtins.hasAttr pkgs.system deploy-rs.lib
+        then deploy-rs.lib.${pkgs.system}.deployChecks self.deploy
+        else {};
+    in
+      {
         formatting = treefmt_eval.${pkgs.system}.config.build.check self;
       }
-    ))
-    // (builtins.mapAttrs
-      (_system: deployLib: deployLib.deployChecks self.deploy)
-      deploy-rs.lib);
+      // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+        vm_bundle_contract = pkgs.testers.runNixOSTest (
+          import ../../tests/vm (extraArgs
+            // {
+              inherit self pkgs;
+              inherit (pkgs) lib;
+            })
+        );
+      }
+      // deployChecks
+  );
 }
