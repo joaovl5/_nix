@@ -26,6 +26,17 @@
              {:desc "Set Python Path" :nargs 1 :complete :file} set_python_path)
   (populate_diagnostics client bufnr))
 
+(fn get_basedpyright_root_dir [bufnr on_dir]
+  (on_dir (vim.fs.root (vim.api.nvim_buf_get_name bufnr)
+                       [:uv.lock
+                        :pyrightconfig.json
+                        :pyproject.toml
+                        :setup.py
+                        :setup.cfg
+                        :requirements.txt
+                        :Pipfile
+                        :.git])))
+
 (fn get_fennel_root_dir [bufnr on_dir]
   (let [fname (vim.api.nvim_buf_get_name bufnr)
         has_fls_cfg #(= :file (. (or (vim.uv.fs_stat (vim.fs.joinpath $1
@@ -39,8 +50,8 @@
   (let [schemastore (require :schemastore)
         blink (require :blink.cmp)
         servers {:basedpyright {:on_attach do_basedpyright_attach
+                                :root_dir get_basedpyright_root_dir
                                 :settings {:basedpyright {:analysis {:autoSearchPaths true
-                                                                     :useLibraryCodeForTypes true
                                                                      :typeCheckingMode :recommended
                                                                      :diagnosticMode :workspace
                                                                      :reportUnknownParameterType false

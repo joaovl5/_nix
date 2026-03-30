@@ -18,8 +18,9 @@
     programs.bun = {
       enable = true;
     };
-    home.packages = [
+    home.packages = with pkgs; [
       node_pkg
+      typescript-language-server
     ];
   };
 }

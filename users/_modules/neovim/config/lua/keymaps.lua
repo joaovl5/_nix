@@ -181,11 +181,6 @@ local function _26_()
 	return vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end
 local function _27_()
-	local name_2_auto = require("swenv.api")
-	local fun_3_auto = name_2_auto.pick_venv
-	return fun_3_auto()
-end
-local function _28_()
 	local name_2_auto = require("pretty_hover")
 	local fun_3_auto = name_2_auto.hover
 	return fun_3_auto()
@@ -199,25 +194,24 @@ wk.add({
 	km("<leader>cd", { desc = "Diagnostic" }, vim.diagnostic.open_float),
 	km("<leader>cn", { desc = "Navbuddy" }, "<cmd>Navbuddy<CR>"),
 	km("<leader>cg", { desc = "Neogen" }, "<cmd>Neogen<CR>"),
-	km("<leader>cv", { desc = "Python switch venv" }, _27_),
-	km("K", { desc = "Hover" }, _28_),
+	km("K", { desc = "Hover" }, _27_),
 	km("gI", { desc = "Implementations" }, "<cmd>Glance implementations<CR>"),
 	km("gr", { desc = "References" }, "<cmd>Glance references<CR>"),
 	km("gd", { desc = "Definitions" }, "<cmd>Glance definitions<CR>"),
 	km("gt", { desc = "Type Definitions" }, "<cmd>Glance type_definitions<CR>"),
 })
-local function _29_()
+local function _28_()
 	local name_2_auto = require("neogen")
 	local fun_3_auto = name_2_auto.jump_next
 	return fun_3_auto()
 end
-n.map({ "i" }, "<C-l>", _29_)
-local function _30_()
+n.map({ "i" }, "<C-l>", _28_)
+local function _29_()
 	local name_2_auto = require("neogen")
 	local fun_3_auto = name_2_auto.jump_prev
 	return fun_3_auto()
 end
-n.map({ "i" }, "<C-h>", _30_)
+n.map({ "i" }, "<C-h>", _29_)
 wk.add({
 	km("<leader>m", { group = "Map" }),
 	km("<leader>mm", { desc = "Toggle" }, "<cmd>lua MiniMap.toggle()<CR>"),
@@ -225,7 +219,7 @@ wk.add({
 	km("<leader>mr", { desc = "Refresh" }, "<cmd>lua MiniMap.refresh()<CR>"),
 })
 wk.add({ km("<leader>_", { group = "Other" }), km("<leader>_t", { desc = "Choose themes" }, "<cmd>Themery<CR>") })
-local function _31_()
+local function _30_()
 	for _, client in ipairs(vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() })) do
 		local worksp = require("workspace-diagnostics")
 		worksp.populate_workspace_diagnostics(client, 0)
@@ -236,22 +230,22 @@ wk.add({
 	km("<leader>x", { group = "Diagnostics" }),
 	km("<leader>xm", { desc = "Messages (noice)" }, "<cmd>NoiceAll<CR>"),
 	km("<leader>xM", { desc = "Messages" }, "<cmd>messages<CR>"),
-	km("<leader>xp", { desc = "Populate diagnostics" }, _31_),
+	km("<leader>xp", { desc = "Populate diagnostics" }, _30_),
 })
-local function _32_()
+local function _31_()
 	local name_2_auto = require("dapui")
 	local fun_3_auto = name_2_auto.eval
 	return fun_3_auto()
 end
-local function _33_()
-	local function _34_(input)
+local function _32_()
+	local function _33_(input)
 		local name_2_auto = require("dapui")
 		local fun_3_auto = name_2_auto.eval
 		return fun_3_auto(input)
 	end
-	return vim.ui.input({ prompt = "Expression to evaluate" }, _34_)
+	return vim.ui.input({ prompt = "Expression to evaluate" }, _33_)
 end
-local function _35_()
+local function _34_()
 	local name_2_auto = require("dapui")
 	local fun_3_auto = name_2_auto.toggle
 	return fun_3_auto()
@@ -265,9 +259,9 @@ wk.add({
 	km("<leader>dj", { desc = "Step over" }, ":DapStepOver<CR>"),
 	km("<leader>dl", { desc = "Step into" }, ":DapStepInto<CR>"),
 	km("<leader>dr", { desc = "Repl" }, ":DapToggleRepl<CR>"),
-	km("<leader>de", { desc = "Eval under cursor" }, _32_),
-	km("<leader>dx", { desc = "Eval expression" }, _33_),
-	km("<leader>dd", { desc = "Toggle UI" }, _35_),
+	km("<leader>de", { desc = "Eval under cursor" }, _31_),
+	km("<leader>dx", { desc = "Eval expression" }, _32_),
+	km("<leader>dd", { desc = "Toggle UI" }, _34_),
 })
 wk.add({
 	km("<leader>a", { group = "CodeCompanion" }),
@@ -293,21 +287,21 @@ wk.add({
 	km("<leader>nl", { desc = "Link a note", mode = { "v" } }, ":Obsidian link<CR>"),
 })
 n.map({ "n", "i" }, "<A-;>", ":Obsidian toggle_checkbox<CR>")
+local function _35_()
+	return Snacks.terminal.toggle()
+end
+n.map({ "n", "t" }, "<A-/>", _35_, { desc = "Toggle Terminal" })
 local function _36_()
 	return Snacks.terminal.toggle()
 end
-n.map({ "n", "t" }, "<A-/>", _36_, { desc = "Toggle Terminal" })
+n.map({ "n", "t" }, "<C-/>", _36_, { desc = "Toggle Terminal" })
 local function _37_()
-	return Snacks.terminal.toggle()
-end
-n.map({ "n", "t" }, "<C-/>", _37_, { desc = "Toggle Terminal" })
-local function _38_()
 	return MiniFiles.open()
 end
-local function _39_()
+local function _38_()
 	return MiniFiles.open(vim.api.nvim_buf_get_name(0))
 end
-wk.add({ km("<leader>E", { desc = "Explore root" }, _38_), km("<leader>e", { desc = "Explore at file" }, _39_) })
+wk.add({ km("<leader>E", { desc = "Explore root" }, _37_), km("<leader>e", { desc = "Explore at file" }, _38_) })
 _G.MiniFilesMappings = {
 	close = "q",
 	go_in = "l",
@@ -345,7 +339,7 @@ local function open_sys()
 	local path = fs_entry.path
 	return vim.ui.open(path)
 end
-local function _41_(args)
+local function _40_(args)
 	local buf_id = args.data.buf_id
 	return wk.add({
 		km("<leader>bh", { desc = "Toggle Hidden Files", buffer = buf_id }, toggle_hidden),
@@ -353,4 +347,4 @@ local function _41_(args)
 		km("<leader>bO", { desc = "Open w/ system handler", buffer = buf_id }, open_sys),
 	})
 end
-return n.autocmd("User", { pattern = "MiniFilesBufferCreate", callback = _41_ })
+return n.autocmd("User", { pattern = "MiniFilesBufferCreate", callback = _40_ })

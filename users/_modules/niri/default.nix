@@ -1,4 +1,4 @@
-{
+ {
   nx = {
     pkgs,
     lib,
@@ -25,7 +25,8 @@
     inherit (lib.meta) getExe;
 
     # run = cmd: "${pkgs.runapp}/bin/runapp ${cmd}";
-    term = ["${pkgs.ghostty}/bin/ghostty" "+new-window"];
+    # term = ["${pkgs.ghostty}/bin/ghostty" "+new-window"];
+    term = ["${pkgs.foot}/bin/footclient"];
     # explorer = run "${pkgs.thunar}/bin/Thunar";
     # screenshot = "${pkgs.hyprshot}/bin/hyprshot -m region --clipboard-only";
     _anyrun = "${pkgs.anyrun}/bin/anyrun";
@@ -54,7 +55,8 @@
         };
       in
         {
-          gestures.hot-corners.enable = false;
+          
+        gestures.hot-corners.enable = false;
           workspaces = lib.mkMerge [
             (_w "A" (
               if fixed_layout
@@ -295,6 +297,8 @@
             };
           };
         };
+
+      prefer-no-csd = true;
     };
   };
 }

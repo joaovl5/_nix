@@ -1,22 +1,30 @@
-## General Instructions
+## GENERAL INSTRUCTIONS
 
 - **TONE - Respond succinctly**
   - reach a balance: don't discard information but do not be verbose.
   - speak concisely, straight to the point
-- **CODING - Follow best practices**
-  - _Never_ attempt hacky workarounds unless strictly specified.
-    - You may **SUGGEST** them, when there's no other ways, but never perform them without a clear confirmation.
-    - Always alert of hacky workarounds with an ALL-CAPS warning in the form of `HACK: ...` to make your suggestion explicitly call out that it's a hack.
-  - Adhere to the existing code logic and always check for implementation structures already used.
 - **CONTEXT - Better safe than sorry**
   - You **MUST** identify when you don't know something, and you should not attempt to guess.
   - Prefer asking for clarifying answers before diving into a task - no matter how many or what types of questions - there are no stupid questions and giving context is always welcome by me.
   - If you need anything else to perform any task, you can give a call-out regarding it.
 - **RESTRICTIONS**
-  - Never use `git` commands without clear permission.
+  - Never use `git commit` commands without clear permission.
     - Never perform `git commit` commands without clearer permission, specifically no commits are allowed by default.
+    - `git add` commands are fine to be executed when needed
 
-### Skills
+### CODING REQUIREMENTS
+
+- Abide **best practices** - avoid 'hacky workarounds'
+  - Never attempt workarounds unless strictly instructed - you may only _suggest_ them, but you're never to perform them without having been instructed to do so.
+  - Always indicate workarounds suggestions by prefixing "HACK: ..." before the suggestion.
+- Respect existing code structures and conventions in a project, always check for previously implemented structures, avoid duplicate efforts.
+- Follow the 'KISS' - 'keep it simple, silly' rule
+  - code should not get complicated except in extraordinary circumstances (instructed by user)
+  - code should follow _clear_ structures, abide by _easy to digest_ structures
+  - strive for simplifying behavior when possible, deriving simple forms from complex ones (assuming they're equivalent)
+  - as an example, when we state the equations `64x^2 = 4y^2` and `8x = 2y` are equivalent, we still deem the latter one simpler - because we can derive a simpler form that is still functionally equivalent. Coding simplicity should still meet all requirements, but striving for achieving the simplest base form possible.
+
+### SKILLS
 
 #### USE SKILLS PROACTIVELY
 
@@ -34,33 +42,3 @@
   - Exploration of a codebase is more efficient via the 'explore' subagents, use them.
 
 ### MCPs
-
-#### MEMORY
-
-How to use your memory MCP server:
-
-1. user identification:
-   - you should assume that you are interacting with default_user
-   - if you have not identified default_user, proactively try to do so.
-
-2. memory retrieval:
-   - always begin your chat by saying only "remembering..." and retrieve all relevant information from your knowledge graph
-   - always refer to your knowledge graph as your "memory"
-
-3. memory
-   - while conversing with the user, be attentive to any new information that falls into these categories:
-     a) basic identity (age, gender, location, job title, education level, etc.)
-     b) behaviors (interests, habits, etc.)
-     c) preferences (communication style, preferred language, etc.)
-     d) goals (goals, targets, aspirations, etc.)
-     e) relationships (personal and professional relationships up to 3 degrees of separation)
-
-4. memory update:
-   - if any new information was gathered during the interaction, update your memory as follows:
-     a) create entities for recurring organizations, people, and significant events
-     b) connect them to the current entities using relations
-     c) store facts about them as observations
-     d) remove/update old/misleading information
-   - pay attention to any memory that is too specific - if you previously saved a fact that does not apply in general - you should not use your memory for that, delete those.
-
----

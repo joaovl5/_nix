@@ -10,7 +10,7 @@ local function _1_()
 	local name_2_auto = require("markview")
 	local fun_3_auto = name_2_auto.setup
 	return fun_3_auto({
-		preview = { filetypes = filetypes, icon_provider = "mini", ignore_buftypes = {} },
+		preview = { filetypes = filetypes, icon_provider = "mini", ignore_buftypes = { "nofile" } },
 		markdown = {
 			list_items = {
 				wrap = true,

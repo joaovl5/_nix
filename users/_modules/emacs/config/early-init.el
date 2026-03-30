@@ -115,17 +115,3 @@
 
 ;; Disable warnings from the legacy advice API. They aren't useful.
 (setq ad-redefinition-action 'accept)
-
-(custom-set-faces
- ;; Default font for all text
- '(default ((t (:family "Iosevka Nerd Font" :height 250))))
- '(fixed-pitch ((t (:family "Iosevka Nerd Font" :height 230))))
-
- ;; Current line number
- '(line-number-current-line ((t (:foreground "yellow" :inherit line-number))))
- '(mode-line ((t (:family "Iosevka Nerd Font" :weight Bold))))
-
- ;; Comments italic
- '(font-lock-function-name-face ((t (:family "Iosevka Nerd Font":slant italic))))
- '(font-lock-variable-name-face ((t (:family "Iosevka Nerd Font":weight bold)))))
-

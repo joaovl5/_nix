@@ -140,6 +140,11 @@
     ## ai
     anthropic-skills.url = "git+https://github.com/anthropics/skills?shallow=1";
     anthropic-skills.flake = false;
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
     superpowers = {
       url = "github:obra/superpowers?ref=main";
       flake = false;
