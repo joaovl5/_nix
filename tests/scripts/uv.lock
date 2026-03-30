@@ -1,0 +1,23 @@
+version = 1
+revision = 3
+requires-python = ">=3.13"
+
+[[package]]
+name = "my-nix-tests"
+version = "0.1.0"
+source = { editable = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "nix-machine-protocol" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "nix-machine-protocol", git = "https://github.com/Gastove/nix-machine-protocol" }]
+
+[[package]]
+name = "nix-machine-protocol"
+version = "0.1.0"
+source = { git = "https://github.com/Gastove/nix-machine-protocol#32277f1ade1ab7b4008bc2fa99fba9c35095fc2a" }

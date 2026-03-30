@@ -1,8 +1,5 @@
 _: {
   projectRootFile = "flake.nix";
-  settings.excludes = [
-    "tests/vm/test.py"
-  ];
   programs = {
     # nix
     alejandra.enable = true;
