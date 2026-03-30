@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 
 
 def _assert_copied_file(machine: "Machine", source_path: str, target_path: str) -> None:
-    machine.succeed(f"test -f {source_path}")
-    machine.succeed(f"test -f {target_path}")
-    machine.succeed(f"test ! -L {target_path}")
-    machine.succeed(f"cmp -s {source_path} {target_path}")
-    machine.succeed(f"test $(stat -c %a {target_path}) -eq 600")
+    _ = machine.succeed(f"test -f {source_path}")
+    _ = machine.succeed(f"test -f {target_path}")
+    _ = machine.succeed(f"test ! -L {target_path}")
+    _ = machine.succeed(f"cmp -s {source_path} {target_path}")
+    _ = machine.succeed(f"test $(stat -c %a {target_path}) -eq 600")
 
 
 def _bundle_file_exists(machine: "Machine", path: str) -> bool:
@@ -32,8 +32,8 @@ def run(driver_globals: dict[str, object]) -> None:
     machine = cast("Machine", driver_globals["machine"])
 
     machine.wait_for_unit("multi-user.target")
-    machine.succeed("test -L /run/vm-bundle")
-    machine.succeed('test "$(readlink /run/vm-bundle)" = /mnt/vm-bundle')
+    _ = machine.succeed("test -L /run/vm-bundle")
+    _ = machine.succeed('test "$(readlink /run/vm-bundle)" = /mnt/vm-bundle')
 
     _assert_copied_file(machine, "/run/vm-bundle/age/key.txt", "/root/.age/key.txt")
 
@@ -44,7 +44,7 @@ def run(driver_globals: dict[str, object]) -> None:
             "/root/.ssh/id_ed25519",
         )
     else:
-        machine.succeed("test ! -e /root/.ssh/id_ed25519")
+        _ = machine.succeed("test ! -e /root/.ssh/id_ed25519")
 
 
 if __name__ == "__main__":

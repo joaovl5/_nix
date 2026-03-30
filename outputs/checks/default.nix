@@ -22,19 +22,16 @@ in {
         if builtins.hasAttr pkgs.system deploy-rs.lib
         then deploy-rs.lib.${pkgs.system}.deployChecks self.deploy
         else {};
+      testChecks = import ../../tests (extraArgs
+        // {
+          inherit self pkgs;
+          inherit (pkgs) lib;
+        });
     in
       {
         formatting = treefmt_eval.${pkgs.system}.config.build.check self;
       }
-      // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
-        vm_bundle_contract = pkgs.testers.runNixOSTest (
-          import ../../tests/vm (extraArgs
-            // {
-              inherit self pkgs;
-              inherit (pkgs) lib;
-            })
-        );
-      }
+      // testChecks
       // deployChecks
   );
 }
