@@ -1,11 +1,14 @@
-{lib, ...}: let
+{lib, options, ...}: let
   vm_bundle_contract = import ./_vm_bundle_contract.nix;
+  has_nvidia_option = lib.hasAttrByPath ["my" "nvidia" "enable"] options;
 in {
   virtualisation.vmVariant = {
     my = {
       nix.monitor_layout = lib.mkForce null;
-      nvidia.enable = lib.mkForce false;
       azure-vpn.enable = lib.mkForce false;
+    }
+    // lib.optionalAttrs has_nvidia_option {
+      nvidia.enable = lib.mkForce false;
     };
 
     services.flatpak.enable = lib.mkForce false;
