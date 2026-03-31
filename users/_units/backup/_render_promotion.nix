@@ -103,7 +103,7 @@
         destination_args
         ++ ["copy"]
         ++ source_args
-        ++ concatMap (tag: ["--tag" tag]) (promotion_tags entry role);
+        ++ ["--tag" (concatStringsSep "," (promotion_tags entry role))];
       script = ''
         set -eu
         ${optionalString (from.environment_file != null) ''
@@ -144,7 +144,7 @@
         repo_args destination
         ++ ["forget"]
         ++ concatMap split_words entry.forget_args
-        ++ concatMap (tag: ["--tag" tag]) (item_identity_tags entry);
+        ++ ["--tag" (concatStringsSep "," (item_identity_tags entry))];
       script = ''
         set -eu
         exec ${restic} ${render_argv command_args}
