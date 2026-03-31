@@ -82,8 +82,10 @@ in {
       inherit (config) hm_modules;
     in
       _: {
-        imports =
-          hm_modules;
+        imports = hm_modules ++ [../home/_modules/hybrid-links];
+
+        hybrid-links.flake_root = inputs.self.outPath;
+        hybrid-links.flake_path = cfg.flake_location;
 
         home.stateVersion = "23.11";
 
@@ -116,6 +118,8 @@ in {
           waylock ## locker
           ## launcher
           fuzzel # backup
+          ## docs
+          libreoffice
           ## file manager
           thunar
           ## settings

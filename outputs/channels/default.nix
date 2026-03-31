@@ -13,6 +13,7 @@ inputs: let
     (_o niri {attr = "niri";})
     (_o fenix {})
     (_o emacs-bleeding-edge {})
+    (_o llm-agents {})
     (_: prev: {
       # zjstatus zellij plugin
       zjstatus = inputs.zjstatus.packages.${prev.system}.default;

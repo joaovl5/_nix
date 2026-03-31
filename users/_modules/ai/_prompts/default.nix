@@ -1,21 +1,15 @@
 {
-  hm = {
-    pkgs,
-    # inputs,
-    ...
-  }: let
-    merged_skills = pkgs.symlinkJoin {
-      name = "opencode-skills";
-      paths = [
-        ./skills
-        # i don't need those prompts
-        # "${inputs.anthropic-skills}/skills"
-      ];
-    };
-  in {
-    home.file.".agents/skills" = {
-      source = merged_skills;
-      recursive = true;
+  hm = _: {
+    hybrid-links.links = {
+      agents_skills = {
+        from = ./skills;
+        to = "~/.agents/skills";
+      };
+      # some use this:
+      agents_skills_2 = {
+        from = ./skills;
+        to = "~/.config/agents/skills";
+      };
     };
   };
 }

@@ -1,16 +1,42 @@
-{lib, ...}: {
+{lib, ...}: let
+  vm_bundle_contract = import ./_vm_bundle_contract.nix;
+in {
   virtualisation.vmVariant = {
-    virtualisation.sharedDirectories = {
-      age-key = {
-        source = builtins.getEnv "HOME" + "/.age";
-        target = "/mnt/age-key";
+    my = {
+      nix.monitor_layout = lib.mkForce null;
+      nvidia.enable = lib.mkForce false;
+      azure-vpn.enable = lib.mkForce false;
+    };
+
+    services.flatpak.enable = lib.mkForce false;
+    virtualisation = {
+      cores = lib.mkDefault 4;
+      memorySize = lib.mkDefault 6192;
+      docker.enable = lib.mkForce false;
+      libvirtd.enable = lib.mkForce false;
+      qemu.options = [
+        "-display sdl,gl=on"
+        "-vga none"
+        "-device virtio-vga-gl"
+      ];
+      sharedDirectories = {
+        vmBundle = {
+          source = "$VM_BUNDLE_DIR";
+          target = vm_bundle_contract.shared_directory_target;
+        };
       };
     };
 
-    system.activationScripts.copy-age-key = lib.stringAfter ["specialfs"] ''
-      mkdir -p /root/.age
-      cp /mnt/age-key/key.txt /root/.age/key.txt
-      chmod 600 /root/.age/key.txt
-    '';
+    hardware = {
+      # disable container toolkit error
+      nvidia-container-toolkit.enable = lib.mkForce false;
+    };
+
+    system.activationScripts = {
+      vm-bundle = lib.stringAfter ["specialfs"] vm_bundle_contract.activation_script;
+
+      setupSecretsForUsers.deps = ["vm-bundle"];
+      setupSecrets.deps = ["vm-bundle"];
+    };
   };
 }

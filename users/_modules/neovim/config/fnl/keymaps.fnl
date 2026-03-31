@@ -129,8 +129,6 @@
          (km :<leader>cd {:desc :Diagnostic} vim.diagnostic.open_float)
          (km :<leader>cn {:desc :Navbuddy} :<cmd>Navbuddy<CR>)
          (km :<leader>cg {:desc :Neogen} :<cmd>Neogen<CR>)
-         (km :<leader>cv {:desc "Python switch venv"}
-             (fn [] (do-req :swenv.api :pick_venv)))
          (km :K {:desc :Hover} (fn [] (do-req :pretty_hover :hover)))
          (km :gI {:desc :Implementations} "<cmd>Glance implementations<CR>")
          (km :gr {:desc :References} "<cmd>Glance references<CR>")

@@ -15,19 +15,28 @@
   treefmt_eval = each_system (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
 in {
   formatter = each_system (pkgs: treefmt_eval.${pkgs.system}.config.build.wrapper);
-  checks =
-    nixpkgs.lib.recursiveUpdate
-    (each_system (
-      pkgs:
-        {
-          formatting = treefmt_eval.${pkgs.system}.config.build.check self;
-        }
-        // (import ./backups.nix {
+  checks = each_system (
+    pkgs: let
+      extraArgs = self._utils.hosts.mk_extra_args {inherit pkgs;};
+      deployChecks =
+        if builtins.hasAttr pkgs.system deploy-rs.lib
+        then deploy-rs.lib.${pkgs.system}.deployChecks self.deploy
+        else {};
+      testChecks = import ../../tests (extraArgs
+        // {
           inherit self pkgs;
-          inherit (nixpkgs) lib;
-        })
-    ))
-    (builtins.mapAttrs
-      (_system: deployLib: deployLib.deployChecks self.deploy)
-      deploy-rs.lib);
+          inherit (pkgs) lib;
+        });
+      backups = import ./backups.nix {
+        inherit self pkgs;
+        inherit (nixpkgs) lib;
+      };
+    in
+      {
+        formatting = treefmt_eval.${pkgs.system}.config.build.check self;
+      }
+      // backups
+      // testChecks
+      // deployChecks
+  );
 }

@@ -123,6 +123,10 @@
     "branch": "main",
     "commit": "88c52297ed3e69ecf9f8652837888ecc727a28ee"
   },
+  "neoconf.nvim": {
+    "branch": "main",
+    "commit": "b349609b77fa5df6cceb887f45cc962e20ff42b6"
+  },
   "neogen": {
     "branch": "main",
     "commit": "23e7e9f883d01289ebd90e98025acc860ea26366"
@@ -231,10 +235,6 @@
     "branch": "main",
     "commit": "a049339328e2599ad6e85a69fa034ac501e921b2"
   },
-  "swenv.nvim": {
-    "branch": "main",
-    "commit": "4157de2619ec2e5c61c103fb6517845a0e04e558"
-  },
   "tabby.nvim": {
     "branch": "main",
     "commit": "3c130e1fcb598ce39a9c292847e32d7c3987cf11"
@@ -279,13 +279,13 @@
     "branch": "main",
     "commit": "123a9fb12e7229342f807ec9e6de478b1102b041"
   },
-  "twilight.nvim": {
-    "branch": "main",
-    "commit": "664e752f4a219801265cc3fc18782b457b58c1e1"
-  },
   "typescript-tools.nvim": {
     "branch": "master",
     "commit": "c2f5910074103705661e9651aa841e0d7eea9932"
+  },
+  "venv-selector.nvim": {
+    "branch": "main",
+    "commit": "42e8faadf9b819654f29eb1a785797a3a328f301"
   },
   "vim": {
     "branch": "main",

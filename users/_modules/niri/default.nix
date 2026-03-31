@@ -1,18 +1,7 @@
 {
-  nx = {
-    pkgs,
-    lib,
-    ...
-  }: {
-    systemd.user.services.float-checker-script = {
+  nx = _: {
+    programs.niri = {
       enable = true;
-      path = [pkgs.uv];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart =
-          pkgs.writeScript
-          "float_checker_script" (lib.readFile ./float_checker_script.py);
-      };
     };
   };
   hm = {
@@ -24,7 +13,8 @@
     inherit (lib.meta) getExe;
 
     # run = cmd: "${pkgs.runapp}/bin/runapp ${cmd}";
-    term = ["${pkgs.ghostty}/bin/ghostty" "+new-window"];
+    # term = ["${pkgs.ghostty}/bin/ghostty" "+new-window"];
+    term = ["${pkgs.foot}/bin/footclient"];
     # explorer = run "${pkgs.thunar}/bin/Thunar";
     # screenshot = "${pkgs.hyprshot}/bin/hyprshot -m region --clipboard-only";
     _anyrun = "${pkgs.anyrun}/bin/anyrun";
@@ -48,6 +38,7 @@
           };
         };
       in {
+        prefer-no-csd = true;
         gestures.hot-corners.enable = false;
         outputs = {
           "${main}" = {
@@ -215,10 +206,43 @@
           #deactivate-unfocused-windows = {};
         };
         environment = {
-          MOZ_ENABLE_WAYLAND = "1";
+          # niri
+          XDG_SESSION_DESKTOP = "niri";
+          XDG_SESSION_TYPE = "niri";
           XDG_CURRENT_DESKTOP = "niri";
+          # wayland
           GDK_BACKEND = "wayland";
+          SDL_VIDEODRIVER = "wayland";
           CLUTTER_BACKEND = "wayland";
+          QT_QPA_PLATFORM = "wayland;xcb";
+          QT_QPA_PLATFORMTHEME = "qt5ct;qt6ct";
+          QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+
+          ## Firefox
+          MOZ_ENABLE_WAYLAND = "1";
+          ## Electron
+          ELECTRON_OZONE_PLATFORM_HINT = "auto";
+
+          # Apps
+          ## Defaults
+          TERMINAL = "footclient";
+          EDITOR = "nvim";
+
+          ## Hardware
+          ## Monitor Scaling
+          GDK_SCALE = "1.333333";
+          QT_SCALE_FACTOR = "1";
+          QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+          ### NVIDIA
+          LIBVA_DRIVER_NAME = "nvidia";
+          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+          NVD_BACKEND = "direct";
+          GBM_BACKEND = "nvidia-drm";
+          __NV_PRIME_RENDER_OFFLOAD = "1";
+          __VK_LAYER_NV_optimus = "NVIDIA_only";
+          WLR_DRM_NO_ATOMIC = "1";
+          MOZ_DISABLE_RDD_SANDBOX = "1";
+          EGL_PLATFORM = "wayland";
         };
         xwayland-satellite = {
           enable = true;

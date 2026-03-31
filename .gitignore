@@ -4,3 +4,9 @@ result
 __pycache__
 .claude
 .deploy-gc
+
+*.qcow2
+*.qcow2.*
+
+__pycache__
+*.egg-info

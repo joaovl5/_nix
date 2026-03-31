@@ -13,28 +13,16 @@ _: {
   ];
 
   services.displayManager.ly = {
-    enable = false;
+    enable = true;
+    settings = {
+      animation = "doom";
+      # dur_file_path = "${../../../_assets/blackhole-smooth-240x67.dur}";
+
+      bigclock = "en";
+      text_in_center = true;
+      vi_mode = true;
+
+      clear_password = true;
+    };
   };
-
-  # services.displayManager.sddm = {
-  #   enable = true;
-  #   wayland = {
-  #     enable = true;
-  #     compositorCommand = ''
-  #       ${lib.getExe pkgs.kdePackages.kwin "kwin_wayland"} \
-  #         --drm \
-  #         --no-lockscreen \
-  #         --no-global-shortcuts \
-  #         --locale1
-  #     '';
-  #   };
-  #   theme = "catppuccin-mocha-mauve";
-  # };
-
-  # environment.systemPackages = [
-  #   (pkgs.catppuccin-sddm.override {
-  #     flavor = "mocha";
-  #     accent = "mauve";
-  #   })
-  # ];
 }

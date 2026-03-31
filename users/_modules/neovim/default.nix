@@ -2,14 +2,8 @@
   hm = {
     pkgs,
     lib,
-    # config,
-    # nixos_config,
     ...
   }: let
-    # cfg = nixos_config.my.nix;
-    # flake_path = cfg.flake_location;
-    # here = assert (flake_path != null); "${flake_path}/users/_modules/neovim";
-    # configSrc = config.lib.file.mkOutOfStoreSymlink "${here}/config";
     treesitter = let
       nts = pkgs.vimPlugins.nvim-treesitter;
     in
@@ -43,11 +37,10 @@
           inherit grammarsPath;
         }));
   in {
-    # xdg.configFile."nvim" = {
-    #   source = configSrc;
-    #   recursive = true;
-    #   force = true;
-    # };
+    hybrid-links.links.neovim = {
+      from = ./config;
+      to = "~/.config/nvim";
+    };
 
     programs.neovim = {
       enable = true;
@@ -58,7 +51,10 @@
 
         ${add_rtp_lines}
 
-        ${lib.readFile ./init.lua}
+        local local_lua = vim.fs.joinpath(vim.fn.stdpath("config"), "local.lua")
+        if vim.fn.filereadable(local_lua) == 1 then
+          dofile(local_lua)
+        end
       '';
       defaultEditor = true;
       viAlias = true;

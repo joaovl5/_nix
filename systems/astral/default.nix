@@ -29,7 +29,7 @@ in {
     inherit (public_data.azure-vpn) gateway gateway_id identity routes;
   };
 
-  # boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
 
   networking = {
     hostName = lib.mkForce cfg.hostname;

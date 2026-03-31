@@ -73,6 +73,10 @@
       # options search
       optnix = let
         optnix_lib = inputs.optnix.mkLib pkgs;
+        excluded = [
+          "musnix.kernel.packages"
+          "virtualisation.vmVariant.musnix.kernel.packages"
+        ];
       in {
         enable = true;
         settings = {
@@ -80,16 +84,17 @@
             description = "NixOS";
             options-list-file = optnix_lib.mkOptionsList {
               options = nixos_options;
-              excluded = [
-                "musnix.kernel.packages"
-              ];
+              inherit excluded;
             };
           };
           scopes."hm" = {
             description = "Home-Manager";
             evaluator = "";
             options-list-file = optnix_lib.mkOptionsList {
-              inherit options;
+              inherit
+                options
+                excluded
+                ;
               transform = o:
                 o
                 // {

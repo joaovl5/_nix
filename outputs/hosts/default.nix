@@ -27,7 +27,7 @@ inputs: let
     (_m hm {attr = "home-manager";})
     ../../_modules/options.nix
     ../../_modules/secrets.nix
-    # ../../_modules/vm.nix
+    ../../_modules/vm.nix
     ../../hardware/_modules/grub.nix
     ../../systems/_modules/home-manager.nix
     ../../systems/_modules/nix.nix

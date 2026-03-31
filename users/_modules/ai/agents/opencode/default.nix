@@ -10,14 +10,16 @@
     lib,
     inputs,
     ...
-  }: {
+  }: let
+    agent_browser_skill = ../../_prompts/skills/agent-browser/SKILL.md;
+  in {
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
       rules = ''
-        ${lib.readFile ../_prompts/general/system.md}
+        ${lib.readFile ../../_prompts/general/system.md}
       '';
-      agents = ../_prompts/agents;
+      agents = ../../_prompts/agents;
       settings = {
         plugin = [
           "@gotgenes/opencode-agent-identity"
@@ -35,10 +37,12 @@
       "opencode/plugins/superpowers.js".source =
         inputs.superpowers + "/.opencode/plugins/superpowers.js";
 
-      "opencode/skills/superpowers" = {
+      "opencode/skill/superpowers" = {
         source = inputs.superpowers + "/skills";
         recursive = true;
       };
+
+      "opencode/skill/agent-browser/SKILL.md".source = agent_browser_skill;
     };
   };
 }
