@@ -2,7 +2,7 @@
   hm = {pkgs, ...}: {
     home.packages = with pkgs; [
       koboldcpp
-      vllm
+      llama-cpp-vulkan
 
       python314Packages.huggingface-hub
     ];
