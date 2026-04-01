@@ -13,11 +13,6 @@ local function set_python_path(path)
 	end
 	return nil
 end
-local function populate_diagnostics(client, bufnr)
-	local name_2_auto = require("workspace-diagnostics")
-	local fun_3_auto = name_2_auto.populate_workspace_diagnostics
-	return fun_3_auto(client, bufnr)
-end
 local function do_basedpyright_attach(client, bufnr)
 	local function _2_()
 		return client:exec_cmd({
@@ -26,13 +21,12 @@ local function do_basedpyright_attach(client, bufnr)
 		})
 	end
 	n.usercmd(bufnr, "LspPyrightOrganizeImports", { desc = "Organize Imports" }, _2_)
-	n.usercmd(
+	return n.usercmd(
 		bufnr,
 		"LspPyrightSetPythonPath",
 		{ desc = "Set Python Path", nargs = 1, complete = "file" },
 		set_python_path
 	)
-	return populate_diagnostics(client, bufnr)
 end
 local function get_basedpyright_root_dir(bufnr, on_dir)
 	return on_dir(vim.fs.root(vim.api.nvim_buf_get_name(bufnr), {
@@ -115,7 +109,6 @@ local function mk_lsp()
 	for server, config in pairs(servers) do
 		vim.lsp.config(server, config)
 		vim.lsp.config(server, blink.get_lsp_capabilities())
-		vim.lsp.config(server, { on_attach = populate_diagnostics })
 		vim.lsp.enable(server)
 	end
 	return nil
@@ -138,10 +131,6 @@ local function _5_()
 			nu.diagnostics.statix,
 			nu.code_actions.statix,
 			nu.diagnostics.deadnix,
-			nu.formatting.prettierd,
-			no("formatting.jq"),
-			no("diagnostics.eslint_d"),
-			no("code_actions.eslint_d"),
 		},
 	}
 end
@@ -152,13 +141,5 @@ return {
 		event = "VeryLazy",
 		opts = _5_,
 	},
-	{
-		"neovim/nvim-lspconfig",
-		config = mk_lsp,
-		event = "VeryLazy",
-		dependencies = {
-			"b0o/schemastore.nvim",
-			{ "artemave/workspace-diagnostics.nvim", event = "LspAttach", opts = {} },
-		},
-	},
+	{ "neovim/nvim-lspconfig", config = mk_lsp, event = "VeryLazy", dependencies = { "b0o/schemastore.nvim" } },
 }

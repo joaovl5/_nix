@@ -21,11 +21,11 @@
                  (key :<leader>gB "<cmd>Gitsigns blame<cr>"
                       {:desc "Blame (all)"})]})
  ; 'dev' actions / provides actions for refactoring
- (plugin :yarospace/dev-tools.nvim
-         {:dependencies [(plugin :ThePrimeagen/refactoring.nvim
-                                 {:dependencies [:nvim-lua/plenary.nvim]})]
-          :event :VeryLazy
-          :opts {:ui {:override true :group_actions true}}})
+ ; (plugin :yarospace/dev-tools.nvim
+ ;         {:dependencies [(plugin :ThePrimeagen/refactoring.nvim
+ ;                                 {:dependencies [:nvim-lua/plenary.nvim]})]
+ ;          :event :VeryLazy
+ ;          :opts {:ui {:override true :group_actions true}}})
  ; code actions
  (plugin :rachartier/tiny-code-action.nvim
          {:dependencies [:nvim-lua/plenary.nvim

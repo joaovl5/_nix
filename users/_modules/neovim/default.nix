@@ -48,6 +48,7 @@
         _G.plugin_dirs = {}
         _G.header = [[
         ${lib.readFile ./assets/header.txt}]]
+        _G.tsserver_path = "${pkgs.nodePackages.typescript}/lib/node_modules/typescript/bin/tsserver"
 
         ${add_rtp_lines}
 
@@ -105,6 +106,7 @@
       ## js
       eslint_d
       typescript-language-server
+      nodePackages.typescript
       vscode-js-debug
       ## nix
       alejandra
