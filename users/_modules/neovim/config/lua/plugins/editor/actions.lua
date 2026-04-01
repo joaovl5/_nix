@@ -22,12 +22,6 @@ return {
 		},
 	},
 	{
-		"yarospace/dev-tools.nvim",
-		dependencies = { { "ThePrimeagen/refactoring.nvim", dependencies = { "nvim-lua/plenary.nvim" } } },
-		event = "VeryLazy",
-		opts = { ui = { override = true, group_actions = true } },
-	},
-	{
 		"rachartier/tiny-code-action.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
