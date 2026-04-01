@@ -20,6 +20,10 @@ inputs: let
       // extra;
   };
 
+  HYPERVISOR_HOST_MODULES = with inputs; [
+    (_m microvm {attr = "host";})
+  ];
+
   SHARED_MODULES = with inputs; [
     (_m disko {})
     (_m sops-nix {attr = "sops";})
@@ -61,14 +65,15 @@ in {
 
   hosts =
     ## desktops
-    _h "lavpc" [
-      ../../systems/astral
-      ../../users/lav.nix
-      ../../systems/_modules/services/ollama.nix
-    ] {channelName = "unstable-small";}
+    _h "lavpc" (HYPERVISOR_HOST_MODULES
+      ++ [
+        ../../systems/astral
+        ../../users/lav.nix
+        ../../systems/_modules/services/ollama.nix
+      ]) {}
     ## servers
-    // (_h "tyrant" [../../systems/tyrant] {})
-    // (_h "temperance" [../../systems/temperance] {})
+    // (_h "tyrant" (HYPERVISOR_HOST_MODULES ++ [../../systems/tyrant]) {})
+    // (_h "temperance" (HYPERVISOR_HOST_MODULES ++ [../../systems/temperance]) {})
     ## other / special
     // (_h "iso" [../../systems/iso] {});
 }
