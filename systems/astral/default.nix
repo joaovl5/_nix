@@ -24,11 +24,11 @@ in {
   ];
 
   my.azure-vpn = {
-    enable = true;
+    # enable = true;
     inherit (public_data.azure-vpn) gateway gateway_id identity routes;
   };
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
 
   networking = {
     hostName = lib.mkForce cfg.hostname;
@@ -134,6 +134,7 @@ in {
       ### system monitoring/inspection
       pciutils
       btop
+      nvtopPackages.full
       glances
       ### etc
       tealdeer # tldr alternative

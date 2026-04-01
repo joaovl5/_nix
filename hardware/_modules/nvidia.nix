@@ -1,6 +1,7 @@
 {
   config,
   mylib,
+  pkgs,
   ...
 }: let
   o = (mylib.use config).options;
@@ -13,14 +14,19 @@ in
         hardware = {
           nvidia-container-toolkit.enable = true;
           nvidia = {
-            package = config.boot.kernelPackages.nvidiaPackages.latest;
+            package = config.boot.kernelPackages.nvidiaPackages.stable;
             modesetting.enable = true;
             powerManagement.enable = true;
             powerManagement.finegrained = false;
-            open = false;
+            open = true;
             nvidiaSettings = true;
           };
         };
         services.xserver.videoDrivers = ["nvidia"];
+        environment.systemPackages = [pkgs.libnvidia-container];
+        virtualisation.docker.rootless = {
+          daemon.settings.features.cdi = true;
+          extraPackages = [pkgs.libnvidia-container];
+        };
       }
   )
