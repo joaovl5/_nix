@@ -2,19 +2,13 @@
   pkgs,
   lib,
 }: let
-  uvx = lib.getExe' pkgs.uv "uvx";
+  exe = pkg: (lib.getExe pkgs.${pkg});
 in {
   nixos = {
-    command = lib.getExe pkgs.mcp-nixos;
+    command = exe "mcp-nixos";
   };
 
-  fetch = {
-    command = uvx;
-    args = ["mcp-server-fetch"];
-  };
-
-  duckduckgo-search = {
-    command = uvx;
-    args = ["duckduckgo-mcp-server"];
+  markitdown = {
+    command = exe "markitdown-mcp";
   };
 }
