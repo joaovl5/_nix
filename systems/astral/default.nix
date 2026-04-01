@@ -42,8 +42,8 @@ in {
   };
 
   # zram
-  zramSwap.enable = true;
-  boot.tmp.useZram = true;
+  # zramSwap.enable = true;
+  # boot.tmp.useZram = true;
 
   # Services
   services = {
