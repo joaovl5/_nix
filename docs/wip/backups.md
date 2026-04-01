@@ -1,122 +1,367 @@
-# Backups: Status, Secrets, and Drill Guide
+# Backups: Overview, Runbook, and Implementation Notes
 
-## 1) Unknowns Remaining
+## Basic Overview
 
-The Nix evaluation layer is in place and we have assertions covering the generated backup jobs and maintenance units. Integration tests now cover most runtime properties in isolated VM environments.
+### What this system is
 
-**Proven by integration tests:**
+This repository implements a declarative, Restic-based backup pipeline driven from Nix configuration.
 
-- Local backup execution is proven by `backup_local` test (path, custom, postgres_dump items)
-- Promotion from repository role `A` to repository role `B` is proven by `backup_promotion` test (SFTP)
-- Remote authentication is proven by `backup_promotion` test (SSH key-based auth)
-- Retention and maintenance are proven by `backup_local` test (forget/prune/check services)
-- Restore procedures are proven by both tests (local restore and remote restore)
+At a high level:
 
-**Still unproven on real hosts:**
+1. backup items are declared in Nix
+2. items are resolved through backup policies
+3. every enabled item backs up first to repository role `A`
+4. promotion and maintenance units are rendered from that resolved state
+5. systemd services and timers execute the resulting backup flow
 
-- Production conditions with real filesystem state and real network conditions
-- Btrfs snapshot backup paths (tested with path backups)
-- MariaDB dump backups (tested with PostgreSQL instead)
+Promotion is modeled as `A -> B,C`, not as direct writes from the original source item to every destination.
 
-Some repository-wide verification remains noisy due to unrelated pre-existing failures elsewhere in the repository. At the time of writing, `prek` and `nix flake check --all-systems` are not a clean signal for this branch alone.
+### Current verification status
 
-**Integration test architecture:**
+At the time of writing:
 
-- `backup_local` test uses a single-node VM named `machine` to test local backup flows
-- `backup_promotion` test uses two-node VMs named `coordinator` (source) and `storage` (destination) to test SFTP promotion
-- Test hosts are stand-ins for real hosts (`tyrant`/`temperance`) and use generated SSH keys instead of production credentials
+- `nix build .#checks.x86_64-linux.backups_eval --no-link` passes
+- `nix build .#checks.x86_64-linux.backup_local --no-link` passes
+- `nix build .#checks.x86_64-linux.backup_promotion --no-link` passes
+- `nix fmt` passes
+- `git add . && prek` passes
+- `nix flake check --all-systems` is still noisy for an unrelated reason: `checks.aarch64-linux.backup_promotion` requires an `aarch64-linux` builder for `backup-test-ssh-key.drv`
 
-### Required by the current backup configuration
+### Separate eval proof from runtime proof
 
-The current implementation expects the following secrets in the secrets repository.
+These are different kinds of verification.
 
-#### `backups.yaml`
+**Eval coverage (`backups_eval`) proves generated structure, including:**
+
+- expected local backup jobs exist
+- excluded jobs do not exist
+- promotion / forget / prune / check units render as expected
+- network / SSH-related unit wiring is present where required
+- `postgres_dump` currently renders as a split model where the generated Restic service stays `root` while the payload command drops to the requested non-root user
+
+**Runtime VM coverage proves live execution, including:**
+
+- local path backup and restore
+- custom stdin backup and restore
+- PostgreSQL dump backup and restore
+- retention (`forget`) and maintenance (`prune` / `check`) on repository role `A`
+- promotion from repository role `A` to repository role `B` over SFTP
+- restore from promoted repository role `B`
+- SSH key-based authentication for SFTP promotion
+
+### What the VM tests currently prove
+
+**`backup_local` proves:**
+
+- path backup execution
+- path restore content equality
+- custom/stdin backup execution
+- custom/stdin restore content equality
+- PostgreSQL dump execution
+- PostgreSQL dump restore correctness by importing the restored SQL dump into a disposable database and checking a known row value
+- `forget`, `prune`, and `check` service execution on role `A`
+
+**`backup_promotion` proves:**
+
+- local backup into role `A`
+- promotion from role `A` to role `B`
+- SFTP / SSH authentication for role `B`
+- restore from role `B`
+- `prune` and `check` execution on role `B`
+
+### What is still only proven by real-host drills
+
+The VM tests are strong happy-path evidence, but they do not replace live drills.
+
+Still unproven on real hosts:
+
+- real filesystem state, disk pressure, and real network conditions
+- Btrfs snapshot runtime behavior on production filesystems
+- MariaDB dump backup and restore on production-like data
+- true first-run remote path bootstrap for role `B` when the destination repo path does not already exist
+
+### Declarative operating contract
+
+This system is intended to be declarative.
+
+**Backup intent must be declarative:**
+
+- which items are backed up
+- which policy they use
+- which destinations exist
+- which host is the promotion coordinator
+- which secrets are required
+
+**Destination-side storage prerequisites must also be declarative:**
+
+- local repository roots such as `/var/lib/backups/repos`
+- remote repository trees addressed by SFTP repository templates
+- ownership and writeability for the SSH account or local service user that must access the repo
+
+**Restores remain imperative by nature:**
+
+- choosing which snapshot to restore
+- choosing a scratch target directory
+- importing restored SQL into a disposable database or container
+- validating the restored content
+
+That split is intentional.
+
+### Important distinction: Restic repo init vs filesystem provisioning
+
+Promotion units can:
+
+- probe a repo path with `restic cat config`
+- run `restic init` if the repository is empty
+- run `restic copy`
+
+Promotion units do **not**:
+
+- `mkdir -p` a missing remote filesystem path
+- `chown` / `chmod` the remote filesystem path
+- bootstrap storage-side permissions over SFTP
+
+That means role `B` storage hosts must declaratively provision the repo path that the `repository_template` points to.
+
+If backups only work after a human manually SSHs into the remote host and creates directories, that is a design failure for this system.
+
+### Current real topology
+
+#### `tyrant`
+
+`tyrant` is currently:
+
+- the backup coordinator host
+- the storage location for repository role `A`
+- a source host with local backup items
+
+Configured repo templates:
+
+- role `A`: `/var/lib/backups/repos/{host}`
+- role `B`: `sftp:temperance@89.167.107.74:/var/lib/backups/repos/{host}`
+
+Declared local items include:
+
+- `root_snapshot` (`btrfs_snapshot`)
+- `home_snapshot` (`btrfs_snapshot`, promoted to `B`)
+- Pi-hole state
+- Traefik ACME state
+- Actual Budget state
+- Fxsync MariaDB dumps for both databases
+- Soularr state
+
+#### `lavpc`
+
+`lavpc` is currently a source host that writes local backups into repository role `A` on `tyrant`.
+
+Configured repo template:
+
+- role `A`: `sftp:tyrant@192.168.15.13:/var/lib/backups/repos/{host}`
+
+Declared local host item:
+
+- `shared_sync` for `/home/lav/.sensitive`
+
+#### `temperance`
+
+`temperance` does not currently originate local backup items in this setup.
+
+It participates as the remote storage host for repository role `B` over SFTP.
+
+That means `temperance` must declaratively guarantee:
+
+- the repo tree addressed by the `B` repo template exists
+- the SSH account in the repo URL can write to it
+- disk space and permissions are appropriate for Restic repositories
+
+---
+
+## Operator-Focused Runbook and Instructions
+
+### Operator prerequisites
+
+Before drills or normal service use, confirm all of the following are true on the relevant hosts:
+
+- the desired backup configuration has been applied
+- generated backup-related units exist on the live system
+- required secret files exist under `/run/secrets`
+- SSH authentication works non-interactively for SFTP-backed destinations
+- destination-side repo paths are already provisioned declaratively and are writable by the service/SSH account that must use them
+
+### Secrets and access requirements
+
+#### Required SOPS keys in `backups.yaml`
+
+The current backup configuration requires:
 
 - `restic_a_password`
 - `restic_b_password`
 - `restic_b_env`
 
-These are consumed by the generated secret declarations for backup destinations:
+These map to generated service secrets:
 
-- repository role `A` uses `restic_a_password`
-- repository role `B` uses `restic_b_password`
-- repository role `B` also uses `restic_b_env`
+- role `A` password -> `backup_restic_password_A`
+- role `B` password -> `backup_restic_password_B`
+- role `B` environment file -> `backup_restic_env_B`
 
-### Not currently required because role `C` is disabled
-
-These do not need to be present unless repository role `C` is enabled later:
+#### Optional only if role `C` is enabled later
 
 - `restic_c_password`
 - `restic_c_env`
 
-#### Existing service secret now also used by backups
+#### Existing application secret reused by backups
 
-The backup system also reuses an existing application secret for Fxsync MariaDB dumps:
+The backup system also depends on the Fxsync MariaDB password secret:
 
 - `fxsync.yaml` -> `mariadb_password`
 
-This is not a new secret if Fxsync is already configured, but the backup flow now depends on it for `mysqldump` jobs.
+This is reused by generated `mysqldump` jobs.
 
-### Secret format guidance
+#### Secret format guidance
 
-#### `restic_a_password`, `restic_b_password`, `restic_c_password`
+**Restic repository passwords** (`restic_a_password`, `restic_b_password`, `restic_c_password`):
 
-These are Restic repository passwords.
+- format: plain text string
+- recommendation: long, random, high-entropy password
+- practical guidance: at least 24-32+ random characters
+- `A`, `B`, and `C` are logically separate repo roles and do not need to share the same password
 
-- Format: plain text string
-- Recommended content: long, random, high-entropy password
-- Safe to generate as: random characters from a password generator
-- Recommendation: at least 24-32+ random characters
-- Important: `A`, `B`, and `C` are logically separate repository roles, so they may use different passwords; they do not need to match unless you explicitly want that
-
-Example shape:
+Example:
 
 ```yaml
 restic_a_password: "<long-random-password>"
 restic_b_password: "<long-random-password>"
 ```
 
-#### `restic_b_env`, `restic_c_env`
+**Environment-file secrets** (`restic_b_env`, `restic_c_env`):
 
-These are environment-file payloads passed to generated systemd services as `EnvironmentFile=` values.
+- format: shell-style `KEY=value` lines
+- purpose: backend-specific environment variables for Restic
+- for the current SFTP-based role `B`, this may be empty if SSH access works through normal key configuration and no extra environment variables are needed
+- for a future cloud/rclone-style role `C`, this is the expected place for backend env vars
 
-- Format: shell-style `KEY=value` lines
-- Purpose: provide backend-specific environment variables required by Restic
-- For the current `sftp`-based `B` destination, this may be empty if SSH access works entirely through host keys / agent / default key placement and no extra environment variables are needed
-- For an eventual `rclone`/cloud-style `C` destination, this is the place for backend environment variables if needed
-
-Example shape:
+Comment-only `restic_b_env` is fine when unused:
 
 ```dotenv
-SOME_BACKEND_VAR=value
-ANOTHER_VAR=value
+# currently unused for sftp backend B
 ```
 
-If no environment variables are required for `B`, you can usually store an empty file or a harmless placeholder comment-only file, provided the surrounding secret tooling accepts it.
+#### Non-SOPS operational material
 
-#### `fxsync.yaml` -> `mariadb_password`
+Promotion to role `B` also depends on SSH connectivity from the coordinator host to the remote host in the SFTP repository URL.
 
-This is the MariaDB password used both by the service and by backup dump jobs.
+That includes:
 
-- Format: plain text string
-- It can be random characters
-- It should match the actual password used by the Fxsync MariaDB deployment
+- private key material for the SSH account in the repo URL
+- corresponding authorized key on the remote host
+- host trust / known_hosts strategy compatible with non-interactive service execution
 
-### Important non-SOPS operational secret/material
+If the SOPS secrets exist but SSH credentials or trust do not, promotion to `B` will still fail.
 
-Promotion to repository role `B` also depends on SSH credentials from `tyrant` to the remote host used by the SFTP repository path.
+### Setting up backups for a new host
 
-- This may already exist outside the secrets repo
-- If it does not exist, backup promotion to `B` will fail even if the SOPS secrets above are present
-- This usually means ensuring the correct SSH private key, authorized keys, and host trust are already set up for the account used by the generated Restic commands
+When adding a new source host to this system, treat the following as the minimum checklist.
 
-## 3) Test Drill Procedure
+#### 1. Enable the backup module on the host
 
-The safest order is: evaluate first, deploy/apply second, run manual service drills third, and restore into scratch paths rather than restoring in place.
+Declare `my."unit.backup"` for that host and decide:
 
-### Step 1: Evaluation check
+- whether the host is itself the coordinator or points at an existing `coordinator_host`
+- which destinations it should use
+- what local host-owned items it should declare under `host_items`
+- which unit-owned items come from enabled units' `backup.items`
 
-Run the backup-specific evaluation check:
+#### 2. Choose the repository role `A` target
+
+Every enabled item always backs up first to role `A`.
+
+For a new host, decide whether role `A` is:
+
+- local filesystem-backed on the same host
+- or remote SFTP-backed to another host such as `tyrant`
+
+That decision determines both the `repository_template` and the operational/storage prerequisites.
+
+#### 3. Make destination paths declarative
+
+If the host backs up to a filesystem path or an SFTP destination, the relevant destination host must already guarantee:
+
+- the repo root exists declaratively
+- the leaf repo path under `/var/lib/backups/repos/{host}` exists if your operational model requires it
+- the service or SSH account can write there
+
+Do not rely on ad-hoc shell setup.
+
+#### 4. Provide secrets
+
+Ensure the host has access to:
+
+- `backup_restic_password_A` for role `A`
+- `backup_restic_password_B` and `backup_restic_env_B` for role `B`, if enabled
+- any per-item secrets such as MariaDB credentials
+
+#### 5. Set all five timer families deliberately
+
+Policies drive five timer families:
+
+- backup timer
+- promotion timer
+- forget timer
+- prune timer
+- check timer
+
+When adding a new policy or changing an existing one, make all five deliberate rather than letting some remain implicit accidentally.
+
+#### 6. Run verification and at least one live drill
+
+At minimum:
+
+```bash
+nix build .#checks.x86_64-linux.backups_eval
+```
+
+Then apply the config and run a manual backup + restore drill on the live host.
+
+### Tweaking backup setup on an existing host
+
+When changing an existing host, be especially careful with:
+
+- `repository_template`
+- `coordinator_host`
+- destination backend type
+- item names / tags
+- repository passwords
+- `run_as_user` semantics for dump jobs
+
+Practical warnings:
+
+- changing repo paths may effectively create a new repository location
+- rotating an existing Restic password is not a casual change; it requires intentional repository password migration handling
+- host identity and item naming feed into stable tags and service names, so renames can change maintenance and restore behavior
+
+### Routine operator inspection
+
+On source and coordinator hosts:
+
+```bash
+systemctl list-unit-files 'restic-backups-*' 'backup_*'
+systemctl list-timers 'restic-backups-*' 'backup_*'
+```
+
+For read-only repo inspection commands such as `snapshots` and `ls --json`, prefer `--no-lock`.
+
+This matches the tested verification flow and avoids unnecessary lock contention from operator checks.
+
+### Generic drill procedure
+
+The safest order is:
+
+1. evaluate first
+2. deploy/apply second
+3. run manual backup / promotion / maintenance drills third
+4. restore into scratch locations rather than restoring in place
+
+#### Step 1: Evaluation check
 
 ```bash
 nix build .#checks.x86_64-linux.backups_eval
@@ -124,36 +369,40 @@ nix build .#checks.x86_64-linux.backups_eval
 
 This confirms the generated jobs, rendered units, and eval-time assertions still pass.
 
-### Step 2: Apply configuration on the real host(s)
+#### Step 2: Apply configuration on the participating hosts
 
-Apply the configuration to the real machines that own backup jobs, especially `tyrant` and `lavpc`.
+At minimum this usually means:
 
-This step must happen before the manual drill because the services and timers need to exist on the live system.
+- `tyrant`
+- `lavpc`
+- `temperance`
 
-### Step 3: Inspect generated units and timers
+#### Step 3: Inspect generated units and timers
 
-On `tyrant`, inspect the generated backup-related units:
+On backup source/coordinator hosts:
 
 ```bash
 systemctl list-unit-files 'restic-backups-*' 'backup_*'
 systemctl list-timers 'restic-backups-*' 'backup_*'
 ```
 
-This confirms the expected backup jobs, promotion units, and maintenance timers are present on the actual machine.
+#### Step 4: Smoke-test one local backup to role `A`
 
-### Step 4: Smoke-test one local backup to repository role `A`
-
-Suggested first candidate:
+Suggested first candidate on `tyrant`:
 
 ```bash
 sudo systemctl start restic-backups-tyrant_home_snapshot_to_a.service
 sudo journalctl -u restic-backups-tyrant_home_snapshot_to_a.service -n 200 --no-pager
 ```
 
-Then verify the repository contains snapshots:
+Then verify the repo:
 
 ```bash
-sudo restic --repo /var/lib/backups/repos/tyrant --password-file /run/secrets/backup_restic_password_A snapshots
+sudo restic \
+  --repo /var/lib/backups/repos/tyrant \
+  --password-file /run/secrets/backup_restic_password_A \
+  --no-lock \
+  snapshots
 ```
 
 Expected outcome:
@@ -162,24 +411,32 @@ Expected outcome:
 - snapshot appears in repo `A`
 - tags identify the item correctly
 
-### Step 5: Smoke-test one dump-based backup
+#### Step 5: Smoke-test one dump-backed backup
 
-Suggested candidate:
+Suggested current real-host candidate on `tyrant`:
 
 ```bash
 sudo systemctl start restic-backups-tyrant_fxsync_syncstorage_db_to_a.service
 sudo journalctl -u restic-backups-tyrant_fxsync_syncstorage_db_to_a.service -n 200 --no-pager
 ```
 
-Then inspect snapshots again and confirm tags such as:
+Then inspect snapshots again:
+
+```bash
+sudo restic \
+  --repo /var/lib/backups/repos/tyrant \
+  --password-file /run/secrets/backup_restic_password_A \
+  --no-lock \
+  snapshots
+```
+
+Confirm tags such as:
 
 - `host:tyrant`
 - `unit:fxsync`
 - `item:syncstorage_db`
 
-This is important because dump jobs exercise the command/stdin backup path instead of normal filesystem path backups.
-
-### Step 6: Smoke-test promotion from `A` to `B`
+#### Step 6: Smoke-test promotion from `A` to `B`
 
 Run the promotion unit manually:
 
@@ -188,17 +445,26 @@ sudo systemctl start backup_promote_tyrant_home_snapshot_to_b.service
 sudo journalctl -u backup_promote_tyrant_home_snapshot_to_b.service -n 200 --no-pager
 ```
 
+Then verify the remote repo:
+
+```bash
+sudo restic \
+  --repo 'sftp:temperance@89.167.107.74:/var/lib/backups/repos/tyrant' \
+  --password-file /run/secrets/backup_restic_password_B \
+  --no-lock \
+  snapshots
+```
+
 Expected outcome:
 
-- if the destination repo is empty, the service initializes it first
+- the remote repo path already exists because the destination host declaratively provisioned it
+- if the repo is empty, the promotion unit initializes Restic metadata there
 - `restic copy` completes successfully
-- the remote repo for role `B` contains promoted snapshots
+- the remote repo contains the promoted snapshot
 
-This is the key drill for proving remote promotion and remote credentials.
+#### Step 7: Smoke-test maintenance units
 
-### Step 7: Smoke-test maintenance units
-
-Run the generated maintenance services manually:
+For role `A`:
 
 ```bash
 sudo systemctl start backup_forget_tyrant_home_snapshot_on_a.service
@@ -206,7 +472,7 @@ sudo systemctl start backup_prune_tyrant_a.service
 sudo systemctl start backup_check_tyrant_a.service
 ```
 
-And for role `B` as well:
+For role `B`:
 
 ```bash
 sudo systemctl start backup_forget_tyrant_home_snapshot_on_b.service
@@ -217,30 +483,45 @@ sudo systemctl start backup_check_tyrant_b.service
 Expected outcome:
 
 - all services exit successfully
-- `forget` respects tagged item identity
-- `prune` completes without repository errors
+- `forget` respects item identity tags
+- `prune` completes without repo errors
 - `check` completes without corruption or auth issues
 
-### Step 8: Perform at least one restore drill
+#### Step 8: Perform at least one restore drill
 
 Do not restore in place first. Restore into a scratch directory.
 
-Example:
+Example for local repo `A`:
 
 ```bash
+sudo rm -rf /tmp/restore-test
 sudo mkdir -p /tmp/restore-test
-sudo restic --repo /var/lib/backups/repos/tyrant --password-file /run/secrets/backup_restic_password_A restore latest --target /tmp/restore-test
+sudo restic \
+  --repo /var/lib/backups/repos/tyrant \
+  --password-file /run/secrets/backup_restic_password_A \
+  restore latest --target /tmp/restore-test
 ```
 
 What to verify:
 
 - restored files are actually present
-- permissions and ownership are sensible enough for recovery purposes
-- the restored contents are the expected item/data
+- restored contents match expected data
+- permissions and ownership are at least sensible enough for recovery purposes
 
-For dump-based backups, the drill should additionally verify the SQL artifact can be read and is structurally valid. Ideally, import it into a disposable database/container rather than trusting file presence alone.
+#### Required rule for dump-backed restores
 
-### Suggested restore drill coverage
+Do **not** stop at “the SQL file exists”.
+
+For SQL-backed backups, the drill should:
+
+1. identify the dump artifact in the snapshot
+2. extract it
+3. import it into a disposable database or container
+4. verify specific restored content
+
+That is now the tested standard for PostgreSQL in `backup_local`, and it should be the expected operator standard for real-host dump drills too.
+
+### Suggested coverage for a real drill
 
 At minimum, prove one example from each class:
 
@@ -250,182 +531,20 @@ At minimum, prove one example from each class:
 
 ### Success criteria
 
-The drill should be considered successful only if all of the following are true:
+A drill is successful only if all of the following are true:
 
 - backup service exits with code `0`
 - snapshot is visible in the expected repository
 - promotion to `B` works against the real remote
 - maintenance services complete successfully
 - at least one restore completes and yields usable data
+- for dump-backed jobs, restored SQL has been imported and validated, not just inspected as a file
 
-## 4) High-Level Summary of Backup Flow
+### Host-specific operator notes
 
-The implemented design is a declarative Restic-based backup pipeline driven from Nix configuration.
+#### `tyrant`
 
-- Backup items are declared in Nix, either as host-owned items or unit-owned items.
-- Every enabled item always backs up first to repository role `A`.
-- Policies decide schedule, retention, check cadence, and which higher-tier destinations the item should be promoted to.
-- Promotion is modeled as `A -> B,C`, not as direct writes from the original source item to every destination.
-- Restic handles the actual backup snapshots, promotion copies, forget, prune, and check operations.
-- Generated systemd services/timers are the execution layer.
-
-In the current host topology:
-
-- `tyrant` is the backup coordinator host
-- `tyrant` stores repository role `A` locally on the filesystem
-- `tyrant` promotes selected items to repository role `B` over SFTP
-- `lavpc` writes its local backups to `tyrant` as repository role `A`
-
-Conceptually, the flow is:
-
-1. declare items in Nix
-2. resolve them through backup policies
-3. render local Restic backup jobs to `A`
-4. render promotion and maintenance systemd units
-5. let systemd timers execute the resulting services
-
-## 5) Detailed Nix + Restic Implementation Notes
-
-### Declaration model
-
-The source of truth is the Nix module tree.
-
-- Host-owned backup items live under `my."unit.backup".host_items`
-- Unit-owned backup items live under each unit's `backup.items`
-- Backup destinations and policies live under `my."unit.backup"`
-
-This means backup intent is declared near the owning system or service rather than being maintained as an external job list.
-
-### Types and schema
-
-The backup schema is defined in the backup type layer.
-
-It includes:
-
-- destination type definitions
-- policy type definitions
-- item type definitions
-- strict payload validation so each item has exactly one payload matching its declared kind
-
-Supported item kinds currently are:
-
-- `path`
-- `btrfs_snapshot`
-- `postgres_dump`
-- `mysql_dump`
-- `custom`
-
-### Item collection and resolution
-
-The implementation collects both host-owned and unit-owned items, then resolves them into executable job descriptions.
-
-Resolution computes:
-
-- the effective schedule
-- the effective retention arguments
-- promotion targets
-- destination repository paths
-- Restic tags
-- command payloads for dump/custom jobs
-- generated job names
-
-Each resolved item always has a local job for repository role `A`, and may additionally participate in promotion/maintenance for other repository roles.
-
-### Local backups to `A`
-
-Local-to-`A` jobs are rendered into `services.restic.backups` entries.
-
-These jobs use the native NixOS Restic integration for:
-
-- filesystem path backups
-- Btrfs snapshot path backups
-- command/stdin backups such as PostgreSQL and MariaDB dumps
-
-For snapshot-based jobs, prepare and cleanup commands create and remove the readonly Btrfs snapshot around the backup operation.
-
-For command-based jobs:
-
-- PostgreSQL uses `pg_dump`
-- MariaDB uses `mysqldump`
-- custom jobs run a generated shell script and feed data to Restic over stdin
-
-### Promotion and maintenance layer
-
-Promotion and maintenance are rendered as custom `systemd.services` and `systemd.timers`.
-
-This layer is responsible for:
-
-- `restic copy` from `A` to promoted destinations
-- `restic forget` scoped by item identity tags
-- `restic prune` per repository role
-- `restic check` per repository role
-
-Promotion units:
-
-- run only on the configured coordinator host
-- initialize empty destination repositories when necessary
-- add stable tags for host/unit/item identity and promotion role
-- gain network/SSH runtime dependencies when the destination backend requires them
-
-### Secret rendering
-
-Secrets are rendered automatically from destination definitions and item definitions.
-
-That includes:
-
-- destination password files
-- destination environment files
-- per-item MariaDB password secrets
-
-This lets backup items declare the secret references they need while the backup module renders the actual SOPS secret declarations consumed by generated jobs.
-
-### Current concrete coverage
-
-The current implementation includes these declared backup items:
-
-- host snapshots on `tyrant` for `/` and `/home`
-- sensitive path backup on `lavpc` for `/home/lav/.sensitive`
-- Pi-hole state
-- Traefik ACME state
-- Actual Budget state
-- Fxsync MariaDB dumps for both databases
-- Soularr state
-
-The implementation explicitly does not include certain service-owned data in v1, including the currently excluded qbittorrent/nixarr backup cases.
-
-### Validation status
-
-The eval layer asserts that:
-
-- expected jobs exist
-- excluded jobs do not exist
-- promotion/maintenance units are rendered as expected
-- command-backed jobs are typed correctly
-- network/SSH-related unit wiring is present where required
-
-This gives good confidence in the generated structure, but it is still not a substitute for live drill execution.
-
-## 6) Host-By-Host Drill Checklist
-
-This section turns the general drill into concrete per-host checklists.
-
-### `tyrant`
-
-`tyrant` is currently the most important host for backup validation because it is both:
-
-- a source host with local backup items
-- the coordinator host for promotion and maintenance
-- the storage location for repository role `A`
-
-#### Pre-flight
-
-- confirm the applied system config includes the new backup units
-- confirm `/run/secrets/backup_restic_password_A` exists
-- confirm `/run/secrets/backup_restic_password_B` exists
-- confirm the role `B` environment secret file exists if configured
-- confirm SSH connectivity from `tyrant` to the `B` remote endpoint works for the account used in the SFTP repository path
-
-Suggested checks:
+Pre-flight checks:
 
 ```bash
 sudo ls -l /run/secrets/backup_restic_password_A
@@ -436,115 +555,15 @@ systemctl list-unit-files 'restic-backups-*' 'backup_*'
 systemctl list-timers 'restic-backups-*' 'backup_*'
 ```
 
-#### Local backup drill on `tyrant`
+Operator expectations:
 
-Test at least one snapshot-style item and one command-backed item.
+- `tyrant` is both the role `A` storage host and the promotion coordinator
+- the remote repo path for `tyrant` on `temperance` must already be declaratively provisioned and writable
+- drills should include one snapshot-style item and one dump-backed item
 
-Recommended snapshot item:
+#### `lavpc`
 
-```bash
-sudo systemctl start restic-backups-tyrant_home_snapshot_to_a.service
-sudo journalctl -u restic-backups-tyrant_home_snapshot_to_a.service -n 200 --no-pager
-```
-
-Recommended command-backed item:
-
-```bash
-sudo systemctl start restic-backups-tyrant_fxsync_syncstorage_db_to_a.service
-sudo journalctl -u restic-backups-tyrant_fxsync_syncstorage_db_to_a.service -n 200 --no-pager
-```
-
-Inspect repository `A`:
-
-```bash
-sudo restic --repo /var/lib/backups/repos/tyrant --password-file /run/secrets/backup_restic_password_A snapshots
-```
-
-Verify:
-
-- snapshots exist
-- tags include the expected `host:*`, `unit:*`, and `item:*` identity tags
-- the Btrfs snapshot job created and cleaned up its temporary snapshot correctly
-
-#### Promotion drill on `tyrant`
-
-Run a promotion explicitly:
-
-```bash
-sudo systemctl start backup_promote_tyrant_home_snapshot_to_b.service
-sudo journalctl -u backup_promote_tyrant_home_snapshot_to_b.service -n 200 --no-pager
-```
-
-Then verify the remote repository can be read:
-
-```bash
-sudo restic \
-  --repo 'sftp:temperance@89.167.107.74:/var/lib/backups/repos/tyrant' \
-  --password-file /run/secrets/backup_restic_password_B \
-  snapshots
-```
-
-Verify:
-
-- remote repo is initialized if it was previously empty
-- promoted snapshot exists remotely
-- authentication works non-interactively
-
-#### Maintenance drill on `tyrant`
-
-Run at least one round of each maintenance class:
-
-```bash
-sudo systemctl start backup_forget_tyrant_home_snapshot_on_a.service
-sudo systemctl start backup_prune_tyrant_a.service
-sudo systemctl start backup_check_tyrant_a.service
-
-sudo systemctl start backup_forget_tyrant_home_snapshot_on_b.service
-sudo systemctl start backup_prune_tyrant_b.service
-sudo systemctl start backup_check_tyrant_b.service
-```
-
-Verify:
-
-- all units exit successfully
-- no auth/network failures occur on role `B`
-- no repository format/corruption issues are reported
-
-#### Restore drill on `tyrant`
-
-Restore into a scratch path:
-
-```bash
-sudo rm -rf /tmp/restore-test-tyrant
-sudo mkdir -p /tmp/restore-test-tyrant
-sudo restic --repo /var/lib/backups/repos/tyrant \
-  --password-file /run/secrets/backup_restic_password_A \
-  restore latest --target /tmp/restore-test-tyrant
-```
-
-For the dump-based job, identify the snapshot and inspect the SQL artifact:
-
-```bash
-sudo restic --repo /var/lib/backups/repos/tyrant \
-  --password-file /run/secrets/backup_restic_password_A \
-  snapshots
-
-sudo find /tmp/restore-test-tyrant -type f | sort
-```
-
-If possible, take the restored SQL dump and import it into a disposable MariaDB instance/container.
-
-### `lavpc`
-
-`lavpc` currently acts as a source host that writes its local backups into repository role `A` hosted on `tyrant`.
-
-#### Pre-flight
-
-- confirm the applied system config includes the generated Restic backup unit
-- confirm `/run/secrets/backup_restic_password_A` exists on `lavpc`
-- confirm SSH connectivity from `lavpc` to `tyrant` works for the account embedded in the repository path
-
-Suggested checks:
+Pre-flight checks:
 
 ```bash
 sudo ls -l /run/secrets/backup_restic_password_A
@@ -553,68 +572,33 @@ systemctl list-unit-files 'restic-backups-*'
 systemctl list-timers 'restic-backups-*'
 ```
 
-#### Backup drill on `lavpc`
+Operator expectations:
 
-Run the declared sensitive-data backup:
+- `lavpc` is a source host only in the current topology
+- the repo path for `lavpc` on `tyrant` must be provisioned and writable if the backend behavior you rely on requires it
+- restore drills should verify the expected contents from `/home/lav/.sensitive`
 
-```bash
-sudo systemctl start restic-backups-lavpc_shared_sync_to_a.service
-sudo journalctl -u restic-backups-lavpc_shared_sync_to_a.service -n 200 --no-pager
-```
+#### `temperance`
 
-Then verify the repository on `tyrant` contains the `lavpc` snapshots:
-
-```bash
-sudo restic --repo 'sftp:tyrant@192.168.15.13:/var/lib/backups/repos/lavpc' \
-  --password-file /run/secrets/backup_restic_password_A \
-  snapshots
-```
-
-Verify:
-
-- snapshot exists for `lavpc`
-- tags correctly identify `host:lavpc`, `unit:host`, `item:shared_sync`
-- no SSH auth issue occurs during the backup
-
-#### Restore drill on `lavpc`
-
-Restore into a scratch path:
+Remote destination checks:
 
 ```bash
-sudo rm -rf /tmp/restore-test-lavpc
-sudo mkdir -p /tmp/restore-test-lavpc
-sudo restic --repo 'sftp:tyrant@192.168.15.13:/var/lib/backups/repos/lavpc' \
-  --password-file /run/secrets/backup_restic_password_A \
-  restore latest --target /tmp/restore-test-lavpc
-```
-
-Verify that the restored tree contains the expected contents from `/home/lav/.sensitive`.
-
-### `temperance`
-
-`temperance` does not currently originate local backup items in this setup, but it is still part of the drill because it hosts repository role `B` over SFTP.
-
-#### Remote destination checks
-
-- confirm the backing path exists or can be created as intended
-- confirm the SSH account has permission to access `/var/lib/backups/repos`
-- confirm disk space and ownership are suitable for a Restic repository
-
-Suggested checks:
-
-```bash
-sudo ls -ld /var/lib/backups /var/lib/backups/repos
-sudo -u temperance test -w /var/lib/backups/repos
+sudo ls -ld /var/lib/backups /var/lib/backups/repos /var/lib/backups/repos/tyrant
+sudo -u temperance test -w /var/lib/backups/repos/tyrant
 df -h /var/lib/backups/repos
 ```
 
-This host mostly participates indirectly by making the `tyrant -> B` promotion drill succeed.
+Operator expectations:
 
-## 7) Example Secret Templates
+- `temperance` does not currently originate local items
+- it must provide a declaratively managed, writable storage tree for role `B`
+- promotion drills depend on `temperance` being ready before the job starts
 
-These are example shapes only. Replace placeholders with your real values.
+### Example secret templates
 
-### Example `backups.yaml`
+These are example shapes only. Replace placeholders with real values.
+
+#### Example `backups.yaml`
 
 ```yaml
 restic_a_password: "replace-with-long-random-password-a"
@@ -629,9 +613,7 @@ restic_b_env: |
 #   RCLONE_CONFIG=/run/secrets/rclone.conf
 ```
 
-### Example `fxsync.yaml`
-
-If Fxsync is already configured, this likely already exists. Included here just to show the expected shape.
+#### Example `fxsync.yaml`
 
 ```yaml
 mariadb_password: "replace-with-the-actual-fxsync-mariadb-password"
@@ -639,9 +621,7 @@ sync_master_secret: "existing-or-generated-secret"
 metrics_hash_secret: "existing-or-generated-secret"
 ```
 
-### Generating password values
-
-For Restic repository passwords, any strong random string is fine.
+#### Generating password values
 
 Examples:
 
@@ -659,20 +639,188 @@ Practical guidance:
 
 - use different random passwords for `A` and `B`
 - avoid reusing service passwords as repository passwords
-- do not change an existing Restic repository password casually unless you also intend to handle repository password migration correctly
+- do not rotate an existing Restic repo password casually unless you also handle repository password migration intentionally
 
-### About `restic_b_env`
+---
 
-For the currently configured `sftp` destination, this file may legitimately contain no variables at all.
+## Technical Implementation Docs
 
-Safe options are:
+### Declaration model
 
-- an empty file, if your secret tooling permits it
-- a comment-only file
-- a small placeholder line that does not affect behavior
+The source of truth is the Nix module tree.
 
-Example:
+- host-owned items live under `my."unit.backup".host_items`
+- unit-owned items live under each unit's `backup.items`
+- destinations and policies live under `my."unit.backup"`
 
-```dotenv
-# currently unused for sftp backend B
-```
+This keeps backup intent close to the owning host or service.
+
+### Supported item kinds
+
+Currently supported item kinds are:
+
+- `path`
+- `btrfs_snapshot`
+- `postgres_dump`
+- `mysql_dump`
+- `custom`
+
+### Item resolution and rendering
+
+Resolution computes:
+
+- effective schedule
+- effective retention arguments
+- promotion targets
+- repository paths
+- tags
+- generated job names
+- payload commands for dump/custom items
+
+Each enabled item always gets a local job to repository role `A`.
+
+Local-to-`A` jobs are rendered into `services.restic.backups` entries.
+
+Promotion and maintenance are rendered as custom `systemd.services` / `systemd.timers`.
+
+### Current privilege model for dump jobs
+
+This is an important maintenance invariant.
+
+**For `postgres_dump` with a non-root `run_as_user`:**
+
+- the Restic service itself stays `root`
+- repository init, locking, and secret access stay under `root`
+- only the payload command is wrapped with `runuser -u <payload_user> -- ...`
+
+This is deliberate and production-like. It avoids the earlier failure mode where the whole Restic service ran as `postgres` and then could not manage the repository correctly.
+
+**For `mysql_dump`, `custom`, and other kinds:**
+
+- current semantics still follow the existing service-user model
+- they do **not** automatically get the same `service_user` / `payload_user` split
+
+If future work needs the same split for another item kind, implement it explicitly rather than assuming it already applies.
+
+### Promotion behavior and remote-path contract
+
+Promotion units:
+
+- run only on the configured coordinator host
+- initialize empty destination repositories when the repo path already exists and is writable
+- add stable tags for host/unit/item identity and promotion role
+- gain network/SSH runtime dependencies when needed by the backend
+
+This means the remote-path contract is explicit:
+
+- promotion handles Restic metadata init and copy
+- destination hosts handle repo-path existence, ownership, and writeability declaratively
+
+### Secret rendering
+
+The module renders secret declarations from destination definitions and item definitions.
+
+That includes:
+
+- destination password secrets
+- destination environment secrets
+- per-item MariaDB password secrets
+
+### Verification model
+
+The eval layer currently asserts, among other things:
+
+- expected jobs exist
+- excluded jobs do not exist
+- promotion/maintenance units render as expected
+- command-backed jobs are typed correctly
+- network/SSH unit wiring is present where required
+- `postgres_dump` currently renders as `service_user = root` plus `payload_user = postgres` when `run_as_user = "postgres"`
+- the rendered local backup command contains the expected `runuser -u postgres -- ...` wrapper
+
+The VM tests currently prove:
+
+- local path/custom/PostgreSQL backup + restore behavior
+- promotion from `A` to `B`
+- SSH-based auth for `B`
+- maintenance happy paths
+
+### Realism gap to remember
+
+`backup_promotion` currently proves the happy path only after the destination repo tree has already been provisioned by host config.
+
+It does **not** prove live storage-host bootstrap or remote directory creation on a missing path.
+
+That is acceptable only because the intended system contract is declarative destination provisioning.
+
+### Maintenance invariants for future changes
+
+Future maintainers should preserve these unless intentionally redesigning the system.
+
+#### Keep destination provisioning declarative
+
+For remote destinations, the repo path must be managed by host configuration, not by ad-hoc shell commands.
+
+If future work wants a more explicitly declarative expression than activation scripts, prefer storage-side mechanisms such as:
+
+- module-managed directories
+- `systemd.tmpfiles.rules`
+- other host config that converges the directory tree automatically
+
+#### Keep eval and VM tests in sync with behavior changes
+
+If you change:
+
+- destination behavior
+- `run_as_user` semantics
+- dump command rendering
+- promotion initialization behavior
+- tag behavior
+
+then update both:
+
+- `outputs/checks/backups.nix`
+- the VM integration tests
+
+#### Preserve the tested read-only query pattern
+
+For read-only repo inspection commands such as:
+
+- `snapshots`
+- `ls --json`
+- other repo queries used only for verification
+
+prefer `--no-lock`.
+
+#### Preserve the current PostgreSQL privilege model
+
+The current proven model for non-root PostgreSQL dumps is:
+
+- Restic service runs as `root`
+- payload command drops to `postgres`
+
+Do not casually revert to running the whole Restic service as `postgres` unless you intentionally redesign repository ownership and locking semantics.
+
+#### Remember that MariaDB runtime restore is still a real-host concern
+
+VM coverage currently proves PostgreSQL dump restore correctness. The real declared host database dumps today are MariaDB-backed Fxsync jobs.
+
+That means live drills should continue to verify restored MariaDB dump content on real hosts even though the module pattern is already validated with PostgreSQL in the VM test.
+
+#### Set all five policy timer configs deliberately
+
+Policies drive:
+
+- backup timer
+- promotion timer
+- forget timer
+- prune timer
+- check timer
+
+When adding or changing policies, keep all five timer families deliberate and explicit.
+
+#### Host identity matters
+
+Promotion and repository addressing are sensitive to host identity and coordinator behavior.
+
+Keep host naming and backup identity stable when changing host config or tests.
