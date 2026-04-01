@@ -153,6 +153,7 @@ in {
           (openvpn.override {
             openssl = openssl_legacy;
           })
+          rustdesk
 
           # dependencies
           rsync
