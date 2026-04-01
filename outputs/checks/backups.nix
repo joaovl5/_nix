@@ -12,6 +12,7 @@
     inherit pkgs;
   };
   collect = import ../../users/_units/backup/_collect.nix;
+  render_local = import ../../users/_units/backup/_render_local.nix;
   unit_defaults = import ../../globals/units.nix {inherit (pkgs) lib;};
   synthetic_item_secrets = backup_lib.render_item_secrets synthetic_items;
   synthetic_destination_secrets = backup_lib.render_destination_secrets tyrant.my."unit.backup".destinations;
@@ -104,6 +105,10 @@
     inherit (tyrant.my."unit.backup") policies;
     items = synthetic_items;
   };
+  synthetic_rendered = render_local {
+    inherit lib pkgs;
+    resolved_items = synthetic_resolved;
+  };
   synthetic_collected = collect {
     u = {backup = backup_lib;};
     host_name = "tyrant";
@@ -170,6 +175,7 @@
   postgres_item = builtins.elemAt synthetic_resolved.local_to_a 0;
   mysql_item = builtins.elemAt synthetic_resolved.local_to_a 1;
   custom_item = builtins.elemAt synthetic_resolved.local_to_a 2;
+  postgres_service = synthetic_rendered.${postgres_item.local_job_name};
   collected_unit_item = builtins.elemAt synthetic_collected.unit_owned_items 0;
 in {
   backups_eval = assert tyrant.my."unit.backup".enable;
@@ -188,6 +194,17 @@ in {
   assert builtins.isList mysql_item.command;
   assert builtins.length mysql_item.command == 1;
   assert mysql_item.stdin_filename == "tyrant_db_mysql_mysql-dump.sql";
+  assert postgres_item.service_user == "root";
+  assert postgres_item.payload_user == "postgres";
+  assert mysql_item.service_user == "mysql";
+  assert mysql_item.payload_user == null;
+  assert postgres_service.user == "root";
+  assert builtins.length postgres_service.command == 5;
+  assert builtins.elemAt postgres_service.command 0 == "${pkgs.util-linux}/bin/runuser";
+  assert builtins.elemAt postgres_service.command 1 == "-u";
+  assert builtins.elemAt postgres_service.command 2 == "postgres";
+  assert builtins.elemAt postgres_service.command 3 == "--";
+  assert builtins.elemAt postgres_service.command 4 == builtins.toString (builtins.elemAt postgres_item.command 0);
   assert synthetic_item_secrets ? mysql_password;
   assert !(synthetic_item_secrets ? backup_restic_password_A);
   assert synthetic_destination_secrets ? backup_restic_password_A;

@@ -69,11 +69,18 @@
       passwordFile = destination.password_file;
       environmentFile = destination.environment_file;
       extraOptions = destination.extra_options;
-      user = entry.run_as_user;
+      user = entry.service_user;
       inherit (entry) timerConfig;
       createWrapper = true;
       inherit (entry) paths;
-      command = normalize_command entry.command;
+      command =
+        (optionals (entry.payload_user != null) [
+          "${pkgs.util-linux}/bin/runuser"
+          "-u"
+          entry.payload_user
+          "--"
+        ])
+        ++ normalize_command entry.command;
       exclude =
         if entry.kind == "path"
         then entry.payload.exclude

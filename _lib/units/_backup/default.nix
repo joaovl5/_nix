@@ -332,7 +332,14 @@ in rec {
         inherit (entry) unit_name item_name;
         suffix = "to_a";
       };
-      inherit (item) run_as_user;
+      payload_user =
+        if item.kind == "postgres_dump" && item.run_as_user != "root"
+        then item.run_as_user
+        else null;
+      service_user =
+        if item.kind == "postgres_dump" && item.run_as_user != "root"
+        then "root"
+        else item.run_as_user;
       timerConfig =
         if item.schedule != null
         then item.schedule

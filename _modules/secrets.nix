@@ -6,10 +6,6 @@
   my = mylib.use config;
   s = my.secrets;
 in {
-  imports = [
-    "${mylib.secrets.private_source}/sops.nix"
-  ];
-
   sops = {
     defaultSopsFile = "${s.private_source}/.sops.yaml";
     age.keyFile = "/root/.age/key.txt";

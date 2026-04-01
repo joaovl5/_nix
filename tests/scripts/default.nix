@@ -10,5 +10,7 @@ python_pkgs.buildPythonPackage {
   pythonImportsCheck = [
     "my_nix_tests"
     "my_nix_tests.vm_bundle_contract"
+    "my_nix_tests.backup_local"
+    "my_nix_tests.backup_promotion"
   ];
 }
