@@ -38,6 +38,11 @@
       url = "git+https://github.com/Mic92/sops-nix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ## microvms
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## private secrets repository
     mysecrets = {
       url = "git+ssh://git@github.com/joaovl5/__secrets.git?ref=main&shallow=1";
