@@ -7,7 +7,6 @@ in {
     ./actual-budget
     ./fail2ban
     ./pihole
-    ./litellm
     ./nixarr
     ./soularr
     ./reverse-proxy

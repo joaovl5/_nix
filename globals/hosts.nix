@@ -21,10 +21,6 @@ rec {
           };
         };
 
-        "unit.litellm" = {
-          enable = true;
-        };
-
         "unit.soularr" = {
           enable = true;
         };
