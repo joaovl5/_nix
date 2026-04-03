@@ -1,0 +1,8 @@
+[project]
+name = "my-nix"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = ["nix-machine-protocol"]
+
+[tool.uv.sources]
+nix-machine-protocol = { git = "https://github.com/Gastove/nix-machine-protocol" }

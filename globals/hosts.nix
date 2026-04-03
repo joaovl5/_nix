@@ -1,4 +1,31 @@
 rec {
+  lavpc = {
+    hostname = "lavpc";
+    ssh_user = "lav";
+    config = {
+      my = {
+        "unit.backup" = {
+          enable = true;
+          coordinator_host = "tyrant";
+          destinations = {
+            A = {
+              enable = true;
+              backend = "sftp";
+              repository_template = "sftp:tyrant@192.168.15.13:/var/lib/backups/repos/{host}";
+            };
+            B.enable = false;
+            C.enable = false;
+          };
+          host_items.shared_sync = {
+            kind = "path";
+            policy = "sensitive_data";
+            path.paths = ["/home/lav/.sensitive"];
+          };
+        };
+      };
+    };
+  };
+
   tyrant = {
     hostname = "192.168.15.13";
     ssh_user = "tyrant";
@@ -36,6 +63,43 @@ rec {
 
         "unit.qbittorrent" = {
           enable = true;
+        };
+
+        "unit.backup" = {
+          enable = true;
+          coordinator_host = "tyrant";
+          destinations = {
+            A = {
+              enable = true;
+              backend = "filesystem";
+              repository_template = "/var/lib/backups/repos/{host}";
+            };
+            B = {
+              enable = true;
+              backend = "sftp";
+              repository_template = "sftp:${temperance.ssh_user}@${temperance.hostname}:/var/lib/backups/repos/{host}";
+            };
+            C.enable = false;
+          };
+          host_items = {
+            root_snapshot = {
+              kind = "btrfs_snapshot";
+              policy = "filesystem_snapshot";
+              btrfs_snapshot = {
+                source_path = "/";
+                snapshot_path = "/var/lib/backups/snapshots/root/current";
+              };
+            };
+            home_snapshot = {
+              kind = "btrfs_snapshot";
+              policy = "filesystem_snapshot";
+              promote_to = ["B"];
+              btrfs_snapshot = {
+                source_path = "/home";
+                snapshot_path = "/var/lib/backups/snapshots/home/current";
+              };
+            };
+          };
         };
 
         # host tunnel (inbound relay)

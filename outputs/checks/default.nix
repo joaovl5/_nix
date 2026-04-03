@@ -27,10 +27,15 @@ in {
           inherit self pkgs;
           inherit (pkgs) lib;
         });
+      backups = import ./backups.nix {
+        inherit self pkgs;
+        inherit (nixpkgs) lib;
+      };
     in
       {
         formatting = treefmt_eval.${pkgs.system}.config.build.check self;
       }
+      // backups
       // testChecks
       // deployChecks
   );

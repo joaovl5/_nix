@@ -27,6 +27,12 @@ in
       inherit (opts.endpoint) target sources;
     };
 
+    my."unit.actual-budget".backup.items.state = {
+      kind = "path";
+      policy = "sensitive_data";
+      path.paths = [internal_data_dir];
+    };
+
     services = {
       actual = {
         enable = true;
