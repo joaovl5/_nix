@@ -11,7 +11,7 @@
     ...
   }: let
     extra_python_packages = extraPythonPackages;
-    test_args = builtins.removeAttrs args [
+    test_args = removeAttrs args [
       "python_module_name"
       "extraPythonPackages"
       "testScript"

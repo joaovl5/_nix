@@ -8,9 +8,8 @@ in {
     ./actual-budget
     ./fail2ban
     ./pihole
-    ./litellm
+    ./postgres
     ./nixarr
-    ./soularr
     ./reverse-proxy
     ./octodns
     ./fxsync

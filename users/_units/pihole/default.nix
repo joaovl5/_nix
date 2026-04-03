@@ -14,6 +14,7 @@
 
   inherit (globals.dns) tld;
   dns_cfg = config.my.dns;
+  octodns_enabled = config.my."unit.octodns".enable;
 in
   o.module "unit.pihole" (with o; {
     enable = toggle "Enable Pihole" false;
@@ -43,10 +44,40 @@ in
     target_state_link = "${computed_data_dir}/lib";
 
     pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
+    wait_for_pihole_setup = pkgs.writeShellScript "wait-pihole-ftl-setup-ready" ''
+      set -euo pipefail
+      api_url="http://127.0.0.1:${toString opts.endpoint.port}/api/"
+
+      max_retries=60
+      attempt=1
+
+      while [ "$attempt" -le "$max_retries" ]; do
+        lists_response="$(${pkgs.curl}/bin/curl --connect-timeout 2 -skS -H "Accept: application/json" "$api_url"lists 2>/dev/null || true)"
+        if [ -n "$lists_response" ] && printf '%s' "$lists_response" | ${pkgs.jq}/bin/jq -e '.error == null' > /dev/null 2>&1; then
+          exit 0
+        fi
+
+        ${pkgs.coreutils}/bin/sleep 1
+        attempt=$((attempt + 1))
+      done
+
+      echo "Pi-hole API/database did not become ready in time" >&2
+      exit 1
+    '';
   in {
     my.vhosts.pihole = {
       inherit (opts.endpoint) target sources;
     };
+
+    assertions =
+      if octodns_enabled
+      then [
+        {
+          assertion = opts.dns.extra_hosts == [];
+          message = "unit.pihole.dns.extra_hosts cannot be used while unit.octodns manages Pi-hole DNS hosts.";
+        }
+      ]
+      else [];
 
     my."unit.pihole".backup.items.state = {
       kind = "path";
@@ -77,20 +108,43 @@ in
       ln -sfn ${source_state_dir} ${target_state_link}
     '';
 
-    systemd.services.pihole-pwhash = {
-      description = "Initialize Pi-hole API password hash";
-      requiredBy = ["pihole-ftl.service"];
-      before = ["pihole-ftl.service"];
-      serviceConfig = {
-        Type = "simple";
-        User = user;
-        Group = group;
-        ExecStart = pkgs.writeShellScript "exec_pihole_pwhash" ''
-          ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_password_hash"})
-        '';
+    systemd = {
+      services.pihole-pwhash = {
+        description = "Initialize Pi-hole API password hash";
+        requiredBy = ["pihole-ftl.service"];
+        before = ["pihole-ftl.service"];
+        serviceConfig = {
+          Type = "simple";
+          User = user;
+          Group = group;
+          ExecStart = pkgs.writeShellScript "exec_pihole_pwhash" ''
+            ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_password_hash"})
+          '';
 
-        inherit (pihole_ftl) AmbientCapabilities;
+          inherit (pihole_ftl) AmbientCapabilities;
+        };
       };
+
+      services.pihole-ftl-setup = {
+        after = ["pihole-ftl.service" "pihole-pwhash.service"];
+        requires = ["pihole-ftl.service" "pihole-pwhash.service"];
+        serviceConfig = {
+          # Pi-hole can report the unit as started before its API/database are ready for setup.
+          # Wait until the lists API responds cleanly so the oneshot setup succeeds in one activation.
+          ExecStartPre = [wait_for_pihole_setup];
+          # The generated setup script can still exit 1 for non-fatal Pi-hole API quirks after
+          # gravity rebuild completes and the old database remains usable. Do not fail activation
+          # on that known exit status once readiness has been established.
+          SuccessExitStatus = [1];
+        };
+      };
+
+      # The following silences a benign FTL.log warning:
+      # WARNING API: Failed to read /etc/pihole/versions (key: internal_error)
+      tmpfiles.rules = [
+        # Type Path Mode User Group Age Argument
+        "f /etc/pihole/versions 0644 pihole pihole - -"
+      ];
     };
 
     services = {
@@ -122,17 +176,23 @@ in
           dhcp = {
             active = false;
           };
-          dns = {
-            domain = tld;
-            inherit (opts.dns) interface upstreams;
-            domainNeeded = true;
-            expandHosts = true;
+          dns =
+            {
+              domain = tld;
+              inherit (opts.dns) interface upstreams;
+              domainNeeded = true;
+              expandHosts = true;
 
-            piholePTR = "HOSTNAMEFQDN";
-            # DNS records now managed by octodns
-            hosts = opts.dns.extra_hosts;
-            cnameRecords = [];
-          };
+              piholePTR = "HOSTNAMEFQDN";
+            }
+            // (
+              if octodns_enabled
+              then {}
+              else {
+                hosts = opts.dns.extra_hosts;
+                cnameRecords = [];
+              }
+            );
           ntp = {
             ipv4.active = false;
             ipv6.active = false;
@@ -150,11 +210,4 @@ in
         ];
       };
     };
-
-    # The following silences a benign FTL.log warning:
-    # WARNING API: Failed to read /etc/pihole/versions (key: internal_error)
-    systemd.tmpfiles.rules = [
-      # Type Path Mode User Group Age Argument
-      "f /etc/pihole/versions 0644 pihole pihole - -"
-    ];
   })))

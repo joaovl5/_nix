@@ -1,0 +1,41 @@
+diff --git a/src/pihole6api/conn.py b/src/pihole6api/conn.py
+--- a/src/pihole6api/conn.py
++++ b/src/pihole6api/conn.py
+@@ -27,6 +27,7 @@ class PiHole6Connection:
+         self.session_id = None
+         self.csrf_token = None
+         self.validity = None
++        self.requires_auth = True
+         self.max_retries = max_retries
+         self.retry_delay = retry_delay
+         self.connection_timeout = connection_timeout
+@@ -72,10 +73,18 @@ class PiHole6Connection:
+                 if response.status_code == 200:
+                     data = response.json()
+                     if "session" in data and data["session"]["valid"] and data["session"]["validity"] > 0:
++                        self.requires_auth = True
+                         self.session_id = data["session"]["sid"]
+                         self.csrf_token = data["session"]["csrf"]
+                         self.validity = data["session"]["validity"]
+                         logger.debug("Authentication successful")
+                         return  # Successful authentication
++                    elif "session" in data and data["session"]["valid"] and data["session"].get("sid") is None and data["session"]["validity"] <= 0:
++                        self.requires_auth = False
++                        self.session_id = None
++                        self.csrf_token = None
++                        self.validity = data["session"]["validity"]
++                        logger.debug("Pi-hole API is operating without session auth")
++                        return  # Successful authentication
+                     else:
+                         if data.get("session"):
+                             logger.error(data["session"].get("message", "API failed without message"))
+@@ -102,6 +111,9 @@ class PiHole6Connection:
+
+     def _get_headers(self):
+         """Return headers including the authentication SID and CSRF token."""
++        if not self.requires_auth:
++            return {}
++
+         if not self.session_id or not self.csrf_token:
+             self._authenticate()
+

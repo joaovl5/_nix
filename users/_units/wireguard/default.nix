@@ -199,39 +199,65 @@ in
             };
           };
         }
-        (o.when opts.client.enable (o.merge [
-          {
-            sops.secrets = {
-              "wg_vpn_priv" = s.mk_secret "${s.dir}/wireguard/vpn.yaml" "key_priv" {};
-            };
-          }
-          {
-            networking.firewall.checkReversePath = "loose";
+        (o.when opts.client.enable (let
+          endpoint_host = lib.head (lib.splitString ":" opts.client.endpoint);
+          wait_for_endpoint = pkgs.writeShellScript "wait-wg-endpoint" ''
+            set -euo pipefail
+            max_retries=30
+            attempt=1
 
-            vpnNamespaces.${opts.client.namespace} = {
-              enable = true;
-              wireguardConfigFile = "/run/wireguard/vpn.conf";
-              accessibleFrom = opts.client.accessible_from;
-              bridgeAddress = "10.15.0.5";
-              namespaceAddress = "10.15.0.1";
-              portMappings = opts.client.port_mappings;
-              openVPNPorts = opts.client.open_vpn_ports;
-            };
+            while [ "$attempt" -le "$max_retries" ]; do
+              if ${pkgs.iputils}/bin/ping -c1 -W1 ${lib.escapeShellArg endpoint_host} > /dev/null 2>&1; then
+                exit 0
+              fi
 
-            systemd.services.${opts.client.namespace}.serviceConfig.ExecStartPre = lib.mkBefore [
-              "+${wg_conf_gen}"
-            ];
-          }
-          {
-            systemd.services = builtins.listToAttrs (map (svc: {
-                name = svc;
-                value.vpnConfinement = {
-                  enable = true;
-                  vpnNamespace = opts.client.namespace;
-                };
-              })
-              opts.client.confined_services);
-          }
-        ]))
+              ${pkgs.coreutils}/bin/sleep 1
+              attempt=$((attempt + 1))
+            done
+
+            echo "WireGuard endpoint ${endpoint_host} did not become reachable in time" >&2
+            exit 1
+          '';
+        in
+          o.merge [
+            {
+              sops.secrets = {
+                "wg_vpn_priv" = s.mk_secret "${s.dir}/wireguard/vpn.yaml" "key_priv" {};
+              };
+            }
+            {
+              networking.firewall.checkReversePath = "loose";
+
+              vpnNamespaces.${opts.client.namespace} = {
+                enable = true;
+                wireguardConfigFile = "/run/wireguard/vpn.conf";
+                accessibleFrom = opts.client.accessible_from;
+                bridgeAddress = "10.15.0.5";
+                namespaceAddress = "10.15.0.1";
+                portMappings = opts.client.port_mappings;
+                openVPNPorts = opts.client.open_vpn_ports;
+              };
+
+              systemd.services.${opts.client.namespace}.serviceConfig = {
+                # VPN-Confinement exits hard if the endpoint cannot be pinged during startup.
+                # During deploys, tyrant briefly loses its default route while networking settles,
+                # so wait for the endpoint before starting the namespace service.
+                ExecStartPre = lib.mkBefore [
+                  "+${wg_conf_gen}"
+                  "${wait_for_endpoint}"
+                ];
+              };
+            }
+            {
+              systemd.services = builtins.listToAttrs (map (svc: {
+                  name = svc;
+                  value.vpnConfinement = {
+                    enable = true;
+                    vpnNamespace = opts.client.namespace;
+                  };
+                })
+                opts.client.confined_services);
+            }
+          ]))
       ]
     ))

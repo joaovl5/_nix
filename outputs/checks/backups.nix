@@ -227,7 +227,6 @@ in {
   assert tyrant.services.restic.backups ? tyrant_actual_budget_state_to_a;
   assert tyrant.services.restic.backups ? tyrant_fxsync_syncstorage_db_to_a;
   assert tyrant.services.restic.backups ? tyrant_fxsync_tokenserver_db_to_a;
-  assert tyrant.services.restic.backups ? tyrant_soularr_state_to_a;
   assert !(tyrant.services.restic.backups ? tyrant_qbittorrent_to_a);
   assert !(tyrant.services.restic.backups ? tyrant_nixarr_to_a);
   assert lib.elem "unit:fxsync" tyrant.services.restic.backups.tyrant_fxsync_syncstorage_db_to_a.extraBackupArgs;

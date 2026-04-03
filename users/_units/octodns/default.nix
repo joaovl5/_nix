@@ -10,40 +10,7 @@
   s = my.secrets;
 
   octodns_config = inputs.self.packages.x86_64-linux.octodns;
-
-  pihole6api = pkgs.python3Packages.buildPythonPackage {
-    pname = "pihole6api";
-    version = "0.2.1";
-    src = inputs.pihole6api-src;
-    doCheck = false;
-    pyproject = true;
-    build-system = with pkgs.python313Packages; [
-      setuptools
-      wheel
-    ];
-    dependencies = with pkgs.python313Packages; [
-      packaging
-      requests
-    ];
-  };
-
-  octodns-pihole = pkgs.python3Packages.buildPythonPackage {
-    pname = "octodns-pihole";
-    version = "0.1.0";
-    src = inputs.octodns-pihole-src;
-    doCheck = false;
-    pyproject = true;
-    build-system = with pkgs.python313Packages; [
-      setuptools
-      wheel
-    ];
-    dependencies = with pkgs.python313Packages; [
-      pkgs.octodns
-      packaging
-      requests
-      pihole6api
-    ];
-  };
+  local_packages = import ../../../packages {inherit pkgs inputs;};
 
   # Python environment with octodns and providers
   # octodns-pihole is not in nixpkgs — needs packaging separately
@@ -51,7 +18,7 @@
     pkgs.octodns
     pkgs.octodns-providers.bind
     pkgs.octodns-providers.cloudflare
-    octodns-pihole
+    local_packages.octodns-pihole
   ]);
 
   vhost_policy_dir =
@@ -65,9 +32,10 @@ in
       systemd.services.octodns-sync = {
         description = "OctoDNS zone sync to Pi-hole and Cloudflare";
         wantedBy = ["multi-user.target" "pihole-ftl.service"];
-        after = ["network-online.target" "pihole-ftl.service"];
+        after = ["network-online.target" "pihole-ftl.service" "pihole-pwhash.service" "pihole-ftl-setup.service"];
         wants = ["network-online.target"];
-        partOf = ["pihole-ftl.service"];
+        requires = ["pihole-ftl-setup.service"];
+        partOf = ["pihole-ftl.service" "pihole-ftl-setup.service"];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;

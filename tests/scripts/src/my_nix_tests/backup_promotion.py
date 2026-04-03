@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
     from nix_machine_protocol import Machine
 
 _REPO_A = "/var/lib/backups/repos/coordinator"
