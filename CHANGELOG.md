@@ -2,6 +2,127 @@
 
 ---
 
+## [1.0.0](https://github.com/joaovl5/_nix/compare/v0.4.0..v1.0.0) - 2026-04-03
+
+### 🚀 Features
+
+- [0b89867](https://github.com/joaovl5/_nix/commit/0b89867c96e59939a456beff610224d0ee886f8b) _(ai)_ Update agents, skills, refactor code
+- [f8098e5](https://github.com/joaovl5/_nix/commit/f8098e519499a477380dc641060ef47ea3e80297) _(ai)_ Add refactor agent
+- [bb5e677](https://github.com/joaovl5/_nix/commit/bb5e677858b542464d52e2482c7f4641ba02d124) _(ai)_ Rework sys prompt
+- [afeb17f](https://github.com/joaovl5/_nix/commit/afeb17f2f892575ee983196a1999475348586fab) _(ai)_ Add superpowers, refactor runtimes
+- [1d4c1ca](https://github.com/joaovl5/_nix/commit/1d4c1cac8574db395a93e68cee0c3d8dab66969f) _(ai)_ Add declarative agent harnesses
+- [98ae79f](https://github.com/joaovl5/_nix/commit/98ae79fbb31a5a0f0ab1555907d5ab0cc1b34516) _(astral)_ Replace kernel to xanmod
+- [26a242a](https://github.com/joaovl5/_nix/commit/26a242ae29be3dc64a8c1d41c7322bc13b7be8d5) _(emacs)_ Building config
+- [44ac95a](https://github.com/joaovl5/_nix/commit/44ac95a54fadc69a4c30ea3699734fbbd4e6a52e) _(emacs)_ Add initial org config
+- [29bd0f8](https://github.com/joaovl5/_nix/commit/29bd0f8977cf8592651ca54b645bdfc1f5e6f222) _(emacs)_ Add wip org config
+- [a060c3f](https://github.com/joaovl5/_nix/commit/a060c3fd93a88988d6ce9fbf662b7e552cfa68c9) _(emacs)_ Add views, basic editing, etc
+- [ba5041c](https://github.com/joaovl5/_nix/commit/ba5041c4173d3b082b69aa0e60f434b24d1f1547) _(emacs)_ Tweaks to keymaps, ui, org, coding
+- [8e64d89](https://github.com/joaovl5/_nix/commit/8e64d89de7005c1640eea5887ab978d0a7c46340) _(home-manager)_ Add reusable hybrid-links
+- [8a56902](https://github.com/joaovl5/_nix/commit/8a56902749afb30b1ddc9f559c2c56853f0dd08e) _(kanata)_ Add kanata simple config
+- [d0d4b7f](https://github.com/joaovl5/_nix/commit/d0d4b7f29f3480679ea4040f96aaa0bdc3113916) _(kanata)_ Dir refactor, add tap-dances
+- [b60b322](https://github.com/joaovl5/_nix/commit/b60b32255fb1115b1c74cfc66e50cfb0ac120680) _(kanata)_ Added one-shot modifiers
+- [46cb3f4](https://github.com/joaovl5/_nix/commit/46cb3f4717e9921cbfcff645c82b50eb71586e4c) _(neovim)_ Add project-aware formatter config
+- [58d1943](https://github.com/joaovl5/_nix/commit/58d1943484bf007955b96558bf8ca565ff5b97c7) _(terminal)_ Add foot, refactor terminals
+- [d726bdb](https://github.com/joaovl5/_nix/commit/d726bdbf1ffeab12b6aceadd9ea7874526cacbc5) _(zellij)_ Setup config
+- [0ee1768](https://github.com/joaovl5/_nix/commit/0ee17682aa03766b751b9c0714093de24b77380c) Add actual-budget
+- [ceb2033](https://github.com/joaovl5/_nix/commit/ceb20333f1411f09123b2812b7011aed84fd2c7e) Add qbittorrent
+- [2eea5ef](https://github.com/joaovl5/_nix/commit/2eea5ef93043a9e9135f72fac9a3dd0563481708) Add fail2ban
+- [0edb084](https://github.com/joaovl5/_nix/commit/0edb08474dd78cd9c9e4e125a9831a49742faa9a) Nvidia+docker
+- [915aee8](https://github.com/joaovl5/_nix/commit/915aee80eb783a0572cd3befa326d4d93e30650b) Add emacs
+- [fe2cf8b](https://github.com/joaovl5/_nix/commit/fe2cf8bb4d0400740d672794cc7bbba8505ea6f3) Experiment w/ unstable-small on single host
+- [f2e03b6](https://github.com/joaovl5/_nix/commit/f2e03b604c7d08d211cff56b177cbd9c6b513b1c) WIP attempt in azure vpn setup
+- [7a5aaaf](https://github.com/joaovl5/_nix/commit/7a5aaaf2703d0bf902b6c44c132e5096b086d46a) Add musnix
+- [f8d578d](https://github.com/joaovl5/_nix/commit/f8d578d34fd2e99f6e3540174f62e8ac8abbffb6) Automated testing
+- [8feee8b](https://github.com/joaovl5/_nix/commit/8feee8b8de51930d22fc504dda93a17e4e3e6776) (WIP) microvms
+- [b267b1f](https://github.com/joaovl5/_nix/commit/b267b1f76330063b108c76d9785789efd41f11ea) Add rustdesk
+- [0de9e42](https://github.com/joaovl5/_nix/commit/0de9e424576e3aeb518041680a1a0fbf06417506) Add postgres unit wip
+- [0f0c78c](https://github.com/joaovl5/_nix/commit/0f0c78c14933788c597a72a982d8c527eedb76ed) [**breaking**] Backups
+
+### 🐛 Bug Fixes
+
+- [ab4f4a3](https://github.com/joaovl5/_nix/commit/ab4f4a3f9905d86a7951310e03c4b8cac55d31ca) _(AGENTS)_ Clarify check instructions
+- [51c52ee](https://github.com/joaovl5/_nix/commit/51c52eee10fcebe9daddf51025311a003c9cbcb4) _(ai)_ Restructure skills
+- [dd9e92e](https://github.com/joaovl5/_nix/commit/dd9e92e5587d1bcda0982e28367cfbb6600a3094) _(ai)_ Reword sys. prompt and remove memory mcp
+- [72e2938](https://github.com/joaovl5/_nix/commit/72e29383e2d15fae48be7939d19bdfb5429b30e7) _(ai)_ Misc fixes
+- [211c93c](https://github.com/joaovl5/_nix/commit/211c93cc741a9fdd2f0392546dbc3f48f351fc19) _(ai)_ Remove claude code
+- [2510c67](https://github.com/joaovl5/_nix/commit/2510c6772205ce489e5721ca4be84c2a486fe843) _(ai)_ Undo unnecessary merge prompts
+- [89664ac](https://github.com/joaovl5/_nix/commit/89664accb5f2752b736340431b331958cafe123c) _(ai)_ Add alternative skills path
+- [1e4e6aa](https://github.com/joaovl5/_nix/commit/1e4e6aa0449eb8b0f732d5fd6efb9c6c911e6ea4) _(ai)_ Remove bad mcps and avoid external deps
+- [fb5ac68](https://github.com/joaovl5/_nix/commit/fb5ac68576e5b77833840e98e3c1bf2fcf8c5223) _(ai)_ Remove vllm, add llama-cpp
+- [6256918](https://github.com/joaovl5/_nix/commit/625691815a6af6d2e80d4dcc5256d2aca58812ff) _(discord)_ Remove plugins
+- [848b68e](https://github.com/joaovl5/_nix/commit/848b68ecc780c9f4b99b185158d9f5dfdf97e986) _(emacs)_ Misc tweaks
+- [8924a0d](https://github.com/joaovl5/_nix/commit/8924a0d11080616bbadf84b51fe2da528794c70b) _(emacs)_ Wip tweaks
+- [f93fe7b](https://github.com/joaovl5/_nix/commit/f93fe7bad3367dc6a676ae651ff9498121a4dbd5) _(foot)_ Add tweaks
+- [58dbde3](https://github.com/joaovl5/_nix/commit/58dbde3f5be81cc7bba8333079793300052746ad) _(foot)_ Tweak cfg
+- [9758eb5](https://github.com/joaovl5/_nix/commit/9758eb52e63ae3bbfb0c0c219cccee1414d59a22) _(ghostty)_ Remove zellij binds
+- [e39ac69](https://github.com/joaovl5/_nix/commit/e39ac6929c09a16b7b1a75d0996ee6904fc53926) _(ghostty)_ Remove systemd service
+- [7da6271](https://github.com/joaovl5/_nix/commit/7da6271abaf3ec94aad6932caf51bffc8bd5c936) _(installer)_ Remove misplaced conftest
+- [458618f](https://github.com/joaovl5/_nix/commit/458618f37514804bfc609b936fff7ed30fbfe164) _(kanata)_ Fix symlink name
+- [3887b29](https://github.com/joaovl5/_nix/commit/3887b297f4cd8dce4d5236084c04d993961c97ec) _(librewolf)_ Remove weird section of cfg
+- [08de653](https://github.com/joaovl5/_nix/commit/08de653d4c78ed46ed3aaa6ae3b81c0e37635b5c) _(neovim)_ Add taplo formatting
+- [4d00174](https://github.com/joaovl5/_nix/commit/4d001741c5163d819217a823b5ffc709a3f2eb41) _(neovim)_ Remove broken yamlls
+- [3b3d873](https://github.com/joaovl5/_nix/commit/3b3d8739f78c74112edf35785fdd89606c4c968a) _(neovim)_ Remove lazy-lock in wrong place
+- [e5a2bb5](https://github.com/joaovl5/_nix/commit/e5a2bb56d94c8711920f2febdb195adb71b75c49) _(neovim)_ Restore hover and remove twilight
+- [c5f19b6](https://github.com/joaovl5/_nix/commit/c5f19b6fec2bcd4364becd8a06c94e0c7fac2bf6) _(neovim)_ Workaround for typescript highlights
+- [376781c](https://github.com/joaovl5/_nix/commit/376781c5d512515e2b9b4935c63fd3ee26e26e14) _(neovim)_ Misc changes/fixes
+- [55ae7a3](https://github.com/joaovl5/_nix/commit/55ae7a3b90d8f750c5195df61829ddc294c850cf) _(niri)_ Switch from ghostty to foot
+- [e9916bb](https://github.com/joaovl5/_nix/commit/e9916bb2c53cab7c12e4963a06e85d8942d82a77) _(niri)_ Remove broken float-check script
+- [d6e98b1](https://github.com/joaovl5/_nix/commit/d6e98b13f37bfc34a98fe0bb67dce30bfc89f710) _(nix)_ Add flake-self-attrs feature
+- [92bbffd](https://github.com/joaovl5/_nix/commit/92bbffd7839bb825f1f64987f89c4e1a223cd9d3) _(optnix)_ Remove musnix.kernel.packages scope
+- [d2aaf73](https://github.com/joaovl5/_nix/commit/d2aaf7307c942dc4407dd924716768d6486868c2) _(statix)_ Rework ignore pattern
+- [8e7b891](https://github.com/joaovl5/_nix/commit/8e7b891ad4a8cac55781c7a2186bba8411ceda6a) _(temperance)_ Remove dhcp
+- [2db7cf1](https://github.com/joaovl5/_nix/commit/2db7cf103cf8100195a11486bddf3281acf65732) _(term)_ Wip refactor
+- [63e3860](https://github.com/joaovl5/_nix/commit/63e3860c44dde78f08815157ee6236c9435d7632) Remove old todo
+- [c8fc73f](https://github.com/joaovl5/_nix/commit/c8fc73fc3b2bc027c7c777d7eab914693622cad8) Rework kanata service
+- [c584136](https://github.com/joaovl5/_nix/commit/c5841364158f7387c03c50106f7f9df9ea4b2650) Remove rt kernel
+- [26dffab](https://github.com/joaovl5/_nix/commit/26dffabc9bb5fc2a7493b0b14c113cd064a7946e) Re-add libreoffice
+- [e33698b](https://github.com/joaovl5/_nix/commit/e33698bf4cbd79bad79c2efe0996e996996e7a06) Rework environment and login manager
+- [5eeae5b](https://github.com/joaovl5/_nix/commit/5eeae5bc11ee5b903da9d968bd742c8047b837c9) Remove redundant 'builtins'
+- [04a902d](https://github.com/joaovl5/_nix/commit/04a902ddbf4c2c5feec8ad8d343feed40663eb12) Remove unused secrets sops import
+- [8f5ad6c](https://github.com/joaovl5/_nix/commit/8f5ad6cab2c8624884bb7d2741be36c850fd0c50) Change kernel and nvidia driver
+- [6fc41d6](https://github.com/joaovl5/_nix/commit/6fc41d6ef9a0ae0773edef28dfa7cdcfce658f4f) Disable zram
+- [7c89e5a](https://github.com/joaovl5/_nix/commit/7c89e5aefec91fc4a5c194604b1568ca0dea006f) Remove litellm for _reasons_
+- [50be040](https://github.com/joaovl5/_nix/commit/50be0405cc623b6a9808f234abb2aba8b889ff28) Remove soularr
+- [f5b5009](https://github.com/joaovl5/_nix/commit/f5b50095583d92bca7fa8d22b2a5d220d980d85f) Handle deploy race-conditions
+- [d629458](https://github.com/joaovl5/_nix/commit/d629458f44f16139b982ba06d52903588b9b00d5) Handle octodns patches and rework packaging
+
+### 💼 Other
+
+- [0b89867](https://github.com/joaovl5/_nix/commit/0b89867c96e59939a456beff610224d0ee886f8b) _(ai)_ Update agents, skills, refactor code
+- [1d4c1ca](https://github.com/joaovl5/_nix/commit/1d4c1cac8574db395a93e68cee0c3d8dab66969f) _(ai)_ Add declarative agent harnesses
+- [1563ffc](https://github.com/joaovl5/_nix/commit/1563ffc7bdb5871a4a6833e896b51214f68e3dc4) _(ai)_ Remove migrated top-level agent modules
+- [26a242a](https://github.com/joaovl5/_nix/commit/26a242ae29be3dc64a8c1d41c7322bc13b7be8d5) _(emacs)_ Building config
+- [46cb3f4](https://github.com/joaovl5/_nix/commit/46cb3f4717e9921cbfcff645c82b50eb71586e4c) _(neovim)_ Add project-aware formatter config
+- [516e207](https://github.com/joaovl5/_nix/commit/516e207e2a4486819afeb2a7ebdbce08b23eccae) Joao Pedro <vieiraleao2005@gmail.com>
+- [0f0c78c](https://github.com/joaovl5/_nix/commit/0f0c78c14933788c597a72a982d8c527eedb76ed) [**breaking**] Backups
+
+### 🚜 Refactor
+
+- [24f2558](https://github.com/joaovl5/_nix/commit/24f2558e3168b7b1208bb8af34d6b41c0bc092c1) _(ai)_ Add yaml metadata on agent
+- [1563ffc](https://github.com/joaovl5/_nix/commit/1563ffc7bdb5871a4a6833e896b51214f68e3dc4) _(ai)_ Remove migrated top-level agent modules
+- [0193534](https://github.com/joaovl5/_nix/commit/0193534aa98b1639ccf192a38f0f1b5278defedd) _(tests)_ Remove redundant code
+- [4d18472](https://github.com/joaovl5/_nix/commit/4d18472e8a65658b360dc8e7808773532ad4d126) Use hybrid-links for prompts
+- [2a37405](https://github.com/joaovl5/_nix/commit/2a37405fe761139ee5a4f976f5b51884e9c9b495) Add microvm as dedicated modulegroup
+
+### 📚 Documentation
+
+- [ec8ab37](https://github.com/joaovl5/_nix/commit/ec8ab379ea78f7e5564a590b825d4a29471168ea) Add wip docs for deployment
+
+### ⚡ Performance
+
+- [1a0781b](https://github.com/joaovl5/_nix/commit/1a0781b58b2994e84827a353a79b10d0fe8b2ef5) _(librewolf)_ Add optimization config
+
+### ⚙️ Miscellaneous Tasks
+
+- [1a967c2](https://github.com/joaovl5/_nix/commit/1a967c21ee3a8ca13c106de153d4817e8a6fa31e) _(neovim)_ Update plugins
+- [516e207](https://github.com/joaovl5/_nix/commit/516e207e2a4486819afeb2a7ebdbce08b23eccae) Update to v0.4.0
+- [1073ef4](https://github.com/joaovl5/_nix/commit/1073ef4c7a555f6ef3de3e92b3a9ad10f68f14b4) Update intellishell db
+- [8e5ee8c](https://github.com/joaovl5/_nix/commit/8e5ee8ccf9399052f2d09e7b7b29165c58da6297) Update inputs+lazy
+- [9c2741a](https://github.com/joaovl5/_nix/commit/9c2741a6a0eb1f648dfc1899b5cb257eef320ebe) Update intellishell
+- [6885a01](https://github.com/joaovl5/_nix/commit/6885a01c90795012742c3f9dca10f2590ecd3a69) Update packages
+- [2498b8f](https://github.com/joaovl5/_nix/commit/2498b8fd9072f7935284227825e3581782c1aa59) Update flake.lock
+- [697428c](https://github.com/joaovl5/_nix/commit/697428ce4375c9c3750c3833db5143582f0f98ef) Remove commitizen
+
 ## [0.4.0](https://github.com/joaovl5/_nix/compare/v0.3.0..v0.4.0) - 2026-03-04
 
 ### 🚀 Features
