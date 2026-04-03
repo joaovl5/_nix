@@ -7,6 +7,7 @@ in {
     ./actual-budget
     ./fail2ban
     ./pihole
+    ./postgres
     ./nixarr
     ./reverse-proxy
     ./octodns
