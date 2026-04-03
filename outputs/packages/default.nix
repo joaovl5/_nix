@@ -1,8 +1,8 @@
 {self, ...} @ inputs: let
   DEFAULT_SYSTEM = "x86_64-linux";
   pkgs = inputs.nixpkgs.legacyPackages.${DEFAULT_SYSTEM};
+  local_packages = import ../../packages {inherit pkgs inputs;};
   octodns = import ./octodns.nix inputs;
-  vm_launcher = import ./vm.nix {inherit pkgs;};
 in {
   packages.${DEFAULT_SYSTEM} =
     {
@@ -10,7 +10,12 @@ in {
         inherit (self.nixosConfigurations) iso;
       in
         iso.config.system.build.isoImage;
-      inherit vm_launcher;
+      inherit
+        (local_packages)
+        octodns-pihole
+        pihole6api
+        vm_launcher
+        ;
     }
     // octodns;
 }
