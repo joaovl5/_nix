@@ -21,10 +21,6 @@ rec {
           };
         };
 
-        "unit.soularr" = {
-          enable = true;
-        };
-
         "unit.fxsync" = {
           enable = true;
         };

@@ -12,9 +12,6 @@
     "unit.nixarr" = {
     };
 
-    "unit.soularr" = {
-    };
-
     "unit.fxsync" = {
     };
 

@@ -8,7 +8,6 @@ in {
     ./fail2ban
     ./pihole
     ./nixarr
-    ./soularr
     ./reverse-proxy
     ./octodns
     ./fxsync

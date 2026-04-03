@@ -138,9 +138,6 @@
       url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # my soularr fork with a nix flake - TODO: put in my nur repo
-    soularr.url = "git+https://github.com/joaovl5/soularr.git?shallow=1";
-    soularr.inputs.nixpkgs.follows = "nixpkgs";
     # Other ---
     ## ai
     anthropic-skills.url = "git+https://github.com/anthropics/skills?shallow=1";
