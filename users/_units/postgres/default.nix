@@ -10,7 +10,6 @@
   my = mylib.use config;
   o = my.options;
   inherit (o) t;
-  u = my.units;
   s = my.secrets;
 
   Database = t.submodule (_: {
@@ -65,10 +64,7 @@ in
           computed_data_dir =
             if opts.data_dir != null
             then opts.data_dir
-            else "${u.data_dir}/postgres";
-
-          postgres_uid = toString config.ids.uids.postgres;
-          postgres_gid = toString config.ids.gids.postgres;
+            else "/var/lib/postgresql/${pkgs.postgresql.psqlSchema}";
 
           database_names = builtins.map (db: db.name) opts.databases;
           database_names_checked =
@@ -102,12 +98,6 @@ in
         in {
           my."unit.postgres".admin.password = lib.mkDefault (s.secret_path "postgres_admin_password");
           sops.secrets."postgres_admin_password" = s.mk_secret "${s.dir}/postgres.yaml" "admin_password" {};
-          system.activationScripts.ensure_data_directory_postgres = ''
-            echo "[!] Ensuring Postgres directories and permissions"
-            install -d -m 0700 ${computed_data_dir}
-            chown -R ${postgres_uid}:${postgres_gid} ${computed_data_dir}
-            chmod 0700 ${computed_data_dir}
-          '';
 
           services.postgresql = {
             enable = true;
