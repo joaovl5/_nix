@@ -99,6 +99,11 @@ in
         in {
           my."unit.postgres".admin.password = lib.mkDefault (s.secret_path "postgres_admin_password");
           sops.secrets."postgres_admin_password" = s.mk_secret "${s.dir}/postgres.yaml" "admin_password" {};
+          system.activationScripts.ensure_data_directory_postgres = ''
+            echo "[!] Ensuring Postgres directories and permissions"
+            install -d -m 0700 -o postgres -g postgres ${computed_data_dir}
+            chown -R postgres:postgres ${computed_data_dir}
+          '';
 
           services.postgresql = {
             enable = true;
