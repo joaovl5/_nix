@@ -72,13 +72,13 @@ in
 
         cat > ${web_config_path} <<'EOF'
         pid ${web_runtime_root}/nginx.pid;
-        error_log stderr notice;
+        error_log /proc/self/fd/2 notice;
 
         events {}
 
         http {
           include ${pkgs.nginx}/conf/mime.types;
-          access_log /dev/stdout;
+          access_log /proc/self/fd/1;
           client_body_temp_path ${web_runtime_root}/client_body_temp;
           proxy_temp_path ${web_runtime_root}/proxy_temp;
           fastcgi_temp_path ${web_runtime_root}/fastcgi_temp;
