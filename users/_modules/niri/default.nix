@@ -161,7 +161,7 @@
 
           mouse = {
             accel-profile = "flat";
-            accel-speed = 1;
+            accel-speed = -0.9;
           };
           touchpad = {
             dwt = true;
