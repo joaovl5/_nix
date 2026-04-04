@@ -82,21 +82,16 @@ rec {
             C.enable = false;
           };
           host_items = {
-            root_snapshot = {
-              kind = "btrfs_snapshot";
-              policy = "filesystem_snapshot";
-              btrfs_snapshot = {
-                source_path = "/";
-                snapshot_path = "/var/lib/backups/snapshots/root/current";
-              };
-            };
             home_snapshot = {
-              kind = "btrfs_snapshot";
+              kind = "path";
               policy = "filesystem_snapshot";
               promote_to = ["B"];
-              btrfs_snapshot = {
-                source_path = "/home";
-                snapshot_path = "/var/lib/backups/snapshots/home/current";
+              path = {
+                paths = ["/home/tyrant"];
+                exclude = [
+                  "/home/tyrant/private/units/soularr/data"
+                  "/home/tyrant/.local/share/docker"
+                ];
               };
             };
           };
@@ -144,6 +139,13 @@ rec {
           };
         };
       };
+
+      systemd.tmpfiles.rules = [
+        "d /var/lib/backups 0755 root root -"
+        "d /var/lib/backups/repos 0755 root root -"
+        "d /var/lib/backups/repos/tyrant 0700 root root -"
+        "d /var/lib/backups/repos/lavpc 0750 tyrant tyrant -"
+      ];
     };
   };
   temperance = let

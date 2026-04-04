@@ -25,7 +25,8 @@ At the time of writing:
 - `nix build .#checks.x86_64-linux.backup_promotion --no-link` passes
 - `nix fmt` passes
 - `git add . && prek` passes
-- `nix flake check --all-systems` is still noisy for an unrelated reason: `checks.aarch64-linux.backup_promotion` requires an `aarch64-linux` builder for `backup-test-ssh-key.drv`
+- `nix flake check` passes on the current host
+- `nix flake check --all-systems` is still blocked here by missing `aarch64-linux` builder/binfmt support
 
 ### Separate eval proof from runtime proof
 
@@ -142,10 +143,9 @@ Configured repo templates:
 
 Declared local items include:
 
-- `root_snapshot` (`btrfs_snapshot`)
-- `home_snapshot` (`btrfs_snapshot`, promoted to `B`)
-- Pi-hole state
-- Traefik ACME state
+- `home_snapshot` (`path`, promoted to `B`) for `/home/tyrant` with explicit excludes for Soularr data and Docker state
+- Pi-hole state (`/var/lib/pihole` only; logs are not backed up)
+- Traefik ACME state (`critical_infra` policy; every 6 hours)
 - Actual Budget state
 - Fxsync MariaDB dumps for both databases
 - Soularr state

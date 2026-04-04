@@ -183,7 +183,7 @@ in {
   assert lavpc.my."unit.backup".coordinator_host == "tyrant";
   assert tyrant.my."unit.backup".policies ? filesystem_snapshot;
   assert tyrant.my."unit.backup".policies.critical_infra.promote_to == ["B" "C"];
-  assert tyrant.my."unit.backup".policies.critical_infra.timerConfig.OnCalendar == "*:0/6";
+  assert tyrant.my."unit.backup".policies.critical_infra.timerConfig.OnCalendar == "*-*-* 00/6:00:00";
   assert tyrant.my."unit.backup".policies.critical_infra.forget == ["--keep-daily 14" "--keep-weekly 8" "--group-by host"];
   assert tyrant.my."unit.backup".policies.sensitive_data.promote_to == ["B" "C"];
   assert tyrant.my."unit.backup".policies.sensitive_data.timerConfig.OnCalendar == "*-*-* 00/12:00:00";
@@ -220,7 +220,6 @@ in {
   assert builtins.isList custom_item.command;
   assert builtins.length custom_item.command == 1;
   assert custom_item.stdin_filename == "custom.dump";
-  assert tyrant.services.restic.backups ? tyrant_root_snapshot_to_a;
   assert tyrant.services.restic.backups ? tyrant_home_snapshot_to_a;
   assert tyrant.services.restic.backups ? tyrant_pihole_state_to_a;
   assert tyrant.services.restic.backups ? tyrant_traefik_acme_to_a;
@@ -232,10 +231,6 @@ in {
   assert lib.elem "unit:fxsync" tyrant.services.restic.backups.tyrant_fxsync_syncstorage_db_to_a.extraBackupArgs;
   assert lavpc.services.restic.backups ? lavpc_shared_sync_to_a;
   assert lavpc.services.restic.backups.lavpc_shared_sync_to_a.paths == ["/home/lav/.sensitive"];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.pruneOpts == [];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.checkOpts == [];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.user == "root";
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.backupPrepareCommand != null;
   assert tyrant.systemd.services ? backup_promote_tyrant_home_snapshot_to_b;
   assert tyrant.systemd.services ? backup_forget_tyrant_home_snapshot_on_a;
   assert tyrant.systemd.services ? backup_prune_tyrant_a;

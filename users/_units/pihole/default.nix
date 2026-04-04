@@ -85,7 +85,6 @@ in
       path = {
         paths = [
           source_state_dir
-          source_log_dir
         ];
       };
     };
