@@ -124,8 +124,8 @@ in
           systemd.services.postgresql-password-sync = {
             description = "Synchronize PostgreSQL role passwords";
             wantedBy = ["multi-user.target"];
-            requires = ["postgresql.service"];
-            after = ["postgresql.service"];
+            requires = ["postgresql.service" "postgresql-setup.service"];
+            after = ["postgresql.service" "postgresql-setup.service"];
             path = with pkgs; [util-linux];
             serviceConfig = {
               Type = "oneshot";
