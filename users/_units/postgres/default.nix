@@ -67,6 +67,9 @@ in
             then opts.data_dir
             else "${u.data_dir}/postgres";
 
+          postgres_uid = toString config.ids.uids.postgres;
+          postgres_gid = toString config.ids.gids.postgres;
+
           database_names = builtins.map (db: db.name) opts.databases;
           database_names_checked =
             if builtins.elem "admin" database_names
@@ -101,8 +104,9 @@ in
           sops.secrets."postgres_admin_password" = s.mk_secret "${s.dir}/postgres.yaml" "admin_password" {};
           system.activationScripts.ensure_data_directory_postgres = ''
             echo "[!] Ensuring Postgres directories and permissions"
-            install -d -m 0700 -o postgres -g postgres ${computed_data_dir}
-            chown -R postgres:postgres ${computed_data_dir}
+            install -d -m 0700 ${computed_data_dir}
+            chown -R ${postgres_uid}:${postgres_gid} ${computed_data_dir}
+            chmod 0700 ${computed_data_dir}
           '';
 
           services.postgresql = {
