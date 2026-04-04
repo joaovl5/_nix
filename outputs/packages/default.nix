@@ -12,6 +12,7 @@ in {
         iso.config.system.build.isoImage;
       inherit
         (local_packages)
+        kaneo
         octodns-pihole
         pihole6api
         vm_launcher

@@ -11,6 +11,7 @@
   o = my.options;
   inherit (o) t;
   u = my.units;
+  s = my.secrets;
 
   Database = t.submodule (_: {
     options = {
@@ -96,13 +97,16 @@ in
             '')
             normalized_databases;
         in {
+          my."unit.postgres".admin.password = lib.mkDefault (s.secret_path "postgres_admin_password");
+          sops.secrets."postgres_admin_password" = s.mk_secret "${s.dir}/postgres.yaml" "admin_password" {};
+
           services.postgresql = {
             enable = true;
             package = pkgs.postgresql;
             enableTCPIP = true;
             dataDir = computed_data_dir;
             authentication = lib.mkForce (authentication normalized_databases);
-            settings.listen_addresses = "127.0.0.1,::1";
+            settings.listen_addresses = lib.mkForce "127.0.0.1,::1";
             ensureDatabases = ["admin"] ++ database_names_checked;
             ensureUsers =
               [

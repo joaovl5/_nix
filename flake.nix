@@ -126,6 +126,10 @@
       url = "git+https://github.com/sbarbett/pihole6api?shallow=1";
       flake = false;
     };
+    kaneo-src = {
+      url = "git+https://github.com/usekaneo/kaneo?shallow=1";
+      flake = false;
+    };
 
     # atticd nix cache server thingy
     atticd = {
