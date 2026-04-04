@@ -66,6 +66,7 @@ in
           ${web_runtime_root}/scgi_temp
 
         cp -a ${pkg}/share/kaneo/web/. ${web_asset_root}/
+        chmod -R u+w ${web_asset_root}
         export KANEO_WEB_ASSET_ROOT=${web_asset_root}
         ${pkg}/share/kaneo/replace-web-env.sh
 
