@@ -34,6 +34,14 @@ rec {
           enable = true;
         };
 
+        "unit.postgres" = {
+          enable = true;
+        };
+
+        "unit.kaneo" = {
+          enable = true;
+        };
+
         "unit.qbittorrent" = {
           enable = true;
         };

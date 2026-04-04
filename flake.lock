@@ -529,7 +529,7 @@
       "flake": false,
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-GxEl+7WnLhGEeSgiTfPhG5dntkT1LQpS8ON7109s0K4=",
+        "narHash": "sha256-oNPjLm/Ohmf9sFXXSUis8wO19OgCr6jRtP66zamVkNA=",
         "path": "./globals",
         "type": "path"
       },
@@ -952,6 +952,23 @@
         "type": "github"
       }
     },
+    "kaneo-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775249402,
+        "narHash": "sha256-8dXodO9fQBDhCvPlUdGs0fgNhgiepi7wFXMvPJvP1jY=",
+        "ref": "refs/heads/main",
+        "rev": "7e31cbbe3ffb2e26d03b10265924704109389f02",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/usekaneo/kaneo"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/usekaneo/kaneo"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "blueprint": "blueprint",
@@ -1023,10 +1040,10 @@
     "mysecrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1774990847,
-        "narHash": "sha256-Ku5H0UnfbK+w1XaIBoy9rIVsKQEIsjg5XpOVsSO2X2Q=",
+        "lastModified": 1775259319,
+        "narHash": "sha256-o6JJ9Q7tJhOepsjZ20KYvKeMP3bEg3Oorm39f1GdY0Y=",
         "ref": "main",
-        "rev": "e0107a493e4b6976250af6e72924b8d0b867a8a4",
+        "rev": "d89e3e6410ead53e18ff283cf881581c058437e5",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/joaovl5/__secrets.git"
@@ -1403,6 +1420,7 @@
         "globals": "globals",
         "hm": "hm",
         "hyprland-plugins": "hyprland-plugins",
+        "kaneo-src": "kaneo-src",
         "llm-agents": "llm-agents",
         "microvm": "microvm",
         "musnix": "musnix",
