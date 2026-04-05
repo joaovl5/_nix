@@ -96,11 +96,11 @@
         };
         critical_infra = {
           timerConfig = {
-            OnCalendar = "*:0/6";
+            OnCalendar = "*-*-* 00/6:00:00";
             Persistent = "true";
           };
           promotion_timerConfig = {
-            OnCalendar = "*:0/6";
+            OnCalendar = "*-*-* 00/6:00:00";
             RandomizedDelaySec = "15m";
             Persistent = "true";
           };

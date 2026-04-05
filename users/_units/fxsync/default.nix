@@ -89,8 +89,7 @@ in
 
           system.activationScripts.ensure_data_directory_fxsync = ''
             echo "[!] Ensuring Fxsync directories and permissions"
-            mkdir -v -p ${computed_data_dir}
-            chown -R ${user}:${group} ${computed_data_dir}
+            install -d -m 0755 -o ${user} -g ${group} ${computed_data_dir}
           '';
         }
         (u.make_docker_unit {
