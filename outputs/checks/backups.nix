@@ -230,8 +230,8 @@ in {
   assert !(tyrant.services.restic.backups ? tyrant_qbittorrent_to_a);
   assert !(tyrant.services.restic.backups ? tyrant_nixarr_to_a);
   assert lib.elem "unit:fxsync" tyrant.services.restic.backups.tyrant_fxsync_syncstorage_db_to_a.extraBackupArgs;
-  assert lavpc.services.restic.backups ? lavpc_shared_sync_to_a;
-  assert lavpc.services.restic.backups.lavpc_shared_sync_to_a.paths == ["/home/lav/.sensitive"];
+  assert tyrant.services.restic.backups ? tyrant_shared_docs_core_to_a;
+  assert tyrant.services.restic.backups.tyrant_shared_docs_core_to_a.paths == ["/srv/shared/docs/core"];
   assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.pruneOpts == [];
   assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.checkOpts == [];
   assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.user == "root";
@@ -255,8 +255,9 @@ in {
   assert tyrant.my."unit.backup".rendered.services.backup_check_tyrant_b.after == ["network-online.target"];
   assert tyrant.my."unit.backup".rendered.services.backup_check_tyrant_b.wants == ["network-online.target"];
   assert lib.elem tyrant.programs.ssh.package tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.path;
-  assert lavpc.my."unit.backup".rendered.services ? backup_forget_lavpc_shared_sync_on_a;
-  assert lavpc.my."unit.backup".rendered.services ? backup_prune_lavpc_a;
-  assert lavpc.my."unit.backup".rendered.services ? backup_check_lavpc_a;
+  assert tyrant.my."unit.backup".rendered.services ? backup_promote_tyrant_shared_docs_core_to_b;
+  assert tyrant.my."unit.backup".rendered.services ? backup_forget_tyrant_shared_docs_core_on_a;
+  assert tyrant.my."unit.backup".rendered.services ? backup_forget_tyrant_shared_docs_core_on_b;
+  assert lavpc.my."unit.backup".rendered.services == {};
     pkgs.runCommand "backups-eval" {} "touch $out";
 }

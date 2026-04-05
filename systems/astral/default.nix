@@ -20,9 +20,12 @@ in {
     ../_modules/services/azure-vpn.nix
     ../_modules/console
     ../_modules/shell
+    ../_modules/storage/client.nix
     (mylib.hosts.host_config "lavpc")
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
+
+  my.storage.client.enable = true;
 
   my.azure-vpn = {
     # enable = true;

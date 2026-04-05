@@ -35,6 +35,8 @@
     (import ./_modules/espanso)
     (import ./_modules/kanata)
     (import ./_modules/discord)
+    (import ./_modules/syncthing)
+    (import ./_modules/storage)
   ];
   module_imports = extract_imports modules;
 
@@ -92,10 +94,11 @@ in {
         ## cli tools
         ### nix
         ### gpg
+        my.syncthing = {
+          enable = true;
+        };
+
         services = {
-          syncthing = {
-            enable = true;
-          };
           gpg-agent = {
             enable = true;
             enableSshSupport = true;
