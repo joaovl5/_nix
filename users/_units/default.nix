@@ -9,6 +9,7 @@ in {
     ./fail2ban
     ./pihole
     ./postgres
+    ./kaneo
     ./nixarr
     ./reverse-proxy
     ./octodns

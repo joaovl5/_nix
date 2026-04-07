@@ -952,6 +952,23 @@
         "type": "github"
       }
     },
+    "kaneo-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775249402,
+        "narHash": "sha256-8dXodO9fQBDhCvPlUdGs0fgNhgiepi7wFXMvPJvP1jY=",
+        "ref": "refs/heads/main",
+        "rev": "7e31cbbe3ffb2e26d03b10265924704109389f02",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/usekaneo/kaneo"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/usekaneo/kaneo"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "blueprint": "blueprint",
@@ -1403,6 +1420,7 @@
         "globals": "globals",
         "hm": "hm",
         "hyprland-plugins": "hyprland-plugins",
+        "kaneo-src": "kaneo-src",
         "llm-agents": "llm-agents",
         "microvm": "microvm",
         "musnix": "musnix",

@@ -59,6 +59,14 @@ rec {
           enable = true;
         };
 
+        "unit.postgres" = {
+          enable = true;
+        };
+
+        "unit.kaneo" = {
+          enable = true;
+        };
+
         "unit.qbittorrent" = {
           enable = true;
         };
@@ -85,21 +93,16 @@ rec {
             C.enable = false;
           };
           host_items = {
-            root_snapshot = {
-              kind = "btrfs_snapshot";
-              policy = "filesystem_snapshot";
-              btrfs_snapshot = {
-                source_path = "/";
-                snapshot_path = "/var/lib/backups/snapshots/root/current";
-              };
-            };
             home_snapshot = {
-              kind = "btrfs_snapshot";
+              kind = "path";
               policy = "filesystem_snapshot";
               promote_to = ["B"];
-              btrfs_snapshot = {
-                source_path = "/home";
-                snapshot_path = "/var/lib/backups/snapshots/home/current";
+              path = {
+                paths = ["/home/tyrant"];
+                exclude = [
+                  "/home/tyrant/private/units/soularr/data"
+                  "/home/tyrant/.local/share/docker"
+                ];
               };
             };
             shared_docs_core = {
