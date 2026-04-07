@@ -131,7 +131,7 @@ rec {
             address = "11.1.0.12/32";
             dns = "192.168.15.13";
             endpoint = with temperance; "${hostname}:51820";
-            confined_services = ["transmission"];
+            # confined_services = ["transmission"];
             port_mappings = [
               {
                 from = 9091;
