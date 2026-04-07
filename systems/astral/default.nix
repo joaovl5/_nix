@@ -38,11 +38,15 @@ in {
     hostName = lib.mkForce cfg.hostname;
   };
 
-  users.mutableUsers = false;
-  users.users.root = {
-    hashedPassword = lib.mkForce null;
-    hashedPasswordFile = s.secret_path "password_hash";
-    shell = pkgs.bash;
+  users = {
+    mutableUsers = false;
+    groups.plugdev = {};
+    users.lav.extraGroups = ["plugdev"];
+    users.root = {
+      hashedPassword = lib.mkForce null;
+      hashedPasswordFile = s.secret_path "password_hash";
+      shell = pkgs.bash;
+    };
   };
 
   # zram
@@ -61,6 +65,11 @@ in {
       implementation = lib.mkForce "dbus";
       packages = with pkgs; [dconf];
     };
+    udev.extraRules = ''
+      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="31e3", ATTRS{idProduct}=="1402", GROUP="plugdev", MODE="0660"
+      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3710", ATTRS{idProduct}=="5406", GROUP="plugdev", MODE="0660"
+      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="36a7", ATTRS{idProduct}=="a882", GROUP="plugdev", MODE="0660"
+    '';
   };
 
   # Programs

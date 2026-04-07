@@ -10,7 +10,6 @@
   my = mylib.use config;
   o = my.options;
   inherit (o) t;
-  u = my.units;
   s = my.secrets;
 
   Database = t.submodule (_: {
@@ -65,7 +64,7 @@ in
           computed_data_dir =
             if opts.data_dir != null
             then opts.data_dir
-            else "${u.data_dir}/postgres";
+            else "/var/lib/postgresql/${pkgs.postgresql.psqlSchema}";
 
           database_names = builtins.map (db: db.name) opts.databases;
           database_names_checked =
@@ -125,8 +124,8 @@ in
           systemd.services.postgresql-password-sync = {
             description = "Synchronize PostgreSQL role passwords";
             wantedBy = ["multi-user.target"];
-            requires = ["postgresql.service"];
-            after = ["postgresql.service"];
+            requires = ["postgresql.service" "postgresql-setup.service"];
+            after = ["postgresql.service" "postgresql-setup.service"];
             path = with pkgs; [util-linux];
             serviceConfig = {
               Type = "oneshot";

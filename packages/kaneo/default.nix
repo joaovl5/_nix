@@ -123,14 +123,16 @@ in {
     done
     EOF
 
-    cat > "$out/bin/kaneo-api" <<'EOF'
+    cat > "$out/share/kaneo/api-launcher.mjs" <<EOF
+    import { pathToFileURL } from "node:url";
+    const mod = await import(pathToFileURL("$out/libexec/kaneo/apps/api/dist/index.js"));
+    await mod.startServer(Number(process.env.KANEO_API_PORT || 1337));
+    EOF
+
+    cat > "$out/bin/kaneo-api" <<EOF
     #!${stdenv.shell}
     set -euo pipefail
-    exec ${nodejs_20}/bin/node --enable-source-maps --input-type=module -e '
-      import { pathToFileURL } from "node:url";
-      const mod = await import(pathToFileURL("${runtime_root}/apps/api/dist/index.js"));
-      await mod.startServer(Number(process.env.KANEO_API_PORT || 1337));
-    ' "$@"
+    exec ${nodejs_20}/bin/node --enable-source-maps "$out/share/kaneo/api-launcher.mjs" "\$@"
     EOF
 
     cat > "$out/bin/kaneo-web" <<'EOF'
