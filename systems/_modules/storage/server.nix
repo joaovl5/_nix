@@ -93,6 +93,8 @@ in
 
             storage-graveyard-prune = {
               description = "Permanently purge expired graveyard entries";
+              requires = ["storage-downloads-retention.service"];
+              after = ["storage-downloads-retention.service"];
               serviceConfig = {
                 Type = "oneshot";
                 ExecStart = "${pkgs.python3}/bin/python3 ${graveyard_prune_script} --graveyard-root ${cfg.graveyard_root} --retention-days ${toString retention.graveyard_retention_days}";
