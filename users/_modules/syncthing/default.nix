@@ -1,49 +1,58 @@
 {
+  nx = {lib, ...}: {
+    options.my.syncthing.server_device_id = lib.mkOption {
+      type = lib.types.str;
+      description = "Syncthing device ID for the storage server peer.";
+    };
+  };
+
   hm = {
     config,
     lib,
-    mylib,
     nixos_config,
     ...
   }: let
-    cfg = config.my.nix;
-    s = (mylib.use nixos_config).secrets;
-    home_path = nixos_config.users.users.${cfg.username}.home;
-    sync_dir = "${home_path}/${cfg.shared_data_dirname}";
-  in {
-    services.syncthing = {
-      enable = false;
+    inherit (lib) mkEnableOption mkIf mkOption types;
 
-      key = s.secret_path "syncthing_pem_key";
-      cert = s.secret_path "syncthing_pem_cert";
-      overrideDevices = true;
-      overrideFolders = true;
-      settings = {
-        options = {
-          localAnnounceEnabled = true;
-          relaysEnabled = true;
-        };
-        devices = {
-          server = {
-            name = "server";
-            id = lib.readFile (s.secret_path "syncthing_server_id");
+    cfg = config.my.syncthing;
+    server_cfg = nixos_config.my.syncthing;
+    home_path = config.home.homeDirectory;
+    src_dir = "${home_path}/src";
+    src_ignore_patterns = import ../storage/src_ignore_patterns.nix;
+  in {
+    options.my.syncthing = {
+      enable = mkEnableOption "Syncthing client";
+
+      server_name = mkOption {
+        type = types.str;
+        default = "tyrant";
+        description = "Syncthing peer name for the storage server.";
+      };
+    };
+
+    config = mkIf cfg.enable {
+      services.syncthing = {
+        enable = true;
+
+        key = nixos_config.sops.secrets.syncthing_lavpc_pem_key.path;
+        cert = nixos_config.sops.secrets.syncthing_lavpc_pem_cert.path;
+        overrideDevices = true;
+        overrideFolders = true;
+        settings = {
+          options = {
+            localAnnounceEnabled = true;
+            relaysEnabled = true;
           };
-        };
-        folders = {
-          sync = {
-            path = sync_dir;
+          devices.${cfg.server_name} = {
+            name = cfg.server_name;
+            id = server_cfg.server_device_id;
+          };
+          folders.src = {
+            path = src_dir;
             type = "sendreceive";
-            label = ".sync";
-            devices = ["server"];
-            versioning = [
-              {
-                versioning = {
-                  type = "simple";
-                  params.keep = "5"; # max. old versions to keep
-                  params.cleanoutDays = "60"; # max days to keep for
-                };
-              }
-            ];
+            label = "src";
+            devices = [cfg.server_name];
+            ignorePatterns = src_ignore_patterns;
           };
         };
       };

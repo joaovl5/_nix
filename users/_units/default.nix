@@ -16,6 +16,7 @@ in {
     ./fxsync
     ./wireguard
     ./qbittorrent
+    ./syncthing
     unit_global_cfg
   ];
 }

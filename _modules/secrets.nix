@@ -24,11 +24,10 @@ in {
       # };
 
       # syncthing-related stuff
-      "syncthing_server_id" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_id" {};
-      "syncthing_gui_user" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_gui_user" {};
-      "syncthing_gui_password" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "server_gui_password" {};
-      "syncthing_pem_cert" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "pem_cert" {};
-      "syncthing_pem_key" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "pem_key" {};
+      "syncthing_lavpc_pem_cert" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "lavpc_pem_cert" {};
+      "syncthing_lavpc_pem_key" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "lavpc_pem_key" {};
+      "syncthing_tyrant_pem_cert" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "tyrant_pem_cert" {};
+      "syncthing_tyrant_pem_key" = s.mk_secret_user "${s.dir}/syncthing/syncthing.yaml" "tyrant_pem_key" {};
     };
   };
 }

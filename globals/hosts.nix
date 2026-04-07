@@ -16,11 +16,9 @@ rec {
             B.enable = false;
             C.enable = false;
           };
-          host_items.shared_sync = {
-            kind = "path";
-            policy = "sensitive_data";
-            path.paths = ["/home/lav/.sensitive"];
-          };
+        };
+        syncthing = {
+          server_device_id = "AG4H3VD-YDLADHK-Z7KLFFD-K2IQIUE-DRIY2IW-XDLZAKW-RW6ZQPV-26LF5AF";
         };
       };
     };
@@ -73,6 +71,11 @@ rec {
           enable = true;
         };
 
+        "unit.syncthing" = {
+          enable = true;
+          peer_device_ids.lavpc = "S7TNWPT-Q35KRUD-Q6SHKYK-REO2WLZ-DMLV7TW-KYPFCXJ-BFVECBC-LTRVHQT";
+        };
+
         "unit.backup" = {
           enable = true;
           coordinator_host = "tyrant";
@@ -101,6 +104,11 @@ rec {
                   "/home/tyrant/.local/share/docker"
                 ];
               };
+            };
+            shared_docs_core = {
+              kind = "path";
+              policy = "sensitive_data";
+              path.paths = ["/srv/shared/docs/core"];
             };
           };
         };

@@ -38,6 +38,5 @@ in {
     loader.grub.efiSupport = false;
   };
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nix.settings.max-jobs = lib.mkDefault 6;
 }
