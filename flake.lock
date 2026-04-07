@@ -529,7 +529,7 @@
       "flake": false,
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-MNeGY0svWuO4v+E13696QrKEg9cNRvgU4deIrhvGQeo=",
+        "narHash": "sha256-fCpWLhVPv8nAjF4kAEY6p6VCivbcTE+1SFVlIUZnyD8=",
         "path": "./globals",
         "type": "path"
       },
