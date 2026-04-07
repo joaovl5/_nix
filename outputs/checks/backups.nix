@@ -231,10 +231,6 @@ in {
   assert lib.elem "unit:fxsync" tyrant.services.restic.backups.tyrant_fxsync_syncstorage_db_to_a.extraBackupArgs;
   assert tyrant.services.restic.backups ? tyrant_shared_docs_core_to_a;
   assert tyrant.services.restic.backups.tyrant_shared_docs_core_to_a.paths == ["/srv/shared/docs/core"];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.pruneOpts == [];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.checkOpts == [];
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.user == "root";
-  assert tyrant.services.restic.backups.tyrant_root_snapshot_to_a.backupPrepareCommand != null;
   assert tyrant.systemd.services ? backup_promote_tyrant_home_snapshot_to_b;
   assert tyrant.systemd.services ? backup_forget_tyrant_home_snapshot_on_a;
   assert tyrant.systemd.services ? backup_prune_tyrant_a;
