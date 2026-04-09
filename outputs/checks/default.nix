@@ -1,47 +1,41 @@
 {
   self,
   deploy-rs,
-  treefmt-nix,
-  all-systems,
   nixpkgs,
   ...
-}: let
-  each_system = f:
-    nixpkgs.lib.genAttrs
-    (import all-systems)
-    (system:
-      f nixpkgs.legacyPackages.${system});
+} @ args: let
   each_supported_system = f:
     nixpkgs.lib.genAttrs
     ["x86_64-linux"]
     (system:
       f nixpkgs.legacyPackages.${system});
 
-  treefmt_eval = each_system (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
+  treefmt = (import ./treefmt) args;
 in {
-  formatter = each_system (pkgs: treefmt_eval.${pkgs.system}.config.build.wrapper);
+  formatter = treefmt.format;
   checks = each_supported_system (
     pkgs: let
-      extraArgs = self._utils.hosts.mk_extra_args {inherit pkgs;};
-      deployChecks =
+      extra_args = self._utils.hosts.mk_extra_args {inherit pkgs;};
+      deploy_checks =
         if builtins.hasAttr pkgs.system deploy-rs.lib
         then deploy-rs.lib.${pkgs.system}.deployChecks self.deploy
         else {};
-      testChecks = import ../../tests (extraArgs
+      test_checks = import ../../tests (extra_args
         // {
           inherit self pkgs;
           inherit (pkgs) lib;
         });
-      backups = import ./backups.nix {
+      backup_checks = import ./backups.nix {
         inherit self pkgs;
         inherit (nixpkgs) lib;
       };
+      formatting_checks = {
+        formatting = treefmt.format_check pkgs;
+      };
     in
-      {
-        formatting = treefmt_eval.${pkgs.system}.config.build.check self;
-      }
-      // backups
-      // testChecks
-      // deployChecks
+      formatting_checks
+      // backup_checks
+      // test_checks
+      // deploy_checks
   );
 }
