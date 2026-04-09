@@ -11,11 +11,16 @@
     (import all-systems)
     (system:
       f nixpkgs.legacyPackages.${system});
+  each_supported_system = f:
+    nixpkgs.lib.genAttrs
+    ["x86_64-linux"]
+    (system:
+      f nixpkgs.legacyPackages.${system});
 
   treefmt_eval = each_system (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
 in {
   formatter = each_system (pkgs: treefmt_eval.${pkgs.system}.config.build.wrapper);
-  checks = each_system (
+  checks = each_supported_system (
     pkgs: let
       extraArgs = self._utils.hosts.mk_extra_args {inherit pkgs;};
       deployChecks =

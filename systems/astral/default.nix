@@ -25,11 +25,13 @@ in {
     {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
-  my.storage.client.enable = true;
-
-  my.azure-vpn = {
-    # enable = true;
-    inherit (public_data.azure-vpn) gateway gateway_id identity routes;
+  my = {
+    storage.client.enable = true;
+    storage.client.server = "192.168.15.13";
+    azure-vpn = {
+      # enable = true;
+      inherit (public_data.azure-vpn) gateway gateway_id identity routes;
+    };
   };
 
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;

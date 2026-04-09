@@ -44,7 +44,7 @@ in
         "${cfg.shared_root}/misc"
       ];
 
-      export_options = "(rw,sync,no_subtree_check,root_squash)";
+      export_options = "(rw,sync,no_subtree_check,root_squash,fsid=0)";
 
       downloads_retention_script = pkgs.writeShellScript "storage-downloads-retention" ''
         set -euo pipefail

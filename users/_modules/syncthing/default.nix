@@ -31,6 +31,10 @@
     };
 
     config = mkIf cfg.enable {
+      home.file."src/.stignore" = {
+        text = lib.concatStringsSep "\n" src_ignore_patterns + "\n";
+        force = true;
+      };
       services.syncthing = {
         enable = true;
 
@@ -52,7 +56,6 @@
             type = "sendreceive";
             label = "src";
             devices = [cfg.server_name];
-            ignorePatterns = src_ignore_patterns;
           };
         };
       };

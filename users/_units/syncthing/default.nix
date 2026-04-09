@@ -7,6 +7,7 @@
 
   cfg = config.my."unit.syncthing";
   user = config.my.nix.username;
+  src_ignore_patterns = import ../../_modules/storage/src_ignore_patterns.nix;
 in {
   options.my."unit.syncthing" = {
     enable = mkEnableOption "server-side Syncthing";
@@ -72,6 +73,7 @@ in {
           type = "sendreceive";
           label = "src";
           devices = builtins.attrNames cfg.peer_device_ids;
+          ignorePatterns = src_ignore_patterns;
         };
       };
     };

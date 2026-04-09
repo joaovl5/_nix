@@ -8,6 +8,7 @@
   my = {
     server.enable = true;
     storage.server.enable = true;
+    storage.server.allowed_clients = ["192.168.15.2"];
     host.title_file = ./assets/title.txt;
     host.password.sops_key = "server";
   };

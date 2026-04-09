@@ -12,7 +12,7 @@ in
     enable = toggle "Enable Actual Budget" false;
     data_dir = optional "Directory for pihole state data" t.str {};
     endpoint = u.endpoint {
-      port = 2049;
+      port = 5006;
       target = "actual";
     };
   }) {} (opts: (o.when opts.enable (let

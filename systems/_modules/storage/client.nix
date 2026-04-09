@@ -15,7 +15,7 @@ in
       shared_dirname = opt "Home-relative directory name for the shared storage mount point." t.str ".shared";
       mount_point = opt "Absolute path where the shared NFS tree is mounted." t.str "/home/${username}/${cfg.shared_dirname}";
       server = opt "Hostname or address of the shared storage server." t.str "tyrant";
-      export_path = opt "Exported NFS path on the storage server." t.str "/srv/shared";
+      export_path = opt "Client-visible NFS export path." t.str "/";
       automount_timeout = opt "Idle timeout before the automounted shared tree is unmounted." t.str "10min";
     };
   }) {} (opts:
