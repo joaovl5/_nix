@@ -1,5 +1,5 @@
 default_mode "normal"
-theme "dracula"
+theme "onedark"
 support_kitty_keyboard_protocol false
 web_server_ip "0.0.0.0"
 web_server_cert "/home/lav/.certs/localhost+3.pem"
@@ -7,6 +7,15 @@ web_server_key "/home/lav/.certs/localhost+3-key.pem"
 enforce_https_on_localhost true
 web_server_port 4430
 copy_on_select true
+session_serialization true
+serialize_pane_viewport true
+osc8_hyperlinks true
+
+ui {
+  pane_frames {
+    rounded_corners true
+  }
+}
 
 keybinds clear-defaults=true {
   normal {
@@ -33,11 +42,6 @@ keybinds clear-defaults=true {
       }
     }
     bind "Alt f" { ToggleFocusFullscreen; }
-    bind "Alt w" {
-      LaunchOrFocusPlugin "https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm" {
-        floating true
-      }
-    }
   }
 
   locked {
@@ -120,31 +124,8 @@ plugins {
   status-bar { path "status-bar"; }
   strider { path "strider"; }
   compact-bar { path "compact-bar"; }
-
-  worktree location="https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm"
-  choose-tree location="https://github.com/laperlej/zellij-choose-tree/releases/download/v0.4.2/zellij-choose-tree.wasm"
-
-  zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
-      // Maximum number of characters to display
-      max_length 0 // 0 = unlimited
-      // String to append when truncated
-      overflow_str "..." // default
-      // Name of the pipe for zjstatus integration
-      pipe_name "zjstatus_hints" // default
-      // Hide hints in base mode (a.k.a. default mode)
-      // E.g. if you have set default_mode to "locked", then
-      // you can hide hints in the locked mode by setting this to true
-      hide_in_base_mode false // default
-  }
-}
-
-load_plugins {
-    // Load at startup
-    zjstatus-hints
-    choose-tree
-    worktree
 }
 
 
-pane_frames false
-simplified_ui true
+// pane_frames false
+// simplified_ui true
