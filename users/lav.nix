@@ -92,12 +92,11 @@ in {
         home.stateVersion = "23.11";
 
         ## cli tools
-        ### nix
-        ### gpg
         my.syncthing = {
           enable = true;
         };
 
+        ### gpg
         services = {
           gpg-agent = {
             enable = true;
