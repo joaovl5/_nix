@@ -23,7 +23,6 @@ in {
     ../base_node.nix
     ../../_modules/options.nix
     ../../hardware/_modules/nvidia.nix
-    ../../systems/_modules/services/azure-vpn.nix
     ../../_modules/vm.nix
   ];
 

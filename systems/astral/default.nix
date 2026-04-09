@@ -3,21 +3,18 @@
   config,
   lib,
   mylib,
-  inputs,
   ...
 }: let
   cfg = config.my.nix;
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
-  public_data = import ../../_modules/public.nix {inherit inputs;};
 in {
   imports = [
     ../_modules/security
     ../_modules/services/login.nix
     ../_modules/services/audio.nix
     ../_modules/services/ntp.nix
-    ../_modules/services/azure-vpn.nix
     ../_modules/console
     ../_modules/shell
     ../_modules/storage/client.nix
@@ -28,10 +25,6 @@ in {
   my = {
     storage.client.enable = true;
     storage.client.server = "192.168.15.13";
-    azure-vpn = {
-      # enable = true;
-      inherit (public_data.azure-vpn) gateway gateway_id identity routes;
-    };
   };
 
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;

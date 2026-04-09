@@ -5,7 +5,6 @@ in {
     my = {
       nix.monitor_layout = lib.mkForce null;
       nvidia.enable = lib.mkForce false;
-      azure-vpn.enable = lib.mkForce false;
     };
 
     services.flatpak.enable = lib.mkForce false;
