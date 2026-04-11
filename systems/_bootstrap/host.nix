@@ -36,6 +36,7 @@ in
       ../_modules/console
       ../_modules/security
       ../_modules/services/ntp.nix
+      ../_modules/shell
     ];
   } (opts: (o.when opts.enable (let
     root_pw_secret = "root_pw_${cfg.hostname}";
@@ -50,13 +51,15 @@ in
         };
 
         sops.secrets.${root_pw_secret} =
-          s.mk_secret "${s.dir}/${opts.password.sops_filename}" opts.password.sops_key {};
+          s.mk_secret "${s.dir}/${opts.password.sops_filename}" opts.password.sops_key {neededForUsers = true;};
 
         users = {
           mutableUsers = false;
           users = {
             root = {
+              hashedPassword = lib.mkForce null;
               hashedPasswordFile = s.secret_path root_pw_secret;
+              shell = pkgs.bash;
             };
             "${cfg.username}" = {
               isNormalUser = true;
@@ -71,23 +74,23 @@ in
         programs.fish.enable = true;
 
         services.avahi.enable = o.def true;
-        services.openssh = {
+        services.openssh = o.def {
           enable = true;
           settings = {
-            PasswordAuthentication = o.def false;
-            PermitRootLogin = o.def "no";
+            PasswordAuthentication = false;
+            PermitRootLogin = "no";
           };
         };
 
-        virtualisation = {
-          spiceUSBRedirection.enable = o.def true;
-          containers.enable = o.def true;
-          libvirtd.enable = o.def true;
+        virtualisation = o.def {
+          spiceUSBRedirection.enable = true;
+          containers.enable = true;
+          libvirtd.enable = true;
           docker = {
-            enable = o.def false;
+            enable = false;
             rootless = {
-              enable = o.def true;
-              setSocketVariable = o.def true;
+              enable = true;
+              setSocketVariable = true;
             };
             autoPrune = {
               enable = true;
@@ -102,14 +105,16 @@ in
           docker-compose
 
           # utils
+          neovim # text editing
+          tmux # multiplexer
           ripgrep
           fd
           jq
-          neovim
-          tmux
           curl
           wget
           git
+          tmux
+          sops
           ## monitoring
           btop
           glances

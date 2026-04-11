@@ -10,10 +10,9 @@ in {
     (mylib.hosts.host_config "temperance")
   ];
 
+  # TODO: check why these public consts is defined here and at globals
   my = {
-    server.enable = true;
     host.title_file = ./assets/title.txt;
-    host.password.sops_key = "server";
 
     "unit.wireguard" = {
       relay.peer.public_key = public_data.wireguard_key_tyrant;

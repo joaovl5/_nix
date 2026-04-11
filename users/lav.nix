@@ -3,12 +3,10 @@
   config,
   lib,
   inputs,
-  mylib,
   ...
 }: let
   inherit (import ../_lib/modules) extract_imports;
   cfg = config.my.nix;
-  s = (mylib.use config).secrets;
 
   modules = [
     (import ./_modules/cli)
@@ -65,11 +63,9 @@ in {
   };
 
   config = {
-    programs.dconf.enable = true;
-
     users.groups.uinput = {};
     users.users.${cfg.username} = {
-      hashedPasswordFile = s.secret_path "password_hash";
+      # hashedPasswordFile = s.secret_path "password_hash";
 
       isNormalUser = true;
       shell = pkgs.fish;

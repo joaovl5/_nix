@@ -10,6 +10,7 @@ in rec {
   t = lib.types;
   when = lib.mkIf;
   def = lib.mkDefault;
+  force = lib.mkForce;
   merge = lib.mkMerge;
   opt = description: type: default: (mkOption (
     {

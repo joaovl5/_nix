@@ -1,9 +1,15 @@
 rec {
   lavpc = {
     hostname = "lavpc";
+    host_ip = "192.168.15.2";
     ssh_user = "lav";
     config = {
       my = {
+        desktop.enable = true;
+        storage.client.enable = true;
+        storage.client.server = tyrant.hostname;
+        host.password.sops_key = "main";
+
         "unit.backup" = {
           enable = true;
           coordinator_host = "tyrant";
@@ -11,7 +17,7 @@ rec {
             A = {
               enable = true;
               backend = "sftp";
-              repository_template = "sftp:tyrant@192.168.15.13:/var/lib/backups/repos/{host}";
+              repository_template = "sftp:tyrant@${tyrant.host_ip}:/var/lib/backups/repos/{host}";
             };
             B.enable = false;
             C.enable = false;
@@ -26,11 +32,16 @@ rec {
 
   tyrant = {
     hostname = "192.168.15.13";
+    host_ip = "192.168.15.13";
     ssh_user = "tyrant";
     config = let
       interface_name = "enp3s0f1";
     in {
       my = {
+        server.enable = true;
+        storage.server.enable = true;
+        storage.server.allowed_clients = [lavpc.host_ip];
+        host.password.sops_key = "server";
         "unit.octodns" = {
           enable = true;
         };
@@ -137,7 +148,7 @@ rec {
           client = {
             enable = true;
             address = "11.1.0.12/32";
-            dns = "192.168.15.13";
+            dns = tyrant.host_ip;
             endpoint = with temperance; "${hostname}:51820";
             # confined_services = ["transmission"];
             port_mappings = [
@@ -157,18 +168,19 @@ rec {
       };
     };
   };
-  temperance = let
+  temperance = {
     hostname = "89.167.107.74";
-  in {
-    inherit hostname;
+    host_ip = "89.167.107.74";
     ssh_user = "temperance";
     config = {
       my = {
+        server.enable = true;
+        host.password.sops_key = "server";
         "unit.wireguard" = {
           enable = true;
           relay = {
             enable = true;
-            public_ip = hostname;
+            public_ip = temperance.host_ip;
             peer.private_ip = tyrant.config.my."unit.wireguard".interfaces.internal.subnet.ip;
           };
           interfaces.external.name = "enp1s0";

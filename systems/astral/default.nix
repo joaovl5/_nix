@@ -1,47 +1,16 @@
-{
-  pkgs,
-  config,
-  lib,
-  mylib,
-  ...
-}: let
-  cfg = config.my.nix;
-  my = mylib.use config;
-  o = my.options;
-  s = my.secrets;
-in {
+{mylib, ...}: {
   imports = [
-    ../_modules/security
-    ../_modules/services/login.nix
-    ../_modules/services/audio.nix
-    ../_modules/services/ntp.nix
-    ../_modules/console
-    ../_modules/shell
-    ../_modules/storage/client.nix
+    ../_bootstrap/desktop.nix
     (mylib.hosts.host_config "lavpc")
-    {my_system.title = lib.readFile ./assets/title.txt;}
   ];
 
   my = {
-    storage.client.enable = true;
-    storage.client.server = "192.168.15.13";
-  };
-
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
-
-  networking = {
-    hostName = lib.mkForce cfg.hostname;
+    host.title_file = ./assets/title.txt;
   };
 
   users = {
-    mutableUsers = false;
     groups.plugdev = {};
     users.lav.extraGroups = ["plugdev"];
-    users.root = {
-      hashedPassword = lib.mkForce null;
-      hashedPasswordFile = s.secret_path "password_hash";
-      shell = pkgs.bash;
-    };
   };
 
   # zram
@@ -50,16 +19,6 @@ in {
 
   # Services
   services = {
-    avahi.enable = true; # scans network, detects hostnames
-    gvfs.enable = true; # automount media devices
-    openssh.enable = true;
-    flatpak.enable = true;
-    xserver.enable = false;
-    dbus = {
-      enable = true;
-      implementation = lib.mkForce "dbus";
-      packages = with pkgs; [dconf];
-    };
     udev.extraRules = ''
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="31e3", ATTRS{idProduct}=="1402", GROUP="plugdev", MODE="0660"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3710", ATTRS{idProduct}=="5406", GROUP="plugdev", MODE="0660"
@@ -67,97 +26,6 @@ in {
     '';
   };
 
-  # Programs
-  programs = {
-    fish.enable = true; # shell
-    xwayland.enable = true; # x11 compat
-    ssh.startAgent = true;
-    dconf.enable = true; # dependency
-  };
-
   # Virtualisation Support
-  virtualisation = {
-    spiceUSBRedirection.enable = true;
-    containers.enable = true;
-    libvirtd.enable = true;
-
-    # rootless + rootful docker setup
-    docker = {
-      enable = true;
-      storageDriver = "btrfs";
-      autoPrune = {
-        enable = true;
-        dates = "weekly";
-      };
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
-    };
-  };
-
-  # install documentation pages
-  documentation = o.def {
-    enable = true;
-    nixos = {
-      enable = true;
-      # not using this and it's causing issues
-      # optnix also does not need this
-      includeAllModules = false;
-    };
-    doc = {enable = true;};
-    dev = {enable = true;};
-    man = {
-      enable = true;
-      generateCaches = true;
-    };
-  };
-
-  environment = {
-    enableAllTerminfo = true;
-    systemPackages = with pkgs; [
-      # virtualisation
-      ## containers
-      docker
-      docker-compose
-
-      # utils
-      neovim # text editing
-      ## terminal
-      starship # shell prompt
-      tmux # terminal multiplexer
-      sops # secrets tool
-      ### nix
-      nh # better cli
-      nix-prefetch-scripts
-      ### git
-      git
-      lazygit
-      ### coreutils alternatives
-      zoxide # fast cd jumps
-      eza # ls alt.
-      bat # cat alt.
-      rm-improved # rm alt.
-      ripgrep # grep alt.
-      ### system monitoring/inspection
-      pciutils
-      btop
-      nvtopPackages.full
-      glances
-      ### etc
-      tealdeer # tldr alternative
-      pandoc
-      typst
-      ## other etc
-      wget
-      curl
-      dconf
-      gcc
-      gnumake
-      lldb
-      lshw
-    ];
-  };
-
-  system.stateVersion = "25.11";
+  virtualisation.docker.storageDriver = "btrfs";
 }
