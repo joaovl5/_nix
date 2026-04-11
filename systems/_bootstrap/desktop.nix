@@ -69,6 +69,9 @@ in
           pciutils
           nvtopPackages.full
 
+          ### decoration
+          cbonsai
+
           ### etc
           tealdeer # tldr alternative
           pandoc
