@@ -3,6 +3,7 @@
   config,
   lib,
   inputs,
+  meta_host,
   ...
 }: let
   inherit (import ../_lib/modules) extract_imports;
@@ -31,7 +32,6 @@
     (import ./_modules/neovim)
     (import ./_modules/emacs)
     (import ./_modules/espanso)
-    (import ./_modules/kanata)
     (import ./_modules/discord)
     (import ./_modules/syncthing)
     (import ./_modules/storage)
@@ -43,7 +43,8 @@
     [
       inputs.nur.modules.homeManager.default
     ]
-    ++ module_imports.hm;
+    ++ module_imports.hm
+    ++ meta_host.hm_modules;
 in {
   imports =
     module_imports.nx
@@ -73,6 +74,7 @@ in {
         "wheel"
         "libvirt"
         "input"
+        "uinput"
       ];
     };
 

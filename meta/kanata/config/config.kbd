@@ -8,8 +8,7 @@
   lmet
   lalt
   lsft
-  d    u
-)
+  d    u)
 
 (deflayer default
   @cap         _    _    _    _
@@ -17,8 +16,7 @@
   @met
   @alt
   @sft
-  _    _
-)
+  _    _)
 
 (deflayer arrows
   _
@@ -27,13 +25,11 @@
   _
   _
   _
-              (mwheel-down 50 120) (mwheel-up 50 120)
-)
+              (mwheel-down 50 120) (mwheel-up 50 120))
 
 (defalias
   cap (tap-hold 200 200 (one-shot 2000 lctl) lctl)
   ctl caps
   met (tap-hold 200 200 (one-shot 2000 lmet) lmet)
   alt (tap-dance 200 ((one-shot 2000 lalt) (layer-while-held arrows)))
-  sft (tap-hold 200 200 (one-shot 2000 lsft) lsft)
-)
+  sft (tap-hold 200 200 (one-shot 2000 lsft) lsft))

@@ -1,0 +1,3 @@
+{
+  kanata = ./kanata;
+}

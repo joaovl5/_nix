@@ -5,17 +5,21 @@ inputs: let
   _m = obj: {attr ? "default"}: obj.nixosModules.${attr};
 
   # assumes hardware/<name> module matches <name>
-  _h = name: modules: extra: {
+  _h = name: modules: extra: let
+    host_args = inputs.self._utils.hosts.mk_extra_args {
+      pkgs = import inputs.nixpkgs {system = DEFAULT_SYSTEM;};
+    };
+    meta_host = host_args.mylib.meta.for_host name;
+  in {
     ${name} =
       {
         modules =
           [
             "${inputs.self}/hardware/${name}"
           ]
-          ++ modules;
-        specialArgs = inputs.self._utils.hosts.mk_extra_args {
-          pkgs = import inputs.nixpkgs {system = DEFAULT_SYSTEM;};
-        };
+          ++ modules
+          ++ meta_host.nx_modules;
+        specialArgs = host_args // {inherit meta_host;};
       }
       // extra;
   };

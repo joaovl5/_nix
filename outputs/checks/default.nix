@@ -29,12 +29,17 @@ in {
         inherit self pkgs;
         inherit (nixpkgs) lib;
       };
+      meta_modules_checks = import ./meta_modules.nix {
+        inherit self pkgs;
+        inherit (nixpkgs) lib;
+      };
       formatting_checks = {
         formatting = treefmt.format_check pkgs;
       };
     in
       formatting_checks
       // backup_checks
+      // meta_modules_checks
       // test_checks
       // deploy_checks
   );

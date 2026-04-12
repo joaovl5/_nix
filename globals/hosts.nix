@@ -3,6 +3,12 @@ rec {
     hostname = "lavpc";
     host_ip = "192.168.15.2";
     ssh_user = "lav";
+    meta = {
+      modules.kanata = {
+        enable = true;
+      };
+    };
+
     config = {
       my = {
         desktop.enable = true;
