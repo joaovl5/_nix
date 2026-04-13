@@ -1,8 +1,11 @@
-rec {
+let
+  default_ssh_port = 59222;
+in rec {
   lavpc = {
     hostname = "lavpc";
     host_ip = "192.168.15.2";
     ssh_user = "lav";
+    ssh_port = default_ssh_port;
     config = {
       my = {
         desktop.enable = true;
@@ -17,7 +20,7 @@ rec {
             A = {
               enable = true;
               backend = "sftp";
-              repository_template = "sftp:tyrant@${tyrant.host_ip}:/var/lib/backups/repos/{host}";
+              repository_template = "sftp://tyrant@${tyrant.host_ip}:59222//var/lib/backups/repos/{host}";
             };
             B.enable = false;
             C.enable = false;
@@ -34,6 +37,7 @@ rec {
     hostname = "192.168.15.13";
     host_ip = "192.168.15.13";
     ssh_user = "tyrant";
+    ssh_port = default_ssh_port;
     config = let
       interface_name = "enp3s0f1";
     in {
@@ -82,6 +86,9 @@ rec {
           enable = true;
         };
 
+        "unit.forgejo" = {
+          enable = true;
+        };
         "unit.syncthing" = {
           enable = true;
           peer_device_ids.lavpc = "S7TNWPT-Q35KRUD-Q6SHKYK-REO2WLZ-DMLV7TW-KYPFCXJ-BFVECBC-LTRVHQT";
@@ -99,7 +106,7 @@ rec {
             B = {
               enable = true;
               backend = "sftp";
-              repository_template = "sftp:${temperance.ssh_user}@${temperance.hostname}:/var/lib/backups/repos/{host}";
+              repository_template = "sftp://${temperance.ssh_user}@${temperance.hostname}:59222//var/lib/backups/repos/{host}";
             };
             C.enable = false;
           };
@@ -172,6 +179,7 @@ rec {
     hostname = "89.167.107.74";
     host_ip = "89.167.107.74";
     ssh_user = "temperance";
+    ssh_port = default_ssh_port;
     config = {
       my = {
         server.enable = true;

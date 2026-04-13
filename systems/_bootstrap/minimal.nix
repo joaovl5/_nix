@@ -11,7 +11,7 @@ this is not meant to work by itself
 } @ args: let
   public_data = import ../../_modules/public.nix args;
 
-  ssh_port = 2222;
+  ssh_port = 59222;
   ssh_authorized_keys = [
     public_data.ssh_key
   ];

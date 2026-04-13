@@ -10,10 +10,14 @@ this is not meant to work by itself
   ...
 } @ args: let
   public_data = import ../../_modules/public.nix args;
+  globals = import ../../globals/hosts.nix;
   ssh_authorized_keys = [
     public_data.ssh_key
   ];
   cfg = config.my.nix;
+
+  host_cfg = globals.${cfg.hostname} or {};
+  host_ssh_port = host_cfg.ssh_port or 22;
 
   my = mylib.use config;
   o = my.options;
@@ -76,6 +80,7 @@ in
         services.avahi.enable = o.def true;
         services.openssh = o.def {
           enable = true;
+          ports = [host_ssh_port];
           settings = {
             PasswordAuthentication = false;
             PermitRootLogin = "no";

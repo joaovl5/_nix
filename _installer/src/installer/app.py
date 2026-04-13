@@ -40,7 +40,7 @@ def main(
     secrets_use_disk_encryption: bool = False,
     secrets_disk_encryption_keyfile_location: str = "/tmp/secret.key",
     use_sudo: bool = True,
-    port: int = 22,
+    port: int = 59222,
     auto_commit: bool = True,
     auto_push: bool = True,
 ) -> None:

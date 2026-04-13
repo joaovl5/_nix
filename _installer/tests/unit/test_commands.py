@@ -130,9 +130,7 @@ class TestGitCommand:
 
 class TestSSHCommand:
     def _config(self) -> SSHConfig:
-        return SSHConfig(
-            host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"), port=22
-        )
+        return SSHConfig(host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"))
 
     def test_basic_build(self):
         inner = ShellCommand("ls", ["/tmp"])
@@ -143,7 +141,7 @@ class TestSSHCommand:
             "-i",
             "/tmp/id_ed25519",
             "-p",
-            "22",
+            "59222",
             "root@192.168.1.1",
             "--",
             "ls /tmp",
@@ -199,9 +197,7 @@ class TestSSHCommand:
 
 class TestRsyncCommand:
     def _config(self) -> SSHConfig:
-        return SSHConfig(
-            host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"), port=22
-        )
+        return SSHConfig(host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"))
 
     def test_local_rsync(self):
         cmd = RsyncCommand(src="/tmp/file.json", dest="/backup/file.json")
@@ -230,7 +226,7 @@ class TestRsyncCommand:
         ssh_str = self._get_ssh_str(result)
         assert "-i" in ssh_str
         assert "/tmp/id_ed25519" in ssh_str
-        assert "-p 22" in ssh_str
+        assert "-p 59222" in ssh_str
 
     def test_remote_dest_false_prepends_host_to_src(self):
         cmd = RsyncCommand(
@@ -271,9 +267,7 @@ class TestRsyncCommand:
 
 class TestCommandWrappers:
     def _config(self) -> SSHConfig:
-        return SSHConfig(
-            host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"), port=22
-        )
+        return SSHConfig(host="root@192.168.1.1", identity=Path("/tmp/id_ed25519"))
 
     def test_ssh_wrapper(self):
         wrapper = SSHWrapper(config=self._config())

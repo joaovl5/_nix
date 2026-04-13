@@ -16,6 +16,7 @@ _: {
 
   services.openssh = {
     enable = true;
+    ports = [59222];
     settings.PasswordAuthentication = false;
   };
 

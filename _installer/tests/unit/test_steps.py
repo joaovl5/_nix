@@ -1,5 +1,6 @@
 # pyright: reportAny=false, reportExplicitAny=false, reportUnusedCallResult=false
 
+from inspect import signature
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -16,6 +17,7 @@ from coisas.command import (
     SudoCommand,
 )
 from coisas.repository import RepositoryURI
+from installer.app import main
 from installer.context import InstallerContext, InstallerError, SecretsEncryptionParams
 from installer.steps import (
     CloneRepositories,
@@ -46,7 +48,7 @@ def _make_context(
         flake=RepositoryURI.parse(flake),
         flake_host="testhost",
         secrets=RepositoryURI.parse(secrets) if secrets else None,
-        ssh_config=SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"), port=22),
+        ssh_config=SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key")),
         encryption_params=SecretsEncryptionParams(
             repo_url="git@github.com:user/secrets.git",
             sops_file="secrets/disk.yaml",
@@ -307,7 +309,7 @@ class TestNixBuild:
 
 class TestNixCopyCommand:
     def test_basic_copy(self):
-        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"), port=22)
+        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"))
         cmd = nix_copy_command(cfg, "/nix/store/abc123")
         built = cmd.build()
         assert "nix" in built
@@ -317,14 +319,14 @@ class TestNixCopyCommand:
         assert "/nix/store/abc123" in built
 
     def test_with_remote_store(self):
-        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"), port=22)
+        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"))
         cmd = nix_copy_command(cfg, "/nix/store/abc123", remote_store="local?root=/mnt")
         built = cmd.build()
         to_arg = built[built.index("--to") + 1]
         assert "remote-store=" in to_arg
 
     def test_with_substitute_on_dest(self):
-        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"), port=22)
+        cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"))
         cmd = nix_copy_command(cfg, "/nix/store/abc123", substitute_on_dest=True)
         built = cmd.build()
         assert "--substitute-on-destination" in built
@@ -379,3 +381,7 @@ class TestInstallSystem:
         InstallSystem().execute(ctx, cli)
         # no chown — nix copy + nixos-install = 2 calls
         assert cli.run_command.call_count == 2
+
+
+def test_main_defaults_to_port_59222():
+    assert signature(main).parameters["port"].default == 59222

@@ -17,6 +17,7 @@ in {
     ./wireguard
     ./qbittorrent
     ./syncthing
+    ./forgejo
     unit_global_cfg
   ];
 }

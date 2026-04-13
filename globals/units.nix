@@ -37,7 +37,7 @@
         B = {
           enable = lib.mkDefault false;
           backend = lib.mkDefault "sftp";
-          repository_template = lib.mkDefault "sftp:backup@example:/var/lib/backups/repos/{host}";
+          repository_template = lib.mkDefault "sftp://backup@example:59222//var/lib/backups/repos/{host}";
           password_secret = lib.mkDefault {
             name = "backup_restic_password_B";
             file = "backups.yaml";

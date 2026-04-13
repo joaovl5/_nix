@@ -5,24 +5,23 @@
     };
   };
 
-  hm = {inputs, ...}: let
-    globals = import inputs.globals;
-    inherit (globals) hosts;
+  hm = _: let
+    hosts = import ../../../globals/hosts.nix;
     _mb = {
       hostname,
       ssh_user,
-      port ? 22,
+      ssh_port ? 22,
       forwardX11 ? false,
       forwardX11Trusted ? false,
       ...
     }: {
       user = ssh_user;
       inherit
-        port
         hostname
         forwardX11
         forwardX11Trusted
         ;
+      port = ssh_port;
     };
 
     matchblocks = builtins.mapAttrs (_name: _mb) hosts;

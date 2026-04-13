@@ -1,11 +1,10 @@
 {
   self,
   deploy-rs,
-  globals,
   ...
 }: let
   DEFAULT_SYSTEM = "x86_64-linux";
-  inherit ((import globals)) hosts;
+  hosts = import ../../globals/hosts.nix;
 
   _d = {
     host,
@@ -22,6 +21,7 @@
     hostname ? host,
     ssh_user ? "root",
     user ? "root",
+    ssh_port ? 22,
     opts ? {},
     ...
   }: ({
@@ -30,6 +30,7 @@
         inherit host user;
         sshUser = ssh_user;
       };
+      sshOpts = ["-p" (toString ssh_port)];
     }
     // opts);
 

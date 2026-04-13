@@ -73,7 +73,7 @@ in {
     destinations.B = {
       enable = true;
       backend = "sftp";
-      repository_template = "sftp:backup-user@storage:/var/lib/backups/repos/{host}";
+      repository_template = "sftp://backup-user@storage:59222//var/lib/backups/repos/{host}";
       password_secret = {
         name = "backup_restic_password_B";
         file = "backups.yaml";

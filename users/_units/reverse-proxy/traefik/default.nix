@@ -28,7 +28,60 @@ in
       }
       (o.when opts.enable (
         let
-          # Generate routers from vhosts
+          inherit (config.my) tcp_routes;
+          inherit (config.my) udp_routes;
+
+          route_listen_address = prefix: route:
+            if route.listen.address != null
+            then route.listen.address
+            else if prefix == "udp"
+            then ":${toString route.listen.port}/udp"
+            else ":${toString route.listen.port}";
+
+          mk_entrypoints = prefix: routes:
+            lib.mapAttrs' (_name: route:
+              lib.nameValuePair "${prefix}_${route.entry_point}" {
+                address = route_listen_address prefix route;
+              })
+            routes;
+
+          mk_routers = prefix: routes:
+            lib.mapAttrs (_name: route:
+              {
+                entryPoints = ["${prefix}_${route.entry_point}"];
+                service = _name;
+              }
+              // lib.optionalAttrs (prefix == "tcp") {
+                inherit (route) rule;
+              }
+              // lib.optionalAttrs (prefix == "tcp" && route.tls != null) {
+                inherit (route) tls;
+              })
+            routes;
+
+          mk_services = routes:
+            lib.mapAttrs (_name: route: {
+              loadBalancer.servers = map (upstream: {address = upstream;}) route.upstreams;
+            })
+            routes;
+
+          static_entrypoints =
+            {
+              web = {
+                address = ":80";
+                http.redirections.entryPoint = {
+                  to = "websecure";
+                  scheme = "https";
+                };
+              };
+              websecure = {
+                address = ":443";
+                asDefault = true;
+              };
+            }
+            // mk_entrypoints "tcp" tcp_routes
+            // mk_entrypoints "udp" udp_routes;
+
           routers =
             {
               traefik-dashboard = {
@@ -61,8 +114,12 @@ in
               loadBalancer.servers = map (source: {url = source;}) vhost.sources;
             })
             vhosts;
+
+          tcp_firewall_ports = map (route: route.listen.port) (lib.filter (route: route.listen.open_firewall) (lib.attrValues tcp_routes));
+          udp_firewall_ports = map (route: route.listen.port) (lib.filter (route: route.listen.open_firewall) (lib.attrValues udp_routes));
         in {
-          networking.firewall.allowedTCPPorts = [80 443];
+          networking.firewall.allowedTCPPorts = lib.unique ([80 443] ++ tcp_firewall_ports);
+          networking.firewall.allowedUDPPorts = lib.unique udp_firewall_ports;
 
           my."unit.traefik".backup.items.acme = {
             kind = "path";
@@ -94,19 +151,7 @@ in
               "/run/traefik/env"
             ];
             staticConfigOptions = {
-              entryPoints = {
-                web = {
-                  address = ":80";
-                  http.redirections.entryPoint = {
-                    to = "websecure";
-                    scheme = "https";
-                  };
-                };
-                websecure = {
-                  address = ":443";
-                  asDefault = true;
-                };
-              };
+              entryPoints = static_entrypoints;
               certificatesResolvers.acme_resolver.acme = {
                 email = public.emails.google_2;
                 storage = "/var/lib/traefik/acme.json";
@@ -117,12 +162,22 @@ in
               };
               api.dashboard = true;
             };
-            dynamicConfigOptions.http = {
-              inherit routers services;
-              middlewares.lan-only.ipAllowList.sourceRange = [
-                "192.168.15.0/24"
-                "127.0.0.1/32"
-              ];
+            dynamicConfigOptions = {
+              http = {
+                inherit routers services;
+                middlewares.lan-only.ipAllowList.sourceRange = [
+                  "192.168.15.0/24"
+                  "127.0.0.1/32"
+                ];
+              };
+              tcp = {
+                routers = mk_routers "tcp" tcp_routes;
+                services = mk_services tcp_routes;
+              };
+              udp = {
+                routers = mk_routers "udp" udp_routes;
+                services = mk_services udp_routes;
+              };
             };
           };
         }

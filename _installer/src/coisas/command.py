@@ -154,7 +154,7 @@ class GitHelper:
 class SSHConfig:
     host: str
     identity: Path
-    port: int = 22
+    port: int = 59222
 
 
 def _quote_for_ssh(parts: list[str]) -> str:

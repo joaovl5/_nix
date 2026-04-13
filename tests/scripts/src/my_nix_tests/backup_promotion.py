@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 _REPO_A = "/var/lib/backups/repos/coordinator"
 _PWD_A = "/run/secrets/backup_restic_password_A"
-_REPO_B = "sftp:backup-user@storage:/var/lib/backups/repos/coordinator"
+_REPO_B = "sftp://backup-user@storage:59222//var/lib/backups/repos/coordinator"
 _PWD_B = "/run/secrets/backup_restic_password_B"
 
 _RESTIC_A = f"restic --repo {_REPO_A} --password-file {_PWD_A} --no-lock"
