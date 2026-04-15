@@ -162,23 +162,28 @@ in
               };
               api.dashboard = true;
             };
-            dynamicConfigOptions = {
-              http = {
-                inherit routers services;
-                middlewares.lan-only.ipAllowList.sourceRange = [
-                  "192.168.15.0/24"
-                  "127.0.0.1/32"
-                ];
+            dynamicConfigOptions =
+              {
+                http = {
+                  inherit routers services;
+                  middlewares.lan-only.ipAllowList.sourceRange = [
+                    "192.168.15.0/24"
+                    "127.0.0.1/32"
+                  ];
+                };
+              }
+              // lib.optionalAttrs (tcp_routes != {}) {
+                tcp = {
+                  routers = mk_routers "tcp" tcp_routes;
+                  services = mk_services tcp_routes;
+                };
+              }
+              // lib.optionalAttrs (udp_routes != {}) {
+                udp = {
+                  routers = mk_routers "udp" udp_routes;
+                  services = mk_services udp_routes;
+                };
               };
-              tcp = {
-                routers = mk_routers "tcp" tcp_routes;
-                services = mk_services tcp_routes;
-              };
-              udp = {
-                routers = mk_routers "udp" udp_routes;
-                services = mk_services udp_routes;
-              };
-            };
           };
         }
       ))

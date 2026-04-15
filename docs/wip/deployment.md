@@ -271,3 +271,52 @@ M  users/_units/wireguard/default.nix
 
 - `soularr.service` was removed from the repo/config instead of being debugged further, because it was unused and not worth more deployment investigation.
 - The earlier OctoDNS root-cause notes and the reusable deploy-debugging commands above remain the useful part of this log.
+
+## Post-mortem: global Traefik 404 after TCP/UDP abstraction rollout
+
+### Symptom
+
+- After the Forgejo SSH / Traefik stream-routing rollout, multiple `*.trll.ing` domains (`git`, `jellyfin`, `pihole`, and others) returned Traefik `HTTP 404` instead of their normal upstream responses.
+- This looked at first like missing HTTP routers or a failed deploy, but Traefik itself was still running and listening on `:80` / `:443`.
+
+### Root cause
+
+- The new Traefik generator in `users/_units/reverse-proxy/traefik/default.nix` always emitted `dynamicConfigOptions.udp = { routers = ...; services = ...; };` even on hosts with **no UDP routes**.
+- On `tyrant`, that rendered empty `[udp.routers]` and `[udp.services]` tables into the file-provider config.
+- Traefik rejected the entire file-provider config with:
+  - `Error while building configuration (for the first time) error="routers cannot be a standalone element (type map[string]*dynamic.UDPRouter)" providerName=file`
+- Because the file provider was rejected wholesale, the valid HTTP routers in the same generated file never became active, and requests fell through to Traefik's default 404 handler.
+- Important lesson: in Traefik's file provider, a bad TCP/UDP subsection can break otherwise-correct HTTP routing if they are emitted in the same provider document.
+
+### Evidence that made the diagnosis clear
+
+- Representative probes from the client side returned Traefik 404s for multiple domains.
+- On `tyrant`, `journalctl -u traefik` showed the UDP file-provider parse error above.
+- The generated provider file still contained the expected HTTP routers/services for `git.trll.ing`, `jellyfin.trll.ing`, etc., plus the Forgejo TCP SSH router, so the problem was **not** missing Nix-side vhost registration.
+- A local host-header probe on `tyrant` against `127.0.0.1:443` still returned 404, which ruled out public DNS / relay issues and pointed directly at Traefik runtime config loading.
+
+### Minimal fix
+
+- Keep `dynamicConfigOptions.http` unconditional.
+- Emit `dynamicConfigOptions.tcp` only when `tcp_routes != {}`.
+- Emit `dynamicConfigOptions.udp` only when `udp_routes != {}`.
+- This preserves the new abstractions without generating invalid empty UDP sections on hosts that do not use them yet.
+
+### Verification after fix
+
+- Local targeted evals confirmed:
+  - on `tyrant`, Traefik dynamic config keys are now only `http` and `tcp`,
+  - with a synthetic UDP route, keys become `http`, `tcp`, and `udp` as expected.
+- After redeploying `tyrant`, representative domains recovered:
+  - `https://git.trll.ing` -> `HTTP 200`
+  - `https://jellyfin.trll.ing` -> `HTTP 302`
+  - `https://pihole.trll.ing` -> `HTTP 302 /login`
+- A local host-header probe on `tyrant` for `git.trll.ing` at `127.0.0.1:443` also returned `HTTP 200`, confirming Traefik loaded the provider config successfully again.
+
+### Operational lessons
+
+- When Traefik returns a sudden global 404 for many unrelated domains, check whether the file provider failed to load before assuming routers disappeared.
+- For mixed-protocol generators, avoid emitting empty top-level protocol sections unless Traefik explicitly accepts them.
+- Probe from both outside and on the target host itself. The local `curl --resolve <host>:443:127.0.0.1 https://<host>` check was especially useful here because it separated Traefik config failure from DNS / relay / firewall confusion.
+- When a deploy changes only Traefik config on `tyrant`, redeploying `tyrant` alone is enough; there is no need to redeploy every host unless the changed module is actually consumed there.
+- If local `nix flake check --all-systems` in the current checkout complains about the relative `globals` path input, refresh it in that checkout with `nix flake update globals` before retrying the check.
