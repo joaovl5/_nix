@@ -13,6 +13,8 @@
       '';
       interactiveShellInit = ''
         ${lib.readFile ./src/functions.fish}
+
+        bind ctrl-t tree
       '';
     };
 

@@ -46,3 +46,7 @@ end
 function !!
     eval sudo $history[1]
 end
+
+function tree --wraps br --description 'runs br -c :pt'
+    br -c :pt $argv
+end

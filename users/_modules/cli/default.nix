@@ -4,6 +4,7 @@ let
     (import ./zoxide.nix)
     (import ./eza.nix)
     (import ./bat.nix)
+    (import ./broot.nix)
     (import ./fzf.nix)
     (import ./ssh.nix)
     (import ./fastfetch.nix)
