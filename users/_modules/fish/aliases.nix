@@ -32,7 +32,7 @@
       # replacing cmds
       # ls -> eza replacements already handled by home-manager
       "cat" = "bat";
-      "rm" = "rip";
+      # "rm" = "rip";
     };
   };
 }
