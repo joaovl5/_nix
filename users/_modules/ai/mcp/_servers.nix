@@ -7,8 +7,4 @@ in {
   nixos = {
     command = exe "mcp-nixos";
   };
-
-  markitdown = {
-    command = exe "markitdown-mcp";
-  };
 }
