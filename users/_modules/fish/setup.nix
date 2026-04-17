@@ -13,8 +13,7 @@
       '';
       interactiveShellInit = ''
         ${lib.readFile ./src/functions.fish}
-
-        bind ctrl-t tree
+        bind ctrl-e __yazi_zellij_ctrl_e
       '';
     };
 

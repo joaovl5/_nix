@@ -24,7 +24,6 @@
       zoxide.enableNushellIntegration = true;
       aliae.enableNushellIntegration = true;
       atuin.enableNushellIntegration = true;
-      broot.enableNushellIntegration = true;
       vivid.enableNushellIntegration = true;
       mise.enableNushellIntegration = true;
       yazi.enableNushellIntegration = true;

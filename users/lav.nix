@@ -10,6 +10,7 @@
 
   modules = [
     (import ./_modules/cli)
+    (import ./_modules/yazi)
     (import ./_modules/fish)
     (import ./_modules/nushell)
     (import ./_modules/starship)
