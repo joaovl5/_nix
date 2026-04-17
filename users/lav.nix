@@ -7,6 +7,7 @@
 }: let
   inherit (import ../_lib/modules) extract_imports;
   cfg = config.my.nix;
+  local_packages = import ../packages {inherit pkgs inputs;};
 
   modules = [
     (import ./_modules/cli)
@@ -167,6 +168,7 @@ in {
           cliphist
           xclip
           unzip
+          local_packages.frag
         ];
       };
   };

@@ -1,0 +1,19 @@
+[project]
+name = "frag"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = ["cyclopts", "questionary"]
+
+[project.scripts]
+frag = "frag.cli:main"
+frag-bootstrap = "frag.bootstrap:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
