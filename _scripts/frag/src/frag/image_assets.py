@@ -41,6 +41,7 @@ class SharedMount:
 @dataclass(frozen=True)
 class RuntimeSpec:
     image_ref: str
+    shared_assets_identity: str
     shared_mounts: tuple[SharedMount, ...]
     start_command: tuple[str, ...]
 
@@ -52,10 +53,22 @@ class InstalledPackageAssets:
     helpers_dir: Path
 
 
+@dataclass(frozen=True)
+class PackagedImageMetadata:
+    image_key: str
+    image_ref: str
+    shared_assets_identity: str
+    helper_path: Path
+
+
 class ImageAssets(Protocol):
     def list_image_keys(self) -> tuple[str, ...]: ...
 
     def normalize_profile_image(self, *, image: str) -> str: ...
+
+    def resolve_profile_image_metadata(
+        self, *, profile: profiles.Profile
+    ) -> PackagedImageMetadata: ...
 
     def load_image(self, *, profile: profiles.Profile) -> str: ...
 
@@ -128,25 +141,41 @@ def normalize_catalog_image_key(*, catalog_path: Path, image_key: str) -> str:
     return _normalize_catalog_image_key(images=images, image_key=image_key)
 
 
-def _resolve_catalog_image_entry(
-    *, catalog_path: Path, image_key: str
-) -> tuple[str, str]:
+def _resolve_catalog_image_metadata(
+    *, catalog_path: Path, helpers_dir: Path, image_key: str
+) -> PackagedImageMetadata:
     images = _read_catalog_images(catalog_path=catalog_path)
     normalized_key = _normalize_catalog_image_key(images=images, image_key=image_key)
     image_entry = images[normalized_key]
     assert isinstance(image_entry, dict)
 
     image_ref = image_entry.get("image_ref")
+    shared_assets_identity = image_entry.get("shared_assets_identity")
     loader = image_entry.get("loader")
     if not isinstance(image_ref, str) or not image_ref.strip():
         raise docker_runtime.DockerRuntimeError(
             f"catalog entry for image key {normalized_key!r} is missing image_ref"
         )
+    if (
+        not isinstance(shared_assets_identity, str)
+        or not shared_assets_identity.strip()
+    ):
+        raise docker_runtime.DockerRuntimeError(
+            f"catalog entry for image key {normalized_key!r} is missing shared_assets_identity; legacy catalog schema is not supported"
+        )
     if not isinstance(loader, str) or not loader.strip():
         raise docker_runtime.DockerRuntimeError(
             f"catalog entry for image key {normalized_key!r} is missing loader"
         )
-    return image_ref.strip(), loader.strip()
+
+    helper_path = helpers_dir / loader.strip()
+
+    return PackagedImageMetadata(
+        image_key=normalized_key,
+        image_ref=image_ref.strip(),
+        shared_assets_identity=shared_assets_identity.strip(),
+        helper_path=helper_path,
+    )
 
 
 def resolve_installed_package_assets(
@@ -202,27 +231,33 @@ class DirectProfileImageAssets:
             image_key=image,
         )
 
-    def load_image(self, *, profile: profiles.Profile) -> str:
-        _image_ref, loader_name = _resolve_catalog_image_entry(
+    def resolve_profile_image_metadata(
+        self, *, profile: profiles.Profile
+    ) -> PackagedImageMetadata:
+        return _resolve_catalog_image_metadata(
             catalog_path=self._package_assets.catalog_path,
+            helpers_dir=self._package_assets.helpers_dir,
             image_key=profile.image,
         )
-        helper_path = self._package_assets.helpers_dir / loader_name
-        if not helper_path.is_file():
+
+    def load_image(self, *, profile: profiles.Profile) -> str:
+        metadata = self.resolve_profile_image_metadata(profile=profile)
+
+        if not metadata.helper_path.is_file():
             raise docker_runtime.DockerRuntimeError(
-                f"image loader helper does not exist: {helper_path}"
+                f"image loader helper does not exist: {metadata.helper_path}"
             )
 
         try:
             result = subprocess.run(
-                [str(helper_path)],
+                [str(metadata.helper_path)],
                 check=False,
                 text=True,
                 capture_output=True,
             )
         except FileNotFoundError as exc:
             raise docker_runtime.DockerRuntimeError(
-                f"image loader helper is not executable: {helper_path}"
+                f"image loader helper is not executable: {metadata.helper_path}"
             ) from exc
 
         if result.returncode != 0:
@@ -234,17 +269,19 @@ class DirectProfileImageAssets:
             raise docker_runtime.DockerRuntimeError(
                 f"image loader returned an empty image reference for {profile.name!r}"
             )
+        if loaded_image_ref != metadata.image_ref:
+            raise docker_runtime.DockerRuntimeError(
+                f"image loader returned unexpected image reference for {profile.name!r}: {loaded_image_ref!r}"
+            )
         return loaded_image_ref
 
     def build_runtime_spec(
         self, *, profile: profiles.Profile, workspace_root: Path
     ) -> RuntimeSpec:
-        image_ref, _loader_name = _resolve_catalog_image_entry(
-            catalog_path=self._package_assets.catalog_path,
-            image_key=profile.image,
-        )
+        metadata = self.resolve_profile_image_metadata(profile=profile)
         return RuntimeSpec(
-            image_ref=image_ref,
+            image_ref=metadata.image_ref,
+            shared_assets_identity=metadata.shared_assets_identity,
             shared_mounts=_resolve_shared_mounts(
                 self._package_assets.shared_assets_root
             ),

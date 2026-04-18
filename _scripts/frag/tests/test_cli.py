@@ -8,7 +8,7 @@ import tomllib
 import subprocess
 import pytest
 
-from frag import cli, profiles
+from frag import cli, image_assets, profiles
 
 
 def _create_shared_assets_tree(shared_assets_dir: Path) -> None:
@@ -129,6 +129,38 @@ def test_resolve_entrypoint_anchor_returns_none_for_missing_path_lookup(
     monkeypatch.setattr(sys, "argv", ["frag"])
 
     assert cli._resolve_entrypoint_anchor() is None
+
+
+def test_build_image_assets_prefers_frag_package_root_env(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    package_assets = object()
+    captured: list[object] = []
+
+    class FakeDirectProfileImageAssets:
+        def __init__(self, *, package_assets: object) -> None:
+            captured.append(package_assets)
+
+    package_root = tmp_path / "nix" / "store" / "frag-0.1.0"
+    runtime_entrypoint = package_root / "bin" / "frag"
+    runtime_entrypoint.parent.mkdir(parents=True)
+    runtime_entrypoint.write_text("#!/bin/sh\n")
+
+    monkeypatch.setattr(
+        cli.image_assets, "DirectProfileImageAssets", FakeDirectProfileImageAssets
+    )
+    monkeypatch.setattr(
+        cli.image_assets,
+        "resolve_installed_package_assets",
+        lambda anchor=None: captured.append(anchor) or package_assets,
+    )
+    monkeypatch.setenv("FRAG_PACKAGE_ROOT", str(package_root))
+    monkeypatch.setattr(sys, "argv", [str(runtime_entrypoint)])
+
+    cli.build_image_assets()
+
+    assert captured == [package_root, package_assets]
 
 
 def test_build_image_assets_uses_installed_package_assets(
@@ -258,7 +290,7 @@ def test_load_image_runs_bundled_helper_and_returns_loaded_ref(tmp_path: Path) -
     helper_path.write_text(
         "#!/bin/sh\n"
         f"printf 'invoked\\n' > {marker_path}\n"
-        "printf 'loaded:frag-main\\n'\n"
+        "printf 'frag-main:latest\\n'\n"
     )
     helper_path.chmod(0o755)
 
@@ -268,6 +300,7 @@ def test_load_image_runs_bundled_helper_and_returns_loaded_ref(tmp_path: Path) -
                 "images": {
                     "main": {
                         "image_ref": "frag-main:latest",
+                        "shared_assets_identity": "shared-assets-123",
                         "loader": "load-image-main",
                     }
                 }
@@ -285,7 +318,7 @@ def test_load_image_runs_bundled_helper_and_returns_loaded_ref(tmp_path: Path) -
         )
     )
 
-    assert loaded_image == "loaded:frag-main"
+    assert loaded_image == "frag-main:latest"
     assert marker_path.read_text() == "invoked\n"
 
 
@@ -366,6 +399,7 @@ def test_handle_profile_new_normalizes_catalog_image_key(
                 "images": {
                     "main": {
                         "image_ref": "frag-main:latest",
+                        "shared_assets_identity": "shared-assets-123",
                         "loader": "load-image-main",
                     }
                 }
@@ -430,6 +464,7 @@ def test_profile_new_returns_nonzero_for_unknown_catalog_image_key(
                 "images": {
                     "main": {
                         "image_ref": "frag-main:latest",
+                        "shared_assets_identity": "shared-assets-123",
                         "loader": "load-image-main",
                     }
                 }
@@ -510,7 +545,7 @@ def test_frag_package_runtime_image_includes_seeded_agent_clis() -> None:
         pytest.skip(
             "repo packaging files are not available from the packaged source tree"
         )
-    package_nix = (repo_root / "packages" / "frag" / "images.nix").read_text()
+    package_nix = (repo_root / "packages" / "frag" / "runtime-system.nix").read_text()
 
     assert "pkgs.llm-agents.code" in package_nix
     assert "pkgs.llm-agents.omp" in package_nix
@@ -525,7 +560,7 @@ def test_frag_package_runtime_image_includes_git() -> None:
         pytest.skip(
             "repo packaging files are not available from the packaged source tree"
         )
-    package_nix = (repo_root / "packages" / "frag" / "images.nix").read_text()
+    package_nix = (repo_root / "packages" / "frag" / "runtime-system.nix").read_text()
 
     assert "pkgs.git" in package_nix
 
@@ -547,10 +582,12 @@ def test_frag_package_loader_always_reloads_bundled_images() -> None:
         pytest.skip(
             "repo packaging files are not available from the packaged source tree"
         )
-    package_nix = (repo_root / "packages" / "frag" / "default.nix").read_text()
+    package_nix = (repo_root / "packages" / "frag" / "images.nix").read_text()
 
-    assert '"$docker_bin" load -i ${spec.image} >/dev/null' in package_nix
+    assert '"$docker_bin" image rm -f "$image_ref"' in package_nix
+    assert '"$docker_bin" import' in package_nix
     assert '"$docker_bin" image inspect "$image_ref"' not in package_nix
+    assert '"$docker_bin" load -i' not in package_nix
 
 
 def test_enter_accepts_optional_profile_and_command_tail(
@@ -573,8 +610,293 @@ def test_enter_accepts_optional_profile_and_command_tail(
     }
 
 
-def test_invalid_flag_returns_parse_error_code() -> None:
+def test_invalid_flag_returns_parse_error_code_and_stderr(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     assert cli.main(["profile", "list", "--bogus"]) == 2
+
+    captured = capsys.readouterr()
+    assert captured.err.strip()
+    assert "bogus" in captured.err
+
+
+def test_enter_missing_profile_prints_actionable_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    backend = object()
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, _name: None,
+    )
+
+    assert cli.main(["enter", "--profile", "missing-profile"]) == 1
+
+    captured = capsys.readouterr()
+    assert "missing-profile" in captured.err
+
+
+def test_profile_rm_missing_profile_prints_actionable_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    backend = object()
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, _name: None,
+    )
+
+    assert cli.main(["profile", "rm", "missing-profile"]) == 1
+
+    captured = capsys.readouterr()
+    assert "missing-profile" in captured.err
+
+
+def test_profile_stop_missing_profile_prints_actionable_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    backend = object()
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, _name: None,
+    )
+
+    assert cli.main(["profile", "stop", "missing-profile"]) == 1
+
+    captured = capsys.readouterr()
+    assert "missing-profile" in captured.err
+
+
+def test_enter_workspace_mismatch_prints_actionable_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    backend = object()
+    demo_profile = profiles.Profile(
+        name="demo",
+        image="main",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo",
+    )
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, _name: demo_profile,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "container_workdir_for_cwd",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            cli.docker_runtime.WorkspacePathError(
+                "Current directory is outside workspace root '/workspace/demo'"
+            )
+        ),
+    )
+
+    assert cli.main(["enter", "--profile", "demo"]) == 1
+
+    captured = capsys.readouterr()
+    assert "outside workspace root" in captured.err
+
+
+def test_enter_cold_start_renders_rich_phase_messages(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+    nested = workspace_root / "nested"
+    nested.mkdir()
+
+    runtime_profile = profiles.Profile(
+        name="Demo Profile",
+        image="main",
+        workspace_root=str(workspace_root),
+        volume_name="frag-profile-demo-profile",
+    )
+
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: object())
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, name: runtime_profile if name == "Demo Profile" else None,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "container_workdir_for_cwd",
+        lambda **_kwargs: "/workspace/nested",
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "is_container_running",
+        lambda _profile, *, runtime_metadata=None: False,
+    )
+    runtime_spec = image_assets.RuntimeSpec(
+        image_ref="frag-main:deadbeefdeadbeefdeadbeefdeadbeef",
+        shared_assets_identity="shared-assets-123",
+        shared_mounts=(),
+        start_command=("frag-bootstrap",),
+    )
+    monkeypatch.setattr(cli, "build_image_assets", lambda: object())
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "resolve_runtime_spec",
+        lambda *_args, **_kwargs: runtime_spec,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "load_profile_image",
+        lambda _profile, _assets: runtime_spec.image_ref,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "bootstrap_token_for_profile",
+        lambda _profile: "fresh-token-123",
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "start_profile_container",
+        lambda **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "wait_for_profile_bootstrap",
+        lambda **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "exec_in_profile_container",
+        lambda **_kwargs: 0,
+    )
+    monkeypatch.chdir(nested)
+
+    assert cli.handle_enter(profile="Demo Profile", command=()) == 0
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Loading runtime image" in captured.err
+    assert "Starting container" in captured.err
+    assert "Waiting for bootstrap" in captured.err
+
+
+def test_enter_hot_path_reports_container_reuse(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+    nested = workspace_root / "nested"
+    nested.mkdir()
+
+    runtime_profile = profiles.Profile(
+        name="Demo Profile",
+        image="main",
+        workspace_root=str(workspace_root),
+        volume_name="frag-profile-demo-profile",
+    )
+
+    monkeypatch.setattr(cli, "build_docker_backend", lambda: object())
+    monkeypatch.setattr(
+        cli.profiles,
+        "get_profile",
+        lambda _backend, name: runtime_profile if name == "Demo Profile" else None,
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "container_workdir_for_cwd",
+        lambda **_kwargs: "/workspace/nested",
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "is_container_running",
+        lambda _profile, *, runtime_metadata=None: True,
+    )
+    monkeypatch.setattr(cli, "build_image_assets", lambda: object())
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "resolve_runtime_spec",
+        lambda *_args, **_kwargs: image_assets.RuntimeSpec(
+            image_ref="loaded:image",
+            shared_assets_identity="shared-assets-123",
+            shared_mounts=(),
+            start_command=("frag-bootstrap",),
+        ),
+    )
+    monkeypatch.setattr(
+        cli.docker_runtime,
+        "exec_in_profile_container",
+        lambda **_kwargs: 0,
+    )
+    monkeypatch.chdir(nested)
+
+    assert cli.handle_enter(profile="Demo Profile", command=()) == 0
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Reusing running container" in captured.err
+
+
+def test_enter_runtime_failures_still_print_to_stderr(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        cli,
+        "handle_enter",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            cli.docker_runtime.DockerRuntimeError("runtime [exploded]")
+        ),
+    )
+
+    assert cli.main(["enter", "--profile", "demo"]) == 1
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "runtime [exploded]" in captured.err
+
+
+def test_enter_legacy_runtime_refusal_uses_legacy_schema_renderer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    rendered: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(
+        cli,
+        "handle_enter",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            cli.docker_runtime.DockerRuntimeError(
+                "legacy schema 1 profile container for 'Demo Profile' is not supported; remove it and recreate the profile"
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        cli.ui,
+        "render_legacy_schema_refusal",
+        lambda message: rendered.append(("legacy", message)),
+    )
+    monkeypatch.setattr(
+        cli.ui,
+        "render_error",
+        lambda message: rendered.append(("error", message)),
+    )
+
+    assert cli.main(["enter", "--profile", "demo"]) == 1
+    assert rendered == [
+        (
+            "legacy",
+            "legacy schema 1 profile container for 'Demo Profile' is not supported; remove it and recreate the profile",
+        )
+    ]
 
 
 def test_pyproject_defines_bootstrap_console_entrypoint() -> None:
@@ -592,7 +914,12 @@ def test_profile_new_returns_nonzero_for_invalid_profile_name(
     workspace_root = tmp_path / "workspace"
     workspace_root.mkdir()
 
+    class FakeImageAssets:
+        def normalize_profile_image(self, *, image: str) -> str:
+            return image
+
     monkeypatch.setattr(cli.prompts, "require_non_blank", lambda value: value)
+    monkeypatch.setattr(cli, "build_image_assets", lambda: FakeImageAssets())
 
     assert (
         cli.main(
@@ -610,18 +937,30 @@ def test_profile_new_returns_nonzero_for_invalid_profile_name(
     )
     captured = capsys.readouterr()
     assert "Traceback" not in captured.err
+    assert (
+        "profile name must contain at least one alphanumeric character" in captured.err
+    )
 
 
 def test_profile_new_returns_nonzero_when_docker_command_fails(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     error = subprocess.CalledProcessError(
         1,
         ["docker", "volume", "create", "frag-profile-demo"],
         stderr="backend failed",
     )
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+
+    class FakeImageAssets:
+        def normalize_profile_image(self, *, image: str) -> str:
+            return image
 
     monkeypatch.setattr(cli.prompts, "require_non_blank", lambda value: value)
+    monkeypatch.setattr(cli, "build_image_assets", lambda: FakeImageAssets())
     monkeypatch.setattr(
         cli.profiles.subprocess,
         "run",
@@ -638,8 +977,10 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
                 "--image",
                 "python:3.14",
                 "--workspace-root",
-                "/workspace/demo",
+                str(workspace_root),
             ]
         )
         == 1
     )
+    captured = capsys.readouterr()
+    assert "backend failed" in captured.err

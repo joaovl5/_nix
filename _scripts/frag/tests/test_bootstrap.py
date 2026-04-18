@@ -9,7 +9,6 @@ import pytest
 
 from frag import bootstrap
 
-
 _EXPECTED_OPENCODE_CONFIG = {
     "$schema": "https://opencode.ai/config.json",
     "mcp": {
@@ -24,7 +23,6 @@ _EXPECTED_OPENCODE_CONFIG = {
         "opencode-agent-skills",
     ],
 }
-
 
 _EXPECTED_AGENT_BROWSER_CONFIG = {
     "contentBoundaries": True,
@@ -55,12 +53,18 @@ def _mode(path: Path) -> int:
     return stat.S_IMODE(path.stat().st_mode)
 
 
+def _prepare_home_view(*, state_profile: Path, home: Path) -> None:
+    home.parent.mkdir(parents=True, exist_ok=True)
+    home.symlink_to(state_profile / "home")
+
+
 def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     tmp_path: Path,
 ) -> None:
     state_profile = tmp_path / "state" / "profile"
     state_shared = tmp_path / "state" / "shared"
     home = tmp_path / "home" / "agent"
+    _prepare_home_view(state_profile=state_profile, home=home)
 
     (state_shared / "code" / "agents").mkdir(parents=True)
     (state_shared / "config" / "agents" / "skills").mkdir(parents=True)
@@ -73,7 +77,10 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     metadata = {
         "profile_name": "demo",
         "profile_image": "python:3.14",
+        "schema_version": "2",
         "workspace_root": "/workspace/demo",
+        "image_ref": "loaded:image",
+        "shared_assets_identity": "shared-assets-123",
     }
 
     bootstrap.initialize_profile_environment(
@@ -86,9 +93,11 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     assert (state_profile / "meta").is_dir()
     assert (state_profile / "config").is_dir()
     assert (state_profile / "notes").is_dir()
+    assert (state_profile / "home").is_dir()
     assert _mode(state_profile / "meta") == 0o700
     assert _mode(state_profile / "config") == 0o700
     assert _mode(state_profile / "notes") == 0o700
+    assert _mode(state_profile / "home") == 0o700
 
     profile_json = state_profile / "meta" / "profile.json"
     assert json.loads(profile_json.read_text()) == metadata
@@ -109,6 +118,11 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
         json.loads(agent_browser_config.read_text()) == _EXPECTED_AGENT_BROWSER_CONFIG
     )
 
+    assert home.is_symlink()
+    assert home.resolve() == (state_profile / "home").resolve()
+    assert (home / ".cache").is_symlink()
+    assert (home / ".cache").readlink() == bootstrap._EPHEMERAL_CACHE_HOME
+    assert not str((home / ".cache").resolve()).startswith(str(state_profile.resolve()))
     assert (home / ".code" / "config.toml").is_symlink()
     assert (home / ".code" / "config.toml").resolve() == code_config.resolve()
     assert (home / ".code" / "agents").is_symlink()
@@ -139,12 +153,13 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     ).resolve() == agent_browser_config.resolve()
 
 
-def test_initialize_profile_environment_is_idempotent_and_normalizes_permissions(
+def test_initialize_profile_environment_is_idempotent_and_preserves_mutable_home_state(
     tmp_path: Path,
 ) -> None:
     state_profile = tmp_path / "state" / "profile"
     state_shared = tmp_path / "state" / "shared"
     home = tmp_path / "home" / "agent"
+    _prepare_home_view(state_profile=state_profile, home=home)
     (state_shared / "code" / "agents").mkdir(parents=True)
 
     bootstrap.initialize_profile_environment(
@@ -154,7 +169,10 @@ def test_initialize_profile_environment_is_idempotent_and_normalizes_permissions
         metadata={
             "profile_name": "demo",
             "profile_image": "python:3.14",
+            "schema_version": "2",
             "workspace_root": "/workspace/demo",
+            "image_ref": "loaded:image",
+            "shared_assets_identity": "shared-assets-123",
         },
     )
 
@@ -174,6 +192,9 @@ def test_initialize_profile_environment_is_idempotent_and_normalizes_permissions
         json.dumps({"contentBoundaries": False, "maxOutput": 123}) + "\n"
     )
     agent_browser_config.chmod(0o600)
+    persisted_file = state_profile / "home" / ".local" / "state.txt"
+    persisted_file.parent.mkdir(parents=True)
+    persisted_file.write_text("persist me\n")
 
     bootstrap.initialize_profile_environment(
         state_profile=state_profile,
@@ -182,7 +203,10 @@ def test_initialize_profile_environment_is_idempotent_and_normalizes_permissions
         metadata={
             "profile_name": "demo",
             "profile_image": "python:3.14",
+            "schema_version": "2",
             "workspace_root": "/workspace/demo",
+            "image_ref": "loaded:image",
+            "shared_assets_identity": "shared-assets-123",
         },
     )
 
@@ -198,16 +222,23 @@ def test_initialize_profile_environment_is_idempotent_and_normalizes_permissions
         "contentBoundaries": False,
         "maxOutput": 123,
     }
+    assert persisted_file.read_text() == "persist me\n"
+    assert (home / ".cache").is_symlink()
+    assert (home / ".cache").readlink() == bootstrap._EPHEMERAL_CACHE_HOME
 
 
-def test_main_initializes_environment_and_execs_keepalive(
+def test_main_initializes_environment_clears_stale_status_and_execs_keepalive(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     state_profile = tmp_path / "state" / "profile"
     state_shared = tmp_path / "state" / "shared"
     home = tmp_path / "home" / "agent"
+    _prepare_home_view(state_profile=state_profile, home=home)
     (state_shared / "code" / "agents").mkdir(parents=True)
+    stale_status = state_profile / "meta" / "bootstrap-status.json"
+    stale_status.parent.mkdir(parents=True)
+    stale_status.write_text('{"status":"failed"}\n')
 
     captured: dict[str, object] = {}
 
@@ -234,6 +265,10 @@ def test_main_initializes_environment_and_execs_keepalive(
                 "python:3.14",
                 "--workspace-root",
                 "/workspace/demo",
+                "--image-ref",
+                "loaded:image",
+                "--shared-assets-identity",
+                "shared-assets-123",
                 "--keepalive",
                 "sleep",
                 "infinity",
@@ -244,10 +279,60 @@ def test_main_initializes_environment_and_execs_keepalive(
     assert json.loads((state_profile / "meta" / "profile.json").read_text()) == {
         "profile_name": "demo",
         "profile_image": "python:3.14",
+        "schema_version": "2",
         "workspace_root": "/workspace/demo",
+        "image_ref": "loaded:image",
+        "shared_assets_identity": "shared-assets-123",
     }
     assert (state_profile / "meta" / "bootstrap-token").read_text() == "token-123\n"
+    assert not stale_status.exists()
     assert captured == {"program": "sleep", "args": ["sleep", "infinity"]}
+
+
+def test_main_writes_token_scoped_bootstrap_failure_status(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    state_shared = tmp_path / "state" / "shared"
+    home = tmp_path / "home" / "agent"
+    _prepare_home_view(state_profile=state_profile, home=home)
+    (state_shared / "code" / "agents").mkdir(parents=True)
+    status_path = state_profile / "meta" / "bootstrap-status.json"
+    status_path.parent.mkdir(parents=True)
+    status_path.write_text('{"status":"stale","bootstrap_token":"old-token"}\n')
+
+    monkeypatch.setenv("FRAG_BOOTSTRAP_TOKEN", "token-456")
+    monkeypatch.setenv("FRAG_TARGET_UID", "1234")
+
+    with pytest.raises(RuntimeError, match="must set both uid and gid"):
+        bootstrap.main(
+            [
+                "--state-profile",
+                str(state_profile),
+                "--state-shared",
+                str(state_shared),
+                "--home",
+                str(home),
+                "--profile-name",
+                "demo",
+                "--profile-image",
+                "python:3.14",
+                "--workspace-root",
+                "/workspace/demo",
+                "--image-ref",
+                "loaded:image",
+                "--shared-assets-identity",
+                "shared-assets-123",
+            ]
+        )
+
+    assert json.loads(status_path.read_text()) == {
+        "bootstrap_token": "token-456",
+        "message": "bootstrap ownership target must set both uid and gid",
+        "phase": "ownership",
+        "status": "failed",
+    }
 
 
 def test_main_applies_target_ownership_to_profile_and_home(
@@ -257,6 +342,8 @@ def test_main_applies_target_ownership_to_profile_and_home(
     state_profile = tmp_path / "state" / "profile"
     state_shared = tmp_path / "state" / "shared"
     home = tmp_path / "home" / "agent"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+    _prepare_home_view(state_profile=state_profile, home=home)
     (state_shared / "code" / "agents").mkdir(parents=True)
 
     chown_calls: list[tuple[Path, int, int, bool]] = []
@@ -269,6 +356,78 @@ def test_main_applies_target_ownership_to_profile_and_home(
     ) -> None:
         chown_calls.append((Path(path), uid, gid, follow_symlinks))
 
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
+    monkeypatch.setattr(bootstrap.os, "execvp", fake_execvp)
+    monkeypatch.setattr(bootstrap.os, "chown", fake_chown)
+    monkeypatch.setenv("FRAG_BOOTSTRAP_TOKEN", "token-123")
+    monkeypatch.setenv("FRAG_TARGET_UID", "1234")
+    monkeypatch.setenv("FRAG_TARGET_GID", "5678")
+    monkeypatch.setenv("FRAG_TARGET_SUPPLEMENTARY_GIDS", "2001,2002")
+
+    with pytest.raises(SystemExit):
+        bootstrap.main(
+            [
+                "--state-profile",
+                str(state_profile),
+                "--state-shared",
+                str(state_shared),
+                "--home",
+                str(home),
+                "--profile-name",
+                "demo",
+                "--profile-image",
+                "python:3.14",
+                "--workspace-root",
+                "/workspace/demo",
+                "--image-ref",
+                "loaded:image",
+                "--shared-assets-identity",
+                "shared-assets-123",
+            ]
+        )
+
+    chowned_paths = {
+        path
+        for path, uid, gid, follow_symlinks in chown_calls
+        if uid == 1234 and gid == 5678 and follow_symlinks is False
+    }
+    assert state_profile in chowned_paths
+    assert state_profile / "meta" / "profile.json" in chowned_paths
+    assert state_profile / "home" in chowned_paths
+    assert state_profile / "home" / ".code" in chowned_paths
+    assert state_profile / "home" / ".code" / "config.toml" not in chowned_paths
+    assert runtime_identity_root not in chowned_paths
+    assert runtime_identity_root / "exec" not in chowned_paths
+    assert runtime_identity_root / "passwd" not in chowned_paths
+    assert runtime_identity_root / "group" not in chowned_paths
+    assert state_profile / "meta" / "bootstrap-token" in chowned_paths
+    assert (state_profile / "meta" / "bootstrap-token").read_text() == "token-123\n"
+
+
+def test_main_applies_target_ownership_to_ephemeral_cache_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    state_shared = tmp_path / "state" / "shared"
+    home = tmp_path / "home" / "agent"
+    _prepare_home_view(state_profile=state_profile, home=home)
+    (state_shared / "code" / "agents").mkdir(parents=True)
+
+    ephemeral_cache = tmp_path / "tmp" / "frag" / "cache"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+    chown_calls: list[tuple[Path, int, int, bool]] = []
+
+    def fake_execvp(program: str, args: list[str]) -> None:
+        raise SystemExit(0)
+
+    def fake_chown(
+        path: str | Path, uid: int, gid: int, *, follow_symlinks: bool = True
+    ) -> None:
+        chown_calls.append((Path(path), uid, gid, follow_symlinks))
+
+    monkeypatch.setattr(bootstrap, "_EPHEMERAL_CACHE_HOME", ephemeral_cache)
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
     monkeypatch.setattr(bootstrap.os, "execvp", fake_execvp)
     monkeypatch.setattr(bootstrap.os, "chown", fake_chown)
     monkeypatch.setenv("FRAG_TARGET_UID", "1234")
@@ -289,6 +448,10 @@ def test_main_applies_target_ownership_to_profile_and_home(
                 "python:3.14",
                 "--workspace-root",
                 "/workspace/demo",
+                "--image-ref",
+                "loaded:image",
+                "--shared-assets-identity",
+                "shared-assets-123",
             ]
         )
 
@@ -297,8 +460,116 @@ def test_main_applies_target_ownership_to_profile_and_home(
         for path, uid, gid, follow_symlinks in chown_calls
         if uid == 1234 and gid == 5678 and follow_symlinks is False
     }
-    assert state_profile in chowned_paths
-    assert state_profile / "meta" / "profile.json" in chowned_paths
-    assert home in chowned_paths
-    assert home / ".code" in chowned_paths
-    assert home / ".code" / "config.toml" not in chowned_paths
+    assert ephemeral_cache.parent in chowned_paths
+    assert ephemeral_cache in chowned_paths
+    assert (home / ".cache").readlink() == ephemeral_cache
+
+
+def test_write_identity_overlay_contract_activates_passwd_group_overlay(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
+    bootstrap._write_identity_overlay_contract(
+        state_profile, uid=1234, gid=5678, supplementary_gids=(2001, 2002)
+    )
+
+    exec_script = (runtime_identity_root / "exec").read_text()
+    passwd_text = (runtime_identity_root / "passwd").read_text()
+    assert exec_script.startswith("#!/sw/bin/sh\n")
+    assert "export NSS_WRAPPER_PASSWD=/run/frag/identity/passwd" in exec_script
+    assert "export NSS_WRAPPER_GROUP=/run/frag/identity/group" in exec_script
+    assert 'export LD_PRELOAD="/sw/lib/libnss_wrapper.so' in exec_script
+    assert 'setpriv --reuid 1234 --regid 5678 --groups 2001,2002 -- "$@"' in exec_script
+    assert "--clear-groups" not in exec_script
+    assert "/sw/bin/bash" in passwd_text
+
+
+def test_container_root_matches_requested_owner_for_rootless_maps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    map_text = {
+        "/proc/self/uid_map": "         0       1000          1\n         1     100000      65536\n",
+        "/proc/self/gid_map": "         0        100          1\n         1     100000      65536\n",
+    }
+    monkeypatch.setattr(
+        bootstrap.Path,
+        "read_text",
+        lambda self: map_text[str(self)],
+    )
+
+    assert bootstrap._container_root_matches_requested_owner(1000, 100) is True
+    assert bootstrap._container_root_matches_requested_owner(1234, 100) is False
+
+
+def test_write_identity_overlay_contract_uses_container_root_for_rootless_owner(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
+    monkeypatch.setattr(
+        bootstrap,
+        "_container_root_matches_requested_owner",
+        lambda uid, gid: (uid, gid) == (1234, 5678),
+    )
+    bootstrap._write_identity_overlay_contract(
+        state_profile, uid=1234, gid=5678, supplementary_gids=()
+    )
+
+    exec_script = (runtime_identity_root / "exec").read_text()
+    passwd_text = (runtime_identity_root / "passwd").read_text()
+
+    assert "setpriv" not in exec_script
+    assert exec_script.rstrip().endswith('exec "$@"')
+    assert "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/bash" in passwd_text
+
+
+def test_write_identity_overlay_contract_rootless_owner_keeps_supplementary_groups(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
+    monkeypatch.setattr(
+        bootstrap,
+        "_container_root_matches_requested_owner",
+        lambda uid, gid: (uid, gid) == (1234, 5678),
+    )
+    bootstrap._write_identity_overlay_contract(
+        state_profile, uid=1234, gid=5678, supplementary_gids=(2001, 2002)
+    )
+
+    exec_script = (runtime_identity_root / "exec").read_text()
+
+    assert 'setpriv --groups 2001,2002 -- "$@"' in exec_script
+    assert exec_script.rstrip().endswith('setpriv --groups 2001,2002 -- "$@"')
+
+
+def test_write_identity_overlay_contract_keeps_overlay_root_owned_but_readable(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_profile = tmp_path / "state" / "profile"
+    runtime_identity_root = tmp_path / "run" / "frag" / "identity"
+
+    monkeypatch.setattr(bootstrap, "_RUNTIME_IDENTITY_ROOT", runtime_identity_root)
+    bootstrap._write_identity_overlay_contract(
+        state_profile, uid=1234, gid=5678, supplementary_gids=()
+    )
+
+    passwd_path = runtime_identity_root / "passwd"
+    group_path = runtime_identity_root / "group"
+    exec_path = runtime_identity_root / "exec"
+
+    assert _mode(runtime_identity_root) == 0o755
+    assert _mode(passwd_path) == 0o644
+    assert _mode(group_path) == 0o644
+    assert _mode(exec_path) == 0o700

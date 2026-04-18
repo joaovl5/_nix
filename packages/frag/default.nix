@@ -17,6 +17,7 @@
     dependencies = with pkgs.python3Packages; [
       cyclopts
       questionary
+      rich
     ];
 
     nativeCheckInputs = with pkgs.python3Packages; [
@@ -29,23 +30,6 @@
   images = import ./images.nix {
     inherit pkgs frag_runtime;
   };
-
-  image_catalog = import ./image_catalog.nix {
-    inherit pkgs lib images;
-  };
-
-  load_image_helpers = lib.mapAttrs (_key: spec:
-    pkgs.writeShellScriptBin spec.loader_name ''
-      set -euo pipefail
-
-      docker_bin=${lib.escapeShellArg (lib.getExe' pkgs.docker "docker")}
-      image_ref=${lib.escapeShellArg spec.image_ref}
-
-      "$docker_bin" load -i ${spec.image} >/dev/null
-
-      printf '%s\n' "$image_ref"
-    '')
-  images;
 
   opencode_json = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
@@ -92,6 +76,19 @@
     cp ${inputs.superpowers + "/.opencode/plugins/superpowers.js"} \
       "$shared_root/.config/opencode/plugins/superpowers.js"
   '';
+
+  shared_assets_identity = builtins.substring 0 32 (builtins.baseNameOf (toString shared_assets));
+
+  image_catalog = import ./image_catalog.nix {
+    inherit
+      pkgs
+      lib
+      images
+      shared_assets_identity
+      ;
+  };
+
+  load_image_helpers = lib.mapAttrs (_key: spec: spec.loader_helper) images;
 in
   pkgs.symlinkJoin {
     name = "frag-${frag_runtime.version}";
@@ -99,6 +96,8 @@ in
       frag_runtime
       shared_assets
     ];
+
+    nativeBuildInputs = [pkgs.makeWrapper];
 
     postBuild = ''
       mkdir -p "$out/share/frag" "$out/share/frag/helpers"
@@ -109,6 +108,10 @@ in
           ln -s ${helper}/bin/${spec.loader_name} "$out/share/frag/helpers/${spec.loader_name}"
         '')
         images)}
+
+      rm "$out/bin/frag"
+      makeWrapper ${frag_runtime}/bin/frag "$out/bin/frag" \
+        --set FRAG_PACKAGE_ROOT "$out"
     '';
 
     passthru = {
