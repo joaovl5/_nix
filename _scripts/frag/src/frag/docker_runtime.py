@@ -10,25 +10,17 @@ import subprocess
 import sys
 import time
 
-from frag import profiles
+from frag import docker_invoke, profiles, runtime_contract
+from frag.exceptions import DockerRuntimeError
 from frag.image_assets import ImageAssets, RuntimeSpec
 
 _WORKSPACE_ROOT_IN_CONTAINER = "/workspace-root"
-_BOOTSTRAP_TOKEN_ENV = "FRAG_BOOTSTRAP_TOKEN"
-_TARGET_UID_ENV = "FRAG_TARGET_UID"
-_TARGET_GID_ENV = "FRAG_TARGET_GID"
-_TARGET_SUPPLEMENTARY_GIDS_ENV = "FRAG_TARGET_SUPPLEMENTARY_GIDS"
-_BOOTSTRAP_TOKEN_PATH = "/state/profile/meta/bootstrap-token"
-_BOOTSTRAP_STATUS_PATH = "/state/profile/meta/bootstrap-status.json"
 _IDENTITY_OVERLAY_EXEC_PATH = "/run/frag/identity/exec"
 
 
 _BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE = 42
 _BOOTSTRAP_WAIT_NOT_READY_SENTINEL = "frag-bootstrap-not-ready"
-
-
-class DockerRuntimeError(RuntimeError):
-    pass
+_BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE = 43
 
 
 class WorkspacePathError(DockerRuntimeError):
@@ -51,28 +43,18 @@ def container_name_for_profile(name: str) -> str:
 def _run_docker_command(
     command: Sequence[str], *, capture_output: bool
 ) -> subprocess.CompletedProcess[str]:
-    try:
-        return subprocess.run(
-            list(command),
-            check=False,
-            text=True,
-            capture_output=capture_output,
-        )
-    except FileNotFoundError as exc:
-        raise DockerRuntimeError("docker executable not found") from exc
+    return docker_invoke.run_docker_command(
+        command,
+        capture_output=capture_output,
+        missing_binary_error=DockerRuntimeError,
+        runner=subprocess.run,
+    )
 
 
 def _check_docker_result(
     result: subprocess.CompletedProcess[str],
 ) -> subprocess.CompletedProcess[str]:
-    if result.returncode == 0:
-        return result
-    detail = (result.stderr or result.stdout or str(result.returncode)).strip()
-    raise DockerRuntimeError(detail)
-
-
-def _canonical_path(path: Path | str) -> Path:
-    return Path(path).expanduser().resolve(strict=False)
+    return docker_invoke.require_success(result, error_type=DockerRuntimeError)
 
 
 def _current_process_user_option() -> str:
@@ -83,40 +65,12 @@ def _root_exec_user_option() -> str:
     return "0:0"
 
 
-def _current_supplementary_gids(*, primary_gid: int) -> tuple[int, ...]:
-    supplementary_groups: list[int] = []
-    for gid in os.getgroups():
-        if gid == primary_gid or gid in supplementary_groups:
-            continue
-        supplementary_groups.append(gid)
-    return tuple(supplementary_groups)
-
-
-def _supplementary_group_env_value(*, primary_gid: int) -> str:
-    return ",".join(
-        str(gid) for gid in _current_supplementary_gids(primary_gid=primary_gid)
-    )
-
-
-def _current_runtime_metadata(
-    *, runtime_spec: RuntimeSpec
-) -> profiles.RuntimeProfileMetadata:
-    primary_gid = os.getgid()
-    return profiles.RuntimeProfileMetadata(
-        image_ref=runtime_spec.image_ref,
-        shared_assets_identity=runtime_spec.shared_assets_identity,
-        target_uid=str(os.getuid()),
-        target_gid=str(primary_gid),
-        supplementary_gids=_current_supplementary_gids(primary_gid=primary_gid),
-    )
-
-
 def container_workdir_for_cwd(
     *, profile: profiles.Profile, cwd: Path | str, workspace_root: Path | str
 ) -> str:
     del profile
-    workspace_path = _canonical_path(workspace_root)
-    cwd_path = _canonical_path(cwd)
+    workspace_path = runtime_contract.canonical_path(workspace_root)
+    cwd_path = runtime_contract.canonical_path(cwd)
     try:
         relative = cwd_path.relative_to(workspace_path)
     except ValueError as exc:
@@ -139,7 +93,7 @@ def _workspace_root_mount_matches(*, mounts: object, workspace_root: Path) -> bo
             and mount.get("Destination") == _WORKSPACE_ROOT_IN_CONTAINER
             and isinstance(mount.get("Source"), str)
         ):
-            return _canonical_path(mount["Source"]) == workspace_root
+            return runtime_contract.canonical_path(mount["Source"]) == workspace_root
     return False
 
 
@@ -179,13 +133,14 @@ def _container_matches_profile(
     except profiles.ProfileError as exc:
         raise DockerRuntimeError(str(exc)) from exc
 
-    expected_workspace_root = _canonical_path(profile.workspace_root)
+    expected_workspace_root = runtime_contract.canonical_path(profile.workspace_root)
     labeled_workspace_root = labels.get(profiles.LABEL_WORKSPACE_ROOT)
     return (
         labels.get(profiles.LABEL_PROFILE) == profile.name
         and labels.get(profiles.LABEL_IMAGE) == profile.image
         and isinstance(labeled_workspace_root, str)
-        and _canonical_path(labeled_workspace_root) == expected_workspace_root
+        and runtime_contract.canonical_path(labeled_workspace_root)
+        == expected_workspace_root
         and _container_runtime_metadata_matches(labels, runtime_metadata)
         and _workspace_root_mount_matches(
             mounts=container.get("Mounts"),
@@ -305,7 +260,7 @@ def resolve_runtime_spec(
     *,
     loaded_image_ref: str | None = None,
 ) -> RuntimeSpec:
-    workspace_path = _canonical_path(workspace_root)
+    workspace_path = runtime_contract.canonical_path(workspace_root)
     runtime_spec = image_assets.build_runtime_spec(
         profile=profile,
         workspace_root=workspace_path,
@@ -356,7 +311,9 @@ def _build_start_container_command(
     workspace_root: Path,
     runtime_spec: RuntimeSpec,
 ) -> list[str]:
-    runtime_metadata = _current_runtime_metadata(runtime_spec=runtime_spec)
+    runtime_metadata = runtime_contract.current_runtime_metadata(
+        runtime_spec=runtime_spec
+    )
     command = [
         "docker",
         "run",
@@ -427,18 +384,19 @@ def _build_bootstrap_wait_command(
         "--user",
         _root_exec_user_option(),
         "-e",
-        f"{_BOOTSTRAP_TOKEN_ENV}={bootstrap_token}",
+        f"{runtime_contract.BOOTSTRAP_TOKEN_ENV}={bootstrap_token}",
         container_name_for_profile(profile.name),
-        _IDENTITY_OVERLAY_EXEC_PATH,
         "sh",
         "-lc",
         (
-            f"if ! test -f {_BOOTSTRAP_TOKEN_PATH}; then "
-            f'printf "%s\\n" "{_BOOTSTRAP_WAIT_NOT_READY_SENTINEL}"; '
-            f"exit {_BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE}; "
+            f"if test -f {runtime_contract.BOOTSTRAP_TOKEN_CONTAINER_PATH}; then "
+            f'token="$(cat {runtime_contract.BOOTSTRAP_TOKEN_CONTAINER_PATH})" || exit $?; '
+            f'test "$token" = "${runtime_contract.BOOTSTRAP_TOKEN_ENV}" && exit 0; '
             "fi; "
-            f'token="$(cat {_BOOTSTRAP_TOKEN_PATH})" || exit $?; '
-            'test "$token" = "$FRAG_BOOTSTRAP_TOKEN" && exit 0; '
+            f"if test -s {runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH}; then "
+            f"cat {runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH}; "
+            f"exit {_BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE}; "
+            "fi; "
             f'printf "%s\\n" "{_BOOTSTRAP_WAIT_NOT_READY_SENTINEL}"; '
             f"exit {_BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE}"
         ),
@@ -454,7 +412,7 @@ def _build_bootstrap_status_command(*, profile: profiles.Profile) -> list[str]:
         container_name_for_profile(profile.name),
         "sh",
         "-lc",
-        f"test -f {_BOOTSTRAP_STATUS_PATH} && cat {_BOOTSTRAP_STATUS_PATH}",
+        f"test -f {runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH} && cat {runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH}",
     ]
 
 
@@ -532,7 +490,7 @@ def _read_persisted_bootstrap_failure(
     mountpoint = _profile_volume_mountpoint(profile)
     if mountpoint is None:
         return None
-    status_path = mountpoint / "meta" / "bootstrap-status.json"
+    status_path = runtime_contract.bootstrap_status_path(mountpoint)
     try:
         raw_status = status_path.read_text()
     except FileNotFoundError:
@@ -554,15 +512,26 @@ def _bootstrap_wait_result_is_retryable(
     result: subprocess.CompletedProcess[str],
 ) -> bool:
     detail = (result.stderr or result.stdout or "").strip()
-    if (
+    return (
         result.returncode == _BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE
         and detail == _BOOTSTRAP_WAIT_NOT_READY_SENTINEL
-    ):
-        return True
-    return (
-        result.returncode in (126, 127)
-        and _IDENTITY_OVERLAY_EXEC_PATH in detail
-        and "no such file or directory" in detail
+    )
+
+
+def _bootstrap_wait_result_failure_detail(
+    result: subprocess.CompletedProcess[str],
+    *,
+    bootstrap_token: str,
+) -> str | None:
+    if result.returncode != _BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE:
+        return None
+    raw_status = result.stdout.strip()
+    if not raw_status:
+        return None
+    return _parse_bootstrap_failure_detail(
+        raw_status,
+        bootstrap_token=bootstrap_token,
+        invalid_json_message="bootstrap wait probe returned invalid JSON",
     )
 
 
@@ -586,8 +555,10 @@ def start_profile_container(
     runtime_spec: RuntimeSpec,
     bootstrap_token: str,
 ) -> None:
-    workspace_path = _canonical_path(workspace_root)
-    runtime_metadata = _current_runtime_metadata(runtime_spec=runtime_spec)
+    workspace_path = runtime_contract.canonical_path(workspace_root)
+    runtime_metadata = runtime_contract.current_runtime_metadata(
+        runtime_spec=runtime_spec
+    )
     _remove_conflicting_profile_container(
         profile,
         runtime_metadata=runtime_metadata,
@@ -598,16 +569,18 @@ def start_profile_container(
         runtime_spec=runtime_spec,
     )
     read_only_index = command.index("--read-only")
-    supplementary_group_env = _supplementary_group_env_value(primary_gid=os.getgid())
+    supplementary_group_env = ",".join(
+        str(gid) for gid in runtime_metadata.supplementary_gids
+    )
     command[read_only_index:read_only_index] = [
         "--env",
-        f"{_TARGET_UID_ENV}={os.getuid()}",
+        f"{runtime_contract.TARGET_UID_ENV}={runtime_metadata.target_uid}",
         "--env",
-        f"{_TARGET_GID_ENV}={os.getgid()}",
+        f"{runtime_contract.TARGET_GID_ENV}={runtime_metadata.target_gid}",
         "--env",
-        f"{_TARGET_SUPPLEMENTARY_GIDS_ENV}={supplementary_group_env}",
+        f"{runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV}={supplementary_group_env}",
         "--env",
-        f"{_BOOTSTRAP_TOKEN_ENV}={bootstrap_token}",
+        f"{runtime_contract.BOOTSTRAP_TOKEN_ENV}={bootstrap_token}",
     ]
     start_result = _run_docker_command(command, capture_output=True)
     if _docker_result_is_container_name_conflict(
@@ -618,22 +591,37 @@ def start_profile_container(
     _check_docker_result(start_result)
 
 
-def _read_bootstrap_timeout_detail(
-    *, profile: profiles.Profile, bootstrap_token: str
+def _read_bootstrap_failure_detail(
+    *,
+    profile: profiles.Profile,
+    bootstrap_token: str,
+    include_logs: bool = False,
+    prefer_logs: bool = False,
+    include_current: bool = True,
 ) -> str | None:
-    failure_detail = _read_current_bootstrap_failure(
-        profile=profile,
-        bootstrap_token=bootstrap_token,
+    readers = []
+    if include_current:
+        readers.append(
+            lambda: _read_current_bootstrap_failure(
+                profile=profile,
+                bootstrap_token=bootstrap_token,
+            )
+        )
+    readers.append(
+        lambda: _read_persisted_bootstrap_failure(
+            profile=profile,
+            bootstrap_token=bootstrap_token,
+        )
     )
-    if failure_detail is not None:
-        return failure_detail
-    failure_detail = _read_persisted_bootstrap_failure(
-        profile=profile,
-        bootstrap_token=bootstrap_token,
-    )
-    if failure_detail is not None:
-        return failure_detail
-    return _read_container_logs(profile)
+    if include_logs:
+        readers.append(lambda: _read_container_logs(profile))
+    if prefer_logs and include_logs:
+        readers.insert(0, readers.pop())
+    for read_detail in readers:
+        failure_detail = read_detail()
+        if failure_detail is not None:
+            return failure_detail
+    return None
 
 
 def wait_for_profile_bootstrap(
@@ -650,47 +638,41 @@ def wait_for_profile_bootstrap(
     deadline = time.monotonic() + timeout_seconds
     while True:
         result = _run_docker_command(command, capture_output=True)
-        if result.returncode == 0:
-            return
-        if not _bootstrap_wait_result_is_retryable(result):
-            logs = _read_container_logs(profile)
-            if logs is not None:
-                raise DockerRuntimeError(logs)
-            failure_detail = _read_current_bootstrap_failure(
-                profile=profile,
-                bootstrap_token=bootstrap_token,
-            )
-            if failure_detail is None:
-                failure_detail = _read_persisted_bootstrap_failure(
-                    profile=profile,
-                    bootstrap_token=bootstrap_token,
-                )
-            if failure_detail is not None:
-                raise DockerRuntimeError(failure_detail)
-            detail = (result.stderr or result.stdout or str(result.returncode)).strip()
-            raise DockerRuntimeError(detail)
-
-        failure_detail = _read_current_bootstrap_failure(
-            profile=profile,
+        probe_failure_detail = _bootstrap_wait_result_failure_detail(
+            result,
             bootstrap_token=bootstrap_token,
         )
-        if failure_detail is None:
-            failure_detail = _read_persisted_bootstrap_failure(
+        if probe_failure_detail is not None:
+            raise DockerRuntimeError(probe_failure_detail)
+        if result.returncode == 0:
+            return
+        if (
+            result.returncode != _BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE
+            and not _bootstrap_wait_result_is_retryable(result)
+        ):
+            failure_detail = _read_bootstrap_failure_detail(
                 profile=profile,
                 bootstrap_token=bootstrap_token,
+                include_logs=True,
+                prefer_logs=True,
+                include_current=False,
             )
-        if failure_detail is not None:
-            raise DockerRuntimeError(failure_detail)
+            if failure_detail is not None:
+                raise DockerRuntimeError(failure_detail)
+            detail = docker_invoke.command_error_detail(result)
+            raise DockerRuntimeError(detail)
+
         if time.monotonic() >= deadline:
-            timeout_detail = _read_bootstrap_timeout_detail(
+            timeout_detail = _read_bootstrap_failure_detail(
                 profile=profile,
                 bootstrap_token=bootstrap_token,
+                include_logs=True,
+                include_current=True,
             )
             if timeout_detail is not None:
                 raise DockerRuntimeError(timeout_detail)
-            raise DockerRuntimeError(
-                f"timed out waiting for bootstrap readiness for {profile.name!r}"
-            )
+            raise DockerRuntimeError("timed out waiting for bootstrap readiness")
+
         time.sleep(poll_interval_seconds)
 
 

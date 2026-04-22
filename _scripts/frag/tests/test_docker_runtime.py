@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from frag import cli, docker_runtime, image_assets, profiles
+from frag import cli, docker_runtime, image_assets, profiles, runtime_contract
 
 
 DEMO_PROFILE = profiles.Profile(
@@ -19,6 +19,7 @@ DEMO_PROFILE = profiles.Profile(
 
 BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE = 42
 BOOTSTRAP_WAIT_NOT_READY_SENTINEL = "frag-bootstrap-not-ready"
+BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE = 43
 
 
 class FakeImageAssets:
@@ -952,11 +953,28 @@ def test_exec_in_profile_container_omits_tty_when_stdio_is_not_interactive(
     ]
 
 
+def test_build_bootstrap_wait_command_executes_shell_directly_as_root() -> None:
+    command = docker_runtime._build_bootstrap_wait_command(
+        profile=DEMO_PROFILE,
+        bootstrap_token="token-123",
+    )
+
+    assert command[:7] == [
+        "docker",
+        "exec",
+        "--user",
+        "0:0",
+        "-e",
+        f"{runtime_contract.BOOTSTRAP_TOKEN_ENV}=token-123",
+        docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
+    ]
+    assert command[7:9] == ["sh", "-lc"]
+    assert docker_runtime._IDENTITY_OVERLAY_EXEC_PATH not in command
+
+
 def test_wait_for_profile_bootstrap_polls_until_token_matches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
-    monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
     captured: list[list[str]] = []
     return_codes = iter([BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE, 0])
     slept: list[float] = []
@@ -966,7 +984,7 @@ def test_wait_for_profile_bootstrap_polls_until_token_matches(
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         captured.append(command)
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
+        if command[:2] == ["docker", "exec"]:
             return subprocess.CompletedProcess(
                 command,
                 next(return_codes),
@@ -988,17 +1006,19 @@ def test_wait_for_profile_bootstrap_polls_until_token_matches(
         poll_interval_seconds=0.25,
     )
 
-    wrapper_attempts = [
-        command
-        for command in captured
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command
-    ]
-    status_attempts = [
-        command for command in captured if "bootstrap-status.json" in " ".join(command)
+    wait_attempts = [
+        command for command in captured if command[:2] == ["docker", "exec"]
     ]
     assert slept == [0.25]
-    assert len(wrapper_attempts) == 2
-    assert len(status_attempts) == 1
+    assert len(wait_attempts) == 2
+    assert all(
+        runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH in command[-1]
+        for command in wait_attempts
+    )
+    assert all(
+        docker_runtime._IDENTITY_OVERLAY_EXEC_PATH not in command
+        for command in wait_attempts
+    )
 
 
 def test_wait_for_profile_bootstrap_times_out_when_token_never_matches(
@@ -1012,7 +1032,7 @@ def test_wait_for_profile_bootstrap_times_out_when_token_never_matches(
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         attempts.append(command)
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
+        if command[:2] == ["docker", "exec"]:
             return subprocess.CompletedProcess(
                 command,
                 BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE,
@@ -1038,17 +1058,16 @@ def test_wait_for_profile_bootstrap_times_out_when_token_never_matches(
             poll_interval_seconds=0.25,
         )
 
-    wrapper_attempts = [
-        command
-        for command in attempts
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command
+    wait_attempts = [
+        command for command in attempts if command[:2] == ["docker", "exec"]
     ]
-    status_attempts = [
-        command for command in attempts if "bootstrap-status.json" in " ".join(command)
+    retry_probe_attempts = [command for command in wait_attempts if "-e" in command]
+    timeout_status_attempts = [
+        command for command in wait_attempts if "-e" not in command
     ]
     assert slept == [0.25]
-    assert len(wrapper_attempts) == 2
-    assert len(status_attempts) == 3
+    assert len(retry_probe_attempts) == 2
+    assert len(timeout_status_attempts) == 1
 
 
 def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeout(
@@ -1062,7 +1081,7 @@ def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeou
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         attempts.append(command)
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
+        if command[:2] == ["docker", "exec"]:
             return subprocess.CompletedProcess(
                 command,
                 BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE,
@@ -1103,107 +1122,15 @@ def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeou
     ] in attempts
 
 
-def test_wait_for_profile_bootstrap_retries_while_identity_wrapper_is_missing(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    attempts: list[list[str]] = []
-    slept: list[float] = []
-    monotonic_values = iter([0.0, 0.0, 0.25])
-
-    def fake_run(
-        command: list[str], **_kwargs: object
-    ) -> subprocess.CompletedProcess[str]:
-        attempts.append(command)
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
-            if (
-                len(
-                    [
-                        attempt
-                        for attempt in attempts
-                        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in attempt
-                    ]
-                )
-                == 1
-            ):
-                return subprocess.CompletedProcess(
-                    command,
-                    127,
-                    stdout="",
-                    stderr=f"stat {docker_runtime._IDENTITY_OVERLAY_EXEC_PATH}: no such file or directory",
-                )
-            return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
-        return subprocess.CompletedProcess(command, 1, stdout="", stderr="")
-
-    monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
-    monkeypatch.setattr(docker_runtime.time, "sleep", slept.append)
-    monkeypatch.setattr(
-        docker_runtime.time, "monotonic", lambda: next(monotonic_values)
+def test_bootstrap_wait_result_is_not_retryable_for_missing_identity_wrapper() -> None:
+    result = subprocess.CompletedProcess(
+        ["docker", "exec"],
+        127,
+        stdout="",
+        stderr=f"stat {docker_runtime._IDENTITY_OVERLAY_EXEC_PATH}: no such file or directory",
     )
 
-    docker_runtime.wait_for_profile_bootstrap(
-        profile=DEMO_PROFILE,
-        bootstrap_token="token-123",
-        timeout_seconds=1.0,
-        poll_interval_seconds=0.25,
-    )
-
-    wrapper_attempts = [
-        command
-        for command in attempts
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command
-    ]
-    assert len(wrapper_attempts) == 2
-    assert slept == [0.25]
-
-
-def test_wait_for_profile_bootstrap_reports_identity_wrapper_probe_failure(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    attempts: list[list[str]] = []
-    volume_root = tmp_path / "profile-volume"
-    volume_root.mkdir()
-
-    def fake_run(
-        command: list[str], **_kwargs: object
-    ) -> subprocess.CompletedProcess[str]:
-        attempts.append(command)
-        if command[1:3] == ["volume", "inspect"]:
-            return subprocess.CompletedProcess(
-                command,
-                0,
-                stdout=json.dumps([{"Mountpoint": str(volume_root)}]),
-                stderr="",
-            )
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
-            return subprocess.CompletedProcess(
-                command,
-                1,
-                stdout="",
-                stderr="identity wrapper probe exploded",
-            )
-        return subprocess.CompletedProcess(command, 1, stdout="", stderr="")
-
-    monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
-    monkeypatch.setattr(docker_runtime.time, "monotonic", iter([0.0, 0.0]).__next__)
-
-    with pytest.raises(
-        docker_runtime.DockerRuntimeError,
-        match="identity wrapper probe exploded",
-    ):
-        docker_runtime.wait_for_profile_bootstrap(
-            profile=DEMO_PROFILE,
-            bootstrap_token="token-123",
-            timeout_seconds=0.0,
-            poll_interval_seconds=0.25,
-        )
-
-    assert ["docker", "volume", "inspect", DEMO_PROFILE.volume_name] in attempts
-    assert [
-        "docker",
-        "logs",
-        docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
-    ] in attempts
+    assert docker_runtime._bootstrap_wait_result_is_retryable(result) is False
 
 
 def test_wait_for_profile_bootstrap_reports_current_token_failure_status(
@@ -1215,16 +1142,9 @@ def test_wait_for_profile_bootstrap_reports_current_token_failure_status(
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         attempts.append(command)
-        if docker_runtime._IDENTITY_OVERLAY_EXEC_PATH in command:
-            return subprocess.CompletedProcess(
-                command,
-                127,
-                stdout="",
-                stderr=f"stat {docker_runtime._IDENTITY_OVERLAY_EXEC_PATH}: no such file or directory",
-            )
         return subprocess.CompletedProcess(
             command,
-            0,
+            BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE,
             stdout=json.dumps(
                 {
                     "status": "failed",
@@ -1249,7 +1169,69 @@ def test_wait_for_profile_bootstrap_reports_current_token_failure_status(
             poll_interval_seconds=0.25,
         )
 
-    assert any("bootstrap-status.json" in " ".join(command) for command in attempts)
+    wait_attempts = [
+        command for command in attempts if command[:2] == ["docker", "exec"]
+    ]
+    assert len(wait_attempts) == 1
+
+
+def test_wait_for_profile_bootstrap_retries_when_probe_reports_stale_failure_status(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    attempts: list[list[str]] = []
+    probe_results = iter(
+        [
+            subprocess.CompletedProcess(
+                ["docker", "exec"],
+                BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE,
+                stdout=json.dumps(
+                    {
+                        "status": "failed",
+                        "bootstrap_token": "stale-token",
+                        "phase": "identity",
+                        "message": "overlay activation failed",
+                    }
+                ),
+                stderr="",
+            ),
+            subprocess.CompletedProcess(["docker", "exec"], 0, stdout="", stderr=""),
+        ]
+    )
+    slept: list[float] = []
+    monotonic_values = iter([0.0, 0.0, 0.25])
+
+    def fake_run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        attempts.append(command)
+        if command[:2] == ["docker", "exec"]:
+            result = next(probe_results)
+            return subprocess.CompletedProcess(
+                command,
+                result.returncode,
+                stdout=result.stdout,
+                stderr=result.stderr,
+            )
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="")
+
+    monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
+    monkeypatch.setattr(docker_runtime.time, "sleep", slept.append)
+    monkeypatch.setattr(
+        docker_runtime.time, "monotonic", lambda: next(monotonic_values)
+    )
+
+    docker_runtime.wait_for_profile_bootstrap(
+        profile=DEMO_PROFILE,
+        bootstrap_token="token-123",
+        timeout_seconds=1.0,
+        poll_interval_seconds=0.25,
+    )
+
+    wait_attempts = [
+        command for command in attempts if command[:2] == ["docker", "exec"]
+    ]
+    assert slept == [0.25]
+    assert len(wait_attempts) == 2
 
 
 def test_read_persisted_bootstrap_failure_ignores_unreadable_volume_file(
@@ -1274,6 +1256,82 @@ def test_read_persisted_bootstrap_failure_ignores_unreadable_volume_file(
         )
         is None
     )
+
+
+def test_read_bootstrap_failure_detail_checks_current_then_persisted_then_logs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+
+    def fake_current(*, profile: profiles.Profile, bootstrap_token: str) -> str | None:
+        assert profile is DEMO_PROFILE
+        assert bootstrap_token == "token-123"
+        calls.append("current")
+        return "current detail"
+
+    def fake_persisted(
+        *, profile: profiles.Profile, bootstrap_token: str
+    ) -> str | None:
+        calls.append("persisted")
+        return "persisted detail"
+
+    def fake_logs(profile: profiles.Profile) -> str | None:
+        calls.append("logs")
+        return "logs detail"
+
+    monkeypatch.setattr(docker_runtime, "_read_current_bootstrap_failure", fake_current)
+    monkeypatch.setattr(
+        docker_runtime, "_read_persisted_bootstrap_failure", fake_persisted
+    )
+    monkeypatch.setattr(docker_runtime, "_read_container_logs", fake_logs)
+
+    assert (
+        docker_runtime._read_bootstrap_failure_detail(
+            profile=DEMO_PROFILE,
+            bootstrap_token="token-123",
+            include_logs=True,
+        )
+        == "current detail"
+    )
+    assert calls == ["current"]
+
+
+def test_read_bootstrap_failure_detail_can_prefer_logs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+
+    def fake_current(*, profile: profiles.Profile, bootstrap_token: str) -> str | None:
+        calls.append("current")
+        return "current detail"
+
+    def fake_persisted(
+        *, profile: profiles.Profile, bootstrap_token: str
+    ) -> str | None:
+        calls.append("persisted")
+        return "persisted detail"
+
+    def fake_logs(profile: profiles.Profile) -> str | None:
+        assert profile is DEMO_PROFILE
+        calls.append("logs")
+        return "logs detail"
+
+    monkeypatch.setattr(docker_runtime, "_read_current_bootstrap_failure", fake_current)
+    monkeypatch.setattr(
+        docker_runtime, "_read_persisted_bootstrap_failure", fake_persisted
+    )
+    monkeypatch.setattr(docker_runtime, "_read_container_logs", fake_logs)
+
+    assert (
+        docker_runtime._read_bootstrap_failure_detail(
+            profile=DEMO_PROFILE,
+            bootstrap_token="token-123",
+            include_logs=True,
+            prefer_logs=True,
+        )
+        == "logs detail"
+    )
+    assert calls == ["logs"]
 
 
 def test_wait_for_profile_bootstrap_reports_persisted_current_token_failure_after_container_exit(
@@ -1559,6 +1617,15 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status_for_no
         "logs",
         docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
     ] in attempts
+
+
+@pytest.mark.skip(
+    reason="Deferred: startup failure/timeout cleanup semantics are not exposed in docker_runtime within tight Chunk 1 runtime-test scope; cover container/volume cleanup behavior in a later task.",
+)
+def test_wait_for_profile_bootstrap_defers_startup_cleanup_semantics() -> None:
+    """Explicitly track the untested cleanup-semantics gap for a follow-up task."""
+
+    pass
 
 
 @pytest.mark.parametrize(
@@ -1969,6 +2036,147 @@ def test_cli_enter_refuses_pwd_outside_workspace_root(
 
     with pytest.raises(docker_runtime.WorkspacePathError, match="bad cwd"):
         cli.handle_enter(profile="Demo Profile", command=("bash",))
+
+
+def test_stop_profile_container_stops_named_container(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: list[list[str]] = []
+
+    def fake_run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        captured.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="stopped\n", stderr="")
+
+    monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
+
+    docker_runtime.stop_profile_container(DEMO_PROFILE)
+
+    assert captured == [["docker", "stop", "frag-demo-profile"]]
+
+
+def test_stop_profile_container_surfaces_docker_stop_failures(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            command, 1, stdout="", stderr="permission denied"
+        )
+
+    monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
+
+    with pytest.raises(docker_runtime.DockerRuntimeError, match="permission denied"):
+        docker_runtime.stop_profile_container(DEMO_PROFILE)
+
+
+@pytest.mark.parametrize(
+    ("stdin_tty", "stdout_tty", "expected"),
+    [
+        pytest.param(True, True, True, id="both-interactive"),
+        pytest.param(True, False, False, id="stdout-only-non-interactive"),
+        pytest.param(False, True, False, id="stdin-only-non-interactive"),
+        pytest.param(False, False, False, id="neither-interactive"),
+    ],
+)
+def test_should_allocate_tty_requires_both_streams_to_be_interactive(
+    monkeypatch: pytest.MonkeyPatch,
+    stdin_tty: bool,
+    stdout_tty: bool,
+    expected: bool,
+) -> None:
+    monkeypatch.setattr(docker_runtime.sys.stdin, "isatty", lambda: stdin_tty)
+    monkeypatch.setattr(docker_runtime.sys.stdout, "isatty", lambda: stdout_tty)
+
+    assert docker_runtime._should_allocate_tty() is expected
+
+
+def test_resolve_runtime_spec_prefers_loaded_image_reference(
+    tmp_path: Path,
+) -> None:
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+    runtime_spec = image_assets.RuntimeSpec(
+        image_ref="runtime:image",
+        shared_assets_identity="shared-assets-123",
+        shared_mounts=(),
+        start_command=("frag-bootstrap",),
+    )
+    assets_provider = FakeImageAssets(runtime_spec=runtime_spec)
+
+    resolved = docker_runtime.resolve_runtime_spec(
+        DEMO_PROFILE,
+        workspace_root,
+        assets_provider,
+        loaded_image_ref="loaded:image",
+    )
+
+    assert resolved == image_assets.RuntimeSpec(
+        image_ref="loaded:image",
+        shared_assets_identity="shared-assets-123",
+        shared_mounts=(),
+        start_command=("frag-bootstrap",),
+    )
+    assert assets_provider.build_calls == [(DEMO_PROFILE, workspace_root.resolve())]
+
+
+@pytest.mark.parametrize(
+    ("runtime_spec", "loaded_image_ref", "message"),
+    [
+        pytest.param(
+            image_assets.RuntimeSpec(
+                image_ref="   ",
+                shared_assets_identity="shared-assets-123",
+                shared_mounts=(),
+                start_command=("frag-bootstrap",),
+            ),
+            None,
+            "image loader returned an empty image reference",
+            id="empty-runtime-image-ref",
+        ),
+        pytest.param(
+            image_assets.RuntimeSpec(
+                image_ref="runtime:image",
+                shared_assets_identity="   ",
+                shared_mounts=(),
+                start_command=("frag-bootstrap",),
+            ),
+            None,
+            "image loader returned no shared assets identity",
+            id="missing-shared-assets-identity",
+        ),
+        pytest.param(
+            image_assets.RuntimeSpec(
+                image_ref="runtime:image",
+                shared_assets_identity="shared-assets-123",
+                shared_mounts=(),
+                start_command=(),
+            ),
+            None,
+            "image loader returned no bootstrap command",
+            id="missing-start-command",
+        ),
+    ],
+)
+def test_resolve_runtime_spec_rejects_invalid_runtime_spec(
+    tmp_path: Path,
+    runtime_spec: image_assets.RuntimeSpec,
+    loaded_image_ref: str | None,
+    message: str,
+) -> None:
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+    assets_provider = FakeImageAssets(runtime_spec=runtime_spec)
+
+    with pytest.raises(docker_runtime.DockerRuntimeError, match=message):
+        docker_runtime.resolve_runtime_spec(
+            DEMO_PROFILE,
+            workspace_root,
+            assets_provider,
+            loaded_image_ref=loaded_image_ref,
+        )
 
 
 def test_cli_profile_stop_stops_named_container(

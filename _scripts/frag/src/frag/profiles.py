@@ -8,6 +8,9 @@ import subprocess
 from collections.abc import Mapping, Sequence
 from typing import Protocol
 
+from frag import docker_invoke
+from frag.exceptions import LegacySchemaError
+
 LABEL_PROFILE = "frag.profile"
 LABEL_IMAGE = "frag.image"
 LABEL_WORKSPACE_ROOT = "frag.workspace_root"
@@ -79,13 +82,13 @@ class RuntimeProfileMetadata:
 
 
 def _run_docker_command(command: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    try:
-        return subprocess.run(command, check=True, capture_output=True, text=True)
-    except FileNotFoundError as exc:
-        raise DockerBackendError("docker executable not found") from exc
-    except subprocess.CalledProcessError as exc:
-        detail = (exc.stderr or exc.stdout or str(exc)).strip()
-        raise DockerBackendError(detail) from exc
+    return docker_invoke.run_docker_command(
+        command,
+        capture_output=True,
+        missing_binary_error=DockerBackendError,
+        nonzero_error=DockerBackendError,
+        runner=subprocess.run,
+    )
 
 
 class DockerCliBackend:
@@ -226,7 +229,7 @@ def ensure_supported_schema(labels: Mapping[str, object], *, subject: str) -> st
         profile_detail = (
             f" for {profile_name!r}" if isinstance(profile_name, str) else ""
         )
-        raise ProfileError(
+        raise LegacySchemaError(
             f"legacy schema 1 {subject}{profile_detail} is not supported; remove it and recreate the profile"
         )
     if not isinstance(schema_version, str):

@@ -8,7 +8,9 @@ import sys
 
 from cyclopts import App, CycloptsError
 
-from frag import docker_runtime, image_assets, profiles, prompts, ui
+from frag.exceptions import LegacySchemaError
+
+from frag import docker_runtime, image_assets, profiles, prompts, runtime_contract, ui
 
 app = App(
     name="frag", result_action="return_value", exit_on_error=False, print_error=False
@@ -245,14 +247,8 @@ def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
         workspace_root,
         image_assets_provider,
     )
-    runtime_metadata = profiles.RuntimeProfileMetadata(
-        image_ref=runtime_spec.image_ref,
-        shared_assets_identity=runtime_spec.shared_assets_identity,
-        target_uid=str(os.getuid()),
-        target_gid=str(os.getgid()),
-        supplementary_gids=docker_runtime._current_supplementary_gids(
-            primary_gid=os.getgid()
-        ),
+    runtime_metadata = runtime_contract.current_runtime_metadata(
+        runtime_spec=runtime_spec,
     )
 
     if docker_runtime.is_container_running(
@@ -290,11 +286,7 @@ def _print_cli_error(error: Exception) -> None:
     if isinstance(error, docker_runtime.WorkspacePathError):
         ui.render_no_workspace(detail)
         return
-    if (
-        "legacy catalog schema" in detail
-        or "legacy schema 1" in detail
-        or "shared_assets_identity" in detail
-    ):
+    if isinstance(error, LegacySchemaError):
         ui.render_legacy_schema_refusal(detail)
         return
     ui.render_error(detail)
@@ -306,6 +298,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     except CycloptsError as exc:
         _print_cli_error(exc)
         return 2
+    except LegacySchemaError as exc:
+        _print_cli_error(exc)
+        return 1
     except docker_runtime.DockerRuntimeError as exc:
         _print_cli_error(exc)
         return 1

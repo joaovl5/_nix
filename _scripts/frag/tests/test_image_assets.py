@@ -1,16 +1,25 @@
 from __future__ import annotations
 
+import hashlib
+import importlib
 import json
 from functools import lru_cache
 from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
-
+import time
 import pytest
 
-from frag import image_assets, profiles
+from frag.exceptions import DockerRuntimeError, LegacySchemaError
+from frag import profiles, shared_assets_contract
+
+
+def _import_image_assets():
+    sys.modules.pop("frag.image_assets", None)
+    return importlib.import_module("frag.image_assets")
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -29,16 +38,29 @@ let
 in
   local.frag
 """
+FRAG_RUNTIME_ROOTFS_EXPR = r"""
+let
+  flake = builtins.getFlake (toString ./.);
+  pkgs = import flake.inputs.nixpkgs {
+    system = "x86_64-linux";
+    overlays = flake._channels.overlays;
+    config.allowUnfree = true;
+  };
+  local = import ./packages {
+    inherit pkgs;
+    inputs = flake.inputs;
+  };
+in
+  local.frag.passthru.images.main.artifact
+"""
 
 
 _DOCKER_BIN = shutil.which("docker")
 
-
 _NIX_BIN = shutil.which("nix")
 
 
-@lru_cache(maxsize=1)
-def _build_frag_package() -> Path:
+def _build_nix_output(build_expr: str) -> Path:
     if _NIX_BIN is None:
         pytest.skip("nix executable is required for packaging-contract tests")
 
@@ -50,7 +72,7 @@ def _build_frag_package() -> Path:
             "--no-link",
             "--print-out-paths",
             "--expr",
-            FRAG_BUILD_EXPR,
+            build_expr,
         ],
         cwd=REPO_ROOT,
         check=True,
@@ -58,6 +80,16 @@ def _build_frag_package() -> Path:
         capture_output=True,
     )
     return Path(result.stdout.strip())
+
+
+@lru_cache(maxsize=1)
+def _build_frag_package() -> Path:
+    return _build_nix_output(FRAG_BUILD_EXPR)
+
+
+@lru_cache(maxsize=1)
+def _build_frag_runtime_rootfs() -> Path:
+    return _build_nix_output(FRAG_RUNTIME_ROOTFS_EXPR)
 
 
 def _load_packaged_catalog(package_root: Path) -> dict[str, object]:
@@ -81,14 +113,100 @@ def _require_docker() -> str:
     return _DOCKER_BIN
 
 
+_PACKAGED_IMAGE_IDENTITY_LABEL = "dev.frag.packaged-runtime-rootfs"
+_PACKAGED_IMAGE_CHANGE_PREFIX = [
+    'CMD ["/init"]',
+    "ENV HOME=/home/agent",
+    "ENV PATH=/sw/bin:/bin",
+    "ENV USER=agent",
+    "WORKDIR /home/agent",
+]
+_PACKAGED_IMAGE_ENV = [
+    "HOME=/home/agent",
+    "PATH=/sw/bin:/bin",
+    "USER=agent",
+]
+_PACKAGED_IMAGE_WORKDIR = "/home/agent"
+
+
+def _packaged_image_identity() -> str:
+    recipe_seed = [
+        str(_build_frag_runtime_rootfs()),
+        _PACKAGED_IMAGE_CHANGE_PREFIX
+        + [f"LABEL {_PACKAGED_IMAGE_IDENTITY_LABEL}=<packaged-image-identity>"],
+    ]
+    recipe_json = json.dumps(recipe_seed, separators=(",", ":"))
+    return hashlib.sha256(recipe_json.encode()).hexdigest()
+
+
+def _inspect_image(docker_bin: str, image_ref: str) -> dict[str, object]:
+    inspect_result = subprocess.run(
+        [docker_bin, "image", "inspect", image_ref],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert inspect_result.returncode == 0, (
+        inspect_result.stderr or inspect_result.stdout
+    )
+    inspect_payload = json.loads(inspect_result.stdout)
+    assert len(inspect_payload) == 1
+    return inspect_payload[0]
+
+
+def _import_unrelated_image(
+    docker_bin: str, image_ref: str, tmp_path: Path
+) -> dict[str, object]:
+    rootfs_dir = tmp_path / "unrelated-rootfs"
+    rootfs_dir.mkdir()
+    (rootfs_dir / "etc").mkdir()
+    (rootfs_dir / "etc" / "issue").write_text("unrelated\n")
+
+    archive_path = tmp_path / "unrelated-rootfs.tar"
+    with tarfile.open(archive_path, mode="w") as archive:
+        archive.add(rootfs_dir, arcname=".")
+
+    subprocess.run(
+        [docker_bin, "image", "rm", "-f", image_ref],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    import_result = subprocess.run(
+        [docker_bin, "import", str(archive_path), image_ref],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert import_result.returncode == 0, import_result.stderr or import_result.stdout
+    return _inspect_image(docker_bin, image_ref)
+
+
 def _create_shared_assets_tree(shared_assets_dir: Path) -> None:
-    for relative_source, _destination, entry_type in image_assets._SHARED_ASSET_MOUNTS:
+    for (
+        relative_source,
+        _destination,
+        entry_type,
+    ) in shared_assets_contract.shared_runtime_mount_specs():
         asset_path = shared_assets_dir / relative_source
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         if entry_type == "file":
             asset_path.write_text("placeholder\n")
         else:
             asset_path.mkdir(exist_ok=True)
+
+
+def test_image_assets_imports_without_docker_runtime_bootstrap() -> None:
+    original_docker_runtime = sys.modules.pop("frag.docker_runtime", None)
+
+    try:
+        module = _import_image_assets()
+
+        assert module.__name__ == "frag.image_assets"
+        assert "frag.docker_runtime" not in sys.modules
+    finally:
+        if original_docker_runtime is not None:
+            sys.modules["frag.docker_runtime"] = original_docker_runtime
 
 
 def test_direct_profile_image_assets_exposes_schema2_packaged_metadata(
@@ -119,6 +237,8 @@ def test_direct_profile_image_assets_exposes_schema2_packaged_metadata(
             }
         )
     )
+
+    image_assets = _import_image_assets()
 
     assets = image_assets.DirectProfileImageAssets(
         package_assets=image_assets.resolve_installed_package_assets(package_root)
@@ -166,6 +286,8 @@ def test_direct_profile_image_assets_refuses_legacy_catalog_entries(
         )
     )
 
+    image_assets = _import_image_assets()
+
     assets = image_assets.DirectProfileImageAssets(
         package_assets=image_assets.resolve_installed_package_assets(package_root)
     )
@@ -176,63 +298,142 @@ def test_direct_profile_image_assets_refuses_legacy_catalog_entries(
         volume_name="frag-profile-demo",
     )
 
-    with pytest.raises(
-        image_assets.docker_runtime.DockerRuntimeError,
-        match="shared_assets_identity",
-    ):
+    with pytest.raises(LegacySchemaError) as exc_info:
         assets.resolve_profile_image_metadata(profile=profile)
 
-
-def test_packaged_catalog_exposes_schema2_runtime_metadata() -> None:
-    package_root = _build_frag_package()
-    catalog = _load_packaged_catalog(package_root)
-
-    main = catalog["images"]["main"]
-
-    assert re.fullmatch(r"frag-main:[0-9a-df-np-sv-z]{32}", main["image_ref"])
-    assert isinstance(main["shared_assets_identity"], str)
-    assert main["shared_assets_identity"].strip()
+    assert isinstance(exc_info.value, DockerRuntimeError)
+    assert "shared_assets_identity" in str(exc_info.value)
 
 
-def test_packaged_helper_stays_under_share_frag_helpers() -> None:
+def test_packaged_catalog_exposes_main_runtime_metadata() -> None:
     package_root = _build_frag_package()
     catalog = _load_packaged_catalog(package_root)
 
     assert "main" in catalog["images"]
+    main = catalog["images"]["main"]
+
+    assert main["image_ref"] == f"frag-main:{_packaged_image_identity()[:32]}"
+    assert isinstance(main["shared_assets_identity"], str)
+    assert main["shared_assets_identity"].strip()
+    assert re.fullmatch(r"load-image-[a-z0-9][a-z0-9-]*", main["loader"])
+
+
+def test_packaged_shared_assets_cover_runtime_mount_contract() -> None:
+    image_assets = _import_image_assets()
+
+    package_root = _build_frag_package()
+    package_assets = image_assets.resolve_installed_package_assets(package_root)
+    catalog = _load_packaged_catalog(package_root)
+
+    profile = profiles.Profile(
+        name="demo",
+        image="main",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo",
+    )
+    runtime_spec = image_assets.DirectProfileImageAssets(
+        package_assets=package_assets
+    ).build_runtime_spec(profile=profile, workspace_root=Path("/workspace/demo"))
+
+    expected_mounted_entries = {
+        (relative_source, destination): package_assets.shared_assets_root
+        / relative_source
+        for relative_source, destination, _entry_type in shared_assets_contract.shared_runtime_mount_specs()
+    }
+    mounted_entries = {
+        (
+            str(shared_mount.source.relative_to(package_assets.shared_assets_root)),
+            shared_mount.destination,
+        ): shared_mount.source
+        for shared_mount in runtime_spec.shared_mounts
+    }
+
+    assert (
+        runtime_spec.shared_assets_identity
+        == catalog["images"]["main"]["shared_assets_identity"]
+    )
+    assert runtime_spec.shared_mounts
+    assert mounted_entries == expected_mounted_entries
+    assert all(
+        shared_mount.source.exists()
+        and str(shared_mount.source).startswith(str(package_assets.shared_assets_root))
+        and shared_mount.destination.startswith("/state/shared/")
+        for shared_mount in runtime_spec.shared_mounts
+    )
+
+    for (
+        relative_source,
+        _destination,
+        entry_type,
+    ) in shared_assets_contract.shared_runtime_mount_specs():
+        asset_path = package_assets.shared_assets_root / relative_source
+        if entry_type == "directory":
+            assert asset_path.is_dir()
+        else:
+            assert asset_path.is_file()
+
+
+def test_packaged_helper_wiring_stays_under_share_frag_helpers() -> None:
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
 
     loader_name = catalog["images"]["main"]["loader"]
     helper_path = package_root / "share" / "frag" / "helpers" / loader_name
 
     assert helper_path.is_file()
     assert helper_path.parent == package_root / "share" / "frag" / "helpers"
-
-    helper_script = helper_path.resolve().read_text()
-
-    assert "ENV PATH=/sw/bin:/bin" in helper_script
-    assert "ENV PATH=/run/current-system/sw/bin:/bin" not in helper_script
+    assert helper_path.resolve().is_file()
+    assert helper_path.stat().st_mode & 0o111
 
 
-def test_packaged_runtime_rootfs_seeds_agent_home_target() -> None:
+def test_packaged_shared_skill_bundles_exclude_agent_browser_skill() -> None:
     package_root = _build_frag_package()
-    catalog = _load_packaged_catalog(package_root)
-    helper_path = (
-        package_root
-        / "share"
-        / "frag"
-        / "helpers"
-        / catalog["images"]["main"]["loader"]
-    )
-    helper_script = helper_path.resolve().read_text()
+    shared_assets_root = package_root / "share" / "frag" / "shared-assets"
 
-    runtime_rootfs = Path(
-        re.search(r"^runtime_rootfs=([^\n]+)$", helper_script, re.MULTILINE).group(1)
+    skill_roots = (
+        shared_assets_root / ".agents" / "skills",
+        shared_assets_root / ".config" / "agents" / "skills",
+        shared_assets_root / ".code" / "skills",
+        shared_assets_root / ".omp" / "agent" / "skills",
+        shared_assets_root / ".config" / "opencode" / "skill",
     )
+
+    for skill_root in skill_roots:
+        assert skill_root.is_dir()
+        assert not (skill_root / "agent-browser").exists()
+
+    assert (
+        shared_assets_root / ".config" / "opencode" / "skill" / "superpowers"
+    ).is_dir()
+
+
+def test_packaged_runtime_rootfs_closure_excludes_agent_browser_package() -> None:
+    if _NIX_BIN is None:
+        pytest.skip("nix executable is required for packaging-contract tests")
+
+    runtime_rootfs = _build_frag_runtime_rootfs()
+    closure_result = subprocess.run(
+        [_NIX_BIN, "path-info", "-r", str(runtime_rootfs)],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+
+    assert "agent-browser" not in closure_result.stdout
+
+
+def test_packaged_runtime_rootfs_exports_agent_home_target() -> None:
+    runtime_rootfs = _build_frag_runtime_rootfs()
 
     with tarfile.open(runtime_rootfs) as archive:
-        home_member = archive.getmember("./home/agent")
-        state_home_member = archive.getmember("./state/profile/home")
-        system_path_member = archive.getmember("./sw")
+        members = {
+            member.name.removeprefix("./"): member for member in archive.getmembers()
+        }
+        home_member = members["home/agent"]
+        state_home_member = members["state/profile/home"]
+        system_path_member = members["sw"]
 
+    assert runtime_rootfs.name.endswith("-frag-runtime-rootfs.tar")
     assert home_member.issym()
     assert home_member.linkname == "/state/profile/home"
     assert state_home_member.isdir()
@@ -269,14 +470,310 @@ def test_packaged_helper_reports_exact_catalog_image_ref() -> None:
         assert result.returncode == 0, result.stderr or result.stdout
         assert result.stdout.strip() == main["image_ref"]
 
-        inspect_result = subprocess.run(
-            [docker_bin, "image", "inspect", main["image_ref"]],
+        image_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert image_metadata["RepoTags"] == [main["image_ref"]]
+        assert image_metadata["Config"]["Cmd"] == ["/init"]
+        assert image_metadata["Config"]["WorkingDir"] == "/home/agent"
+        assert sorted(image_metadata["Config"]["Env"]) == [
+            "HOME=/home/agent",
+            "PATH=/sw/bin:/bin",
+            "USER=agent",
+        ]
+        assert (
+            image_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            == _packaged_image_identity()
+        )
+    finally:
+        subprocess.run(
+            [docker_bin, "image", "rm", "-f", main["image_ref"]],
             check=False,
             text=True,
             capture_output=True,
         )
-        assert inspect_result.returncode == 0, (
-            inspect_result.stderr or inspect_result.stdout
+
+
+def test_packaged_helper_runtime_image_excludes_git() -> None:
+    docker_bin = _require_docker()
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
+
+    main = catalog["images"]["main"]
+    helper_path = package_root / "share" / "frag" / "helpers" / main["loader"]
+
+    subprocess.run(
+        [docker_bin, "image", "rm", "-f", main["image_ref"]],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    try:
+        result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        assert result.returncode == 0, result.stderr or result.stdout
+
+        git_check = subprocess.run(
+            [
+                docker_bin,
+                "run",
+                "--rm",
+                "--entrypoint",
+                "/sw/bin/bash",
+                main["image_ref"],
+                "-lc",
+                "test -x /sw/bin/bash && ! command -v git >/dev/null",
+            ],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        assert git_check.returncode == 0, git_check.stderr or git_check.stdout
+    finally:
+        subprocess.run(
+            [docker_bin, "image", "rm", "-f", main["image_ref"]],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+
+def test_packaged_helper_reuses_matching_packaged_image_identity() -> None:
+    docker_bin = _require_docker()
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
+
+    main = catalog["images"]["main"]
+    helper_path = package_root / "share" / "frag" / "helpers" / main["loader"]
+
+    subprocess.run(
+        [docker_bin, "image", "rm", "-f", main["image_ref"]],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    try:
+        first_result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert first_result.returncode == 0, first_result.stderr or first_result.stdout
+
+        first_metadata = _inspect_image(docker_bin, main["image_ref"])
+        time.sleep(1.2)
+
+        second_result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert second_result.returncode == 0, (
+            second_result.stderr or second_result.stdout
+        )
+
+        second_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert second_metadata["Id"] == first_metadata["Id"]
+        assert second_metadata["Created"] == first_metadata["Created"]
+    finally:
+        subprocess.run(
+            [docker_bin, "image", "rm", "-f", main["image_ref"]],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+
+def test_packaged_helper_reimports_unlabeled_same_tag_image(tmp_path: Path) -> None:
+    docker_bin = _require_docker()
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
+
+    main = catalog["images"]["main"]
+    helper_path = package_root / "share" / "frag" / "helpers" / main["loader"]
+
+    try:
+        stale_metadata = _import_unrelated_image(
+            docker_bin, main["image_ref"], tmp_path
+        )
+        assert stale_metadata["Config"].get("Labels") in (None, {})
+
+        result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        refreshed_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert refreshed_metadata["Id"] != stale_metadata["Id"]
+        assert (
+            refreshed_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            == _packaged_image_identity()
+        )
+    finally:
+        subprocess.run(
+            [docker_bin, "image", "rm", "-f", main["image_ref"]],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+
+def test_packaged_helper_reimports_same_tag_image_with_legacy_rootfs_only_identity(
+    tmp_path: Path,
+) -> None:
+    docker_bin = _require_docker()
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
+
+    main = catalog["images"]["main"]
+    helper_path = package_root / "share" / "frag" / "helpers" / main["loader"]
+
+    rootfs_dir = tmp_path / "legacy-rootfs"
+    rootfs_dir.mkdir()
+    (rootfs_dir / "etc").mkdir()
+    (rootfs_dir / "etc" / "issue").write_text("legacy-rootfs-only\n")
+    archive_path = tmp_path / "legacy-rootfs.tar"
+    with tarfile.open(archive_path, mode="w") as archive:
+        archive.add(rootfs_dir, arcname=".")
+
+    subprocess.run(
+        [docker_bin, "image", "rm", "-f", main["image_ref"]],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    legacy_identity = _build_frag_runtime_rootfs().name
+
+    try:
+        import_result = subprocess.run(
+            [
+                docker_bin,
+                "import",
+                "--change",
+                'CMD ["/bin/sh"]',
+                "--change",
+                f"LABEL {_PACKAGED_IMAGE_IDENTITY_LABEL}={legacy_identity}",
+                str(archive_path),
+                main["image_ref"],
+            ],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert import_result.returncode == 0, (
+            import_result.stderr or import_result.stdout
+        )
+
+        stale_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert (
+            stale_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            == legacy_identity
+        )
+        assert stale_metadata["Config"]["Cmd"] == ["/bin/sh"]
+
+        result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        refreshed_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert refreshed_metadata["Id"] != stale_metadata["Id"]
+        assert refreshed_metadata["Config"]["Cmd"] == ["/init"]
+        assert refreshed_metadata["Config"]["WorkingDir"] == _PACKAGED_IMAGE_WORKDIR
+        assert sorted(refreshed_metadata["Config"]["Env"]) == sorted(
+            _PACKAGED_IMAGE_ENV
+        )
+        assert (
+            refreshed_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            == _packaged_image_identity()
+        )
+    finally:
+        subprocess.run(
+            [docker_bin, "image", "rm", "-f", main["image_ref"]],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+
+def test_packaged_helper_reimports_same_tag_image_with_wrong_identity_label(
+    tmp_path: Path,
+) -> None:
+    docker_bin = _require_docker()
+    package_root = _build_frag_package()
+    catalog = _load_packaged_catalog(package_root)
+
+    main = catalog["images"]["main"]
+    helper_path = package_root / "share" / "frag" / "helpers" / main["loader"]
+
+    rootfs_dir = tmp_path / "mismatched-rootfs"
+    rootfs_dir.mkdir()
+    (rootfs_dir / "etc").mkdir()
+    (rootfs_dir / "etc" / "issue").write_text("mismatched\n")
+    archive_path = tmp_path / "mismatched-rootfs.tar"
+    with tarfile.open(archive_path, mode="w") as archive:
+        archive.add(rootfs_dir, arcname=".")
+
+    subprocess.run(
+        [docker_bin, "image", "rm", "-f", main["image_ref"]],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    try:
+        import_result = subprocess.run(
+            [
+                docker_bin,
+                "import",
+                "--change",
+                f"LABEL {_PACKAGED_IMAGE_IDENTITY_LABEL}=wrong-identity",
+                str(archive_path),
+                main["image_ref"],
+            ],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert import_result.returncode == 0, (
+            import_result.stderr or import_result.stdout
+        )
+
+        stale_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert (
+            stale_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            == "wrong-identity"
+        )
+
+        result = subprocess.run(
+            [str(helper_path)],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        refreshed_metadata = _inspect_image(docker_bin, main["image_ref"])
+        assert refreshed_metadata["Id"] != stale_metadata["Id"]
+        assert refreshed_metadata["RepoTags"] == [main["image_ref"]]
+        assert (
+            refreshed_metadata["Config"]["Labels"][_PACKAGED_IMAGE_IDENTITY_LABEL]
+            != "wrong-identity"
         )
     finally:
         subprocess.run(

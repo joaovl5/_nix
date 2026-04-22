@@ -1,26 +1,20 @@
 from __future__ import annotations
 
 import argparse
+from enum import StrEnum
 import json
 import os
 from pathlib import Path
+import shutil
 
-_BOOTSTRAP_TOKEN_ENV = "FRAG_BOOTSTRAP_TOKEN"
-_TARGET_UID_ENV = "FRAG_TARGET_UID"
-_TARGET_GID_ENV = "FRAG_TARGET_GID"
-_TARGET_SUPPLEMENTARY_GIDS_ENV = "FRAG_TARGET_SUPPLEMENTARY_GIDS"
-_BOOTSTRAP_TOKEN_PATH = Path("meta/bootstrap-token")
-_BOOTSTRAP_STATUS_PATH = Path("meta/bootstrap-status.json")
+from frag import runtime_contract, shared_assets_contract
+
 _IDENTITY_OVERLAY_CONTRACT_PATH = Path("meta/identity-overlay.json")
 _RUNTIME_IDENTITY_ROOT = Path("/run/frag/identity")
 _RUNTIME_IDENTITY_CONTAINER_ROOT = Path("/run/frag/identity")
 _EPHEMERAL_CACHE_HOME = Path("/tmp/frag/cache")
 _NSS_WRAPPER_LIBRARY = Path("/sw/lib/libnss_wrapper.so")
 
-_AGENT_BROWSER_DEFAULT_CONFIG = {
-    "contentBoundaries": True,
-    "maxOutput": 50000,
-}
 
 _CODE_DEFAULT_CONFIG = """approval_policy = \"on-request\"
 sandbox_mode = \"workspace-write\"
@@ -45,50 +39,30 @@ _REQUIRED_DIRECTORIES: tuple[Path, ...] = (
     Path("home"),
     Path("config/code"),
     Path("config/omp"),
-    Path("config/agent-browser"),
     Path("config/opencode"),
 )
-_REQUIRED_FILES: tuple[Path, ...] = (Path("config/agent-browser/config.json"),)
 
 
-class MappingKind:
+class MappingKind(StrEnum):
     PROFILE = "profile"
     SHARED = "shared"
 
 
-_HOME_VIEW_MAPPINGS: tuple[tuple[Path, str, Path], ...] = (
-    (Path(".agents/skills"), MappingKind.SHARED, Path("agents/skills")),
-    (Path(".config/agents/skills"), MappingKind.SHARED, Path("config/agents/skills")),
+_PROFILE_HOME_VIEW_MAPPINGS: tuple[tuple[Path, MappingKind, Path], ...] = (
     (Path(".code/config.toml"), MappingKind.PROFILE, Path("config/code/config.toml")),
-    (Path(".code/agents"), MappingKind.SHARED, Path("code/agents")),
-    (Path(".code/skills"), MappingKind.SHARED, Path("code/skills")),
-    (Path(".code/AGENTS.md"), MappingKind.SHARED, Path("code/AGENTS.md")),
-    (Path(".omp/agent/agents"), MappingKind.SHARED, Path("omp/agent/agents")),
-    (Path(".omp/agent/skills"), MappingKind.SHARED, Path("omp/agent/skills")),
-    (Path(".omp/agent/SYSTEM.md"), MappingKind.SHARED, Path("omp/agent/SYSTEM.md")),
     (Path(".omp/agent/mcp.json"), MappingKind.PROFILE, Path("config/omp/mcp.json")),
-    (
-        Path(".agent-browser/config.json"),
-        MappingKind.PROFILE,
-        Path("config/agent-browser/config.json"),
-    ),
-    (Path(".config/opencode/skill"), MappingKind.SHARED, Path("opencode/skill")),
-    (
-        Path(".config/opencode/opencode.json"),
-        MappingKind.SHARED,
-        Path("opencode/opencode.json"),
-    ),
-    (
-        Path(".config/opencode/superpowers"),
-        MappingKind.SHARED,
-        Path("opencode/superpowers"),
-    ),
-    (
-        Path(".config/opencode/plugins/superpowers.js"),
-        MappingKind.SHARED,
-        Path("opencode/plugins/superpowers.js"),
-    ),
 )
+
+
+def _shared_home_view_mappings() -> tuple[tuple[Path, MappingKind, Path], ...]:
+    return tuple(
+        (destination_relative, MappingKind.SHARED, state_shared_relative)
+        for destination_relative, state_shared_relative in shared_assets_contract.shared_home_view_mappings()
+    )
+
+
+def _home_view_mappings() -> tuple[tuple[Path, MappingKind, Path], ...]:
+    return (*_shared_home_view_mappings(), *_PROFILE_HOME_VIEW_MAPPINGS)
 
 
 def _ensure_directory(path: Path) -> None:
@@ -123,14 +97,15 @@ def _ensure_json_file(path: Path, payload: dict[str, object]) -> None:
 
 
 def _write_bootstrap_token(state_profile: Path, token: str) -> None:
-    token_path = state_profile / _BOOTSTRAP_TOKEN_PATH
+
+    token_path = runtime_contract.bootstrap_token_path(state_profile)
     _ensure_directory(token_path.parent)
     token_path.write_text(f"{token}\n")
     token_path.chmod(0o600)
 
 
 def _reset_bootstrap_status(state_profile: Path) -> None:
-    status_path = state_profile / _BOOTSTRAP_STATUS_PATH
+    status_path = runtime_contract.bootstrap_status_path(state_profile)
     if status_path.exists() or status_path.is_symlink():
         status_path.unlink()
 
@@ -143,7 +118,7 @@ def _write_bootstrap_failure(
     message: str,
 ) -> None:
     _write_json(
-        state_profile / _BOOTSTRAP_STATUS_PATH,
+        runtime_contract.bootstrap_status_path(state_profile),
         {
             "bootstrap_token": bootstrap_token,
             "message": message,
@@ -179,6 +154,22 @@ def _ensure_ephemeral_cache(home_root: Path) -> None:
     _ensure_directory(_EPHEMERAL_CACHE_HOME)
     cache_path = home_root / ".cache"
     _symlink_view_entry(cache_path, _EPHEMERAL_CACHE_HOME)
+
+
+def _remove_path_if_present(path: Path) -> None:
+    if path.is_symlink() or path.is_file():
+        path.unlink()
+        return
+    if path.is_dir():
+        shutil.rmtree(path)
+
+
+def _prune_stale_browser_state(*, state_profile: Path, persistent_home: Path) -> None:
+    for stale_path in (
+        state_profile / "config" / "agent-browser",
+        persistent_home / ".agent-browser",
+    ):
+        _remove_path_if_present(stale_path)
 
 
 def _setpriv_group_option(supplementary_gids: tuple[int, ...]) -> str:
@@ -297,8 +288,6 @@ def initialize_profile_environment(
     _ensure_directory(state_profile)
     for relative_directory in _REQUIRED_DIRECTORIES:
         _ensure_directory(state_profile / relative_directory)
-    for relative_file in _REQUIRED_FILES:
-        _ensure_file(state_profile / relative_file)
     _ensure_text_file(
         state_profile / "config/code/config.toml",
         _CODE_DEFAULT_CONFIG,
@@ -308,15 +297,15 @@ def initialize_profile_environment(
         _OMP_DEFAULT_CONFIG,
     )
     _write_json(state_profile / "meta/profile.json", metadata)
-    _ensure_json_file(
-        state_profile / "config/agent-browser/config.json",
-        _AGENT_BROWSER_DEFAULT_CONFIG,
-    )
 
     persistent_home = _persistent_home_root(state_profile)
     _ensure_home_alignment(home=home, persistent_home=persistent_home)
+    _prune_stale_browser_state(
+        state_profile=state_profile,
+        persistent_home=persistent_home,
+    )
     _ensure_ephemeral_cache(persistent_home)
-    for destination_relative, mapping_kind, source_relative in _HOME_VIEW_MAPPINGS:
+    for destination_relative, mapping_kind, source_relative in _home_view_mappings():
         root = state_profile if mapping_kind == MappingKind.PROFILE else state_shared
         _symlink_view_entry(
             persistent_home / destination_relative, root / source_relative
@@ -324,20 +313,20 @@ def initialize_profile_environment(
 
 
 def _requested_owner_from_env() -> tuple[int, int] | None:
-    uid = os.environ.get(_TARGET_UID_ENV)
-    gid = os.environ.get(_TARGET_GID_ENV)
+    uid = os.environ.get(runtime_contract.TARGET_UID_ENV)
+    gid = os.environ.get(runtime_contract.TARGET_GID_ENV)
     if uid is None and gid is None:
         return None
     if uid is None or gid is None:
         raise RuntimeError("bootstrap ownership target must set both uid and gid")
     try:
-        return int(uid), int(gid)
+        return (int(uid), int(gid))
     except ValueError as exc:
         raise RuntimeError("bootstrap ownership target must be numeric") from exc
 
 
 def _requested_supplementary_gids_from_env(*, primary_gid: int) -> tuple[int, ...]:
-    raw_gids = os.environ.get(_TARGET_SUPPLEMENTARY_GIDS_ENV, "")
+    raw_gids = os.environ.get(runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, "")
     if not raw_gids.strip():
         return ()
     supplementary_gids: list[int] = []
@@ -390,7 +379,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     state_profile = Path(args.state_profile)
     home = Path(args.home)
-    bootstrap_token = os.environ.get(_BOOTSTRAP_TOKEN_ENV, "")
+    bootstrap_token = os.environ.get(runtime_contract.BOOTSTRAP_TOKEN_ENV, "")
     phase = "startup"
     try:
         _ensure_directory(state_profile)
@@ -425,7 +414,6 @@ def main(argv: list[str] | None = None) -> int:
             _ensure_directory(_EPHEMERAL_CACHE_HOME.parent)
             _ensure_directory(_EPHEMERAL_CACHE_HOME)
             _chown_tree(state_profile, uid=uid, gid=gid)
-            _chown_tree(_persistent_home_root(state_profile), uid=uid, gid=gid)
             _chown_tree(_EPHEMERAL_CACHE_HOME.parent, uid=uid, gid=gid)
         if bootstrap_token:
             phase = "token"

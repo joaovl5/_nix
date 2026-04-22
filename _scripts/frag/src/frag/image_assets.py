@@ -6,30 +6,12 @@ from pathlib import Path
 import subprocess
 from typing import Protocol
 
-from frag import docker_runtime, profiles
+from frag import profiles, shared_assets_contract
+from frag.exceptions import DockerRuntimeError, LegacySchemaError
 
-_SHARED_ASSET_MOUNTS: tuple[tuple[str, str, str], ...] = (
-    (".agents/skills", "/state/shared/agents/skills", "directory"),
-    (".config/agents/skills", "/state/shared/config/agents/skills", "directory"),
-    (".code/agents", "/state/shared/code/agents", "directory"),
-    (".code/skills", "/state/shared/code/skills", "directory"),
-    (".code/AGENTS.md", "/state/shared/code/AGENTS.md", "file"),
-    (".omp/agent/agents", "/state/shared/omp/agent/agents", "directory"),
-    (".omp/agent/skills", "/state/shared/omp/agent/skills", "directory"),
-    (".omp/agent/SYSTEM.md", "/state/shared/omp/agent/SYSTEM.md", "file"),
-    (".config/opencode/skill", "/state/shared/opencode/skill", "directory"),
-    (".config/opencode/opencode.json", "/state/shared/opencode/opencode.json", "file"),
-    (
-        ".config/opencode/superpowers",
-        "/state/shared/opencode/superpowers",
-        "directory",
-    ),
-    (
-        ".config/opencode/plugins/superpowers.js",
-        "/state/shared/opencode/plugins/superpowers.js",
-        "file",
-    ),
-)
+
+def _shared_asset_mount_specs() -> tuple[tuple[str, str, str], ...]:
+    return shared_assets_contract.shared_runtime_mount_specs()
 
 
 @dataclass(frozen=True)
@@ -77,10 +59,6 @@ class ImageAssets(Protocol):
     ) -> RuntimeSpec: ...
 
 
-def _canonical_path(path: Path | str) -> Path:
-    return Path(path).expanduser().resolve(strict=False)
-
-
 def _shared_asset_entry_has_expected_type(path: Path, entry_type: str) -> bool:
     if entry_type == "directory":
         return path.is_dir()
@@ -92,7 +70,7 @@ def _shared_asset_entry_has_expected_type(path: Path, entry_type: str) -> bool:
 def _missing_required_shared_assets(shared_assets_root: Path) -> tuple[str, ...]:
     return tuple(
         relative_source
-        for relative_source, _destination, entry_type in _SHARED_ASSET_MOUNTS
+        for relative_source, _destination, entry_type in _shared_asset_mount_specs()
         if not _shared_asset_entry_has_expected_type(
             shared_assets_root / relative_source, entry_type
         )
@@ -101,7 +79,7 @@ def _missing_required_shared_assets(shared_assets_root: Path) -> tuple[str, ...]
 
 def _resolve_shared_mounts(shared_assets_root: Path) -> tuple[SharedMount, ...]:
     mounts: list[SharedMount] = []
-    for relative_source, destination, entry_type in _SHARED_ASSET_MOUNTS:
+    for relative_source, destination, entry_type in _shared_asset_mount_specs():
         source = shared_assets_root / relative_source
         if _shared_asset_entry_has_expected_type(source, entry_type):
             mounts.append(SharedMount(source=source, destination=destination))
@@ -112,17 +90,17 @@ def _read_catalog_images(*, catalog_path: Path) -> dict[str, object]:
     try:
         catalog_data = json.loads(catalog_path.read_text())
     except OSError as exc:
-        raise docker_runtime.DockerRuntimeError(
+        raise DockerRuntimeError(
             f"failed reading frag image catalog at {catalog_path}"
         ) from exc
     except json.JSONDecodeError as exc:
-        raise docker_runtime.DockerRuntimeError(
+        raise DockerRuntimeError(
             f"frag image catalog at {catalog_path} is not valid JSON"
         ) from exc
 
     images = catalog_data.get("images")
     if not isinstance(images, dict):
-        raise docker_runtime.DockerRuntimeError(
+        raise DockerRuntimeError(
             f"frag image catalog at {catalog_path} is missing an 'images' object"
         )
     return images
@@ -132,7 +110,7 @@ def _normalize_catalog_image_key(*, images: dict[str, object], image_key: str) -
     normalized_key = image_key.strip()
     image_entry = images.get(normalized_key)
     if not isinstance(image_entry, dict):
-        raise docker_runtime.DockerRuntimeError(f"unknown image key {normalized_key!r}")
+        raise DockerRuntimeError(f"unknown image key {normalized_key!r}")
     return normalized_key
 
 
@@ -153,18 +131,18 @@ def _resolve_catalog_image_metadata(
     shared_assets_identity = image_entry.get("shared_assets_identity")
     loader = image_entry.get("loader")
     if not isinstance(image_ref, str) or not image_ref.strip():
-        raise docker_runtime.DockerRuntimeError(
+        raise DockerRuntimeError(
             f"catalog entry for image key {normalized_key!r} is missing image_ref"
         )
     if (
         not isinstance(shared_assets_identity, str)
         or not shared_assets_identity.strip()
     ):
-        raise docker_runtime.DockerRuntimeError(
+        raise LegacySchemaError(
             f"catalog entry for image key {normalized_key!r} is missing shared_assets_identity; legacy catalog schema is not supported"
         )
     if not isinstance(loader, str) or not loader.strip():
-        raise docker_runtime.DockerRuntimeError(
+        raise DockerRuntimeError(
             f"catalog entry for image key {normalized_key!r} is missing loader"
         )
 
@@ -201,7 +179,7 @@ def resolve_installed_package_assets(
         missing_required_assets = _missing_required_shared_assets(shared_assets_root)
         if missing_required_assets:
             missing_paths = ", ".join(missing_required_assets)
-            raise docker_runtime.DockerRuntimeError(
+            raise DockerRuntimeError(
                 f"required shared assets missing or wrong type under {shared_assets_root}: {missing_paths}"
             )
 
@@ -211,7 +189,7 @@ def resolve_installed_package_assets(
             helpers_dir=helpers_dir,
         )
 
-    raise docker_runtime.DockerRuntimeError(
+    raise DockerRuntimeError(
         f"installed frag assets could not be resolved from {search_anchor}"
     )
 
@@ -244,7 +222,7 @@ class DirectProfileImageAssets:
         metadata = self.resolve_profile_image_metadata(profile=profile)
 
         if not metadata.helper_path.is_file():
-            raise docker_runtime.DockerRuntimeError(
+            raise DockerRuntimeError(
                 f"image loader helper does not exist: {metadata.helper_path}"
             )
 
@@ -256,21 +234,21 @@ class DirectProfileImageAssets:
                 capture_output=True,
             )
         except FileNotFoundError as exc:
-            raise docker_runtime.DockerRuntimeError(
+            raise DockerRuntimeError(
                 f"image loader helper is not executable: {metadata.helper_path}"
             ) from exc
 
         if result.returncode != 0:
             detail = (result.stderr or result.stdout or str(result.returncode)).strip()
-            raise docker_runtime.DockerRuntimeError(detail)
+            raise DockerRuntimeError(detail)
 
         loaded_image_ref = result.stdout.strip()
         if not loaded_image_ref:
-            raise docker_runtime.DockerRuntimeError(
+            raise DockerRuntimeError(
                 f"image loader returned an empty image reference for {profile.name!r}"
             )
         if loaded_image_ref != metadata.image_ref:
-            raise docker_runtime.DockerRuntimeError(
+            raise DockerRuntimeError(
                 f"image loader returned unexpected image reference for {profile.name!r}: {loaded_image_ref!r}"
             )
         return loaded_image_ref

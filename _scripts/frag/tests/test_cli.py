@@ -9,6 +9,27 @@ import subprocess
 import pytest
 
 from frag import cli, image_assets, profiles
+from frag.exceptions import LegacySchemaError
+
+
+SHARED_ASSET_RUNTIME_CONTRACT: tuple[tuple[str, str, str], ...] = (
+    (".agents/skills", "/state/shared/agents/skills", "directory"),
+    (".config/agents/skills", "/state/shared/config/agents/skills", "directory"),
+    (".code/agents", "/state/shared/code/agents", "directory"),
+    (".code/skills", "/state/shared/code/skills", "directory"),
+    (".code/AGENTS.md", "/state/shared/code/AGENTS.md", "file"),
+    (".omp/agent/agents", "/state/shared/omp/agent/agents", "directory"),
+    (".omp/agent/skills", "/state/shared/omp/agent/skills", "directory"),
+    (".omp/agent/SYSTEM.md", "/state/shared/omp/agent/SYSTEM.md", "file"),
+    (".config/opencode/skill", "/state/shared/opencode/skill", "directory"),
+    (".config/opencode/opencode.json", "/state/shared/opencode/opencode.json", "file"),
+    (".config/opencode/superpowers", "/state/shared/opencode/superpowers", "directory"),
+    (
+        ".config/opencode/plugins/superpowers.js",
+        "/state/shared/opencode/plugins/superpowers.js",
+        "file",
+    ),
+)
 
 
 def _create_shared_assets_tree(shared_assets_dir: Path) -> None:
@@ -16,7 +37,7 @@ def _create_shared_assets_tree(shared_assets_dir: Path) -> None:
         relative_source,
         _destination,
         entry_type,
-    ) in cli.image_assets._SHARED_ASSET_MOUNTS:
+    ) in SHARED_ASSET_RUNTIME_CONTRACT:
         asset_path = shared_assets_dir / relative_source
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         if entry_type == "file":
@@ -49,13 +70,6 @@ def _create_installed_frag_layout(tmp_path: Path) -> tuple[Path, object]:
 
     package_assets = cli.image_assets.resolve_installed_package_assets(anchor)
     return package_root, package_assets
-
-
-def _repo_root() -> Path | None:
-    for parent in Path(__file__).resolve().parents:
-        if (parent / "packages" / "default.nix").is_file():
-            return parent
-    return None
 
 
 def test_build_image_assets_anchors_resolution_to_invoked_entrypoint(
@@ -504,92 +518,6 @@ def test_profile_new_returns_nonzero_for_unknown_catalog_image_key(
     )
 
 
-def test_frag_package_uses_real_shared_asset_sources() -> None:
-    repo_root = _repo_root()
-    if repo_root is None:
-        pytest.skip(
-            "repo packaging files are not available from the packaged source tree"
-        )
-    package_nix = (repo_root / "packages" / "frag" / "default.nix").read_text()
-
-    assert "users/_modules/ai/_prompts/agents" in package_nix
-    assert "users/_modules/ai/_prompts/skills" in package_nix
-    assert (
-        'cp -r ${../../users/_modules/ai/_prompts/skills} "$shared_root/.agents/skills"'
-        in package_nix
-    )
-    assert (
-        'cp -r ${../../users/_modules/ai/_prompts/skills} "$shared_root/.config/agents/skills"'
-        in package_nix
-    )
-    assert "../../.agents/skills" not in package_nix
-    assert "users/_modules/ai/_prompts/general/system.md" in package_nix
-    assert 'inputs.superpowers + "/skills"' in package_nix
-    assert 'inputs.superpowers + "/.opencode/plugins/superpowers.js"' in package_nix
-    assert '"$schema" = "https://opencode.ai/config.json";' in package_nix
-    assert "plugin = [" in package_nix
-    assert '"@gotgenes/opencode-agent-identity"' in package_nix
-    assert '"opencode-agent-skills"' in package_nix
-    assert (
-        'cp ${opencode_json} "$shared_root/.config/opencode/opencode.json"'
-        in package_nix
-    )
-    assert "users/_modules/ai/_prompts/skills/agent-browser/SKILL.md" in package_nix
-    assert "Frag bundles installed shared assets under share/frag." not in package_nix
-    assert "// frag packaged superpowers bridge" not in package_nix
-
-
-def test_frag_package_runtime_image_includes_seeded_agent_clis() -> None:
-    repo_root = _repo_root()
-    if repo_root is None:
-        pytest.skip(
-            "repo packaging files are not available from the packaged source tree"
-        )
-    package_nix = (repo_root / "packages" / "frag" / "runtime-system.nix").read_text()
-
-    assert "pkgs.llm-agents.code" in package_nix
-    assert "pkgs.llm-agents.omp" in package_nix
-    assert "pkgs.llm-agents.agent-browser" in package_nix
-    assert "pkgs.llm-agents.opencode" in package_nix
-    assert "pkgs.mcp-nixos" in package_nix
-
-
-def test_frag_package_runtime_image_includes_git() -> None:
-    repo_root = _repo_root()
-    if repo_root is None:
-        pytest.skip(
-            "repo packaging files are not available from the packaged source tree"
-        )
-    package_nix = (repo_root / "packages" / "frag" / "runtime-system.nix").read_text()
-
-    assert "pkgs.git" in package_nix
-
-
-def test_frag_package_import_requires_inputs() -> None:
-    repo_root = _repo_root()
-    if repo_root is None:
-        pytest.skip(
-            "repo packaging files are not available from the packaged source tree"
-        )
-    packages_nix = (repo_root / "packages" / "default.nix").read_text()
-
-    assert "frag = pkgs.callPackage ./frag {inherit inputs;};" in packages_nix
-
-
-def test_frag_package_loader_always_reloads_bundled_images() -> None:
-    repo_root = _repo_root()
-    if repo_root is None:
-        pytest.skip(
-            "repo packaging files are not available from the packaged source tree"
-        )
-    package_nix = (repo_root / "packages" / "frag" / "images.nix").read_text()
-
-    assert '"$docker_bin" image rm -f "$image_ref"' in package_nix
-    assert '"$docker_bin" import' in package_nix
-    assert '"$docker_bin" image inspect "$image_ref"' not in package_nix
-    assert '"$docker_bin" load -i' not in package_nix
-
-
 def test_enter_accepts_optional_profile_and_command_tail(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -867,36 +795,26 @@ def test_enter_runtime_failures_still_print_to_stderr(
 
 def test_enter_legacy_runtime_refusal_uses_legacy_schema_renderer(
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    rendered: list[tuple[str, str]] = []
-
     monkeypatch.setattr(
         cli,
         "handle_enter",
         lambda **_kwargs: (_ for _ in ()).throw(
-            cli.docker_runtime.DockerRuntimeError(
-                "legacy schema 1 profile container for 'Demo Profile' is not supported; remove it and recreate the profile"
+            LegacySchemaError(
+                "schema upgrade required for 'Demo Profile'; remove it and recreate the profile"
             )
         ),
     )
-    monkeypatch.setattr(
-        cli.ui,
-        "render_legacy_schema_refusal",
-        lambda message: rendered.append(("legacy", message)),
-    )
-    monkeypatch.setattr(
-        cli.ui,
-        "render_error",
-        lambda message: rendered.append(("error", message)),
-    )
 
     assert cli.main(["enter", "--profile", "demo"]) == 1
-    assert rendered == [
-        (
-            "legacy",
-            "legacy schema 1 profile container for 'Demo Profile' is not supported; remove it and recreate the profile",
-        )
-    ]
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert (
+        "schema upgrade required for 'Demo Profile'; remove it and recreate the profile"
+        in captured.err
+    )
 
 
 def test_pyproject_defines_bootstrap_console_entrypoint() -> None:
@@ -947,9 +865,10 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    error = subprocess.CalledProcessError(
-        1,
+    result = subprocess.CompletedProcess(
         ["docker", "volume", "create", "frag-profile-demo"],
+        1,
+        stdout="",
         stderr="backend failed",
     )
     workspace_root = tmp_path / "workspace"
@@ -964,7 +883,7 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
     monkeypatch.setattr(
         cli.profiles.subprocess,
         "run",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(error),
+        lambda *_args, **_kwargs: result,
     )
 
     assert (

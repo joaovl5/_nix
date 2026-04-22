@@ -4,30 +4,24 @@
   lib ? pkgs.lib,
   ...
 }: let
-  runtimeFrag = pkgs.python3Packages.buildPythonPackage {
+  runtimeFrag = frag_runtime.overridePythonAttrs (old: {
+    # Keep the runtime image on the shared frag derivation while preserving
+    # the leaner runtime dependency set used for image assembly.
     pname = "frag-runtime";
-    inherit (frag_runtime) version;
-    src = ../../_scripts/frag;
-    pyproject = true;
-
-    build-system = with pkgs.python3Packages; [
-      setuptools
-    ];
-
-    dependencies = with pkgs.python3Packages; [
-      cyclopts
-      questionary
-    ];
-
+    dependencies = lib.filter (pkg: lib.getName pkg != "rich") (
+      old.dependencies or frag_runtime.dependencies
+    );
     doCheck = false;
-    pythonImportsCheck = ["frag"];
-  };
+  });
 
   runtimeSystem = import "${pkgs.path}/nixos" {
-    inherit (pkgs.stdenv.hostPlatform) system;
-    specialArgs = {inherit pkgs;};
-    configuration = {...}: {
-      imports = [./runtime-system.nix];
+    system = null;
+    configuration = {modulesPath, ...}: {
+      imports = [
+        ./runtime-system.nix
+        "${modulesPath}/misc/nixpkgs/read-only.nix"
+      ];
+      nixpkgs.pkgs = pkgs;
       environment.systemPackages = [runtimeFrag];
     };
   };
@@ -52,31 +46,61 @@
       tar -cf "$out" -C "$TMPDIR/runtime-root" .
     '';
 
-  image_ref = "frag-main:${builtins.substring 0 32 (builtins.baseNameOf (toString runtimeRootfs))}";
+  packaged_image_identity_label = "dev.frag.packaged-runtime-rootfs";
+  packaged_image_change_prefix = [
+    ''CMD ["/init"]''
+    "ENV HOME=/home/agent"
+    "ENV PATH=/sw/bin:/bin"
+    "ENV USER=agent"
+    "WORKDIR /home/agent"
+  ];
+  packaged_image_identity = builtins.hashString "sha256" (
+    builtins.toJSON [
+      (toString runtimeRootfs)
+      (packaged_image_change_prefix
+        ++ [
+          "LABEL ${packaged_image_identity_label}=<packaged-image-identity>"
+        ])
+    ]
+  );
+  packaged_image_changes =
+    packaged_image_change_prefix
+    ++ [
+      "LABEL ${packaged_image_identity_label}=${packaged_image_identity}"
+    ];
   loader_name = "load-image-main";
+  image_ref = "frag-main:${builtins.substring 0 32 packaged_image_identity}";
 in {
   main = {
     inherit image_ref loader_name;
     artifact = runtimeRootfs;
     bootstrap_entrypoint = "/sw/bin/frag-bootstrap";
     loader_helper = pkgs.writeShellScriptBin loader_name ''
-      set -euo pipefail
+            set -euo pipefail
 
-      docker_bin=${lib.escapeShellArg (lib.getExe' pkgs.docker "docker")}
-      image_ref=${lib.escapeShellArg image_ref}
-      runtime_rootfs=${lib.escapeShellArg runtimeRootfs}
+            docker_bin=${lib.escapeShellArg (lib.getExe' pkgs.docker "docker")}
+            image_ref=${lib.escapeShellArg image_ref}
+            runtime_rootfs=${lib.escapeShellArg runtimeRootfs}
+            packaged_image_identity=${lib.escapeShellArg packaged_image_identity}
+            packaged_image_identity_label=${lib.escapeShellArg packaged_image_identity_label}
 
-      "$docker_bin" image rm -f "$image_ref" >/dev/null 2>&1 || true
-      "$docker_bin" import \
-        --change 'CMD ["/init"]' \
-        --change 'ENV HOME=/home/agent' \
-        --change 'ENV PATH=/sw/bin:/bin' \
-        --change 'ENV USER=agent' \
-        --change 'WORKDIR /home/agent' \
-        "$runtime_rootfs" \
-        "$image_ref" >/dev/null
+            if current_packaged_image_identity="$(
+              "$docker_bin" image inspect \
+                --format "{{ index .Config.Labels \"$packaged_image_identity_label\" }}" \
+                "$image_ref" 2>/dev/null
+            )"; then
+              if [ "$current_packaged_image_identity" = "$packaged_image_identity" ]; then
+                printf '%s\n' "$image_ref"
+                exit 0
+              fi
+            fi
 
-      printf '%s\n' "$image_ref"
+            "$docker_bin" image rm -f "$image_ref" >/dev/null 2>&1 || true
+            "$docker_bin" import \
+      ${lib.concatMapStringsSep "" (change: "        --change ${lib.escapeShellArg change} \\\n") packaged_image_changes}        "$runtime_rootfs" \
+              "$image_ref" >/dev/null
+
+            printf '%s\n' "$image_ref"
     '';
   };
 }

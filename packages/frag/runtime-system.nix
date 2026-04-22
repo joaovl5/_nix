@@ -29,11 +29,9 @@
     pkgs.cacert
     pkgs.coreutils
     pkgs.findutils
-    pkgs.git
     pkgs.gnugrep
     pkgs.gnused
     pkgs.less
-    pkgs.llm-agents.agent-browser
     pkgs.llm-agents.code
     pkgs.llm-agents.omp
     pkgs.llm-agents.opencode

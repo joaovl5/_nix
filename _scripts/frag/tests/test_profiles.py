@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import pytest
 
 from frag import cli, profiles, prompts
+from frag.exceptions import LegacySchemaError
 
 
 @dataclass
@@ -367,10 +368,29 @@ def test_get_profile_refuses_legacy_schema1_volume() -> None:
     )
 
     with pytest.raises(
-        profiles.ProfileError,
+        LegacySchemaError,
         match="schema 1 profile volume .*demo.* is not supported",
     ):
         profiles.get_profile(backend, "demo")
+
+
+def test_get_profile_raises_typed_legacy_schema_error() -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: "1",
+            }
+        },
+        running_profiles=set(),
+    )
+
+    with pytest.raises(LegacySchemaError) as exc_info:
+        profiles.get_profile(backend, "demo")
+
+    assert "schema 1 profile volume" in str(exc_info.value)
 
 
 def test_get_profile_skips_malformed_same_name_schema2_volume() -> None:
@@ -413,7 +433,7 @@ def test_create_profile_refuses_legacy_schema1_name_conflict(tmp_path) -> None:
     )
 
     with pytest.raises(
-        profiles.ProfileError,
+        LegacySchemaError,
         match="schema 1 profile volume .*Demo Profile.* is not supported",
     ):
         profiles.create_profile(
