@@ -25,7 +25,13 @@ in
         services.xserver.videoDrivers = ["nvidia"];
         environment.systemPackages = [pkgs.libnvidia-container];
         virtualisation.docker.rootless = {
-          daemon.settings.features.cdi = true;
+          daemon.settings = {
+            dns = [
+              "1.1.1.1"
+              "1.0.0.1"
+            ];
+            features.cdi = true;
+          };
           extraPackages = [pkgs.libnvidia-container];
         };
       }
