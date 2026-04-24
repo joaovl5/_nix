@@ -21,25 +21,41 @@
     group = "agent";
     home = "/home/agent";
     createHome = false;
-    shell = pkgs.bashInteractive;
+    shell = pkgs.fish;
   };
 
-  environment.systemPackages = [
-    pkgs.bashInteractive
-    pkgs.cacert
-    pkgs.coreutils
-    pkgs.findutils
-    pkgs.gnugrep
-    pkgs.gnused
-    pkgs.less
-    pkgs.llm-agents.code
-    pkgs.llm-agents.omp
-    pkgs.llm-agents.opencode
-    pkgs.mcp-nixos
-    pkgs.procps
-    pkgs.nss_wrapper
-    pkgs.util-linux
-    pkgs.which
+  programs.fish.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    bashInteractive
+    cacert
+    coreutils
+    findutils
+    fish
+    gnugrep
+    gnused
+    less
+    llm-agents.code
+    llm-agents.omp
+    llm-agents.claude-code
+    llm-agents.oh-my-claudecode
+    llm-agents.opencode
+    mcp-nixos
+    nss_wrapper
+    procps
+    starship
+    tmux
+    util-linux
+    which
+    zellij
+
+    # deps
+    perl
+    nodejs
+    bun
+    python314
+    jq
+    git
   ];
 
   system.stateVersion = "25.11";

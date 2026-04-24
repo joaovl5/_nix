@@ -29,6 +29,35 @@ SHARED_ASSET_RUNTIME_CONTRACT: tuple[tuple[str, str, str], ...] = (
         "/state/shared/opencode/plugins/superpowers.js",
         "file",
     ),
+    (
+        ".config/fish/conf.d/frag_init.fish",
+        "/state/shared/config/fish/conf.d/frag_init.fish",
+        "file",
+    ),
+    (
+        ".config/fish/conf.d/container_safe_vars.fish",
+        "/state/shared/config/fish/conf.d/container_safe_vars.fish",
+        "file",
+    ),
+    (
+        ".config/fish/conf.d/container_safe_functions.fish",
+        "/state/shared/config/fish/conf.d/container_safe_functions.fish",
+        "file",
+    ),
+    (".config/starship.toml", "/state/shared/config/starship.toml", "file"),
+    (".config/zellij/config.kdl", "/state/shared/config/zellij/config.kdl", "file"),
+    (".config/zellij/layouts", "/state/shared/config/zellij/layouts", "directory"),
+    (
+        ".local/share/zellij/plugins/zjstatus.wasm",
+        "/state/shared/local/share/zellij/plugins/zjstatus.wasm",
+        "file",
+    ),
+    (".config/tmux/tmux.conf", "/state/shared/config/tmux/tmux.conf", "file"),
+    (
+        ".config/tmux/plugins/better-mouse-mode",
+        "/state/shared/config/tmux/plugins/better-mouse-mode",
+        "directory",
+    ),
 )
 
 
@@ -529,12 +558,12 @@ def test_enter_accepts_optional_profile_and_command_tail(
 
     monkeypatch.setattr(cli, "handle_enter", fake_handle_enter)
 
-    result = cli.main(["enter", "--profile", "demo", "--", "bash", "-lc", "pwd"])
+    result = cli.main(["enter", "--profile", "demo", "--", "fish", "-lc", "pwd"])
 
     assert result == 0
     assert captured == {
         "profile": "demo",
-        "command": ("bash", "-lc", "pwd"),
+        "command": ("fish", "-lc", "pwd"),
     }
 
 
@@ -678,22 +707,29 @@ def test_enter_cold_start_renders_rich_phase_messages(
     monkeypatch.setattr(
         cli.docker_runtime,
         "resolve_runtime_spec",
-        lambda *_args, **_kwargs: runtime_spec,
+        lambda *_args, loaded_image_ref=None, **_kwargs: image_assets.RuntimeSpec(
+            image_ref=loaded_image_ref or runtime_spec.image_ref,
+            shared_assets_identity=runtime_spec.shared_assets_identity,
+            shared_mounts=runtime_spec.shared_mounts,
+            start_command=runtime_spec.start_command,
+        ),
     )
+    loaded_image_ref = "frag-main:loadedloadedloadedloaded1234"
     monkeypatch.setattr(
         cli.docker_runtime,
         "load_profile_image",
-        lambda _profile, _assets: runtime_spec.image_ref,
+        lambda _profile, _assets: loaded_image_ref,
     )
     monkeypatch.setattr(
         cli.docker_runtime,
         "bootstrap_token_for_profile",
         lambda _profile: "fresh-token-123",
     )
+    started: dict[str, object] = {}
     monkeypatch.setattr(
         cli.docker_runtime,
         "start_profile_container",
-        lambda **_kwargs: None,
+        lambda **kwargs: started.update(kwargs),
     )
     monkeypatch.setattr(
         cli.docker_runtime,
@@ -714,6 +750,7 @@ def test_enter_cold_start_renders_rich_phase_messages(
     assert "Loading runtime image" in captured.err
     assert "Starting container" in captured.err
     assert "Waiting for bootstrap" in captured.err
+    assert started["runtime_spec"].image_ref == loaded_image_ref
 
 
 def test_enter_hot_path_reports_container_reuse(

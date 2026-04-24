@@ -10,6 +10,7 @@ BOOTSTRAP_TOKEN_ENV = "FRAG_BOOTSTRAP_TOKEN"
 TARGET_UID_ENV = "FRAG_TARGET_UID"
 TARGET_GID_ENV = "FRAG_TARGET_GID"
 TARGET_SUPPLEMENTARY_GIDS_ENV = "FRAG_TARGET_SUPPLEMENTARY_GIDS"
+PROFILE_NAME_ENV = "FRAG_PROFILE_NAME"
 BOOTSTRAP_TOKEN_RELATIVE_PATH = Path("meta/bootstrap-token")
 BOOTSTRAP_STATUS_RELATIVE_PATH = Path("meta/bootstrap-status.json")
 BOOTSTRAP_TOKEN_CONTAINER_PATH = "/state/profile/meta/bootstrap-token"
@@ -40,6 +41,24 @@ def current_runtime_metadata(
         target_gid=str(primary_gid),
         supplementary_gids=current_supplementary_gids(primary_gid=primary_gid),
     )
+
+
+def runtime_environment(
+    *,
+    profile: profiles.Profile,
+    runtime_metadata: profiles.RuntimeProfileMetadata,
+    bootstrap_token: str,
+) -> dict[str, str]:
+    supplementary_gids = ",".join(
+        str(gid) for gid in runtime_metadata.supplementary_gids
+    )
+    return {
+        TARGET_UID_ENV: runtime_metadata.target_uid,
+        TARGET_GID_ENV: runtime_metadata.target_gid,
+        TARGET_SUPPLEMENTARY_GIDS_ENV: supplementary_gids,
+        PROFILE_NAME_ENV: profile.name,
+        BOOTSTRAP_TOKEN_ENV: bootstrap_token,
+    }
 
 
 def bootstrap_token_path(state_profile: Path | str) -> Path:

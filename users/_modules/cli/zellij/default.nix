@@ -1,5 +1,67 @@
 {
-  hm = {pkgs, ...}: let
+  hm = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    zellijConfigDir = "${config.xdg.configHome}/zellij";
+    zellijConfigFragments = [
+      ./config/base.kdl
+      ./config/host-web-server.kdl
+    ];
+    zellijConfigPath = "${zellijConfigDir}/config.kdl";
+    zellij_config_sync = pkgs.writeShellApplication {
+      name = "zellij-config-sync";
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.diffutils
+      ];
+      text = ''
+        set -euo pipefail
+
+        config_dir=${lib.escapeShellArg zellijConfigDir}
+        config_file=${lib.escapeShellArg zellijConfigPath}
+        tmp_file=$(mktemp)
+        first=1
+
+        cleanup() {
+          rm -f -- "$tmp_file"
+        }
+        trap cleanup EXIT
+
+        mkdir -p -- "$config_dir"
+        {
+          for fragment in ${lib.concatMapStringsSep " " lib.escapeShellArg zellijConfigFragments}; do
+            if [[ $first -eq 0 ]]; then
+              printf '\n\n'
+            fi
+
+            cat -- "$fragment"
+            first=0
+          done
+        } >"$tmp_file"
+
+        chmod 644 -- "$tmp_file"
+
+        if [[ ! -e "$config_file" ]] || ! cmp -s -- "$tmp_file" "$config_file"; then
+          mv -- "$tmp_file" "$config_file"
+        fi
+      '';
+    };
+    zellij = pkgs.symlinkJoin {
+      name = "zellij-${pkgs.zellij.version}";
+      inherit (pkgs.zellij) version;
+      paths = [pkgs.zellij];
+      postBuild = ''
+        rm -- "$out/bin/zellij"
+        ln -s ${pkgs.writeShellScript "zellij" ''
+          set -euo pipefail
+          ${zellij_config_sync}/bin/zellij-config-sync
+          exec ${pkgs.zellij}/bin/zellij "$@"
+        ''} "$out/bin/zellij"
+      '';
+    };
     yazi_zellij_toggle = pkgs.writeShellApplication {
       name = "yazi-zellij-toggle";
       text = ''
@@ -58,16 +120,21 @@
       '';
     };
   in {
-    hybrid-links.links.zellij = {
-      from = ./config;
-      to = "~/.config/zellij";
-    };
+    home.activation."zellij-config" = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      ${zellij_config_sync}/bin/zellij-config-sync
+    '';
 
-    home.packages = [yazi_zellij_toggle];
+    home.packages = [
+      yazi_zellij_toggle
+      zellij_config_sync
+    ];
 
     programs.zellij = {
       enable = true;
+      package = zellij;
     };
+
+    xdg.configFile."zellij/layouts".source = ../zellij/layouts;
 
     xdg.dataFile."zellij/plugins/zjstatus.wasm" = {
       source = "${pkgs.zjstatus}/bin/zjstatus.wasm";

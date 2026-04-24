@@ -29,6 +29,34 @@ def test_current_runtime_metadata_uses_process_identity(monkeypatch) -> None:
     )
 
 
+def test_runtime_environment_includes_profile_name_and_bootstrap_contract() -> None:
+    profile = profiles.Profile(
+        name="Demo Profile",
+        image="python:3.14",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo-profile",
+    )
+    runtime_metadata = profiles.RuntimeProfileMetadata(
+        image_ref="loaded:image",
+        shared_assets_identity="shared-assets-123",
+        target_uid="1234",
+        target_gid="5678",
+        supplementary_gids=(2001, 2002),
+    )
+
+    assert runtime_contract.runtime_environment(
+        profile=profile,
+        runtime_metadata=runtime_metadata,
+        bootstrap_token="token-123",
+    ) == {
+        runtime_contract.TARGET_UID_ENV: "1234",
+        runtime_contract.TARGET_GID_ENV: "5678",
+        runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV: "2001,2002",
+        runtime_contract.PROFILE_NAME_ENV: "Demo Profile",
+        runtime_contract.BOOTSTRAP_TOKEN_ENV: "token-123",
+    }
+
+
 def test_bootstrap_contract_paths_are_shared_sources_of_truth(tmp_path: Path) -> None:
     state_profile = tmp_path / "profile-state"
 

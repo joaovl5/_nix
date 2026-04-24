@@ -1,3 +1,11 @@
+function !!
+    eval sudo $history[1]
+end
+
+function tree --wraps eza --description 'runs eza --tree'
+    eza --tree $argv
+end
+
 function n.s --wraps nh --description 'runs nh os switch'
     command nh os switch \
         --verbose \
@@ -29,26 +37,6 @@ function killp --description 'Kill process that user selects in fzf (from ps aux
         echo "Killing processes: $pid"
         kill -9 $pid
     end
-end
-
-function md --wraps mkdir -d "Create a directory and cd into it"
-    command mkdir -p $argv
-    if test $status = 0
-        switch $argv[(count $argv)]
-            case '-*'
-            case '*'
-                cd $argv[(count $argv)]
-                return
-        end
-    end
-end
-
-function !!
-    eval sudo $history[1]
-end
-
-function tree --wraps eza --description 'runs eza --tree'
-    eza --tree $argv
 end
 
 function __yazi_zellij_request_file

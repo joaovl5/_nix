@@ -4,6 +4,7 @@ let
     (import ./opencode)
     (import ./code)
     (import ./omp)
+    (import ./hermes)
     (import ./agent-browser)
   ];
 in

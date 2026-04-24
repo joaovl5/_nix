@@ -569,19 +569,15 @@ def start_profile_container(
         runtime_spec=runtime_spec,
     )
     read_only_index = command.index("--read-only")
-    supplementary_group_env = ",".join(
-        str(gid) for gid in runtime_metadata.supplementary_gids
+    runtime_environment = runtime_contract.runtime_environment(
+        profile=profile,
+        runtime_metadata=runtime_metadata,
+        bootstrap_token=bootstrap_token,
     )
-    command[read_only_index:read_only_index] = [
-        "--env",
-        f"{runtime_contract.TARGET_UID_ENV}={runtime_metadata.target_uid}",
-        "--env",
-        f"{runtime_contract.TARGET_GID_ENV}={runtime_metadata.target_gid}",
-        "--env",
-        f"{runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV}={supplementary_group_env}",
-        "--env",
-        f"{runtime_contract.BOOTSTRAP_TOKEN_ENV}={bootstrap_token}",
-    ]
+    runtime_environment_flags: list[str] = []
+    for name, value in runtime_environment.items():
+        runtime_environment_flags.extend(["--env", f"{name}={value}"])
+    command[read_only_index:read_only_index] = runtime_environment_flags
     start_result = _run_docker_command(command, capture_output=True)
     if _docker_result_is_container_name_conflict(
         start_result,

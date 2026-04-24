@@ -17,7 +17,7 @@ app = App(
 )
 profile_app = App(name="profile")
 app.command(profile_app)
-DEFAULT_SHELL = ("bash",)
+DEFAULT_SHELL = ("fish",)
 _FRAG_PACKAGE_ROOT_ENV = "FRAG_PACKAGE_ROOT"
 
 
@@ -258,7 +258,15 @@ def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
         ui.render_status("Reusing running container…")
     else:
         ui.render_status("Loading runtime image…")
-        docker_runtime.load_profile_image(selected_profile, image_assets_provider)
+        loaded_image_ref = docker_runtime.load_profile_image(
+            selected_profile, image_assets_provider
+        )
+        runtime_spec = docker_runtime.resolve_runtime_spec(
+            selected_profile,
+            workspace_root,
+            image_assets_provider,
+            loaded_image_ref=loaded_image_ref,
+        )
         bootstrap_token = docker_runtime.bootstrap_token_for_profile(selected_profile)
         ui.render_status("Starting container…")
         docker_runtime.start_profile_container(

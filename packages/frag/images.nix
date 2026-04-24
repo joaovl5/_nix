@@ -38,10 +38,12 @@
       mkdir -p "$TMPDIR/runtime-root"
       tar -xJf ${runtimeTarball}/tarball/*.tar.xz -C "$TMPDIR/runtime-root"
 
-      rm -rf "$TMPDIR/runtime-root/home/agent" "$TMPDIR/runtime-root/sw"
+      rm -rf "$TMPDIR/runtime-root/home/agent" "$TMPDIR/runtime-root/sw" "$TMPDIR/runtime-root/bin/sh"
       mkdir -p "$TMPDIR/runtime-root/home" "$TMPDIR/runtime-root/state/profile/home"
+      chmod u+w "$TMPDIR/runtime-root/bin"
       ln -s /state/profile/home "$TMPDIR/runtime-root/home/agent"
       ln -s ${runtimeSystemPath} "$TMPDIR/runtime-root/sw"
+      ln -s /sw/bin/sh "$TMPDIR/runtime-root/bin/sh"
 
       tar -cf "$out" -C "$TMPDIR/runtime-root" .
     '';

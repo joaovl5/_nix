@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -26,6 +27,12 @@ class RuntimeSpec:
     shared_assets_identity: str
     shared_mounts: tuple[SharedMount, ...]
     start_command: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ResolvedSharedMounts:
+    mounts: tuple[SharedMount, ...]
+    host_override_sources: tuple[tuple[str, Path], ...]
 
 
 @dataclass(frozen=True)
@@ -77,13 +84,71 @@ def _missing_required_shared_assets(shared_assets_root: Path) -> tuple[str, ...]
     )
 
 
-def _resolve_shared_mounts(shared_assets_root: Path) -> tuple[SharedMount, ...]:
-    mounts: list[SharedMount] = []
+def _resolve_host_override_source(host_home: Path, relative_path: Path) -> Path:
+    return (host_home / relative_path).expanduser().resolve(strict=False)
+
+
+def _resolve_shared_mounts(
+    shared_assets_root: Path,
+    *,
+    host_home: Path | None = None,
+) -> ResolvedSharedMounts:
+    package_mounts_by_destination: dict[str, SharedMount] = {}
+    mount_order: list[str] = []
     for relative_source, destination, entry_type in _shared_asset_mount_specs():
         source = shared_assets_root / relative_source
-        if _shared_asset_entry_has_expected_type(source, entry_type):
-            mounts.append(SharedMount(source=source, destination=destination))
-    return tuple(mounts)
+        if not _shared_asset_entry_has_expected_type(source, entry_type):
+            continue
+        package_mounts_by_destination[destination] = SharedMount(
+            source=source,
+            destination=destination,
+        )
+        mount_order.append(destination)
+
+    resolved_host_home = (host_home or Path.home()).expanduser().resolve(strict=False)
+    host_override_sources: list[tuple[str, Path]] = []
+    for (
+        relative_path,
+        destination,
+        entry_type,
+    ) in shared_assets_contract.shared_host_override_specs():
+        source = _resolve_host_override_source(resolved_host_home, relative_path)
+        if not _shared_asset_entry_has_expected_type(source, entry_type):
+            continue
+        if destination not in package_mounts_by_destination:
+            continue
+        package_mounts_by_destination[destination] = SharedMount(
+            source=source,
+            destination=destination,
+        )
+        host_override_sources.append((destination, source))
+
+    mounts = tuple(
+        package_mounts_by_destination[destination]
+        for destination in mount_order
+        if destination in package_mounts_by_destination
+    )
+    return ResolvedSharedMounts(
+        mounts=mounts,
+        host_override_sources=tuple(host_override_sources),
+    )
+
+
+def _resolved_shared_assets_identity(
+    base_identity: str,
+    *,
+    host_override_sources: tuple[tuple[str, Path], ...],
+) -> str:
+    if not host_override_sources:
+        return base_identity
+    payload = [
+        base_identity,
+        [(destination, str(source)) for destination, source in host_override_sources],
+    ]
+    digest = hashlib.sha256(
+        json.dumps(payload, separators=(",", ":")).encode()
+    ).hexdigest()[:16]
+    return f"{base_identity}-host-{digest}"
 
 
 def _read_catalog_images(*, catalog_path: Path) -> dict[str, object]:
@@ -257,12 +322,16 @@ class DirectProfileImageAssets:
         self, *, profile: profiles.Profile, workspace_root: Path
     ) -> RuntimeSpec:
         metadata = self.resolve_profile_image_metadata(profile=profile)
+        resolved_shared_mounts = _resolve_shared_mounts(
+            self._package_assets.shared_assets_root
+        )
         return RuntimeSpec(
             image_ref=metadata.image_ref,
-            shared_assets_identity=metadata.shared_assets_identity,
-            shared_mounts=_resolve_shared_mounts(
-                self._package_assets.shared_assets_root
+            shared_assets_identity=_resolved_shared_assets_identity(
+                metadata.shared_assets_identity,
+                host_override_sources=resolved_shared_mounts.host_override_sources,
             ),
+            shared_mounts=resolved_shared_mounts.mounts,
             start_command=(
                 "frag-bootstrap",
                 "--profile-name",

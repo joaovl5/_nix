@@ -1,0 +1,4 @@
+model:
+  default: glm-5.1
+  provider: zai
+  base_url: https://api.z.ai/api/coding/paas/v4

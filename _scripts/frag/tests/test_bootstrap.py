@@ -174,7 +174,7 @@ def test_initialize_profile_environment_is_idempotent_preserves_mutable_home_sta
     )
     omp_config.chmod(0o600)
     persisted_file = state_profile / "home" / ".local" / "state.txt"
-    persisted_file.parent.mkdir(parents=True)
+    persisted_file.parent.mkdir(parents=True, exist_ok=True)
     persisted_file.write_text("persist me\n")
     stale_profile_browser_state = state_profile / "config" / "agent-browser"
     stale_profile_browser_state.mkdir(parents=True)
@@ -593,7 +593,7 @@ def test_write_identity_overlay_contract_activates_passwd_group_overlay(
     assert 'export LD_PRELOAD="/sw/lib/libnss_wrapper.so' in exec_script
     assert 'setpriv --reuid 1234 --regid 5678 --groups 2001,2002 -- "$@"' in exec_script
     assert "--clear-groups" not in exec_script
-    assert "/sw/bin/bash" in passwd_text
+    assert "/sw/bin/fish" in passwd_text
 
 
 def test_container_root_matches_requested_owner_for_rootless_maps(
@@ -730,7 +730,7 @@ def test_write_identity_overlay_contract_uses_container_root_for_rootless_owner(
 
     assert "setpriv" not in exec_script
     assert exec_script.rstrip().endswith('exec "$@"')
-    assert "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/bash" in passwd_text
+    assert "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/fish" in passwd_text
 
 
 def test_write_identity_overlay_contract_rootless_owner_keeps_supplementary_groups(

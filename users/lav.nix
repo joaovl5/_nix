@@ -109,7 +109,6 @@ in {
           ghostty
           alacritty # backup
           ## multiplexer
-          zellij
           ## tui
           systemctl-tui
           gdu # ncdu alternative (MUCH faster on SSDs)

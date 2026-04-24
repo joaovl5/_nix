@@ -38,6 +38,20 @@ let
 in
   local.frag
 """
+FRAG_TERMINAL_ASSETS_EXPR = r"""
+let
+  flake = builtins.getFlake (toString ./.);
+  pkgs = import flake.inputs.nixpkgs {
+    system = "x86_64-linux";
+    overlays = flake._channels.overlays;
+    config.allowUnfree = true;
+  };
+in
+  import ./packages/frag/terminal_assets.nix {
+    inherit pkgs;
+  }
+"""
+
 FRAG_RUNTIME_ROOTFS_EXPR = r"""
 let
   flake = builtins.getFlake (toString ./.);
@@ -90,6 +104,11 @@ def _build_frag_package() -> Path:
 @lru_cache(maxsize=1)
 def _build_frag_runtime_rootfs() -> Path:
     return _build_nix_output(FRAG_RUNTIME_ROOTFS_EXPR)
+
+
+@lru_cache(maxsize=1)
+def _build_frag_terminal_assets() -> Path:
+    return _build_nix_output(FRAG_TERMINAL_ASSETS_EXPR)
 
 
 def _load_packaged_catalog(package_root: Path) -> dict[str, object]:
@@ -194,6 +213,42 @@ def _create_shared_assets_tree(shared_assets_dir: Path) -> None:
             asset_path.write_text("placeholder\n")
         else:
             asset_path.mkdir(exist_ok=True)
+
+
+def _create_host_override_tree(host_home: Path) -> None:
+    (host_home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    (host_home / ".agents" / "skills" / "README.md").write_text("host agents\n")
+    (host_home / ".config" / "agents" / "skills").mkdir(parents=True, exist_ok=True)
+    (host_home / ".config" / "agents" / "skills" / "README.md").write_text(
+        "host config agents\n"
+    )
+    (host_home / ".config" / "zellij").mkdir(parents=True, exist_ok=True)
+    (host_home / ".config" / "zellij" / "config.kdl").write_text(
+        'default_mode "locked"\n'
+    )
+    (host_home / ".config" / "zellij" / "layouts").mkdir(parents=True, exist_ok=True)
+    (host_home / ".config" / "zellij" / "layouts" / "default.kdl").write_text(
+        "layout host\n"
+    )
+    (host_home / ".local" / "share" / "zellij" / "plugins").mkdir(
+        parents=True, exist_ok=True
+    )
+    (
+        host_home / ".local" / "share" / "zellij" / "plugins" / "zjstatus.wasm"
+    ).write_text("wasm\n")
+    (host_home / ".config" / "tmux" / "plugins").mkdir(parents=True, exist_ok=True)
+    (host_home / ".config" / "tmux" / "tmux.conf").write_text("set -g prefix C-a\n")
+    (host_home / ".config" / "tmux" / "plugins" / "better-mouse-mode").mkdir(
+        parents=True, exist_ok=True
+    )
+    (
+        host_home
+        / ".config"
+        / "tmux"
+        / "plugins"
+        / "better-mouse-mode"
+        / "scroll_copy_mode.tmux"
+    ).write_text("bind -T copy-mode-vi v send-keys -X begin-selection\n")
 
 
 def test_image_assets_imports_without_docker_runtime_bootstrap() -> None:
@@ -318,8 +373,77 @@ def test_packaged_catalog_exposes_main_runtime_metadata() -> None:
     assert re.fullmatch(r"load-image-[a-z0-9][a-z0-9-]*", main["loader"])
 
 
-def test_packaged_shared_assets_cover_runtime_mount_contract() -> None:
+def test_direct_profile_image_assets_uses_packaged_mounts_when_host_overrides_absent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    package_root = tmp_path / "nix" / "store" / "frag-0.1.0"
+    shared_assets_dir = package_root / "share" / "frag" / "shared-assets"
+    _create_shared_assets_tree(shared_assets_dir)
+
+    helpers_dir = package_root / "share" / "frag" / "helpers"
+    helpers_dir.mkdir(parents=True)
+    helper_path = helpers_dir / "load-image-main"
+    helper_path.write_text("#!/bin/sh\nprintf 'frag-main:immutable123\n'")
+    helper_path.chmod(0o755)
+
+    catalog_path = package_root / "share" / "frag" / "catalog.json"
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    catalog_path.write_text(
+        json.dumps(
+            {
+                "images": {
+                    "main": {
+                        "image_ref": "frag-main:immutable123",
+                        "shared_assets_identity": "shared-assets-123",
+                        "loader": "load-image-main",
+                    }
+                }
+            }
+        )
+    )
+
     image_assets = _import_image_assets()
+    monkeypatch.setattr(image_assets.Path, "home", lambda: tmp_path / "empty-home")
+
+    assets = image_assets.DirectProfileImageAssets(
+        package_assets=image_assets.resolve_installed_package_assets(package_root)
+    )
+    profile = profiles.Profile(
+        name="demo",
+        image="main",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo",
+    )
+
+    runtime_spec = assets.build_runtime_spec(
+        profile=profile,
+        workspace_root=Path("/workspace/demo"),
+    )
+    mounts_by_destination = {
+        shared_mount.destination: shared_mount.source
+        for shared_mount in runtime_spec.shared_mounts
+    }
+
+    assert runtime_spec.shared_assets_identity == "shared-assets-123"
+    assert mounts_by_destination["/state/shared/agents/skills"] == (
+        shared_assets_dir / ".agents" / "skills"
+    )
+    assert mounts_by_destination["/state/shared/config/zellij/config.kdl"] == (
+        shared_assets_dir / ".config" / "zellij" / "config.kdl"
+    )
+    assert mounts_by_destination["/state/shared/config/tmux/tmux.conf"] == (
+        shared_assets_dir / ".config" / "tmux" / "tmux.conf"
+    )
+
+
+def test_packaged_shared_assets_cover_runtime_mount_contract(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    image_assets = _import_image_assets()
+
+    monkeypatch.setattr(image_assets.Path, "home", lambda: tmp_path / "empty-home")
 
     package_root = _build_frag_package()
     package_assets = image_assets.resolve_installed_package_assets(package_root)
@@ -373,6 +497,91 @@ def test_packaged_shared_assets_cover_runtime_mount_contract() -> None:
             assert asset_path.is_file()
 
 
+def test_direct_profile_image_assets_prefers_host_override_mounts(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    package_root = tmp_path / "nix" / "store" / "frag-0.1.0"
+    shared_assets_dir = package_root / "share" / "frag" / "shared-assets"
+    _create_shared_assets_tree(shared_assets_dir)
+
+    helpers_dir = package_root / "share" / "frag" / "helpers"
+    helpers_dir.mkdir(parents=True)
+    helper_path = helpers_dir / "load-image-main"
+    helper_path.write_text("#!/bin/sh\nprintf 'frag-main:immutable123\n'")
+    helper_path.chmod(0o755)
+
+    catalog_path = package_root / "share" / "frag" / "catalog.json"
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    catalog_path.write_text(
+        json.dumps(
+            {
+                "images": {
+                    "main": {
+                        "image_ref": "frag-main:immutable123",
+                        "shared_assets_identity": "shared-assets-123",
+                        "loader": "load-image-main",
+                    }
+                }
+            }
+        )
+    )
+
+    image_assets = _import_image_assets()
+    host_home = tmp_path / "host-home"
+    _create_host_override_tree(host_home)
+    monkeypatch.setattr(image_assets.Path, "home", lambda: host_home)
+
+    assets = image_assets.DirectProfileImageAssets(
+        package_assets=image_assets.resolve_installed_package_assets(package_root)
+    )
+    profile = profiles.Profile(
+        name="demo",
+        image="main",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo",
+    )
+
+    runtime_spec = assets.build_runtime_spec(
+        profile=profile,
+        workspace_root=Path("/workspace/demo"),
+    )
+    mounts_by_destination = {
+        shared_mount.destination: shared_mount.source
+        for shared_mount in runtime_spec.shared_mounts
+    }
+
+    assert runtime_spec.shared_assets_identity != "shared-assets-123"
+    assert mounts_by_destination["/state/shared/agents/skills"] == (
+        host_home / ".agents" / "skills"
+    ).resolve(strict=False)
+    assert mounts_by_destination["/state/shared/config/agents/skills"] == (
+        host_home / ".config" / "agents" / "skills"
+    ).resolve(strict=False)
+    assert mounts_by_destination["/state/shared/config/zellij/config.kdl"] == (
+        host_home / ".config" / "zellij" / "config.kdl"
+    ).resolve(strict=False)
+    assert mounts_by_destination["/state/shared/config/zellij/layouts"] == (
+        host_home / ".config" / "zellij" / "layouts"
+    ).resolve(strict=False)
+    assert mounts_by_destination[
+        "/state/shared/local/share/zellij/plugins/zjstatus.wasm"
+    ] == (
+        host_home / ".local" / "share" / "zellij" / "plugins" / "zjstatus.wasm"
+    ).resolve(strict=False)
+    assert mounts_by_destination["/state/shared/config/tmux/tmux.conf"] == (
+        host_home / ".config" / "tmux" / "tmux.conf"
+    ).resolve(strict=False)
+    assert mounts_by_destination[
+        "/state/shared/config/tmux/plugins/better-mouse-mode"
+    ] == (host_home / ".config" / "tmux" / "plugins" / "better-mouse-mode").resolve(
+        strict=False
+    )
+    assert mounts_by_destination["/state/shared/code/agents"] == (
+        shared_assets_dir / ".code" / "agents"
+    )
+
+
 def test_packaged_helper_wiring_stays_under_share_frag_helpers() -> None:
     package_root = _build_frag_package()
     catalog = _load_packaged_catalog(package_root)
@@ -405,6 +614,61 @@ def test_packaged_shared_skill_bundles_exclude_agent_browser_skill() -> None:
     assert (
         shared_assets_root / ".config" / "opencode" / "skill" / "superpowers"
     ).is_dir()
+
+
+def test_packaged_terminal_shared_assets_cover_runtime_contract() -> None:
+    terminal_assets_root = (
+        _build_frag_terminal_assets() / "share" / "frag" / "shared-assets"
+    )
+
+    terminal_paths = {
+        relative_source: terminal_assets_root / relative_source
+        for relative_source, _destination, _entry_type in shared_assets_contract.shared_runtime_mount_specs()
+        if relative_source.startswith(
+            (
+                ".config/fish/",
+                ".config/starship",
+                ".config/zellij/",
+                ".local/share/zellij/",
+                ".config/tmux/",
+            )
+        )
+    }
+
+    assert terminal_paths
+    assert (
+        terminal_paths[".config/zellij/config.kdl"].read_text()
+        == (
+            REPO_ROOT / "users" / "_modules" / "cli" / "zellij" / "config" / "base.kdl"
+        ).read_text()
+    )
+    assert "web_server_" not in terminal_paths[".config/zellij/config.kdl"].read_text()
+    assert terminal_paths[".config/zellij/layouts"].is_dir()
+    assert terminal_paths[".local/share/zellij/plugins/zjstatus.wasm"].is_file()
+    assert terminal_paths[".config/starship.toml"].is_file()
+    assert terminal_paths[".config/fish/conf.d/frag_init.fish"].is_file()
+    assert terminal_paths[".config/fish/conf.d/container_safe_vars.fish"].is_file()
+    assert terminal_paths[".config/fish/conf.d/container_safe_functions.fish"].is_file()
+    assert terminal_paths[".config/tmux/tmux.conf"].is_file()
+    assert terminal_paths[".config/tmux/plugins/better-mouse-mode"].is_dir()
+
+    tmux_config = terminal_paths[".config/tmux/tmux.conf"].read_text()
+    assert "better-mouse-mode" in tmux_config
+    assert "run-shell" in tmux_config
+    assert (
+        terminal_paths[".config/tmux/plugins/better-mouse-mode"]
+        / "scroll_copy_mode.tmux"
+    ).is_file()
+
+    for relative_source, asset_path in terminal_paths.items():
+        entry_type = dict(
+            (source, kind)
+            for source, _destination, kind in shared_assets_contract.shared_runtime_mount_specs()
+        )[relative_source]
+        if entry_type == "directory":
+            assert asset_path.is_dir()
+        else:
+            assert asset_path.is_file()
 
 
 def test_packaged_runtime_rootfs_closure_excludes_agent_browser_package() -> None:

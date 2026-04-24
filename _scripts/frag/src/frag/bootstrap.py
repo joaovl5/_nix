@@ -230,7 +230,7 @@ def _write_identity_overlay_contract(
     passwd_path.parent.chmod(0o755)
 
     if _container_root_matches_requested_owner(uid, gid):
-        passwd_contents = "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/bash\n"
+        passwd_contents = "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/fish\n"
         group_contents = "agent:x:0:\n"
         if supplementary_gids:
             exec_command = (
@@ -240,8 +240,8 @@ def _write_identity_overlay_contract(
             exec_command = 'exec "$@"\n'
     else:
         passwd_contents = (
-            f"root:x:0:0:root:/root:/sw/bin/bash\n"
-            f"agent:x:{uid}:{gid}:Frag Agent:/home/agent:/sw/bin/bash\n"
+            f"root:x:0:0:root:/root:/sw/bin/fish\n"
+            f"agent:x:{uid}:{gid}:Frag Agent:/home/agent:/sw/bin/fish\n"
         )
         group_contents = f"root:x:0:\nagent:x:{gid}:\n"
         exec_command = (

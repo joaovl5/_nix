@@ -30,6 +30,13 @@ class SharedPackagedAssetEntry:
         )
 
 
+@dataclass(frozen=True)
+class SharedHostOverrideEntry:
+    host_relative_path: Path
+    runtime_destination: str
+    entry_type: SharedAssetEntryType
+
+
 SHARED_PACKAGED_ASSET_ENTRIES: tuple[SharedPackagedAssetEntry, ...] = (
     SharedPackagedAssetEntry(
         home_relative_path=Path(".agents/skills"),
@@ -103,6 +110,102 @@ SHARED_PACKAGED_ASSET_ENTRIES: tuple[SharedPackagedAssetEntry, ...] = (
         runtime_destination="/state/shared/opencode/plugins/superpowers.js",
         entry_type=SharedAssetEntryType.FILE,
     ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/fish/conf.d/frag_init.fish"),
+        packaged_asset_relative_path=Path(".config/fish/conf.d/frag_init.fish"),
+        runtime_destination="/state/shared/config/fish/conf.d/frag_init.fish",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/fish/conf.d/container_safe_vars.fish"),
+        packaged_asset_relative_path=Path(
+            ".config/fish/conf.d/container_safe_vars.fish"
+        ),
+        runtime_destination="/state/shared/config/fish/conf.d/container_safe_vars.fish",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/fish/conf.d/container_safe_functions.fish"),
+        packaged_asset_relative_path=Path(
+            ".config/fish/conf.d/container_safe_functions.fish"
+        ),
+        runtime_destination="/state/shared/config/fish/conf.d/container_safe_functions.fish",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/starship.toml"),
+        packaged_asset_relative_path=Path(".config/starship.toml"),
+        runtime_destination="/state/shared/config/starship.toml",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/zellij/config.kdl"),
+        packaged_asset_relative_path=Path(".config/zellij/config.kdl"),
+        runtime_destination="/state/shared/config/zellij/config.kdl",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/zellij/layouts"),
+        packaged_asset_relative_path=Path(".config/zellij/layouts"),
+        runtime_destination="/state/shared/config/zellij/layouts",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".local/share/zellij/plugins/zjstatus.wasm"),
+        packaged_asset_relative_path=Path(".local/share/zellij/plugins/zjstatus.wasm"),
+        runtime_destination="/state/shared/local/share/zellij/plugins/zjstatus.wasm",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/tmux/tmux.conf"),
+        packaged_asset_relative_path=Path(".config/tmux/tmux.conf"),
+        runtime_destination="/state/shared/config/tmux/tmux.conf",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedPackagedAssetEntry(
+        home_relative_path=Path(".config/tmux/plugins/better-mouse-mode"),
+        packaged_asset_relative_path=Path(".config/tmux/plugins/better-mouse-mode"),
+        runtime_destination="/state/shared/config/tmux/plugins/better-mouse-mode",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
+)
+
+SHARED_HOST_OVERRIDE_ENTRIES: tuple[SharedHostOverrideEntry, ...] = (
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".agents/skills"),
+        runtime_destination="/state/shared/agents/skills",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".config/agents/skills"),
+        runtime_destination="/state/shared/config/agents/skills",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".config/zellij/config.kdl"),
+        runtime_destination="/state/shared/config/zellij/config.kdl",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".config/zellij/layouts"),
+        runtime_destination="/state/shared/config/zellij/layouts",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".local/share/zellij/plugins/zjstatus.wasm"),
+        runtime_destination="/state/shared/local/share/zellij/plugins/zjstatus.wasm",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".config/tmux/tmux.conf"),
+        runtime_destination="/state/shared/config/tmux/tmux.conf",
+        entry_type=SharedAssetEntryType.FILE,
+    ),
+    SharedHostOverrideEntry(
+        host_relative_path=Path(".config/tmux/plugins/better-mouse-mode"),
+        runtime_destination="/state/shared/config/tmux/plugins/better-mouse-mode",
+        entry_type=SharedAssetEntryType.DIRECTORY,
+    ),
 )
 
 
@@ -121,4 +224,15 @@ def shared_runtime_mount_specs() -> tuple[tuple[str, str, str], ...]:
             entry.entry_type.value,
         )
         for entry in SHARED_PACKAGED_ASSET_ENTRIES
+    )
+
+
+def shared_host_override_specs() -> tuple[tuple[Path, str, str], ...]:
+    return tuple(
+        (
+            entry.host_relative_path,
+            entry.runtime_destination,
+            entry.entry_type.value,
+        )
+        for entry in SHARED_HOST_OVERRIDE_ENTRIES
     )

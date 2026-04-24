@@ -31,6 +31,10 @@
     inherit pkgs frag_runtime;
   };
 
+  terminal_assets = import ./terminal_assets.nix {
+    inherit pkgs lib;
+  };
+
   opencode_json = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     mcp = {
@@ -49,7 +53,7 @@
   shared_skills = builtins.path {
     name = "frag-shared-skills";
     path = ../../users/_modules/ai/_prompts/skills;
-    filter = path: _type: (builtins.baseNameOf path) != "agent-browser";
+    filter = path: _type: (baseNameOf path) != "agent-browser";
   };
 
   shared_assets = pkgs.runCommand "frag-shared-assets" {} ''
@@ -79,6 +83,9 @@
     cp -r ${inputs.superpowers} "$shared_root/.config/opencode/superpowers"
     cp ${inputs.superpowers + "/.opencode/plugins/superpowers.js"} \
       "$shared_root/.config/opencode/plugins/superpowers.js"
+
+    cp -r ${terminal_assets}/share/frag/shared-assets/. "$shared_root/"
+
 
     chmod -R u+w "$shared_root/.config/opencode/skill" 2>/dev/null || true
     rm -rf "$shared_root/.config/opencode/skill/agent-browser"

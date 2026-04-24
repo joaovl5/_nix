@@ -772,6 +772,8 @@ def test_start_profile_container_uses_runtime_spec_mounts_and_command(
             "--env",
             "FRAG_TARGET_SUPPLEMENTARY_GIDS=2001,2002",
             "--env",
+            "FRAG_PROFILE_NAME=Demo Profile",
+            "--env",
             "FRAG_BOOTSTRAP_TOKEN=token-123",
             "--read-only",
             "--tmpfs",
@@ -1921,7 +1923,7 @@ def test_cli_enter_requires_runtime_metadata_for_container_reuse(
     assert calls == [
         ("map", working_dir),
         ("reuse", expected_metadata),
-        ("exec", "Demo Profile", "/workspace-root/nested", ("bash",)),
+        ("exec", "Demo Profile", "/workspace-root/nested", ("fish",)),
     ]
 
 
@@ -1965,7 +1967,7 @@ def test_cli_enter_loads_image_starts_container_waits_then_execs(
         lambda: assets_provider,
         raising=False,
     )
-    monkeypatch.setattr(cli, "DEFAULT_SHELL", ("bash",), raising=False)
+    monkeypatch.setattr(cli, "DEFAULT_SHELL", ("fish",), raising=False)
     monkeypatch.setattr(
         cli.docker_runtime,
         "bootstrap_token_for_profile",
@@ -2003,12 +2005,15 @@ def test_cli_enter_loads_image_starts_container_waits_then_execs(
 
     assert cli.handle_enter(profile="Demo Profile", command=()) == 0
     assert assets_provider.load_calls == [runtime_profile]
-    assert assets_provider.build_calls == [(runtime_profile, workspace_root)]
+    assert assets_provider.build_calls == [
+        (runtime_profile, workspace_root),
+        (runtime_profile, workspace_root),
+    ]
     assert calls == [
         ("map", working_dir),
         ("start", "Demo Profile", workspace_root, runtime_spec, "fresh-token-123"),
         ("wait", "Demo Profile", "fresh-token-123"),
-        ("exec", "Demo Profile", "/workspace-root/nested", ("bash",)),
+        ("exec", "Demo Profile", "/workspace-root/nested", ("fish",)),
     ]
 
 
@@ -2035,7 +2040,7 @@ def test_cli_enter_refuses_pwd_outside_workspace_root(
     monkeypatch.chdir(outside)
 
     with pytest.raises(docker_runtime.WorkspacePathError, match="bad cwd"):
-        cli.handle_enter(profile="Demo Profile", command=("bash",))
+        cli.handle_enter(profile="Demo Profile", command=("fish",))
 
 
 def test_stop_profile_container_stops_named_container(
