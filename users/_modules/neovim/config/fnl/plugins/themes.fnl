@@ -16,6 +16,13 @@
                                              :transparent true
                                              :dim_inactive true}))
                         :names [:teide-darker :teide-dark :teide-dimmed]}
+                       {:source :projekt0n/github-nvim-theme
+                        :names [:github_dark
+                                :github_dark_high_contrast
+                                :github_dark_dimmed]}
+                       {:source :Aejkatappaja/sora :names [:sora]}
+                       {:source :everviolet/nvim
+                        :names [:evergarden :evergarden-winter]}
                        {:source :uhs-robert/oasis.nvim
                         :names [:oasis-midnight
                                 :oasis-abyss
