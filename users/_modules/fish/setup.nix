@@ -30,8 +30,5 @@
       ghostty.enableFishIntegration = true;
       kitty.shellIntegration.enableFishIntegration = true;
     };
-    services = {
-      ssh-agent.enableFishIntegration = true;
-    };
   };
 }

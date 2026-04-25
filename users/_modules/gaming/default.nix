@@ -52,7 +52,7 @@
 
   hm = {pkgs, ...}: {
     programs.lutris = {
-      enable = true;
+      enable = false; # fix later ldap thing
     };
     programs.mangohud = {
       enable = true;

@@ -5,6 +5,11 @@
     ...
   }: {
     xdg = {
+      configFile."electron-flags.conf".text = ''
+        --enable-features=UseOzonePlatform
+        --ozone-platform=wayland
+      '';
+
       autostart.enable = true;
       mime.enable = true;
       portal = {
@@ -12,7 +17,6 @@
         xdgOpenUsePortal = true;
         extraPortals = lib.mkForce (
           with pkgs; [
-            # xdg-desktop-portal-wlr
             xdg-desktop-portal-gnome
             # gnome-keyring
           ]
@@ -20,7 +24,5 @@
         config.common.default = lib.mkForce "gnome";
       };
     };
-
-    # systemd.user.services.xdg-desktop-portal-gnome.requisite = lib.mkForce [];
   };
 }

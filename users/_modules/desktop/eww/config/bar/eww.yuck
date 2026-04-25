@@ -1,0 +1,77 @@
+(defwidget bar []
+  (centerbox :orientation "v"
+    (workspaces)
+    (centerstuff)
+    (sidestuff)))
+
+(defwidget centerstuff []
+  (box
+    :class "centerstuff"
+    :orientation "v"
+    :halign "center"
+    :valign "center"
+    time
+    date))
+
+(defwidget sidestuff []
+  (box
+    :class "sidestuff"
+    :orientation "v"
+    :space-evenly false
+    :valign "end"
+    :halign "center"
+    (metric :label "⌸"
+            :value {EWW_RAM.used_mem_perc}
+            :onchange "")
+    (metric :label "⍙"
+            :value {round((1 - (EWW_DISK["/"].free / EWW_DISK["/"].total)) * 100, 0)}
+            :onchange "")))
+
+(defwidget workspaces []
+  (box :class "workspaces"
+       :orientation "v"
+       :space-evenly false
+       :halign "center"
+       :valign "start"
+       :spacing 0
+    (button :onclick "wmctrl -s 0" 1)
+    (button :onclick "wmctrl -s 1" 2)
+    (button :onclick "wmctrl -s 2" 3)
+    (button :onclick "wmctrl -s 3" 4)
+    (button :onclick "wmctrl -s 4" 5)
+    (button :onclick "wmctrl -s 5" 6)
+    (button :onclick "wmctrl -s 6" 7)
+    (button :onclick "wmctrl -s 7" 8)
+    (button :onclick "wmctrl -s 8" 9)))
+
+
+
+(defwidget metric [label value onchange]
+  (box :orientation "v"
+       :class "metric"
+       :space-evenly false
+    (box :class "label" label)
+    (scale :min 0
+           :max 101
+           :active {onchange != ""}
+           :value value
+           :onchange onchange)))
+
+
+
+
+
+(defpoll time :interval "10s"
+  "date '+%H:%M'")
+(defpoll date :interval "10s"
+  "date '+%d.%m'")
+
+(defwindow bar
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "10px"
+                      :height "50%"
+                      :anchor "right center")
+  (bar))
