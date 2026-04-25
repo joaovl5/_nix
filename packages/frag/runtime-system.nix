@@ -40,7 +40,6 @@
     llm-agents.claude-code
     llm-agents.oh-my-claudecode
     llm-agents.opencode
-    mcp-nixos
     nss_wrapper
     procps
     starship

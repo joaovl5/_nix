@@ -38,11 +38,6 @@
   opencode_json = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     mcp = {
-      nixos = {
-        command = ["mcp-nixos"];
-        enabled = true;
-        type = "local";
-      };
     };
     plugin = [
       "@gotgenes/opencode-agent-identity"

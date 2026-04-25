@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import argparse
-from enum import StrEnum
 import json
 import os
-from pathlib import Path
 import shutil
+from enum import StrEnum
+from pathlib import Path
 
 from frag import runtime_contract, shared_assets_contract
 
@@ -25,11 +25,6 @@ command = \"mcp-nixos\"
 
 _OMP_DEFAULT_CONFIG = {
     "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
-    "mcpServers": {
-        "nixos": {
-            "command": "mcp-nixos",
-        }
-    },
 }
 
 _REQUIRED_DIRECTORIES: tuple[Path, ...] = (
