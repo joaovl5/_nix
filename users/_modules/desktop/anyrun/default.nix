@@ -15,31 +15,15 @@ in {
       };
     };
   };
-  hm = {
-    pkgs,
-    lib,
-    ...
-  }: let
+  hm = {pkgs, ...}: let
     anyrun_pkg = pkgs.${anyrun_pkg_name};
   in {
-    programs.anyrun = {
-      enable = true;
-      package = anyrun_pkg;
-      extraCss = lib.readFile ./style.css;
-      config = {
-        plugins = [
-          "${anyrun_pkg}/_lib/libapplications.so"
-          "${anyrun_pkg}/_lib/libshell.so"
-          "${anyrun_pkg}/_lib/libwebsearch.so"
-          "${anyrun_pkg}/_lib/libkidex.so"
-          "${anyrun_pkg}/_lib/libsymbols.so"
-          "${anyrun_pkg}/_lib/libtranslate.so"
-        ];
-        x = {fraction = 0.5;};
-        y = {fraction = 0.02;};
-        width = {absolute = 800;};
-        height = {absolute = 1;};
-      };
+    hybrid-links.links.anyrun = {
+      from = ./config;
+      to = "~/.config/anyrun";
     };
+    home.packages = [
+      anyrun_pkg
+    ];
   };
 }

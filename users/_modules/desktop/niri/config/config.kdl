@@ -110,6 +110,7 @@ binds {
     Mod+BracketLeft { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
     Mod+Comma { consume-window-into-column; }
+    Mod+Grave { spawn "swaync-client" "--toggle-panel"; }
     Mod+Ctrl+H { move-column-left-or-to-monitor-left; }
     Mod+Ctrl+J { move-window-down-or-to-workspace-down; }
     Mod+Ctrl+K { move-window-up-or-to-workspace-up; }
@@ -165,5 +166,7 @@ workspace "H" { open-on-output "HDMI-A-2"; }
 workspace "I" { open-on-output "HDMI-A-2"; }
 workspace "J" { open-on-output "HDMI-A-2"; }
 spawn-sh-at-startup "systemctl --user start ironbar"
+spawn-sh-at-startup "eww -c ~/.config/eww/bar daemon"
+spawn-sh-at-startup "eww -c ~/.config/eww/bar open bar"
 gestures { hot-corners { off; }; }
 xwayland-satellite { path "xwayland-satellite"; }

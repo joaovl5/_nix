@@ -23,6 +23,9 @@
     };
 
     services = {
+      swaync = {
+        enable = true;
+      };
       swayidle = {
         enable = true;
         # HACK: Work around swayidle 1.9.0 timeout-only logind bus regression.

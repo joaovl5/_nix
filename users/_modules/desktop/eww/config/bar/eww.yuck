@@ -20,6 +20,9 @@
     :space-evenly false
     :valign "end"
     :halign "center"
+    (metric :label "⎈"
+            :value {round(EWW_CPU.avg, 0)}
+            :onchange "")
     (metric :label "⌸"
             :value {EWW_RAM.used_mem_perc}
             :onchange "")
@@ -29,21 +32,31 @@
 
 (defwidget workspaces []
   (box :class "workspaces"
-       :orientation "v"
+       :orientation "h"
        :space-evenly false
        :halign "center"
        :valign "start"
-       :spacing 0
-    (button :onclick "wmctrl -s 0" 1)
-    (button :onclick "wmctrl -s 1" 2)
-    (button :onclick "wmctrl -s 2" 3)
-    (button :onclick "wmctrl -s 3" 4)
-    (button :onclick "wmctrl -s 4" 5)
-    (button :onclick "wmctrl -s 5" 6)
-    (button :onclick "wmctrl -s 6" 7)
-    (button :onclick "wmctrl -s 7" 8)
-    (button :onclick "wmctrl -s 8" 9)))
-
+       :spacing 4
+    (box :class "workspace-list workspace-list-secondary"
+         :orientation "v"
+         :space-evenly false
+         :halign "center"
+         :valign "start"
+         :spacing 0
+      (for wsp in {jq(niri_workspaces, 'map(select(.output == "HDMI-A-2" and .name != null)) | sort_by(.idx)')}
+        (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
+                :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
+          {wsp.name ?: wsp.idx})))
+    (box :class "workspace-list workspace-list-primary"
+         :orientation "v"
+         :space-evenly false
+         :halign "center"
+         :valign "start"
+         :spacing 0
+      (for wsp in {jq(niri_workspaces, 'map(select(.output == "DP-4" and .name != null)) | sort_by(.idx)')}
+        (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
+                :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
+          {wsp.name ?: wsp.idx})))))
 
 
 (defwidget metric [label value onchange]
@@ -61,17 +74,22 @@
 
 
 
+(deflisten niri_workspaces :initial "[]"
+  "bash scripts/niri-workspaces.sh")
+
+
 (defpoll time :interval "10s"
   "date '+%H:%M'")
 (defpoll date :interval "10s"
   "date '+%d.%m'")
+
 
 (defwindow bar
   :monitor 0
   :windowtype "dock"
   :geometry (geometry :x "0%"
                       :y "0%"
-                      :width "10px"
-                      :height "50%"
+                      :width "36px"
+                      :height "30%"
                       :anchor "right center")
   (bar))
