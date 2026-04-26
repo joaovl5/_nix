@@ -5,6 +5,7 @@ let
     (import ./eww)
     (import ./gnome)
     (import ./anyrun)
+    (import ./hexecute)
     (import ./hyprland)
     (import ./gtk)
     (import ./xdg-portals.nix)

@@ -101,6 +101,13 @@
         nixpkgs-stable.follows = "nixpkgs";
       };
     };
+    ## casting spells
+    hexecute = {
+      url = "git+https://github.com/ThatOtherAndrew/Hexecute?shallow=1";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
     ## rust nightly support
     fenix = {
       url = "git+https://github.com/nix-community/fenix?shallow=1";

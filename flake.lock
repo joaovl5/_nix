@@ -539,6 +539,27 @@
         "type": "path"
       }
     },
+    "hexecute": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1765826167,
+        "narHash": "sha256-iXQzLgZYzzD6b82Oa1nLvQKvUHrdOWgJi3awhW5YWrk=",
+        "ref": "refs/heads/main",
+        "rev": "2105ee3f80a748bd4e270e8092fc12be4be927b6",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/ThatOtherAndrew/Hexecute"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/ThatOtherAndrew/Hexecute"
+      }
+    },
     "hm": {
       "inputs": {
         "nixpkgs": [
@@ -1419,6 +1440,7 @@
         "fenix": "fenix",
         "fup": "fup",
         "globals": "globals",
+        "hexecute": "hexecute",
         "hm": "hm",
         "hyprland-plugins": "hyprland-plugins",
         "kaneo-src": "kaneo-src",

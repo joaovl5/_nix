@@ -151,7 +151,12 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
     Mod+Shift+T { toggle-column-tabbed-display; }
     Mod+Shift+U { move-workspace-down; }
+    Mod+A { spawn "hexecute"; }
     Mod+Space { spawn "anyrun" "--plugins" "libapplications.so"; }
+    Mod+N { spawn "anyrun" "--plugins" "libsymbols.so"; } // unicode
+    Mod+C { spawn "anyrun" "--plugins" "librink.so"; } // calc
+    Alt+Tab { spawn "anyrun" "--plugins" "libniri_focus.so"; } // calc
+    Mod+Alt+Delete { spawn "anyrun" "--plugins" "libactions.so"; } // calc
     Mod+Tab { toggle-overview; }
     Mod+Y { focus-column-first; }
 }
