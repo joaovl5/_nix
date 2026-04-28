@@ -5,10 +5,12 @@
 }: let
   globals = import inputs.globals;
   fxsync_cfg = nixos_config.my."unit.fxsync";
+  gpu_enable = nixos_config.my.nvidia.enable;
   inherit (globals.dns) tld;
 in {
   "browser.toolbars.bookmarks.visibility" = "never";
   "identity.sync.tokenserver.uri" = "https://${fxsync_cfg.endpoint.target}.${tld}/1.0/sync/1.5";
+  "dom.webgpu.enabled" = gpu_enable;
 
   # firefox optimizations
   # these are optimized for speed at the detriment of some privacy

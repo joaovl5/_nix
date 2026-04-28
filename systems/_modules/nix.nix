@@ -24,6 +24,9 @@ in
               warn-dirty = false;
               builders-use-substitutes = true;
               auto-optimise-store = true;
+              # Prevent heavyweight local builds (Firefox/Rust LTO, CUDA) from exhausting RAM.
+              max-jobs = 1;
+              cores = 4;
               experimental-features = [
                 "nix-command"
                 "flakes"

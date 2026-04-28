@@ -5,7 +5,6 @@ let
     (import ./code)
     (import ./omp)
     (import ./hermes)
-    (import ./agent-browser)
   ];
 in
   combine_modules modules

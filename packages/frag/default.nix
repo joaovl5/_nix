@@ -48,7 +48,6 @@
   shared_skills = builtins.path {
     name = "frag-shared-skills";
     path = ../../users/_modules/ai/_prompts/skills;
-    filter = path: _type: (baseNameOf path) != "agent-browser";
   };
 
   shared_assets = pkgs.runCommand "frag-shared-assets" {} ''
@@ -83,7 +82,6 @@
 
 
     chmod -R u+w "$shared_root/.config/opencode/skill" 2>/dev/null || true
-    rm -rf "$shared_root/.config/opencode/skill/agent-browser"
   '';
 
   shared_assets_identity = builtins.substring 0 32 (builtins.baseNameOf (toString shared_assets));

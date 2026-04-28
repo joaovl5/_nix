@@ -3,18 +3,19 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
-from functools import lru_cache
-from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
 import tarfile
 import time
+from functools import lru_cache
+from pathlib import Path
+
 import pytest
 
-from frag.exceptions import DockerRuntimeError, LegacySchemaError
 from frag import profiles, shared_assets_contract
+from frag.exceptions import DockerRuntimeError, LegacySchemaError
 
 
 def _import_image_assets():
@@ -609,7 +610,6 @@ def test_packaged_shared_skill_bundles_exclude_agent_browser_skill() -> None:
 
     for skill_root in skill_roots:
         assert skill_root.is_dir()
-        assert not (skill_root / "agent-browser").exists()
 
     assert (
         shared_assets_root / ".config" / "opencode" / "skill" / "superpowers"
@@ -669,21 +669,6 @@ def test_packaged_terminal_shared_assets_cover_runtime_contract() -> None:
             assert asset_path.is_dir()
         else:
             assert asset_path.is_file()
-
-
-def test_packaged_runtime_rootfs_closure_excludes_agent_browser_package() -> None:
-    if _NIX_BIN is None:
-        pytest.skip("nix executable is required for packaging-contract tests")
-
-    runtime_rootfs = _build_frag_runtime_rootfs()
-    closure_result = subprocess.run(
-        [_NIX_BIN, "path-info", "-r", str(runtime_rootfs)],
-        check=True,
-        text=True,
-        capture_output=True,
-    )
-
-    assert "agent-browser" not in closure_result.stdout
 
 
 def test_packaged_runtime_rootfs_exports_agent_home_target() -> None:

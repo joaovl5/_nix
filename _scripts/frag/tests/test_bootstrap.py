@@ -5,7 +5,6 @@ import os
 import shutil
 import stat
 from pathlib import Path
-import tomllib
 
 import pytest
 
@@ -103,7 +102,6 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
 
     code_config = state_profile / "config" / "code" / "config.toml"
     omp_config = state_profile / "config" / "omp" / "mcp.json"
-    assert not (state_profile / "config" / "agent-browser").exists()
 
     assert home.is_symlink()
     assert home.resolve() == (state_profile / "home").resolve()
@@ -134,75 +132,6 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     )
     assert (home / ".omp" / "agent" / "mcp.json").is_symlink()
     assert (home / ".omp" / "agent" / "mcp.json").resolve() == omp_config.resolve()
-    assert not (home / ".agent-browser").exists()
-
-
-def test_initialize_profile_environment_is_idempotent_preserves_mutable_home_state_and_prunes_stale_browser_state(
-    tmp_path: Path,
-) -> None:
-    state_profile = tmp_path / "state" / "profile"
-    state_shared = tmp_path / "state" / "shared"
-    home = tmp_path / "home" / "agent"
-    _prepare_home_view(state_profile=state_profile, home=home)
-    (state_shared / "code" / "agents").mkdir(parents=True)
-
-    metadata = {
-        "profile_name": "demo",
-        "profile_image": "python:3.14",
-        "schema_version": "2",
-        "workspace_root": "/workspace/demo",
-        "image_ref": "loaded:image",
-        "shared_assets_identity": "shared-assets-123",
-    }
-
-    bootstrap.initialize_profile_environment(
-        state_profile=state_profile,
-        state_shared=state_shared,
-        home=home,
-        metadata=metadata,
-    )
-
-    profile_json = state_profile / "meta" / "profile.json"
-    profile_json.chmod(0o644)
-    (state_profile / "config").chmod(0o755)
-    code_config = state_profile / "config" / "code" / "config.toml"
-    code_config.write_text('approval_policy = "never"\n')
-    code_config.chmod(0o600)
-    omp_config = state_profile / "config" / "omp" / "mcp.json"
-    omp_config.write_text(
-        json.dumps({"mcpServers": {"custom": {"command": "custom"}}}) + "\n"
-    )
-    omp_config.chmod(0o600)
-    persisted_file = state_profile / "home" / ".local" / "state.txt"
-    persisted_file.parent.mkdir(parents=True, exist_ok=True)
-    persisted_file.write_text("persist me\n")
-    stale_profile_browser_state = state_profile / "config" / "agent-browser"
-    stale_profile_browser_state.mkdir(parents=True)
-    (stale_profile_browser_state / "session.json").write_text("{}\n")
-    stale_home_browser_state = state_profile / "home" / ".agent-browser"
-    stale_home_browser_state.mkdir(parents=True)
-    (stale_home_browser_state / "session.json").write_text("{}\n")
-
-    bootstrap.initialize_profile_environment(
-        state_profile=state_profile,
-        state_shared=state_shared,
-        home=home,
-        metadata=metadata,
-    )
-
-    assert _mode(profile_json) == 0o600
-    assert _mode(state_profile / "config") == 0o700
-    assert tomllib.loads(code_config.read_text()) == {
-        "approval_policy": "never",
-    }
-    assert json.loads(omp_config.read_text()) == {
-        "mcpServers": {"custom": {"command": "custom"}},
-    }
-    assert not stale_profile_browser_state.exists()
-    assert not stale_home_browser_state.exists()
-    assert persisted_file.read_text() == "persist me\n"
-    assert (home / ".cache").is_symlink()
-    assert (home / ".cache").readlink() == bootstrap._EPHEMERAL_CACHE_HOME
 
 
 def test_main_initializes_environment_clears_stale_status_and_execs_keepalive(

@@ -108,6 +108,11 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    whisper-overlay = {
+      ## whisper overlay thing (forked)
+      url = "git+https://github.com/joaovl5/whisper-overlay?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## rust nightly support
     fenix = {
       url = "git+https://github.com/nix-community/fenix?shallow=1";

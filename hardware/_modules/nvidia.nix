@@ -8,6 +8,7 @@
 in
   o.module "nvidia" (with o; {
     enable = toggle "Enable nvidia settings" true;
+    cuda_cap = opt "Cuda capability setting" t.str "8.6";
   }) {} (
     opts:
       o.when opts.enable {
@@ -22,6 +23,8 @@ in
             nvidiaSettings = true;
           };
         };
+        nixpkgs.config.cudaSupport = true;
+        nixpkgs.config.cudaCapabilities = [opts.cuda_cap];
         services.xserver.videoDrivers = ["nvidia"];
         environment.systemPackages = [pkgs.libnvidia-container];
         virtualisation.docker.rootless = {

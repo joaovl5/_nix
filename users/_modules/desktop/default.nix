@@ -6,6 +6,7 @@ let
     (import ./gnome)
     (import ./anyrun)
     (import ./hexecute)
+    (import ./whisper-overlay)
     (import ./hyprland)
     (import ./gtk)
     (import ./xdg-portals.nix)

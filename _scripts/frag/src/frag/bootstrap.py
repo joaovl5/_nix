@@ -159,14 +159,6 @@ def _remove_path_if_present(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def _prune_stale_browser_state(*, state_profile: Path, persistent_home: Path) -> None:
-    for stale_path in (
-        state_profile / "config" / "agent-browser",
-        persistent_home / ".agent-browser",
-    ):
-        _remove_path_if_present(stale_path)
-
-
 def _setpriv_group_option(supplementary_gids: tuple[int, ...]) -> str:
     if not supplementary_gids:
         return "--clear-groups"
@@ -295,10 +287,6 @@ def initialize_profile_environment(
 
     persistent_home = _persistent_home_root(state_profile)
     _ensure_home_alignment(home=home, persistent_home=persistent_home)
-    _prune_stale_browser_state(
-        state_profile=state_profile,
-        persistent_home=persistent_home,
-    )
     _ensure_ephemeral_cache(persistent_home)
     for destination_relative, mapping_kind, source_relative in _home_view_mappings():
         root = state_profile if mapping_kind == MappingKind.PROFILE else state_shared
