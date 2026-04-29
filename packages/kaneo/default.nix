@@ -21,7 +21,7 @@ in {
     inherit pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-PqiRikHsduJYtrqx9BYLV+5PhBzyvTZRy6ySvjqhbY8=";
+    hash = "sha256-0Actg/BuY94iXFgWHroYvsbT6C6/vZQkNqZu+OqL/pw=";
   };
 
   nativeBuildInputs = [
@@ -58,6 +58,7 @@ in {
       "${runtime_root}/apps/web" \
       "${runtime_root}/packages/email" \
       "${runtime_root}/packages/libs" \
+      "${runtime_root}/packages/mcp" \
       "${runtime_root}/packages/typescript-config"
 
     cp -a package.json pnpm-lock.yaml pnpm-workspace.yaml "${runtime_root}/"
@@ -72,6 +73,7 @@ in {
     cp -a packages/email/node_modules "${runtime_root}/packages/email/"
     cp -a packages/email/dist "${runtime_root}/packages/email/"
     cp -a packages/libs/package.json "${runtime_root}/packages/libs/"
+    cp -a packages/mcp/package.json "${runtime_root}/packages/mcp/"
     cp -a packages/typescript-config/package.json "${runtime_root}/packages/typescript-config/"
     cp -a apps/web/dist/. "$out/share/kaneo/web/"
     cp apps/web/nginx.conf "$out/share/kaneo/nginx.conf"
