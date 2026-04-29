@@ -143,6 +143,11 @@
       flake = false;
     };
 
+    hister = {
+      url = "github:asciimoo/hister";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # atticd nix cache server thingy
     atticd = {
       url = "git+https://github.com/zhaofengli/attic?shallow=1";

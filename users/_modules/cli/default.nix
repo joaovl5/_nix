@@ -11,6 +11,7 @@ let
     (import ./lazygit.nix)
     (import ./tmux)
     (import ./zellij)
+    (import ./hister.nix)
   ];
 in
   combine_modules modules

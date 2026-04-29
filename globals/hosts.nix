@@ -50,6 +50,10 @@ in rec {
           enable = true;
         };
 
+        "unit.hister" = {
+          enable = true;
+        };
+
         "unit.traefik" = {
           enable = true;
         };
