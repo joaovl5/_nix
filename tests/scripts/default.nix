@@ -12,5 +12,6 @@ python_pkgs.buildPythonPackage {
     "my_nix_tests.vm_bundle_contract"
     "my_nix_tests.backup_local"
     "my_nix_tests.backup_promotion"
+    "my_nix_tests.wireguard_tunnels"
   ];
 }
