@@ -22,6 +22,9 @@
     chmod 0444 "$out"/*.public
   '';
 in
+  # Three-node topology: relay publishes the host-side WireGuard endpoint, isolated runs both
+  # host and namespace peers under test, and probe provides observer/dns/leak fixtures on the
+  # shared VLAN. Keep node roles obvious here because the Python driver reasons about them by name.
   mylib.tests.mk_test {
     name = "wireguard_tunnels";
     python_module_name = "wireguard_tunnels";

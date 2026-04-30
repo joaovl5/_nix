@@ -19,6 +19,16 @@ WG_HOST_UNIT = "wireguard-wg-host.service"
 WG_NAMESPACE_UNIT = "wg.service"
 WG_INTERFACE = "wg0"
 WG_HOST_INTERFACE = "wg-host"
+FAILED_WG_NAMESPACE = "wgfail"
+FAILED_WG_UNIT = f"{FAILED_WG_NAMESPACE}.service"
+FAILED_WG_INTERFACE = "wgfail0"
+FAILED_WG_HOST_VETH = "nnh-wgfail"
+FAILED_WG_NAMESPACE_VETH = "nnp-wgfail"
+FAILED_WG_NAT_CHAIN = "MYNS-wgfail-NAT"
+FAILED_WG_FORWARD_CHAIN = "MYNS-wgfail-FWD"
+FAILED_WG_DNS_CHAIN = "MYNS-wgfail-DNS"
+FAILED_WG_VPN_CHAIN = "MYNS-wgfail-VPN"
+
 
 RELAY_SHARED_V4 = "192.0.2.1"
 RELAY_SHARED_V6 = "fd00:1::1"
@@ -64,6 +74,7 @@ HTTP_TIMEOUT = 4
 NETWORK_TIMEOUT = 4
 
 # Fixture service and log names under the reviewed /run/wg-test token-log contract.
+# Restart and recovery assertions depend on these names matching the Nix fixtures exactly.
 PLAIN_SOURCE_SERVICES = {
     "ipv4": ("plain-demo.service", f"{LOG_ROOT}/plain-demo-source-ip"),
     "ipv6": ("plain-demo-v6.service", f"{LOG_ROOT}/plain-demo-source-ip-v6"),
@@ -77,6 +88,8 @@ REMOTE_SOURCE_OBSERVERS = {
     "ipv6": (PROBE_REMOTE_V6, "6", f"{LOG_ROOT}/observer-remote-v6.log", "remote-v6"),
 }
 
+# Keep this list synchronized with the toy listener units declared in relay.nix and isolated.nix;
+# recovery helpers restart and clear them by these exact systemd names.
 TOY_LISTENER_UNITS = [
     "wg-demo.service",
     "wg-demo-v6.service",
@@ -281,6 +294,7 @@ def _python_network_command(
     port: int,
     token: str,
     expect_reply: bool,
+    source_address: str | None = None,
 ) -> str:
     socket_type = "SOCK_STREAM" if protocol == "tcp" else "SOCK_DGRAM"
     script_lines = [
@@ -290,6 +304,9 @@ def _python_network_command(
         f"sock_type = socket.{socket_type}",
         "sock = socket.socket(family, sock_type)",
         f"sock.settimeout({NETWORK_TIMEOUT})",
+        f"source_address = {source_address!r}",
+        "if source_address is not None:",
+        "    sock.bind((source_address, 0))",
         f"address = {address!r}",
         f"port = {port}",
         f"payload = {(token + chr(10))!r}.encode('utf-8')",
@@ -328,6 +345,7 @@ def _tcp_roundtrip(
     family: Family,
     namespace: str | None = None,
     expect_reply: bool = True,
+    source_address: str | None = None,
 ) -> str:
     return _succeed(
         machine,
@@ -339,6 +357,7 @@ def _tcp_roundtrip(
             port=port,
             token=token,
             expect_reply=expect_reply,
+            source_address=source_address,
         ),
         f"TCP exchange failed for {address}:{port} on IPv{family}",
     )
@@ -353,6 +372,7 @@ def _udp_roundtrip(
     family: Family,
     namespace: str | None = None,
     expect_reply: bool = True,
+    source_address: str | None = None,
 ) -> str:
     return _succeed(
         machine,
@@ -364,6 +384,7 @@ def _udp_roundtrip(
             port=port,
             token=token,
             expect_reply=expect_reply,
+            source_address=source_address,
         ),
         f"UDP exchange failed for {address}:{port} on IPv{family}",
     )
@@ -435,37 +456,6 @@ def _assert_denied_listener_preflight(
     )
 
 
-def _assert_one_way_udp_listener_limitation(
-    *,
-    machine: "Machine",
-    log_path: str,
-    control_command: str,
-    blocked_command: str,
-    control_token: str,
-    blocked_token: str,
-    message: str,
-    blocked_machine: "Machine" | None = None,
-) -> None:
-    blocked_on = machine if blocked_machine is None else blocked_machine
-    _clear_log(machine, log_path)
-    _succeed(machine, control_command, f"{message}: control preflight failed")
-    _assert_log_has_token(
-        machine, log_path, control_token, f"{message}: control token missing"
-    )
-    _clear_log(machine, log_path)
-    _fail(
-        blocked_on,
-        blocked_command,
-        f"{message}: blocked UDP command must fail despite one-way delivery",
-    )
-    _assert_log_has_token(
-        machine,
-        log_path,
-        blocked_token,
-        f"{message}: blocked UDP token missing despite expected one-way delivery",
-    )
-
-
 def _dig_query(machine: "Machine", server: str, token: str, *, family: Family) -> str:
     query_name = f"{token}{DNS_SUFFIX}"
     dig_family = "-4" if family == "4" else "-6"
@@ -511,6 +501,143 @@ def _assert_service_inactive(machine: "Machine", service: str, message: str) -> 
     states = [line.strip() for line in output.splitlines() if line.strip()]
     assert states and states[0] != "active", (
         f"{message}: {service} is unexpectedly active ({states})"
+    )
+
+
+def _assert_service_failed(machine: "Machine", service: str, message: str) -> None:
+    output = _succeed(
+        machine,
+        f"systemctl show {_q(service)} --property=ActiveState,Result --value --no-pager",
+        f"Failed to inspect {service}",
+    )
+    states = [line.strip() for line in output.splitlines() if line.strip()]
+    assert len(states) >= 2 and states[0] == "failed" and states[1] == "exit-code", (
+        f"{message}: {service} did not fail with exit-code ({states})"
+    )
+
+
+def _assert_failed_wg_backend_state_absent(
+    isolated: "Machine", *, context: str
+) -> None:
+    _fail(
+        isolated,
+        f"test -e /run/netns/{FAILED_WG_NAMESPACE}",
+        f"{context}: stale /run/netns/{FAILED_WG_NAMESPACE} must be removed",
+    )
+    netns_lines = _succeed(
+        isolated, "ip netns list", "Failed to inspect network namespaces"
+    ).splitlines()
+    assert not any(
+        line.split() and line.split()[0] == FAILED_WG_NAMESPACE for line in netns_lines
+    ), (
+        f"{context}: stale namespace {FAILED_WG_NAMESPACE!r} remained registered in ip netns list"
+    )
+    for interface, description in [
+        (FAILED_WG_HOST_VETH, "host veth"),
+        (FAILED_WG_NAMESPACE_VETH, "namespace veth"),
+        (FAILED_WG_INTERFACE, "backend WireGuard interface"),
+    ]:
+        _fail(
+            isolated,
+            f"ip link show {_q(interface)}",
+            f"{context}: {description} {interface!r} must be absent",
+        )
+    for tool, family in [("iptables", "IPv4"), ("ip6tables", "IPv6")]:
+        _fail(
+            isolated,
+            f"{tool} -t nat -S {FAILED_WG_NAT_CHAIN}",
+            f"{context}: {family} host NAT chain {FAILED_WG_NAT_CHAIN} must be absent",
+        )
+        _fail(
+            isolated,
+            f"{tool} -t filter -S {FAILED_WG_FORWARD_CHAIN}",
+            f"{context}: {family} host forward chain {FAILED_WG_FORWARD_CHAIN} must be absent",
+        )
+        _fail(
+            isolated,
+            f"{tool} -t nat -S PREROUTING | grep -F -- '-j {FAILED_WG_NAT_CHAIN}'",
+            f"{context}: {family} PREROUTING jump into {FAILED_WG_NAT_CHAIN} must be absent",
+        )
+        _fail(
+            isolated,
+            f"{tool} -t nat -S OUTPUT | grep -F -- '-j {FAILED_WG_NAT_CHAIN}'",
+            f"{context}: {family} OUTPUT jump into {FAILED_WG_NAT_CHAIN} must be absent",
+        )
+        _fail(
+            isolated,
+            f"{tool} -t filter -S FORWARD | grep -F -- '-i {FAILED_WG_HOST_VETH} -j {FAILED_WG_FORWARD_CHAIN}'",
+            f"{context}: {family} FORWARD ingress jump for {FAILED_WG_HOST_VETH} must be absent",
+        )
+        _fail(
+            isolated,
+            f"{tool} -t filter -S FORWARD | grep -F -- '-o {FAILED_WG_HOST_VETH} -j {FAILED_WG_FORWARD_CHAIN}'",
+            f"{context}: {family} FORWARD egress jump for {FAILED_WG_HOST_VETH} must be absent",
+        )
+
+
+def _assert_failed_wg_backend_cleanup(isolated: "Machine") -> None:
+    _assert_service_failed(
+        isolated,
+        FAILED_WG_UNIT,
+        "Dedicated WireGuard backend cleanup fixture must fail before recovery config is installed",
+    )
+    _assert_failed_wg_backend_state_absent(
+        isolated,
+        context="WireGuard backend setup failure cleanup",
+    )
+
+    recovery_config = (
+        "install -d /run/wireguard && cat > /run/wireguard/wgfail.conf <<'EOF'\n"
+        "[Interface]\n"
+        "PrivateKey = APDovwpdFffE40Ksm3EZgWB6gChjKb4CZp1wWTfZcXU=\n"
+        "Address = 10.15.1.2/32, fd93:9701:1d01::2/128\n"
+        "DNS = 192.0.2.3, fd00:1::3\n\n"
+        "[Peer]\n"
+        "PublicKey = 0nFEgTPX3ixlV3FeF2R2NTvONDaJW2svQXhSRJEnJ24=\n"
+        "AllowedIPs = 0.0.0.0/0, ::/0\n"
+        "Endpoint = 192.0.2.1:51820\n"
+        "PersistentKeepalive = 25\n"
+        "EOF"
+    )
+    _succeed(
+        isolated,
+        recovery_config,
+        "Failed to install recovery WireGuard config for wgfail fixture",
+    )
+    _succeed(
+        isolated,
+        f"systemctl reset-failed {_q(FAILED_WG_UNIT)}",
+        "Failed to reset failed wgfail namespace service",
+    )
+    _succeed(
+        isolated,
+        f"systemctl start {_q(FAILED_WG_UNIT)}",
+        "Failed to restart wgfail namespace service after installing recovery config",
+    )
+    isolated.wait_for_unit(FAILED_WG_UNIT)
+    _succeed(
+        isolated,
+        f"ip netns exec {_q(FAILED_WG_NAMESPACE)} ip link show {_q(FAILED_WG_INTERFACE)}",
+        "Recovered wgfail namespace did not create its backend WireGuard interface",
+    )
+    _succeed(
+        isolated,
+        f"ip netns exec {_q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_DNS_CHAIN}",
+        "Recovered wgfail namespace did not recreate its DNS chain",
+    )
+    _succeed(
+        isolated,
+        f"ip netns exec {_q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_VPN_CHAIN}",
+        "Recovered wgfail namespace did not recreate its VPN input chain",
+    )
+    _succeed(
+        isolated,
+        f"systemctl stop {_q(FAILED_WG_UNIT)}",
+        "Failed to stop recovered wgfail namespace service",
+    )
+    _assert_failed_wg_backend_state_absent(
+        isolated,
+        context="WireGuard backend teardown after recovery",
     )
 
 
@@ -590,6 +717,8 @@ def _assert_no_duplicate_state(
         "    text = subprocess.check_output(command, shell=True, text=True)\n"
         "    seen = set()\n"
         "    for line in text.splitlines():\n"
+        "        if line.startswith('#'):\n"
+        "            continue\n"
         "        if not __import__('re').search(pattern, line):\n"
         "            continue\n"
         "        if line in seen:\n"
@@ -603,11 +732,11 @@ def _assert_no_duplicate_state(
 
 def _assert_startup_fail_closed(probe: "Machine", isolated: "Machine") -> None:
     isolated.wait_for_unit(WG_HOST_UNIT)
-    _assert_service_inactive(
-        isolated,
-        WG_NAMESPACE_UNIT,
-        "wg.service must fail closed while relay is initially unavailable",
-    )
+    # Creating a WireGuard interface does not require a completed handshake, so the
+    # namespace unit may be active before the relay is online. Fail-closed evidence
+    # comes from the confined source probes below: they must not fall back to the host
+    # network or reach remote observers while the relay is absent.
+    isolated.wait_for_unit(WG_NAMESPACE_UNIT)
     plain_v4_service, plain_v4_output = PLAIN_SOURCE_SERVICES["ipv4"]
     plain_v6_service, plain_v6_output = PLAIN_SOURCE_SERVICES["ipv6"]
     assert (
@@ -946,8 +1075,16 @@ def _assert_port_mappings(probe: "Machine", isolated: "Machine") -> None:
     both_udp4 = _token("portmap-both-udp4")
     both_udp6 = _token("portmap-both-udp6")
 
+    # Probe has separate primary and remote IPv6 addresses on the same interface. Bind direct
+    # port-mapping clients to the primary source so these positives do not accidentally use
+    # the remote leak-sentinel address, which must remain routed through the VPN path.
     assert tcp4 in _tcp_roundtrip(
-        probe, ISOLATED_SHARED_V4, PORTMAP_TCP_PORT, tcp4, family="4"
+        probe,
+        ISOLATED_SHARED_V4,
+        PORTMAP_TCP_PORT,
+        tcp4,
+        family="4",
+        source_address=PROBE_PRIMARY_V4,
     ), "Namespace TCP port mapping over IPv4 did not echo the expected token"
     _assert_log_has_entry(
         isolated,
@@ -956,33 +1093,28 @@ def _assert_port_mappings(probe: "Machine", isolated: "Machine") -> None:
         PROBE_PRIMARY_V4,
         "Namespace TCP IPv4 port-mapping listener log missing probe source",
     )
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=_log_path("namespace-port-map-tcp-v6"),
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="tcp",
-            family="6",
-            address=NAMESPACE_WG_V6,
-            port=NAMESPACE_PORTMAP_TCP_PORT,
-            token=f"{tcp6}-control",
-            expect_reply=True,
-        ),
-        blocked_command=_python_network_command(
-            protocol="tcp",
-            family="6",
-            address=ISOLATED_SHARED_V6,
-            port=PORTMAP_TCP_PORT,
-            token=tcp6,
-            expect_reply=True,
-        ),
-        control_token=f"{tcp6}-control",
-        blocked_token=tcp6,
-        message="IPv6 host-to-namespace TCP port mapping is a documented current VPN-Confinement bridge limitation",
-        blocked_machine=probe,
+    assert tcp6 in _tcp_roundtrip(
+        probe,
+        ISOLATED_SHARED_V6,
+        PORTMAP_TCP_PORT,
+        tcp6,
+        family="6",
+        source_address=PROBE_PRIMARY_V6,
+    ), "Namespace TCP port mapping over IPv6 did not echo the expected token"
+    _assert_log_has_entry(
+        isolated,
+        _log_path("namespace-port-map-tcp-v6"),
+        tcp6,
+        PROBE_PRIMARY_V6,
+        "Namespace TCP IPv6 port-mapping listener log missing probe source",
     )
     assert udp4 in _udp_roundtrip(
-        probe, ISOLATED_SHARED_V4, PORTMAP_UDP_PORT, udp4, family="4"
+        probe,
+        ISOLATED_SHARED_V4,
+        PORTMAP_UDP_PORT,
+        udp4,
+        family="4",
+        source_address=PROBE_PRIMARY_V4,
     ), "Namespace UDP port mapping over IPv4 did not echo the expected token"
     _assert_log_has_entry(
         isolated,
@@ -991,33 +1123,28 @@ def _assert_port_mappings(probe: "Machine", isolated: "Machine") -> None:
         PROBE_PRIMARY_V4,
         "Namespace UDP IPv4 port-mapping listener log missing probe source",
     )
-    _assert_one_way_udp_listener_limitation(
-        machine=isolated,
-        log_path=_log_path("namespace-port-map-udp-v6"),
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="udp",
-            family="6",
-            address=NAMESPACE_WG_V6,
-            port=NAMESPACE_PORTMAP_UDP_PORT,
-            token=f"{udp6}-control",
-            expect_reply=True,
-        ),
-        blocked_command=_python_network_command(
-            protocol="udp",
-            family="6",
-            address=ISOLATED_SHARED_V6,
-            port=PORTMAP_UDP_PORT,
-            token=udp6,
-            expect_reply=True,
-        ),
-        control_token=f"{udp6}-control",
-        blocked_token=udp6,
-        message="IPv6 host-to-namespace UDP port mapping is a documented current VPN-Confinement one-way delivery limitation",
-        blocked_machine=probe,
+    assert udp6 in _udp_roundtrip(
+        probe,
+        ISOLATED_SHARED_V6,
+        PORTMAP_UDP_PORT,
+        udp6,
+        family="6",
+        source_address=PROBE_PRIMARY_V6,
+    ), "Namespace UDP port mapping over IPv6 did not echo the expected token"
+    _assert_log_has_entry(
+        isolated,
+        _log_path("namespace-port-map-udp-v6"),
+        udp6,
+        PROBE_PRIMARY_V6,
+        "Namespace UDP IPv6 port-mapping listener log missing probe source",
     )
     assert both_tcp4 in _tcp_roundtrip(
-        probe, ISOLATED_SHARED_V4, PORTMAP_BOTH_PORT, both_tcp4, family="4"
+        probe,
+        ISOLATED_SHARED_V4,
+        PORTMAP_BOTH_PORT,
+        both_tcp4,
+        family="4",
+        source_address=PROBE_PRIMARY_V4,
     ), (
         "Namespace dual-protocol TCP port mapping over IPv4 did not echo the expected token"
     )
@@ -1028,33 +1155,30 @@ def _assert_port_mappings(probe: "Machine", isolated: "Machine") -> None:
         PROBE_PRIMARY_V4,
         "Namespace dual-protocol TCP IPv4 port-mapping listener log missing probe source",
     )
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=_log_path("namespace-port-map-both-tcp-v6"),
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="tcp",
-            family="6",
-            address=NAMESPACE_WG_V6,
-            port=NAMESPACE_PORTMAP_BOTH_PORT,
-            token=f"{both_tcp6}-control",
-            expect_reply=True,
-        ),
-        blocked_command=_python_network_command(
-            protocol="tcp",
-            family="6",
-            address=ISOLATED_SHARED_V6,
-            port=PORTMAP_BOTH_PORT,
-            token=both_tcp6,
-            expect_reply=True,
-        ),
-        control_token=f"{both_tcp6}-control",
-        blocked_token=both_tcp6,
-        message="IPv6 host-to-namespace both/TCP port mapping is a documented current VPN-Confinement bridge limitation",
-        blocked_machine=probe,
+    assert both_tcp6 in _tcp_roundtrip(
+        probe,
+        ISOLATED_SHARED_V6,
+        PORTMAP_BOTH_PORT,
+        both_tcp6,
+        family="6",
+        source_address=PROBE_PRIMARY_V6,
+    ), (
+        "Namespace dual-protocol TCP port mapping over IPv6 did not echo the expected token"
+    )
+    _assert_log_has_entry(
+        isolated,
+        _log_path("namespace-port-map-both-tcp-v6"),
+        both_tcp6,
+        PROBE_PRIMARY_V6,
+        "Namespace dual-protocol TCP IPv6 port-mapping listener log missing probe source",
     )
     assert both_udp4 in _udp_roundtrip(
-        probe, ISOLATED_SHARED_V4, PORTMAP_BOTH_PORT, both_udp4, family="4"
+        probe,
+        ISOLATED_SHARED_V4,
+        PORTMAP_BOTH_PORT,
+        both_udp4,
+        family="4",
+        source_address=PROBE_PRIMARY_V4,
     ), (
         "Namespace dual-protocol UDP port mapping over IPv4 did not echo the expected token"
     )
@@ -1065,154 +1189,190 @@ def _assert_port_mappings(probe: "Machine", isolated: "Machine") -> None:
         PROBE_PRIMARY_V4,
         "Namespace dual-protocol UDP IPv4 port-mapping listener log missing probe source",
     )
-    _assert_one_way_udp_listener_limitation(
-        machine=isolated,
-        log_path=_log_path("namespace-port-map-both-udp-v6"),
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="udp",
-            family="6",
-            address=NAMESPACE_WG_V6,
-            port=NAMESPACE_PORTMAP_BOTH_PORT,
-            token=f"{both_udp6}-control",
-            expect_reply=True,
-        ),
-        blocked_command=_python_network_command(
-            protocol="udp",
-            family="6",
-            address=ISOLATED_SHARED_V6,
-            port=PORTMAP_BOTH_PORT,
-            token=both_udp6,
-            expect_reply=True,
-        ),
-        control_token=f"{both_udp6}-control",
-        blocked_token=both_udp6,
-        message="IPv6 host-to-namespace both/UDP port mapping is a documented current VPN-Confinement one-way delivery limitation",
-        blocked_machine=probe,
+    assert both_udp6 in _udp_roundtrip(
+        probe,
+        ISOLATED_SHARED_V6,
+        PORTMAP_BOTH_PORT,
+        both_udp6,
+        family="6",
+        source_address=PROBE_PRIMARY_V6,
+    ), (
+        "Namespace dual-protocol UDP port mapping over IPv6 did not echo the expected token"
+    )
+    _assert_log_has_entry(
+        isolated,
+        _log_path("namespace-port-map-both-udp-v6"),
+        both_udp6,
+        PROBE_PRIMARY_V6,
+        "Namespace dual-protocol UDP IPv6 port-mapping listener log missing probe source",
     )
 
-    tcp_opposite_log = _log_path("namespace-port-map-tcp-opposite-v4")
-    udp_opposite_log = _log_path("namespace-port-map-udp-opposite-v4")
-    tcp_opposite_control = _token("portmap-opposite-udp-control")
-    tcp_opposite_blocked = _token("portmap-opposite-udp-blocked")
-    udp_opposite_control = _token("portmap-opposite-tcp-control")
-    udp_opposite_blocked = _token("portmap-opposite-tcp-blocked")
+    opposite_protocol_cases = [
+        (
+            "udp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            NAMESPACE_PORTMAP_TCP_PORT,
+            PORTMAP_TCP_PORT,
+            "namespace-port-map-tcp-opposite-v4",
+            "UDP packets must not traverse the TCP-only IPv4 host-to-namespace port mapping",
+        ),
+        (
+            "udp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            NAMESPACE_PORTMAP_TCP_PORT,
+            PORTMAP_TCP_PORT,
+            "namespace-port-map-tcp-opposite-v6",
+            "UDP packets must not traverse the TCP-only IPv6 host-to-namespace port mapping",
+        ),
+        (
+            "tcp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            NAMESPACE_PORTMAP_UDP_PORT,
+            PORTMAP_UDP_PORT,
+            "namespace-port-map-udp-opposite-v4",
+            "TCP connections must not traverse the UDP-only IPv4 host-to-namespace port mapping",
+        ),
+        (
+            "tcp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            NAMESPACE_PORTMAP_UDP_PORT,
+            PORTMAP_UDP_PORT,
+            "namespace-port-map-udp-opposite-v6",
+            "TCP connections must not traverse the UDP-only IPv6 host-to-namespace port mapping",
+        ),
+    ]
+    for (
+        mode,
+        family,
+        namespace_address,
+        shared_address,
+        namespace_port,
+        host_port,
+        log_name,
+        message,
+    ) in opposite_protocol_cases:
+        control = _token(f"portmap-opposite-{mode}-control-ipv{family}")
+        blocked = _token(f"portmap-opposite-{mode}-blocked-ipv{family}")
+        _assert_denied_listener_preflight(
+            machine=isolated,
+            log_path=_log_path(log_name),
+            control_command=_command_prefix(WG_NAMESPACE)
+            + _python_network_command(
+                protocol=mode,
+                family=cast(Family, family),
+                address=namespace_address,
+                port=namespace_port,
+                token=control,
+                expect_reply=True,
+            ),
+            blocked_command=_command_prefix(None)
+            + _python_network_command(
+                protocol=mode,
+                family=cast(Family, family),
+                address=shared_address,
+                port=host_port,
+                token=blocked,
+                expect_reply=True,
+            ),
+            control_token=control,
+            blocked_token=blocked,
+            message=message,
+            blocked_machine=probe,
+        )
 
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=tcp_opposite_log,
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="udp",
-            family="4",
-            address=NAMESPACE_WG_V4,
-            port=NAMESPACE_PORTMAP_TCP_PORT,
-            token=tcp_opposite_control,
-            expect_reply=True,
+    unmapped_cases = [
+        (
+            "tcp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            NAMESPACE_DENIED_TCP_PORT,
+            HOST_DENIED_TCP_PORT,
+            "namespace-unmapped-denied-tcp-v4",
+            "Unmapped TCP IPv4 host port must fail without leaking to the namespace listener",
         ),
-        blocked_command=_command_prefix(None)
-        + _python_network_command(
-            protocol="udp",
-            family="4",
-            address=ISOLATED_SHARED_V4,
-            port=PORTMAP_TCP_PORT,
-            token=tcp_opposite_blocked,
-            expect_reply=True,
+        (
+            "tcp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            NAMESPACE_DENIED_TCP_PORT,
+            HOST_DENIED_TCP_PORT,
+            "namespace-unmapped-denied-tcp-v6",
+            "Unmapped TCP IPv6 host port must fail without leaking to the namespace listener",
         ),
-        control_token=tcp_opposite_control,
-        blocked_token=tcp_opposite_blocked,
-        message="UDP packets must not traverse the TCP-only host-to-namespace port mapping",
-        blocked_machine=probe,
-    )
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=udp_opposite_log,
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="tcp",
-            family="4",
-            address=NAMESPACE_WG_V4,
-            port=NAMESPACE_PORTMAP_UDP_PORT,
-            token=udp_opposite_control,
-            expect_reply=True,
+        (
+            "udp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            NAMESPACE_DENIED_UDP_PORT,
+            HOST_DENIED_UDP_PORT,
+            "namespace-unmapped-denied-udp-v4",
+            "Unmapped UDP IPv4 host port must fail without leaking to the namespace listener",
         ),
-        blocked_command=_command_prefix(None)
-        + _python_network_command(
-            protocol="tcp",
-            family="4",
-            address=ISOLATED_SHARED_V4,
-            port=PORTMAP_UDP_PORT,
-            token=udp_opposite_blocked,
-            expect_reply=True,
+        (
+            "udp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            NAMESPACE_DENIED_UDP_PORT,
+            HOST_DENIED_UDP_PORT,
+            "namespace-unmapped-denied-udp-v6",
+            "Unmapped UDP IPv6 host port must fail without leaking to the namespace listener",
         ),
-        control_token=udp_opposite_control,
-        blocked_token=udp_opposite_blocked,
-        message="TCP connections must not traverse the UDP-only host-to-namespace port mapping",
-        blocked_machine=probe,
-    )
-
-    tcp_denied_log = _log_path("namespace-unmapped-denied-tcp-v4")
-    udp_denied_log = _log_path("namespace-unmapped-denied-udp-v4")
-    tcp_control = _token("portmap-denied-tcp-control")
-    tcp_blocked = _token("portmap-denied-tcp-blocked")
-    udp_control = _token("portmap-denied-udp-control")
-    udp_blocked = _token("portmap-denied-udp-blocked")
-
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=tcp_denied_log,
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="tcp",
-            family="4",
-            address=NAMESPACE_WG_V4,
-            port=NAMESPACE_DENIED_TCP_PORT,
-            token=tcp_control,
-            expect_reply=True,
-        ),
-        blocked_command=_command_prefix(None)
-        + _python_network_command(
-            protocol="tcp",
-            family="4",
-            address=ISOLATED_SHARED_V4,
-            port=HOST_DENIED_TCP_PORT,
-            token=tcp_blocked,
-            expect_reply=True,
-        ),
-        control_token=tcp_control,
-        blocked_token=tcp_blocked,
-        message="Unmapped TCP host port must fail without leaking to the namespace listener",
-        blocked_machine=probe,
-    )
-    _assert_denied_listener_preflight(
-        machine=isolated,
-        log_path=udp_denied_log,
-        control_command=_command_prefix(WG_NAMESPACE)
-        + _python_network_command(
-            protocol="udp",
-            family="4",
-            address=NAMESPACE_WG_V4,
-            port=NAMESPACE_DENIED_UDP_PORT,
-            token=udp_control,
-            expect_reply=True,
-        ),
-        blocked_command=_command_prefix(None)
-        + _python_network_command(
-            protocol="udp",
-            family="4",
-            address=ISOLATED_SHARED_V4,
-            port=HOST_DENIED_UDP_PORT,
-            token=udp_blocked,
-            expect_reply=True,
-        ),
-        control_token=udp_control,
-        blocked_token=udp_blocked,
-        message="Unmapped UDP host port must fail without leaking to the namespace listener",
-        blocked_machine=probe,
-    )
+    ]
+    for (
+        mode,
+        family,
+        namespace_address,
+        shared_address,
+        namespace_port,
+        host_port,
+        log_name,
+        message,
+    ) in unmapped_cases:
+        control = _token(f"portmap-denied-{mode}-control-ipv{family}")
+        blocked = _token(f"portmap-denied-{mode}-blocked-ipv{family}")
+        _assert_denied_listener_preflight(
+            machine=isolated,
+            log_path=_log_path(log_name),
+            control_command=_command_prefix(WG_NAMESPACE)
+            + _python_network_command(
+                protocol=mode,
+                family=cast(Family, family),
+                address=namespace_address,
+                port=namespace_port,
+                token=control,
+                expect_reply=True,
+            ),
+            blocked_command=_command_prefix(None)
+            + _python_network_command(
+                protocol=mode,
+                family=cast(Family, family),
+                address=shared_address,
+                port=host_port,
+                token=blocked,
+                expect_reply=True,
+            ),
+            control_token=control,
+            blocked_token=blocked,
+            message=message,
+            blocked_machine=probe,
+        )
 
 
-def _assert_open_vpn_ports(relay: "Machine", isolated: "Machine") -> None:
+def _assert_open_vpn_ports(
+    relay: "Machine", probe: "Machine", isolated: "Machine"
+) -> None:
     tcp4 = _token("open-vpn-tcp4")
     tcp6 = _token("open-vpn-tcp6")
     udp4 = _token("open-vpn-udp4")
@@ -1310,6 +1470,128 @@ def _assert_open_vpn_ports(relay: "Machine", isolated: "Machine") -> None:
         RELAY_WG_V6,
         "Open VPN dual-protocol UDP IPv6 listener log missing relay WireGuard source",
     )
+
+    shared_lan_denied_cases = [
+        (
+            "tcp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            OPEN_VPN_TCP_PORT,
+            "namespace-open-vpn-tcp-v4",
+            RELAY_WG_V4,
+        ),
+        (
+            "tcp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            OPEN_VPN_TCP_PORT,
+            "namespace-open-vpn-tcp-v6",
+            RELAY_WG_V6,
+        ),
+        (
+            "udp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            OPEN_VPN_UDP_PORT,
+            "namespace-open-vpn-udp-v4",
+            RELAY_WG_V4,
+        ),
+        (
+            "udp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            OPEN_VPN_UDP_PORT,
+            "namespace-open-vpn-udp-v6",
+            RELAY_WG_V6,
+        ),
+        (
+            "tcp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            OPEN_VPN_BOTH_PORT,
+            "namespace-open-vpn-both-tcp-v4",
+            RELAY_WG_V4,
+        ),
+        (
+            "tcp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            OPEN_VPN_BOTH_PORT,
+            "namespace-open-vpn-both-tcp-v6",
+            RELAY_WG_V6,
+        ),
+        (
+            "udp",
+            "4",
+            NAMESPACE_WG_V4,
+            ISOLATED_SHARED_V4,
+            OPEN_VPN_BOTH_PORT,
+            "namespace-open-vpn-both-udp-v4",
+            RELAY_WG_V4,
+        ),
+        (
+            "udp",
+            "6",
+            NAMESPACE_WG_V6,
+            ISOLATED_SHARED_V6,
+            OPEN_VPN_BOTH_PORT,
+            "namespace-open-vpn-both-udp-v6",
+            RELAY_WG_V6,
+        ),
+    ]
+    for (
+        mode,
+        family,
+        wg_address,
+        shared_address,
+        port,
+        log_name,
+        expected_relay_source,
+    ) in shared_lan_denied_cases:
+        log_path = _log_path(log_name)
+        control = _token(f"open-vpn-shared-control-{mode}-ipv{family}")
+        blocked = _token(f"open-vpn-shared-blocked-{mode}-ipv{family}")
+        _clear_log(isolated, log_path)
+        if mode == "tcp":
+            assert control in _tcp_roundtrip(
+                relay, wg_address, port, control, family=cast(Family, family)
+            )
+        else:
+            assert control in _udp_roundtrip(
+                relay, wg_address, port, control, family=cast(Family, family)
+            )
+        _assert_log_has_entry(
+            isolated,
+            log_path,
+            control,
+            expected_relay_source,
+            f"Open-VPN {mode}/IPv{family} shared-LAN negative preflight missing",
+        )
+        _clear_log(isolated, log_path)
+        _fail(
+            probe,
+            _python_network_command(
+                protocol=mode,
+                family=cast(Family, family),
+                address=shared_address,
+                port=port,
+                token=blocked,
+                expect_reply=True,
+            ),
+            f"Open-VPN {mode}/IPv{family} port must not be exposed on the shared host address",
+        )
+        _assert_log_lacks_token(
+            isolated,
+            log_path,
+            blocked,
+            f"Open-VPN {mode}/IPv{family} shared host-address attempt reached namespace",
+        )
 
     tcp_denied_log = _log_path("namespace-open-vpn-denied-tcp-v4")
     udp_denied_log = _log_path("namespace-open-vpn-denied-udp-v4")
@@ -1787,7 +2069,7 @@ def _assert_restart_idempotency(
     _assert_relay_baseline(probe, isolated)
     _assert_source_observers(isolated)
     _assert_port_mappings(probe, isolated)
-    _assert_open_vpn_ports(relay, isolated)
+    _assert_open_vpn_ports(relay, probe, isolated)
     _assert_dns(isolated, probe)
 
 
@@ -1797,13 +2079,19 @@ def run(driver_globals: dict[str, object]) -> None:
     isolated = cast("Machine", driver_globals["isolated"])
     probe = cast("Machine", driver_globals["probe"])
 
+    # Startup must fail closed while the relay peer and upstream path are absent.
     _start_machine(probe)
     _start_machine(isolated)
 
     probe.wait_for_unit("multi-user.target")
     isolated.wait_for_unit("multi-user.target")
+    # A dedicated direct backend fixture starts with a missing config so setup fails after the
+    # namespace core exists; cleanup must be immediate and complete before recovery is attempted.
+    _assert_failed_wg_backend_cleanup(isolated)
     _assert_startup_fail_closed(probe, isolated)
 
+    # Once the relay appears, recover the namespace in place and wait for the tunnel to become
+    # functionally usable again.
     _start_machine(relay)
     relay.wait_for_unit("multi-user.target")
     _succeed(
@@ -1818,14 +2106,28 @@ def run(driver_globals: dict[str, object]) -> None:
     )
     _wait_for_wg_recovery(relay, isolated, probe)
 
+    # Prove the relay is usable before checking finer routing details.
     _assert_relay_baseline(probe, isolated)
+    # Relay ingress must land on the published listeners behind the host-side peer.
     _assert_relay_ingress(probe, isolated)
+    # Separate route ownership and observed source addresses so host and namespace paths cannot
+    # silently collapse onto the same network behavior.
     _assert_route_separation(isolated)
     _assert_source_observers(isolated)
+    # Host-to-namespace mappings must work in both address families for TCP, UDP, and dual-protocol
+    # forwards, with exact probe-source evidence from the confined listeners.
     _assert_port_mappings(probe, isolated)
-    _assert_open_vpn_ports(relay, isolated)
+    # Open-VPN ports are separate from host port mappings: they should be reachable on the
+    # tunnel itself and remain closed everywhere else.
+    _assert_open_vpn_ports(relay, probe, isolated)
+    # DNS policy needs both positive controls and leak endpoints so allow/deny behavior is
+    # evidenced by replies and listener logs, not just command exit codes.
     _assert_dns(isolated, probe)
+    # A live relay outage must cut off the confined path without teaching services to escape back
+    # onto the host network.
     _assert_midflight_outage(relay, isolated, probe)
+    # Restarting the stack after recovery should be safe and repeatable; this guards the
+    # idempotency assumptions baked into the fixtures and helper routines.
     _assert_restart_idempotency(relay, isolated, probe)
 
 

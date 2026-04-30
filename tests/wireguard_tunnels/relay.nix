@@ -58,6 +58,9 @@ in {
     python3
   ];
 
+  # Relay is the stable ingress node: probe reaches forwarded ports on eth1, then the test
+  # proves that traffic emerges from the isolated host-side WireGuard peer rather than the
+  # confined namespace peer.
   my = {
     nix.hostname = "relay";
     nix.username = "tester";

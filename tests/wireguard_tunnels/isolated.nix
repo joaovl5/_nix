@@ -105,21 +105,14 @@ _: {
         serve_udp()
   '';
 
-  curl_capture = name: url: vpn:
-    {
-      serviceConfig.Type = "oneshot";
-      script = ''
-        set -euo pipefail
-        mkdir -p ${log_dir}
-        ${pkgs.curl}/bin/curl --fail --silent --show-error --max-time 5 ${lib.escapeShellArg url} > ${log_dir}/${name}
-      '';
-    }
-    // lib.optionalAttrs vpn {
-      vpnConfinement = {
-        enable = true;
-        vpnNamespace = "wg";
-      };
-    };
+  curl_capture = name: url: _vpn: {
+    serviceConfig.Type = "oneshot";
+    script = ''
+      set -euo pipefail
+      mkdir -p ${log_dir}
+      ${pkgs.curl}/bin/curl --fail --silent --show-error --max-time 5 ${lib.escapeShellArg url} > ${log_dir}/${name}
+    '';
+  };
 
   mk_http_service = {
     name,
@@ -127,35 +120,28 @@ _: {
     port,
     body,
     log_name,
-    vpn ? false,
     after ? [],
     pre_start ? null,
   }:
-    lib.nameValuePair name ({
-        wantedBy = ["multi-user.target"];
-        after = ["network-online.target"] ++ after;
-        wants = ["network-online.target"];
-        preStart =
-          if pre_start == null
-          then ''
-            mkdir -p ${log_dir}
-          ''
-          else ''
-            mkdir -p ${log_dir}
-            ${pre_start}
-          '';
-        serviceConfig = {
-          ExecStart = "${pkgs.python3}/bin/python3 ${listener_script} http --bind ${lib.escapeShellArg bind} --port ${toString port} --log ${lib.escapeShellArg "${log_dir}/${log_name}"} --body ${lib.escapeShellArg body}";
-          Restart = "always";
-          RestartSec = 1;
-        };
-      }
-      // lib.optionalAttrs vpn {
-        vpnConfinement = {
-          enable = true;
-          vpnNamespace = "wg";
-        };
-      });
+    lib.nameValuePair name {
+      wantedBy = ["multi-user.target"];
+      after = ["network-online.target"] ++ after;
+      wants = ["network-online.target"];
+      preStart =
+        if pre_start == null
+        then ''
+          mkdir -p ${log_dir}
+        ''
+        else ''
+          mkdir -p ${log_dir}
+          ${pre_start}
+        '';
+      serviceConfig = {
+        ExecStart = "${pkgs.python3}/bin/python3 ${listener_script} http --bind ${lib.escapeShellArg bind} --port ${toString port} --log ${lib.escapeShellArg "${log_dir}/${log_name}"} --body ${lib.escapeShellArg body}";
+        Restart = "always";
+        RestartSec = 1;
+      };
+    };
 
   mk_socket_service = {
     name,
@@ -167,26 +153,26 @@ _: {
     vpn ? false,
     after ? [],
   }:
-    lib.nameValuePair name ({
-        wantedBy = ["multi-user.target"];
-        after = ["network-online.target"] ++ after;
-        wants = ["network-online.target"];
-        preStart = ''
-          mkdir -p ${log_dir}
-        '';
-        serviceConfig = {
-          ExecStart = "${pkgs.python3}/bin/python3 ${listener_script} ${mode} --bind ${lib.escapeShellArg bind} --port ${toString port} --log ${lib.escapeShellArg "${log_dir}/${log_name}"} --body ${lib.escapeShellArg body}";
-          Restart = "always";
-          RestartSec = 1;
-        };
-      }
-      // lib.optionalAttrs vpn {
-        vpnConfinement = {
-          enable = true;
-          vpnNamespace = "wg";
-        };
-      });
+    lib.nameValuePair name {
+      description =
+        if vpn
+        then "WireGuard namespace socket fixture ${name}"
+        else "Host-network socket fixture ${name}";
+      wantedBy = ["multi-user.target"];
+      after = ["network-online.target"] ++ after;
+      wants = ["network-online.target"];
+      preStart = ''
+        mkdir -p ${log_dir}
+      '';
+      serviceConfig = {
+        ExecStart = "${pkgs.python3}/bin/python3 ${listener_script} ${mode} --bind ${lib.escapeShellArg bind} --port ${toString port} --log ${lib.escapeShellArg "${log_dir}/${log_name}"} --body ${lib.escapeShellArg body}";
+        Restart = "always";
+        RestartSec = 1;
+      };
+    };
 
+  # Host services bind the host-side WireGuard address so relay ingress and source-observer
+  # assertions can distinguish host-network behavior from namespace-confined behavior.
   host_services = builtins.listToAttrs [
     (mk_http_service {
       name = "wg-demo";
@@ -296,6 +282,9 @@ _: {
     })
   ];
 
+  # Namespace services are the confinement targets. Their unit names and log names are part of
+  # the Python driver's recovery/idempotency contract, so keep these lists synchronized when
+  # adding or renaming listeners.
   namespace_services = builtins.listToAttrs [
     (mk_socket_service {
       name = "ns-port-map-tcp-v4";
@@ -325,6 +314,15 @@ _: {
       after = ["wg.service"];
     })
     (mk_socket_service {
+      name = "ns-port-map-tcp-opposite-v6";
+      mode = "udp";
+      bind = "::";
+      port = 28080;
+      log_name = "namespace-port-map-tcp-opposite-v6.log";
+      vpn = true;
+      after = ["wg.service"];
+    })
+    (mk_socket_service {
       name = "ns-port-map-udp-v4";
       mode = "udp";
       bind = "0.0.0.0";
@@ -348,6 +346,15 @@ _: {
       bind = "::";
       port = 28082;
       log_name = "namespace-port-map-udp-v6.log";
+      vpn = true;
+      after = ["wg.service"];
+    })
+    (mk_socket_service {
+      name = "ns-port-map-udp-opposite-v6";
+      mode = "tcp";
+      bind = "::";
+      port = 28082;
+      log_name = "namespace-port-map-udp-opposite-v6.log";
       vpn = true;
       after = ["wg.service"];
     })
@@ -611,6 +618,31 @@ in {
     nix.hostname = "isolated";
     nix.username = "tester";
 
+    network_namespaces.wgfail = {
+      enable = true;
+      backend = {
+        type = "wireguard";
+        wireguard = {
+          config_file = "/run/wireguard/wgfail.conf";
+          interface_name = "wgfail0";
+        };
+      };
+      addresses = {
+        host_v4 = "10.15.1.5";
+        namespace_v4 = "10.15.1.1";
+        host_v6 = "fd93:9701:1d01::5";
+        namespace_v6 = "fd93:9701:1d01::1";
+      };
+      dns = {
+        servers = [probe_primary_ipv4 probe_primary_ipv6];
+        strict.enable = true;
+      };
+      accessible_from = [
+        "192.0.2.3/32"
+        "fd00:1::3/128"
+      ];
+    };
+
     "unit.wireguard" = {
       enable = true;
       relay.enable = false;
@@ -628,6 +660,9 @@ in {
           mask = "128";
         };
       };
+      # This node needs two peers on purpose: the host-side peer proves relay forwarding and
+      # source-address behavior outside confinement, while the namespace peer drives the
+      # fail-closed, DNS, and port-mapping assertions inside my.network_namespaces.
       extra_peers = [
         {
           publicKey = read_key "relay.public";
@@ -698,15 +733,20 @@ in {
             }
           ];
         };
+        # Keep this service list aligned with the Python driver's restart/recovery helpers and
+        # with the namespace listener/log declarations above; drift here makes fail-closed and
+        # idempotency assertions prove the wrong units.
         confined_services = [
           "confined-demo"
           "confined-demo-v6"
           "ns-port-map-tcp-v4"
           "ns-port-map-tcp-opposite-v4"
           "ns-port-map-tcp-v6"
+          "ns-port-map-tcp-opposite-v6"
           "ns-port-map-udp-v4"
           "ns-port-map-udp-opposite-v4"
           "ns-port-map-udp-v6"
+          "ns-port-map-udp-opposite-v6"
           "ns-port-map-both-tcp-v4"
           "ns-port-map-both-tcp-v6"
           "ns-port-map-both-udp-v4"

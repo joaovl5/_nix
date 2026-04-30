@@ -3,7 +3,6 @@
   lib,
   pkgs,
   config,
-  inputs,
   ...
 } @ args: let
   my = mylib.use config;
@@ -121,7 +120,7 @@ in
       port_mappings = opt "Port mappings host->namespace" (t.listOf PortMapping) [];
       open_vpn_ports = opt "Ports open through VPN" (t.listOf VPNPort) [];
     };
-  }) {imports = _: [inputs.vpnconfinement.nixosModules.default];} (opts: let
+  }) {imports = _: [../network_namespaces];} (opts: let
     protocols_for = protocol:
       if protocol == "both"
       then ["tcp" "udp"]
@@ -297,51 +296,7 @@ in
             };
           };
         }
-        (o.when opts.client.enable (let
-          ip_cmd = "${pkgs.iproute2}/bin/ip";
-          ipt = "${pkgs.iptables}/bin/iptables";
-          ip6t = "${pkgs.iptables}/bin/ip6tables";
-
-          strict_dns_post_start = pkgs.writeShellScript "wireguard-strict-dns-${opts.client.namespace}" ''
-            set -euo pipefail
-
-            ns=${lib.escapeShellArg opts.client.namespace}
-
-            netns_exec() {
-              ${ip_cmd} netns exec "$ns" "$@"
-            }
-
-            ensure_rule() {
-              local tool=$1
-              shift
-
-              if ! netns_exec "$tool" -C OUTPUT "$@"; then
-                netns_exec "$tool" -A OUTPUT "$@"
-              fi
-            }
-
-            ensure_rule ${ipt} -p tcp --dport 53 -j REJECT
-            ensure_rule ${ipt} -p tcp --dport 853 -j REJECT
-            ensure_rule ${ipt} -p udp --dport 853 -j REJECT
-            ensure_rule ${ip6t} -p tcp --dport 53 -j REJECT
-            ensure_rule ${ip6t} -p tcp --dport 853 -j REJECT
-            ensure_rule ${ip6t} -p udp --dport 853 -j REJECT
-            ${lib.concatMapStrings (
-                endpoint: let
-                  tool =
-                    if endpoint.family == "ipv4"
-                    then ipt
-                    else ip6t;
-                  inherit (endpoint) address;
-                  port = toString endpoint.port;
-                in ''
-                  ensure_rule ${tool} -p tcp -d ${address} --dport ${port} -j REJECT
-                  ensure_rule ${tool} -p udp -d ${address} --dport ${port} -j REJECT
-                ''
-              )
-              opts.client.strict_dns.block_doh_endpoints}
-          '';
-        in
+        (o.when opts.client.enable (
           o.merge [
             {
               sops.secrets = {
@@ -351,37 +306,33 @@ in
             {
               networking.firewall.checkReversePath = "loose";
 
-              vpnNamespaces.${opts.client.namespace} = {
+              my.network_namespaces.${opts.client.namespace} = {
                 enable = true;
-                wireguardConfigFile = "/run/wireguard/vpn.conf";
-                accessibleFrom = opts.client.accessible_from;
-                bridgeAddress = opts.client.bridge_address;
-                namespaceAddress = opts.client.namespace_address;
-                bridgeAddressIPv6 = opts.client.bridge_address_v6;
-                namespaceAddressIPv6 = opts.client.namespace_address_v6;
-                portMappings = opts.client.port_mappings;
-                openVPNPorts = opts.client.open_vpn_ports;
+                backend = {
+                  type = "wireguard";
+                  wireguard.config_file = "/run/wireguard/vpn.conf";
+                };
+                addresses = {
+                  host_v4 = opts.client.bridge_address;
+                  namespace_v4 = opts.client.namespace_address;
+                  host_v6 = opts.client.bridge_address_v6;
+                  namespace_v6 = opts.client.namespace_address_v6;
+                };
+                dns = {
+                  servers = dns_servers;
+                  strict = opts.client.strict_dns;
+                };
+                services = opts.client.confined_services;
+                inherit (opts.client) accessible_from;
+                inherit (opts.client) port_mappings;
+                inherit (opts.client) open_vpn_ports;
               };
 
               systemd.services.${opts.client.namespace}.serviceConfig.ExecStartPre = lib.mkBefore [
                 "+${wg_conf_gen}"
               ];
             }
-            (o.when opts.client.strict_dns.enable {
-              systemd.services.${opts.client.namespace}.serviceConfig.ExecStartPost = lib.mkAfter [
-                "+${strict_dns_post_start}"
-              ];
-            })
-            {
-              systemd.services = builtins.listToAttrs (map (svc: {
-                  name = svc;
-                  value.vpnConfinement = {
-                    enable = true;
-                    vpnNamespace = opts.client.namespace;
-                  };
-                })
-                opts.client.confined_services);
-            }
-          ]))
+          ]
+        ))
       ]
     ))

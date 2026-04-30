@@ -165,6 +165,9 @@ in {
 
   virtualisation.vlans = [1];
 
+  # Probe keeps two addresses per family on one NIC: the primary address is the approved shared
+  # VLAN fixture for positive controls, while the remote /32 and /128 model destinations that
+  # confined traffic must reach over WireGuard rather than directly on the LAN.
   networking.interfaces.eth1 = {
     useDHCP = false;
     ipv4.addresses = [
@@ -217,6 +220,8 @@ in {
     dnsutils
   ];
 
+  # These listeners are the observable external world for the suite: source observers on the
+  # approved addresses, plus DNS/DoT/DoH leak endpoints on the remote addresses.
   systemd.services = {
     probe-observer-primary-v4 = mk_observer_service "probe-observer-primary-v4" primary_ipv4 "observer-primary-v4.log";
     probe-observer-primary-v6 = mk_observer_service "probe-observer-primary-v6" primary_ipv6 "observer-primary-v6.log";
