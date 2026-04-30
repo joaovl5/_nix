@@ -320,3 +320,107 @@ M  users/_units/wireguard/default.nix
 - Probe from both outside and on the target host itself. The local `curl --resolve <host>:443:127.0.0.1 https://<host>` check was especially useful here because it separated Traefik config failure from DNS / relay / firewall confusion.
 - When a deploy changes only Traefik config on `tyrant`, redeploying `tyrant` alone is enough; there is no need to redeploy every host unless the changed module is actually consumed there.
 - If local `nix flake check --all-systems` in the current checkout complains about the relative `globals` path input, refresh it in that checkout with `nix flake update globals` before retrying the check.
+
+## Post-mortem: server DBus implementation switch inhibitor during Hister rollout
+
+### Symptom
+
+- `deploy --skip-checks --log-dir logs --debug-logs` built and copied all profiles, activated `lavpc`, then failed during forward activation of `temperance`.
+- The decisive first-activation message was:
+  - `There are changes to critical components of the system:`
+  - `dbus-implementation : dbus -> broker`
+  - `Pre-switch check 'switchInhibitors' failed`
+- Deploy then attempted rollback/revoke of already-confirmed `lavpc`; the revoke failed with `No such file or directory`. That was downstream rollback noise, not the root cause.
+- `tyrant` had not activated yet, so Hister was not present there from this failed attempt.
+
+### Root cause
+
+- This was a real NixOS switch inhibitor, not a deploy-tool bug and not a Hister service failure.
+- Current evaluated server configs wanted `services.dbus.implementation = "broker"`, while the live server generations were still running classic `dbus`.
+- Hister did not introduce the DBus change: the parent commit already evaluated `temperance` to `broker`, and the nixpkgs input revision had not changed in the Hister commit.
+- Desktop hosts already forced classic DBus in `systems/_bootstrap/desktop.nix`; server bootstrap had no matching pin, so server hosts followed the nixpkgs default.
+
+### Evidence commands
+
+```bash
+# New-generation intent
+nix eval --raw .#nixosConfigurations.temperance.config.services.dbus.implementation
+nix eval --raw .#nixosConfigurations.tyrant.config.services.dbus.implementation
+nix eval --raw .#nixosConfigurations.temperance.config.system.switch.inhibitors.dbus-implementation
+
+# Live host implementation evidence
+ssh -p 59222 temperance@89.167.107.74 'systemctl cat dbus.service --no-pager'
+ssh -p 59222 tyrant@192.168.15.13 'systemctl cat dbus.service --no-pager'
+
+# Separate first blocker from rollback aftermath
+ssh -p 59222 temperance@89.167.107.74 'systemctl --failed --no-pager'
+ssh -p 59222 tyrant@192.168.15.13 'systemctl show -p LoadState -p ActiveState hister.service hister-prepare-env.service'
+```
+
+### Fix used in this repo
+
+- User chose to avoid a boot/reboot migration for now.
+- Minimal code fix: pin server bootstrap to classic DBus, mirroring the desktop preset:
+
+```nix
+services.dbus = {
+  enable = true;
+  implementation = o.force "dbus";
+};
+```
+
+- This keeps live-switch deploys compatible with the current server generations.
+- Future `dbus-broker` migration should be handled deliberately as a boot/reboot migration, not as a normal live switch.
+- `NIXOS_NO_CHECK=1` is an explicit risk-acceptance escape hatch only; do not use it as the default fix.
+
+### Verification after fix
+
+- Targeted evals showed `lavpc`, `temperance`, and `tyrant` all evaluating to `dbus`.
+- `nix fmt`, staged `prek`, and `nix flake check --all-systems` passed.
+- `deploy --skip-checks --log-dir logs --debug-logs` then confirmed activation for `lavpc`, `temperance`, and `tyrant`.
+
+## Post-mortem: Hister initial 502 after successful deploy
+
+### Symptom
+
+- After successful deploy, `https://hister.trll.ing/` initially returned Traefik `HTTP 502 Bad Gateway`.
+- `hister.service` was already `active (running)`, which made this look like a reverse-proxy or service config issue.
+
+### Root cause / nuance
+
+- The first 502 was a readiness timing issue, not proof that Hister or Traefik config was wrong.
+- Hister had started as a systemd process, but had not yet bound `127.0.0.1:4433`.
+- With local directory indexing enabled for `/srv/shared`, Hister can spend several minutes on initial startup/indexing before logging `Starting webserver` and opening the socket.
+- In the observed deployment, systemd started `hister.service` at `14:09:14`, but Hister only logged `Starting webserver Address=127.0.0.1:4433` at `14:18:57`. After that, both direct upstream and public domain probes returned `HTTP 200`.
+
+### Evidence commands
+
+```bash
+# Public route from the client side
+curl -sS -I --max-time 20 https://hister.trll.ing/
+curl -sS -L --max-time 20 -w '\nhttp=%{http_code} remote=%{remote_ip} time=%{time_total}\n' https://hister.trll.ing/
+
+# Target-host upstream and socket
+ssh -p 59222 tyrant@192.168.15.13 'curl -sS -I --max-time 10 http://127.0.0.1:4433/ || true'
+ssh -p 59222 tyrant@192.168.15.13 'ss -ltnp | grep 4433 || true'
+
+# Service and startup timing
+ssh -p 59222 tyrant@192.168.15.13 'systemctl show -p LoadState -p ActiveState -p SubState -p Result -p ExecMainStatus -p MainPID hister.service hister-prepare-env.service traefik.service'
+ssh -p 59222 tyrant@192.168.15.13 'journalctl -u hister.service --since "30 minutes ago" --no-pager | grep -E "Started Hister|Starting webserver|Failed|WARN"'
+
+# Client wrapper connectivity
+hister list-urls
+```
+
+### Operational lessons
+
+- Do not patch upstream Hister code based only on an immediate post-deploy 502.
+- First determine which layer is failing:
+  - public route: `curl https://hister.trll.ing/`,
+  - Traefik-to-upstream: local `curl --resolve hister.trll.ing:443:127.0.0.1 https://hister.trll.ing/` on `tyrant`,
+  - upstream socket: `curl http://127.0.0.1:4433/` and `ss -ltnp | grep 4433`,
+  - service readiness: `journalctl -u hister.service`.
+- If `hister.service` is active but no socket is listening yet, wait for the `Starting webserver` log before concluding the domain is broken.
+- The current desktop CLI wrapper was verified to connect to the server: `hister list-urls` returned indexed `file:///srv/shared/...` entries.
+- A non-blocking warning was observed: Hister tries to create `tui.yaml` next to the Nix-store generated config and logs `read-only file system`. If this becomes worth polishing, prefer a wrapper/config layout that gives Hister a writable config path; do not patch upstream for this warning.
+- If future deploys require Hister to be immediately routable, solve that as a service readiness/wrapper/config problem, not by changing Hister's source without stronger evidence.
