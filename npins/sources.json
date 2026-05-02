@@ -1,0 +1,459 @@
+{
+  "pins": {
+    "all-systems": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@github.com/nix-systems/default.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+      "url": null,
+      "hash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768="
+    },
+    "anthropic-skills": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "anthropics",
+        "repo": "skills"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "5128e1865d670f5d6c9cef000e6dfc4e951fb5b9",
+      "url": "https://github.com/anthropics/skills/archive/5128e1865d670f5d6c9cef000e6dfc4e951fb5b9.tar.gz",
+      "hash": "sha256-xFsg66TCtKzSgRIW6Ab771FWEIhei3jPgfE4byMiB44="
+    },
+    "atticd": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "zhaofengli",
+        "repo": "attic"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "12cbeca141f46e1ade76728bce8adc447f2166c6",
+      "url": "https://github.com/zhaofengli/attic/archive/12cbeca141f46e1ade76728bce8adc447f2166c6.tar.gz",
+      "hash": "sha256-0nZlCCDC5PfndsQJXXtcyrtrfW49I3KadGMDlutzaGU="
+    },
+    "deploy-rs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "serokell",
+        "repo": "deploy-rs"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "77c906c0ba56aabdbc72041bf9111b565cdd6171",
+      "url": "https://github.com/serokell/deploy-rs/archive/77c906c0ba56aabdbc72041bf9111b565cdd6171.tar.gz",
+      "hash": "sha256-hwsYgDnby50JNVpTRYlF3UR/Rrpt01OrxVuryF40CFY="
+    },
+    "disko": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "disko"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "32f4236bfc141ae930b5ba2fb604f561fed5219d",
+      "url": "https://github.com/nix-community/disko/archive/32f4236bfc141ae930b5ba2fb604f561fed5219d.tar.gz",
+      "hash": "sha256-gC9Cp5ibBmGD5awCA9z7xy6MW6iJufhazTYJOiGlCUI="
+    },
+    "emacs-bleeding-edge": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "emacs-overlay"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "8f68ac1754dcde4d6ff249719091e77d710d3747",
+      "url": "https://github.com/nix-community/emacs-overlay/archive/8f68ac1754dcde4d6ff249719091e77d710d3747.tar.gz",
+      "hash": "sha256-GipVnXG4K6CoG+N06yyaPEpDnq+qRIUlU35rN6rGjQM="
+    },
+    "fenix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "fenix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "4d81601e0b73f20d81d066754ad0e7d1e7f75a06",
+      "url": "https://github.com/nix-community/fenix/archive/4d81601e0b73f20d81d066754ad0e7d1e7f75a06.tar.gz",
+      "hash": "sha256-thSyElkje577x/kAbP72nHlfiFc1a+tCudskLPHXe9s="
+    },
+    "fup": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "gytis-ivaskevicius",
+        "repo": "flake-utils-plus"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "afcb15b845e74ac5e998358709b2b5fe42a948d1",
+      "url": "https://github.com/gytis-ivaskevicius/flake-utils-plus/archive/afcb15b845e74ac5e998358709b2b5fe42a948d1.tar.gz",
+      "hash": "sha256-4WNeriUToshQ/L5J+dTSWC5OJIwT39SEP7V7oylndi8="
+    },
+    "hexecute": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "ThatOtherAndrew",
+        "repo": "Hexecute"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "2105ee3f80a748bd4e270e8092fc12be4be927b6",
+      "url": "https://github.com/ThatOtherAndrew/Hexecute/archive/2105ee3f80a748bd4e270e8092fc12be4be927b6.tar.gz",
+      "hash": "sha256-iXQzLgZYzzD6b82Oa1nLvQKvUHrdOWgJi3awhW5YWrk="
+    },
+    "hister": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "asciimoo",
+        "repo": "hister"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "e745952bdd3990d71d834301b735f110aba2963e",
+      "url": "https://github.com/asciimoo/hister/archive/e745952bdd3990d71d834301b735f110aba2963e.tar.gz",
+      "hash": "sha256-ggVnwMTUcPaXHiZBM1sbgPgEju2L0FpdrPobnTTTqQ4="
+    },
+    "hm": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "home-manager"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "9cb587ade2aa1b4a7257f0238d41072690b0ca4f",
+      "url": "https://github.com/nix-community/home-manager/archive/9cb587ade2aa1b4a7257f0238d41072690b0ca4f.tar.gz",
+      "hash": "sha256-egYNbRrkn+6SwTHinhdb6WUfzzdC3nXfCRqS321VylY="
+    },
+    "hyprland-plugins": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "hyprwm",
+        "repo": "hyprland-plugins"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "473804b3594dd829295484f1f479a560b8114f2d",
+      "url": "https://github.com/hyprwm/hyprland-plugins/archive/473804b3594dd829295484f1f479a560b8114f2d.tar.gz",
+      "hash": "sha256-iTtzJsp4hXp7/Y+2kVaosPPNBeUJbFiqQcZVRUtC+dM="
+    },
+    "kaneo-src": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "usekaneo",
+        "repo": "kaneo"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "340a930cd1b4b509ac54cb643f55bb479eef278a",
+      "url": "https://github.com/usekaneo/kaneo/archive/340a930cd1b4b509ac54cb643f55bb479eef278a.tar.gz",
+      "hash": "sha256-f0anh4TFKqQ5LFipF26IqhYBHO8jQ1WBJVOouGsMyrY="
+    },
+    "llm-agents": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "numtide",
+        "repo": "llm-agents.nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "a2cd1d9eda4a84d713153f718c8583e1a4c89983",
+      "url": "https://github.com/numtide/llm-agents.nix/archive/a2cd1d9eda4a84d713153f718c8583e1a4c89983.tar.gz",
+      "hash": "sha256-AmiRSWOXXJyB/rBRZZKwJWRfM5O+xGO4Pe8V+XFd6Kc="
+    },
+    "microvm": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "microvm-nix",
+        "repo": "microvm.nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "2f2f62fdfdca2750e3399f66bd03986ab967e5ca",
+      "url": "https://github.com/microvm-nix/microvm.nix/archive/2f2f62fdfdca2750e3399f66bd03986ab967e5ca.tar.gz",
+      "hash": "sha256-s4FDictJlPtY6Shd6scG5hgrDMiHth09+svtvTA5NLA="
+    },
+    "musnix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "musnix",
+        "repo": "musnix"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "739e2a1f94c87d5f4c8b880a12480185cf0d7620",
+      "url": "https://github.com/musnix/musnix/archive/739e2a1f94c87d5f4c8b880a12480185cf0d7620.tar.gz",
+      "hash": "sha256-COuJkFg669oalmEN3T61gD3gM9SfUsiGvDS9pCOphZY="
+    },
+    "mysecrets": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@github.com/joaovl5/__secrets.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "f0d78a4abd1a596f800709b4b22df4c520473480",
+      "url": null,
+      "hash": "sha256-BpI9N+CsiN4d4PmzS+o9Ac12F3Z+WOZixW/JnhzqrGY="
+    },
+    "niri": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "sodiboo",
+        "repo": "niri-flake"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "8dbf91d91d0e9be3aa0fe2a9fc364a6f7ad053a8",
+      "url": "https://github.com/sodiboo/niri-flake/archive/8dbf91d91d0e9be3aa0fe2a9fc364a6f7ad053a8.tar.gz",
+      "hash": "sha256-wAeDjnP9IZXb+S0cglXN9ITWF6HVFhruPaoyVLbShVI="
+    },
+    "nix-flatpak": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "gmodena",
+        "repo": "nix-flatpak"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.7.0",
+      "revision": "440818969ac2cbd77bfe025e884d0aa528991374",
+      "url": "https://api.github.com/repos/gmodena/nix-flatpak/tarball/refs/tags/v0.7.0",
+      "hash": "sha256-7ZCulYUD9RmJIDULTRkGLSW1faMpDlPKcbWJLYHoXcs="
+    },
+    "nixarr": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-media-server",
+        "repo": "nixarr"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "7eae4e19577017e1919a3a74f89b5ee52942f641",
+      "url": "https://github.com/nix-media-server/nixarr/archive/7eae4e19577017e1919a3a74f89b5ee52942f641.tar.gz",
+      "hash": "sha256-Oc40uwOEZaCArzpVSuYpMUr+I+MhiRXM2SS0TCu9ars="
+    },
+    "nixcord": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "FlameFlag",
+        "repo": "nixcord"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "23ce6a970138ece42c51e1e4ec4b0d65790e753b",
+      "url": "https://github.com/FlameFlag/nixcord/archive/23ce6a970138ece42c51e1e4ec4b0d65790e753b.tar.gz",
+      "hash": "sha256-MyXIw2VeLbaRc7d48ONxMfFirZVVDzUmrMnnY0s/ZH0="
+    },
+    "nixos-dns": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Janik-Haag",
+        "repo": "nixos-dns"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "04b00ea7423c8dbe6e0ea78e4eb96f874a04c543",
+      "url": "https://github.com/Janik-Haag/nixos-dns/archive/04b00ea7423c8dbe6e0ea78e4eb96f874a04c543.tar.gz",
+      "hash": "sha256-aTsLqhW9XD0O37BTJo0u5f0gkk/x4KnZ9sho9hSE6hE="
+    },
+    "nur": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "NUR"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "c20a7acd0942576ff166ffe0c3105859ed1469a1",
+      "url": "https://github.com/nix-community/NUR/archive/c20a7acd0942576ff166ffe0c3105859ed1469a1.tar.gz",
+      "hash": "sha256-y7MglD53kW3a5qHJunyxJ1JQ37I7RgNP1ajA4LMdcy4="
+    },
+    "octodns-pihole-src": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "roosnic1",
+        "repo": "octodns-pihole"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "566a863bc67e18ced24906e7838fa6cff0f471be",
+      "url": "https://github.com/roosnic1/octodns-pihole/archive/566a863bc67e18ced24906e7838fa6cff0f471be.tar.gz",
+      "hash": "sha256-6pUanEEezAIfNtQB7ia0FThzMv99iI84oTtHOmcIxSE="
+    },
+    "optnix": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "https://git.sr.ht/~watersucks/optnix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "c320dc5494c0caaca9ee4341367618c06a957709",
+      "url": null,
+      "hash": "sha256-zx5O1RyRl6Fq+mvMh+JdS18aXR8644bcN9MKh2fN19M="
+    },
+    "pihole6api-src": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "sbarbett",
+        "repo": "pihole6api"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "e87c651ce0e084bc5f15c529d6103c524ee98d64",
+      "url": "https://github.com/sbarbett/pihole6api/archive/e87c651ce0e084bc5f15c529d6103c524ee98d64.tar.gz",
+      "hash": "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI="
+    },
+    "sops-nix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Mic92",
+        "repo": "sops-nix"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "8eaee5c45428b28b8c47a83e4c09dccec5f279b5",
+      "url": "https://github.com/Mic92/sops-nix/archive/8eaee5c45428b28b8c47a83e4c09dccec5f279b5.tar.gz",
+      "hash": "sha256-bc+ZZCmOTNq86/svGnw0tVpH7vJaLYvGLLKFYP08Q8E="
+    },
+    "stable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-25.11",
+      "submodules": false,
+      "revision": "755f5aa91337890c432639c60b6064bb7fe67769",
+      "url": "https://github.com/NixOS/nixpkgs/archive/755f5aa91337890c432639c60b6064bb7fe67769.tar.gz",
+      "hash": "sha256-ypxFOeDz+CqADEQNL72haqGjvZQdBR5Vc7pyx2JDttI="
+    },
+    "superpowers": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "obra",
+        "repo": "superpowers"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "e7a2d16476bf042e9add4699c9d018a90f86e4a6",
+      "url": "https://github.com/obra/superpowers/archive/e7a2d16476bf042e9add4699c9d018a90f86e4a6.tar.gz",
+      "hash": "sha256-8/M/S0BUYurZkFqe6LemVtBQnPSxBNfy1C7Q6f92hjE="
+    },
+    "treefmt-nix": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@github.com/numtide/treefmt-nix.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "790751ff7fd3801feeaf96d7dc416a8d581265ba",
+      "url": null,
+      "hash": "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0="
+    },
+    "unstable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable",
+      "submodules": false,
+      "revision": "15f4ee454b1dce334612fa6843b3e05cf546efab",
+      "url": "https://github.com/NixOS/nixpkgs/archive/15f4ee454b1dce334612fa6843b3e05cf546efab.tar.gz",
+      "hash": "sha256-Ad49moKWeXtKBJNy2ebiTQUEgdLyvGmTeykAQ9xM+Z4="
+    },
+    "unstable-small": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable-small",
+      "submodules": false,
+      "revision": "8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5",
+      "url": "https://github.com/NixOS/nixpkgs/archive/8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5.tar.gz",
+      "hash": "sha256-0u92BSnKt3simIZf6qDJ9kxu1eF3utdJdVM4uWItnTA="
+    },
+    "whisper-overlay": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "joaovl5",
+        "repo": "whisper-overlay"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "fbf0501b6a2dab1f9aa408f4b11624f58debb5da",
+      "url": "https://github.com/joaovl5/whisper-overlay/archive/fbf0501b6a2dab1f9aa408f4b11624f58debb5da.tar.gz",
+      "hash": "sha256-9Y3DiVQnlZr89bLb3AGgK0osaOyEGVUe69uo5FayXoA="
+    },
+    "with-inputs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "denful",
+        "repo": "with-inputs"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "b4cbe858b381c0ee0fe617498549f0562090ad04",
+      "url": "https://github.com/denful/with-inputs/archive/b4cbe858b381c0ee0fe617498549f0562090ad04.tar.gz",
+      "hash": "sha256-GgKZ4LyKDS9vd946UeArhYqBKw63LdH4JqfbfFf7qNw="
+    },
+    "zjstatus": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "dj95",
+        "repo": "zjstatus"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "f7f58bd3cb30352a8da85926636b8ec41770098a",
+      "url": "https://github.com/dj95/zjstatus/archive/f7f58bd3cb30352a8da85926636b8ec41770098a.tar.gz",
+      "hash": "sha256-sjMs63OaRhwCrl46v1A+K2EJdqnw63Pc7BMnHqiU790="
+    }
+  },
+  "version": 7
+}
