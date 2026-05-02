@@ -38,6 +38,19 @@
       "url": "https://github.com/zhaofengli/attic/archive/12cbeca141f46e1ade76728bce8adc447f2166c6.tar.gz",
       "hash": "sha256-0nZlCCDC5PfndsQJXXtcyrtrfW49I3KadGMDlutzaGU="
     },
+    "blueprint": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "numtide",
+        "repo": "blueprint"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "56131e8628f173d24a27f6d27c0215eff57e40dd",
+      "url": "https://github.com/numtide/blueprint/archive/56131e8628f173d24a27f6d27c0215eff57e40dd.tar.gz",
+      "hash": "sha256-Dt9t1TGRmJFc0xVYhttNBD6QsAgHOHCArqGa0AyjrJY="
+    },
     "deploy-rs": {
       "type": "Git",
       "repository": {
@@ -50,6 +63,19 @@
       "revision": "77c906c0ba56aabdbc72041bf9111b565cdd6171",
       "url": "https://github.com/serokell/deploy-rs/archive/77c906c0ba56aabdbc72041bf9111b565cdd6171.tar.gz",
       "hash": "sha256-hwsYgDnby50JNVpTRYlF3UR/Rrpt01OrxVuryF40CFY="
+    },
+    "devshell": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "numtide",
+        "repo": "devshell"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "255a2b1725a20d060f566e4755dbf571bbbb5f76",
+      "url": "https://github.com/numtide/devshell/archive/255a2b1725a20d060f566e4755dbf571bbbb5f76.tar.gz",
+      "hash": "sha256-460jc0+CZfyaO8+w8JNtlClB2n4ui1RbHfPTLkpwhU8="
     },
     "disko": {
       "type": "Git",
@@ -90,6 +116,32 @@
       "url": "https://github.com/nix-community/fenix/archive/4d81601e0b73f20d81d066754ad0e7d1e7f75a06.tar.gz",
       "hash": "sha256-thSyElkje577x/kAbP72nHlfiFc1a+tCudskLPHXe9s="
     },
+    "flake-parts": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "hercules-ci",
+        "repo": "flake-parts"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "5250617bffd85403b14dbf43c3870e7f255d2c16",
+      "url": "https://github.com/hercules-ci/flake-parts/archive/5250617bffd85403b14dbf43c3870e7f255d2c16.tar.gz",
+      "hash": "sha256-EPIFsulyon7Z1vLQq5Fk64GR8L7cQsT+IPhcsukVbgk="
+    },
+    "flake-utils": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "numtide",
+        "repo": "flake-utils"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+      "url": "https://github.com/numtide/flake-utils/archive/11707dc2f618dd54ca8739b309ec4fc024de578b.tar.gz",
+      "hash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI="
+    },
     "fup": {
       "type": "Git",
       "repository": {
@@ -102,6 +154,19 @@
       "revision": "afcb15b845e74ac5e998358709b2b5fe42a948d1",
       "url": "https://github.com/gytis-ivaskevicius/flake-utils-plus/archive/afcb15b845e74ac5e998358709b2b5fe42a948d1.tar.gz",
       "hash": "sha256-4WNeriUToshQ/L5J+dTSWC5OJIwT39SEP7V7oylndi8="
+    },
+    "gitignore": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "cb5e3fdca1de58ccbc3ef53de65bd372b48f567c",
+      "url": "https://github.com/hercules-ci/gitignore.nix/archive/cb5e3fdca1de58ccbc3ef53de65bd372b48f567c.tar.gz",
+      "hash": "sha256-XmjITeZNMTQXGhhww6ed/Wacy2KzD6svioyCX7pkUu4="
     },
     "hexecute": {
       "type": "Git",
@@ -338,6 +403,19 @@
       "url": "https://github.com/sbarbett/pihole6api/archive/e87c651ce0e084bc5f15c529d6103c524ee98d64.tar.gz",
       "hash": "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI="
     },
+    "pre-commit-hooks": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "cachix",
+        "repo": "pre-commit-hooks.nix"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "3cfd774b0a530725a077e17354fbdb87ea1c4aad",
+      "url": "https://github.com/cachix/pre-commit-hooks.nix/archive/3cfd774b0a530725a077e17354fbdb87ea1c4aad.tar.gz",
+      "hash": "sha256-PcRvlWayisPSjd0UcRQbhG8Oqw78AcPE6x872cPRHN8="
+    },
     "sops-nix": {
       "type": "Git",
       "repository": {
@@ -414,6 +492,19 @@
       "revision": "8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5",
       "url": "https://github.com/NixOS/nixpkgs/archive/8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5.tar.gz",
       "hash": "sha256-0u92BSnKt3simIZf6qDJ9kxu1eF3utdJdVM4uWItnTA="
+    },
+    "vpnconfinement": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Maroka-chan",
+        "repo": "VPN-Confinement"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "a6b2da727853886876fd1081d6bb2880752937f3",
+      "url": "https://github.com/Maroka-chan/VPN-Confinement/archive/a6b2da727853886876fd1081d6bb2880752937f3.tar.gz",
+      "hash": "sha256-FddhMxnc99KYOZ/S3YNqtDSoxisIhVtJ7L4s8XD2u0A="
     },
     "whisper-overlay": {
       "type": "Git",

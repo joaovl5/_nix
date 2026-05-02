@@ -1,10 +1,10 @@
 {
-  self,
-  deploy-rs,
-  ...
+  globals,
+  inputs,
 }: let
+  inherit (inputs) deploy-rs self;
   DEFAULT_SYSTEM = "x86_64-linux";
-  hosts = import ../../globals/hosts.nix;
+  inherit (globals) hosts;
 
   _d = {
     host,

@@ -1,13 +1,12 @@
 {
   mylib,
   config,
+  globals,
   inputs,
   pkgs,
   lib,
   ...
 }: let
-  globals = import inputs.globals;
-
   my = mylib.use config;
   o = my.options;
   s = my.secrets;

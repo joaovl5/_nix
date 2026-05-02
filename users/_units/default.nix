@@ -1,6 +1,5 @@
 # Module for registering unit options to be used universally across hosts
-{inputs, ...}: let
-  globals = import inputs.globals;
+{globals, ...}: let
   unit_global_cfg = globals.units;
 in {
   imports = [

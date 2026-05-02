@@ -2,6 +2,7 @@
   self,
   lib,
   pkgs,
+  globals,
   ...
 }: let
   tyrant = self.nixosConfigurations.tyrant.config;
@@ -13,7 +14,7 @@
   };
   collect = import ../../users/_units/backup/_collect.nix;
   render_local = import ../../users/_units/backup/_render_local.nix;
-  unit_defaults = import ../../globals/units.nix {inherit (pkgs) lib;};
+  unit_defaults = globals.units {inherit (pkgs) lib;};
   synthetic_item_secrets = backup_lib.render_item_secrets synthetic_items;
   synthetic_destination_secrets = backup_lib.render_destination_secrets tyrant.my."unit.backup".destinations;
   synthetic_items = [

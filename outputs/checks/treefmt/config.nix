@@ -1,11 +1,10 @@
 _: {
-  projectRootFile = "flake.nix";
+  projectRootFile = "npins/sources.json";
   programs = {
     # nix
     alejandra.enable = true;
     deadnix.enable = true;
     statix.enable = true;
-    flake-edit.enable = true;
     # fennel
     fnlfmt.enable = true;
     # python

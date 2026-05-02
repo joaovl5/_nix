@@ -1,9 +1,8 @@
 {
   nixos_config,
-  inputs,
+  globals,
   ...
 }: let
-  globals = import inputs.globals;
   fxsync_cfg = nixos_config.my."unit.fxsync";
   gpu_enable = nixos_config.my.nvidia.enable;
   inherit (globals.dns) tld;

@@ -1,13 +1,12 @@
 {
   mylib,
   config,
-  inputs,
+  globals,
   pkgs,
   lib,
   ...
 } @ args: let
   public = import ../../../../_modules/public.nix args;
-  globals = import inputs.globals;
 
   my = mylib.use config;
   o = my.options;

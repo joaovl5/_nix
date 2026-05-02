@@ -1,9 +1,5 @@
-{
-  self,
-  nixpkgs,
-  all-systems,
-  ...
-} @ args: let
+{inputs, ...}: let
+  inherit (inputs) all-systems nixpkgs self;
   DEFAULT_SYSTEM = "x86_64-linux";
 
   each_system = f:
@@ -12,7 +8,7 @@
     (system:
       f nixpkgs.legacyPackages.${system});
 
-  treefmt = (import ../checks/treefmt) args;
+  treefmt = import ../checks/treefmt inputs;
 in {
   apps =
     {

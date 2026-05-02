@@ -1,4 +1,4 @@
-inputs: let
+{inputs, ...}: let
   # OVERLAYS = with inputs; [
   #   nur.overlays.default
   #   deploy-rs.overlays.default

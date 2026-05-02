@@ -7,16 +7,17 @@ this is not meant to work by itself
   lib,
   config,
   mylib,
+  globals,
   ...
 } @ args: let
   public_data = import ../../_modules/public.nix args;
-  globals = import ../../globals/hosts.nix;
+  inherit (globals) hosts;
   ssh_authorized_keys = [
     public_data.ssh_key
   ];
   cfg = config.my.nix;
 
-  host_cfg = globals.${cfg.hostname} or {};
+  host_cfg = hosts.${cfg.hostname} or {};
   host_ssh_port = host_cfg.ssh_port or 22;
 
   my = mylib.use config;

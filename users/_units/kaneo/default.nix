@@ -1,14 +1,13 @@
 {
   mylib,
   config,
-  pkgs,
+  globals,
   inputs,
+  pkgs,
   lib,
   ...
 }: let
   inherit (lib) mkOption;
-
-  globals = import inputs.globals;
   local_packages = import ../../../packages {inherit pkgs inputs;};
 
   my = mylib.use config;

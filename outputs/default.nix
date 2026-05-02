@@ -1,4 +1,9 @@
-{self, ...} @ inputs: let
+{
+  globals,
+  inputs,
+}: let
+  inherit (inputs) self;
+  context = {inherit globals inputs;};
   SYSTEMS = ["x86_64-linux"];
 in
   {
@@ -10,24 +15,24 @@ in
   # ---------------
   # Channels
   # ---------------
-  // (import ./channels inputs)
+  // (import ./channels context)
   # ---------------
   # Hosts
   # ---------------
-  // (import ./hosts inputs)
+  // (import ./hosts context)
   # ---------------
   # Packages
   # ---------------
-  // (import ./packages inputs)
+  // (import ./packages context)
   # ---------------
   # Apps
   # ---------------
-  // (import ./apps inputs)
+  // (import ./apps context)
   # ---------------
   # Deployment
   # ---------------
-  // (import ./deploy inputs)
+  // (import ./deploy context)
   # ---------------
   # Checks
   # ---------------
-  // (import ./checks inputs)
+  // (import ./checks context)

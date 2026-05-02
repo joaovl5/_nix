@@ -1,16 +1,15 @@
 {
-  self,
-  deploy-rs,
-  nixpkgs,
-  ...
-} @ args: let
+  globals,
+  inputs,
+}: let
+  inherit (inputs) deploy-rs nixpkgs self;
   each_supported_system = f:
     nixpkgs.lib.genAttrs
     ["x86_64-linux"]
     (system:
       f nixpkgs.legacyPackages.${system});
 
-  treefmt = (import ./treefmt) args;
+  treefmt = import ./treefmt inputs;
 in {
   formatter = treefmt.format;
   checks = each_supported_system (
@@ -26,7 +25,7 @@ in {
           inherit (pkgs) lib;
         });
       backup_checks = import ./backups.nix {
-        inherit self pkgs;
+        inherit globals self pkgs;
         inherit (nixpkgs) lib;
       };
       formatting_checks = {

@@ -1,4 +1,7 @@
-inputs: let
+{
+  globals,
+  inputs,
+}: let
   DEFAULT_SYSTEM = "x86_64-linux";
   DEFAULT_CHANNEL = "unstable";
 
@@ -46,12 +49,13 @@ in {
   _utils.hosts.mk_extra_args = {pkgs, ...}: {
     mylib = import ../../_lib {
       inherit
+        globals
         inputs
         pkgs
         ;
       inherit (pkgs) lib;
     };
-    inherit inputs;
+    inherit globals inputs;
     system = DEFAULT_SYSTEM;
   };
 

@@ -5,8 +5,8 @@
     };
   };
 
-  hm = _: let
-    hosts = import ../../../globals/hosts.nix;
+  hm = {globals, ...}: let
+    inherit (globals) hosts;
     _mb = {
       hostname,
       ssh_user,

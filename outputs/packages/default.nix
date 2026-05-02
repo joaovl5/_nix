@@ -1,8 +1,12 @@
-{self, ...} @ inputs: let
+{
+  globals,
+  inputs,
+}: let
+  inherit (inputs) self;
   DEFAULT_SYSTEM = "x86_64-linux";
   pkgs = inputs.nixpkgs.legacyPackages.${DEFAULT_SYSTEM};
   local_packages = import ../../packages {inherit pkgs inputs;};
-  octodns = import ./octodns.nix inputs;
+  octodns = import ./octodns.nix {inherit globals inputs self;};
 in {
   packages.${DEFAULT_SYSTEM} =
     {

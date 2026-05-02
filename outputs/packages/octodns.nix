@@ -1,5 +1,8 @@
-{self, ...} @ inputs: let
-  globals = import inputs.globals;
+{
+  globals,
+  inputs,
+  self,
+}: let
   inherit (globals.dns) tld;
   generate = inputs.nixos-dns.utils.generate inputs.nixpkgs.legacyPackages.x86_64-linux;
 in {
