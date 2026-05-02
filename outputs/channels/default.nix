@@ -17,6 +17,7 @@ inputs: let
     (_: prev: {
       # zjstatus zellij plugin
       zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+      inherit (inputs.zjstatus.packages.${prev.system}) zjframes;
     })
   ];
   # list of packages to use from stable

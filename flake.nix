@@ -158,6 +158,7 @@
     nixarr = {
       url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
     # Other ---
     ## ai
