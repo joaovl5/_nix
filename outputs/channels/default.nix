@@ -13,7 +13,41 @@
     (_o niri {attr = "niri";})
     (_o fenix {})
     (_o emacs-bleeding-edge {})
+    (final: prev: {
+      # The default x86_64-linux Bun binary currently segfaults on this build
+      # host before printing --version. Use Bun's official baseline build so
+      # Bun-based packages can build locally instead of relying on substitutes.
+      bun =
+        if prev.stdenv.hostPlatform.system == "x86_64-linux"
+        then
+          prev.bun.overrideAttrs (_old: {
+            src = final.fetchurl {
+              url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-linux-x64-baseline.zip";
+              hash = "sha256-q+NG9jQUVHzfazW3pkmkkMcouT0AYiYVaSORioTA5Zs=";
+            };
+            sourceRoot = "bun-linux-x64-baseline";
+          })
+        else prev.bun;
+    })
     (_o llm-agents {})
+    (final: prev: {
+      llm-agents =
+        prev.llm-agents
+        // {
+          omp = prev.llm-agents.omp.overrideAttrs (old: {
+            preBunPatchPhase =
+              (old.preBunPatchPhase or "")
+              + ''
+                export PATH="${final.bun}/bin:$PATH"
+              '';
+            buildPhase =
+              builtins.replaceStrings
+              ["--target=\"bun-linux-x64-modern\""]
+              ["--target=\"bun-linux-x64-baseline\""]
+              old.buildPhase;
+          });
+        };
+    })
     (_: prev: {
       # zjstatus zellij plugin
       zjstatus = inputs.zjstatus.packages.${prev.system}.default;
