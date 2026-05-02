@@ -9,18 +9,23 @@
       f nixpkgs.legacyPackages.${system});
 
   treefmt = import ../checks/treefmt inputs;
+  format_apps = each_system (pkgs: {
+    format = {
+      type = "app";
+      program = "${treefmt.format_wrapper pkgs}/bin/treefmt";
+    };
+  });
 in {
   apps =
-    {
-      ${DEFAULT_SYSTEM}.vm = {
-        type = "app";
-        program = "${self.packages.${DEFAULT_SYSTEM}.vm_launcher}/bin/vm-launcher";
-      };
-    }
-    // (each_system (pkgs: {
-      format = {
-        type = "app";
-        program = "${treefmt.format_wrapper pkgs}/bin/treefmt";
-      };
-    }));
+    format_apps
+    // {
+      ${DEFAULT_SYSTEM} =
+        format_apps.${DEFAULT_SYSTEM}
+        // {
+          vm = {
+            type = "app";
+            program = "${self.packages.${DEFAULT_SYSTEM}.vm_launcher}/bin/vm-launcher";
+          };
+        };
+    };
 }
