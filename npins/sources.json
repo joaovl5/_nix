@@ -51,6 +51,35 @@
       "url": "https://github.com/numtide/blueprint/archive/56131e8628f173d24a27f6d27c0215eff57e40dd.tar.gz",
       "hash": "sha256-Dt9t1TGRmJFc0xVYhttNBD6QsAgHOHCArqGa0AyjrJY="
     },
+    "bun2nix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "bun2nix"
+      },
+      "branch": "staging-2.1.0",
+      "submodules": false,
+      "revision": "e659e1cc4b8e1b21d0aa85f1c481f9db61ecfa98",
+      "url": "https://github.com/nix-community/bun2nix/archive/e659e1cc4b8e1b21d0aa85f1c481f9db61ecfa98.tar.gz",
+      "hash": "sha256-1xW7cRZNsFNPQD+cE0fwnLVStnDth0HSoASEIFeT7uI="
+    },
+    "crane": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "ipetkov",
+        "repo": "crane"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.23.3",
+      "revision": "9db02d41c4107fab6914b772dc3a27f7adfa2279",
+      "url": "https://api.github.com/repos/ipetkov/crane/tarball/refs/tags/v0.23.3",
+      "hash": "sha256-K0i9GoNk2To1RQkW348EY4c7RYf3mD74hWlGSc/9sk0="
+    },
     "deploy-rs": {
       "type": "Git",
       "repository": {
@@ -415,6 +444,19 @@
       "revision": "3cfd774b0a530725a077e17354fbdb87ea1c4aad",
       "url": "https://github.com/cachix/pre-commit-hooks.nix/archive/3cfd774b0a530725a077e17354fbdb87ea1c4aad.tar.gz",
       "hash": "sha256-PcRvlWayisPSjd0UcRQbhG8Oqw78AcPE6x872cPRHN8="
+    },
+    "rust-overlay": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "oxalica",
+        "repo": "rust-overlay"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "4757db4358c77c1cbe878fa5990e6ea88d82f6b5",
+      "url": "https://github.com/oxalica/rust-overlay/archive/4757db4358c77c1cbe878fa5990e6ea88d82f6b5.tar.gz",
+      "hash": "sha256-sdCAzrPAaKu+yo7L2pWddy5PN6U9bO++WEWc1zcr7aQ="
     },
     "sops-nix": {
       "type": "Git",

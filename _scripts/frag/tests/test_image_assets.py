@@ -27,14 +27,15 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FRAG_BUILD_EXPR = r"""
 let
   flake = builtins.getFlake (toString ./.);
-  pkgs = import flake.inputs.nixpkgs {
+  outputs = flake.outputs;
+  pkgs = import outputs.inputs.nixpkgs {
     system = "x86_64-linux";
-    overlays = flake._channels.overlays;
+    overlays = outputs._channels.overlays;
     config.allowUnfree = true;
   };
   local = import ./packages {
     inherit pkgs;
-    inputs = flake.inputs;
+    inputs = outputs.inputs;
   };
 in
   local.frag
@@ -42,9 +43,10 @@ in
 FRAG_TERMINAL_ASSETS_EXPR = r"""
 let
   flake = builtins.getFlake (toString ./.);
-  pkgs = import flake.inputs.nixpkgs {
+  outputs = flake.outputs;
+  pkgs = import outputs.inputs.nixpkgs {
     system = "x86_64-linux";
-    overlays = flake._channels.overlays;
+    overlays = outputs._channels.overlays;
     config.allowUnfree = true;
   };
 in
@@ -56,14 +58,15 @@ in
 FRAG_RUNTIME_ROOTFS_EXPR = r"""
 let
   flake = builtins.getFlake (toString ./.);
-  pkgs = import flake.inputs.nixpkgs {
+  outputs = flake.outputs;
+  pkgs = import outputs.inputs.nixpkgs {
     system = "x86_64-linux";
-    overlays = flake._channels.overlays;
+    overlays = outputs._channels.overlays;
     config.allowUnfree = true;
   };
   local = import ./packages {
     inherit pkgs;
-    inputs = flake.inputs;
+    inputs = outputs.inputs;
   };
 in
   local.frag.passthru.images.main.artifact

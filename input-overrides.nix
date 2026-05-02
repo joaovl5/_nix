@@ -25,6 +25,12 @@ in {
     nixpkgs.follows = "nixpkgs";
     systems.follows = "all-systems";
   };
+  bun2nix.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    systems.follows = "all-systems";
+    flake-parts.follows = "flake-parts";
+    treefmt-nix.follows = "treefmt-nix";
+  };
   devshell.inputs.nixpkgs.follows = "nixpkgs";
   pre-commit-hooks.inputs = {
     nixpkgs.follows = "nixpkgs";
@@ -41,7 +47,13 @@ in {
   treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   optnix.inputs.nixpkgs.follows = "nixpkgs";
   musnix.inputs.nixpkgs.follows = "nixpkgs";
-  zjstatus.inputs.nixpkgs.follows = "nixpkgs";
+  rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+  zjstatus.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    crane.follows = "crane";
+    flake-utils.follows = "flake-utils";
+    rust-overlay.follows = "rust-overlay";
+  };
   nixcord.inputs.nixpkgs.follows = "nixpkgs";
   hyprland-plugins.inputs.nixpkgs.follows = "nixpkgs";
   niri.inputs = {
@@ -76,6 +88,7 @@ in {
     systems.follows = "all-systems";
     blueprint.follows = "blueprint";
     flake-parts.follows = "flake-parts";
+    bun2nix.follows = "bun2nix";
   };
 
   mysecrets = raw_source;
