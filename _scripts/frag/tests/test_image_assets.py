@@ -639,10 +639,16 @@ def test_packaged_terminal_shared_assets_cover_runtime_contract() -> None:
     assert (
         terminal_paths[".config/zellij/config.kdl"].read_text()
         == (
-            REPO_ROOT / "users" / "_modules" / "cli" / "zellij" / "config" / "base.kdl"
+            REPO_ROOT
+            / "users"
+            / "_modules"
+            / "cli"
+            / "zellij"
+            / "config"
+            / "config.kdl"
         ).read_text()
     )
-    assert "web_server_" not in terminal_paths[".config/zellij/config.kdl"].read_text()
+    assert (terminal_paths[".config/zellij/layouts"] / "default.kdl").is_file()
     assert terminal_paths[".config/zellij/layouts"].is_dir()
     assert terminal_paths[".local/share/zellij/plugins/zjstatus.wasm"].is_file()
     assert terminal_paths[".config/starship.toml"].is_file()
