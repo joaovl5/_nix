@@ -54,7 +54,11 @@ in {
     flake-utils.follows = "flake-utils";
     rust-overlay.follows = "rust-overlay";
   };
-  nixcord.inputs.nixpkgs.follows = "nixpkgs";
+  nixcord.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    nixpkgs-nixcord.follows = "stable";
+    flake-parts.follows = "flake-parts";
+  };
   hyprland-plugins.inputs.nixpkgs.follows = "nixpkgs";
   niri.inputs = {
     nixpkgs.follows = "nixpkgs";
