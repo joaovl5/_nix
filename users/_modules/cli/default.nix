@@ -6,7 +6,7 @@ let
     (import ./bat.nix)
     (import ./fzf.nix)
     (import ./ssh.nix)
-    (import ./fastfetch.nix)
+    (import ./fetchers)
     (import ./nix-tools.nix)
     (import ./lazygit.nix)
     (import ./tmux)
