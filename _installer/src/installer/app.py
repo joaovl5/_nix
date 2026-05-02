@@ -20,7 +20,7 @@ from installer.steps import (
     RunDisko,
     RunFacter,
     SendKeyfile,
-    UpdateFlakeLock,
+    UpdateSecretsPin,
 )
 
 app = App(
@@ -58,8 +58,8 @@ def main(
         secrets_disk_encryption_keyfile_location: Where to place the decrypted keyfile.
         use_sudo: Prepend sudo to rootful commands. Disable if root on target.
         port: SSH port to connect to.
-        auto_commit: Auto-commit facter and flake lock changes.
-        auto_push: Auto-push after committing (requires auto_commit).
+        auto_commit: Auto-commit facter and secrets pin changes.
+        auto_push: Auto-push after committing (required for the secrets pin update step).
     """
     flake_uri = RepositoryURI.parse(flake)
     secrets_uri = RepositoryURI.parse(secrets) if secrets else None
@@ -106,7 +106,7 @@ def main(
         RunFacter(),
         DownloadFacter(),
         CommitFacter(),
-        UpdateFlakeLock(),
+        UpdateSecretsPin(),
         CopyKeys(),
         GenerateInitrdSSHKeys(),
         InstallSystem(),

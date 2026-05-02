@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+import shlex
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Protocol
@@ -18,7 +19,6 @@ from coisas.command import (
     NIX_FLAGS,
     GitCommand,
     GitHelper,
-    NixCommand,
     RsyncCommand,
     ShellCommand,
     SSHConfig,
@@ -423,52 +423,51 @@ class CommitFacter:
 
 
 @define
-class UpdateFlakeLock:
-    name: str = "update_flake_lock"
-    description: str = "Updating flake lock with new secrets"
+class UpdateSecretsPin:
+    name: str = "update_secrets_pin"
+    description: str = (
+        "Updating secrets pin with npins; push secrets first, then rerun the pin update"
+    )
 
     def should_skip(self, context: InstallerContext) -> bool:
-        return not context.auto_commit
+        return not context.auto_commit or not context.auto_push
 
     def execute(self, context: InstallerContext, cli: CLI) -> None:
         flake_dir = context.flake_dir
         git = GitHelper(config=_GIT_INSTALLER_CONFIG, repo_path=flake_dir)
 
         cli.run_command(
-            command=NixCommand(
+            command=ShellCommand(
+                "sh",
                 [
-                    "flake",
-                    "update",
-                    context.flake_secrets_input_name,
-                    "--flake",
-                    flake_dir,
-                ]
+                    "-c",
+                    f"cd {shlex.quote(flake_dir)} && npins update {shlex.quote(context.flake_secrets_input_name)}",
+                ],
             ),
-            description="Updating secrets input in flake lock",
-            error_msg="Failed to update flake lock",
+            description="Updating secrets pin in npins sources",
+            error_msg="Failed to update npins sources",
         )
 
         msg = f"[my-installer][update-secrets][new-facter-cfg]:{context.flake_host}"
 
         cli.run_command(
-            command=git.add(["flake.lock"]),
-            description="Staging updated flake.lock",
-            error_msg="Failed to stage flake.lock",
+            command=git.add(["npins/sources.json"]),
+            description="Staging updated npins/sources.json",
+            error_msg="Failed to stage npins/sources.json",
         )
 
         cli.run_command(
             command=git.commit(msg),
-            description="Committing flake lock update",
-            error_msg="Failed to commit flake lock update",
+            description="Committing secrets pin update",
+            error_msg="Failed to commit secrets pin update",
             ok_codes=(0, 1),
         )
 
-        if context.auto_push:
-            cli.run_command(
-                command=git.push(),
-                description="Pushing flake repo",
-                error_msg="Failed to push flake repo",
-            )
+        cli.run_command(
+            command=git.push(),
+            description="Pushing flake repo",
+            error_msg="Failed to push flake repo",
+        )
 
 
 @define

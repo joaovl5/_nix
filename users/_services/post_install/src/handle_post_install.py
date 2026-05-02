@@ -16,8 +16,8 @@ from rich.panel import Panel  # pyright: ignore
 
 
 REPOS = [
-    ("git@github.com:joaovl5/_nix.git", "my_nix", "nix flake"),
-    ("git@github.com:joaovl5/_secrets.git", "my_secrets", "nix secrets"),
+    ("git@github.com:joaovl5/_nix.git", "my_nix", "nix config"),
+    ("git@github.com:joaovl5/__secrets.git", "my_secrets", "nix secrets"),
 ]
 
 console = Console()

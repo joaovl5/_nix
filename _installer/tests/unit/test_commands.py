@@ -28,7 +28,7 @@ class TestShellCommand:
 
 class TestNixCommand:
     def test_basic(self):
-        cmd = NixCommand(["flake", "update", "mysecrets", "--flake", "/tmp/flake"])
+        cmd = NixCommand(["eval", "nixpkgs#hello"])
         result = cmd.build()
         assert result[0] == "nix"
         assert "--option" in result
@@ -36,7 +36,7 @@ class TestNixCommand:
         assert "nix-command flakes" in result
         # user args appear after nix and flags
         nix_idx = result.index("nix")
-        for arg in ["flake", "update", "mysecrets", "--flake", "/tmp/flake"]:
+        for arg in ["eval", "nixpkgs#hello"]:
             assert arg in result[nix_idx + 1 :]
 
     def test_with_env(self):

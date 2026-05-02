@@ -26,10 +26,11 @@ from installer.steps import (
     DecryptKeyfile,
     GenerateInitrdSSHKeys,
     InstallSystem,
+    Installer,
     RunDisko,
     RunFacter,
     SendKeyfile,
-    UpdateFlakeLock,
+    UpdateSecretsPin,
     nix_build,
     nix_copy_command,
 )
@@ -252,10 +253,53 @@ class TestCommitFacter:
         assert cli.run_command.call_count == 2
 
 
-class TestUpdateFlakeLock:
+class TestUpdateSecretsPin:
     def test_skips_when_no_auto_commit(self):
         ctx = _make_context(auto_commit=False)
-        assert UpdateFlakeLock().should_skip(ctx) is True
+        assert UpdateSecretsPin().should_skip(ctx) is True
+
+    def test_skips_when_auto_push_disabled(self):
+        ctx = _make_context(auto_commit=True, auto_push=False)
+        assert UpdateSecretsPin().should_skip(ctx) is True
+
+    def test_updates_npins_and_stages_sources_json(self):
+        ctx = _make_context(auto_commit=True, auto_push=True)
+        cli = _mock_cli()
+        UpdateSecretsPin().execute(ctx, cli)
+
+        assert cli.run_command.call_count == 4
+
+        update_cmd = _get_command(cli, 0)
+        assert isinstance(update_cmd, ShellCommand)
+        assert update_cmd.build() == [
+            "sh",
+            "-c",
+            "cd /tmp/test/flake && npins update mysecrets",
+        ]
+
+        stage_cmd = _get_command(cli, 1)
+        assert stage_cmd.build() == [
+            "git",
+            "-c",
+            "user.name=nixos-installer",
+            "-c",
+            "user.email=nixos-installer@local",
+            "-C",
+            "/tmp/test/flake",
+            "add",
+            "npins/sources.json",
+        ]
+
+    def test_installer_skip_message_mentions_manual_push(self):
+        ctx = _make_context(auto_commit=True, auto_push=False)
+        cli = _mock_cli()
+        installer = Installer(context=ctx, cli=cli, steps=[UpdateSecretsPin()])
+
+        installer.run()
+
+        cli.info.assert_any_call(
+            "Skipping: Updating secrets pin with npins; push secrets first, then rerun the pin update"
+        )
 
 
 class TestGenerateInitrdSSHKeys:
