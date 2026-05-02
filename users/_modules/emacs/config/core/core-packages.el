@@ -15,6 +15,13 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(defun my/straight-update-all ()
+ (message "Starting update...")
+ (message "Pulling...")
+ (straight-pull-all)
+ (message "Rebuilding...")
+ (straight-rebuild-all)
+ (message "Update done!"))
 
 (defalias 'sup 'straight-use-package)
 
