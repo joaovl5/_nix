@@ -5,7 +5,6 @@
 nh os switch \
     --elevation-program run0 \
     --diff always \
-    --update \
     --refresh \
     --repair \
     --verbose \

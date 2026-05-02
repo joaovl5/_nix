@@ -22,8 +22,8 @@ in {
       default = "America/Sao_Paulo";
     };
 
-    flake_location = mkOption {
-      description = "Location where flake for system will reside";
+    repo_location = mkOption {
+      description = "Location where the repo or thin shim for system will reside";
       type = types.str;
       default = "${user_home}/my_nix";
     };

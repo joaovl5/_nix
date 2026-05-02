@@ -79,8 +79,8 @@ in {
       _: {
         imports = hm_modules ++ [../home/_modules/hybrid-links];
 
-        hybrid-links.flake_root = inputs.self.outPath;
-        hybrid-links.flake_path = cfg.flake_location;
+        hybrid-links.source_root = inputs.self.outPath;
+        hybrid-links.source_path = cfg.repo_location;
 
         home.stateVersion = "23.11";
 

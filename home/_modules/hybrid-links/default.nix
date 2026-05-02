@@ -26,21 +26,21 @@
   source_from = link:
     if
       link.hybrid
-      && cfg.flake_root != null
-      && cfg.flake_path != null
-      && cfg.flake_path != ""
-      && hasPrefix "/" cfg.flake_path
+      && cfg.source_root != null
+      && cfg.source_path != null
+      && cfg.source_path != ""
+      && hasPrefix "/" cfg.source_path
     then let
-      flake_root = normalize_absolute cfg.flake_root;
+      source_root = normalize_absolute cfg.source_root;
       from = normalize_absolute link.from;
       relative_path =
-        if from == flake_root
+        if from == source_root
         then ""
-        else removePrefix "${flake_root}/" from;
+        else removePrefix "${source_root}/" from;
       checkout_path =
         if relative_path == ""
-        then cfg.flake_path
-        else "${cfg.flake_path}/${relative_path}";
+        then cfg.source_path
+        else "${cfg.source_path}/${relative_path}";
     in
       config.lib.file.mkOutOfStoreSymlink checkout_path
     else link.from;
@@ -51,10 +51,10 @@
         name: link: let
           target = target_from link.to;
           from = normalize_absolute link.from;
-          flake_root =
-            if cfg.flake_root == null
+          source_root =
+            if cfg.source_root == null
             then null
-            else normalize_absolute cfg.flake_root;
+            else normalize_absolute cfg.source_root;
         in
           [
             {
@@ -76,16 +76,16 @@
           ]
           ++ lib.optionals link.hybrid [
             {
-              assertion = cfg.flake_root != null;
-              message = "hybrid-links.links.${name} requires hybrid-links.flake_root when hybrid = true.";
+              assertion = cfg.source_root != null;
+              message = "hybrid-links.links.${name} requires hybrid-links.source_root when hybrid = true.";
             }
             {
-              assertion = cfg.flake_path != null && cfg.flake_path != "" && hasPrefix "/" cfg.flake_path;
-              message = "hybrid-links.links.${name} requires hybrid-links.flake_path to be a non-empty absolute path when hybrid = true.";
+              assertion = cfg.source_path != null && cfg.source_path != "" && hasPrefix "/" cfg.source_path;
+              message = "hybrid-links.links.${name} requires hybrid-links.source_path to be a non-empty absolute path when hybrid = true.";
             }
             {
-              assertion = flake_root != null && is_nested_under flake_root from;
-              message = "hybrid-links.links.${name}.from must be equal to or nested under hybrid-links.flake_root when hybrid = true.";
+              assertion = source_root != null && is_nested_under source_root from;
+              message = "hybrid-links.links.${name}.from must be equal to or nested under hybrid-links.source_root when hybrid = true.";
             }
           ]
       )
@@ -118,12 +118,12 @@ in {
       default = true;
     };
 
-    flake_root = mkOption {
+    source_root = mkOption {
       type = t.nullOr (t.oneOf [t.path t.str]);
       default = null;
     };
 
-    flake_path = mkOption {
+    source_path = mkOption {
       type = t.nullOr t.str;
       default = null;
     };

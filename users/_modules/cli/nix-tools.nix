@@ -54,8 +54,8 @@
           clean.enable = true;
           clean.extraArgs = "--keep 5 --keep-since 5d";
         }
-        (mkIf (cfg.flake_location != null) {
-          flake = cfg.flake_location;
+        (mkIf (cfg.repo_location != null) {
+          flake = cfg.repo_location;
         })
       ];
 
@@ -129,8 +129,8 @@
       comma
       # search packages
       nps
-      # edit flake inputs
-      flake-edit
+      # manage source pins
+      npins
     ];
   };
 }

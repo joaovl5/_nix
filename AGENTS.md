@@ -6,7 +6,9 @@
 
 ## Special Instructions
 
-- When altering the `globals/` directory, it's necessary to run `nix flake update globals` to update `flake.lock` with the new info.
+- Dependency pins are managed in `npins/sources.json`; `flake.nix` is a thin tooling shim over `default.nix`, not the pin source of truth.
+- `globals/` is local repo data. Changing it does not require a pin or lock update.
+- `mysecrets` updates use `npins update mysecrets` and should stage `npins/sources.json`.
 
 ## Helpful Tooling
 
@@ -21,12 +23,14 @@
 
 In this order:
 
-- `nix fmt` - basic formatting, runs `treefmt` under the hood
-- `prek` - precommit hook has linters included
-  - prek only operates on git staged files, so you have to run `git add .` for `prek` to correctly check
-- IN SOME CASES (see more below): `nix flake check --all-systems` (after the other checks pass)
-  - **only** run `nix flake check` when nix code has been touched.
+- `npins verify` when `npins/`, `inputs.nix`, or `input-overrides.nix` changes.
+- `nix fmt` - basic formatting, runs `treefmt` through the thin flake shim.
+- `prek` - precommit hook has linters included.
+  - `prek` only operates on git staged files, so stage the exact intended files before running it.
+- IN SOME CASES (see more below): `nix flake check --all-systems` (after the other checks pass).
+  - **only** run `nix flake check` when Nix code has been touched.
   - `nix flake check` will warn about unknown flake outputs `deploy` and `pkgs`; this is expected.
+  - If `--all-systems` is blocked by local builder/binfmt constraints, run local `nix flake check`, run the relevant targeted host/package/check matrix, and document the blocker.
 
 ## Instruction updates
 

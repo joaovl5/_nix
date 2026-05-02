@@ -85,6 +85,7 @@ nix eval --json .#nixosConfigurations.tyrant.config.systemd.services.wg.after
 ## Required local verification after Nix changes
 
 ```bash
+npins verify # when source pins or input adapter files changed
 nix fmt
 git add <relevant files>
 prek
@@ -319,7 +320,7 @@ M  users/_units/wireguard/default.nix
 - For mixed-protocol generators, avoid emitting empty top-level protocol sections unless Traefik explicitly accepts them.
 - Probe from both outside and on the target host itself. The local `curl --resolve <host>:443:127.0.0.1 https://<host>` check was especially useful here because it separated Traefik config failure from DNS / relay / firewall confusion.
 - When a deploy changes only Traefik config on `tyrant`, redeploying `tyrant` alone is enough; there is no need to redeploy every host unless the changed module is actually consumed there.
-- If local `nix flake check --all-systems` in the current checkout complains about the relative `globals` path input, refresh it in that checkout with `nix flake update globals` before retrying the check.
+- In the npins setup, `globals/` is local repo data and is not refreshed with flake lock-update commands. If a check complains about globals, verify the thin shim/default.nix evaluation from the repo root; use `npins update <name>` only for real source pins such as `mysecrets`.
 
 ## Post-mortem: server DBus implementation switch inhibitor during Hister rollout
 

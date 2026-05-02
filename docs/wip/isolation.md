@@ -51,7 +51,7 @@ Reusing the existing AI setup inside a container or guest looks plausible, but `
 - Home Manager wiring from `systems/_modules/home-manager.nix`
 - user imports from `users/lav.nix`
 - the `llm-agents` overlay from `outputs/channels/default.nix`
-- `home/_modules/hybrid-links/default.nix`, which assumes a real flake checkout path via `hybrid-links.flake_root` and `hybrid-links.flake_path`
+- `home/_modules/hybrid-links/default.nix`, which assumes a real repo checkout path via `hybrid-links.source_root` and `hybrid-links.source_path`
 
 So the repo can likely reuse the same modules inside a NixOS guest, but only if the guest is wired similarly to the current user environment and can see the expected checkout path.
 
