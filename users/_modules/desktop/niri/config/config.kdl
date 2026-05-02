@@ -39,12 +39,12 @@ layout {
     struts {
         left 50
         right 50
-        top 50
-        bottom 50
+        top 85
+        bottom 85
     }
     background-color "000000"
     focus-ring { off; }
-    border { width 1.5; }
+    border { width 1.5; active-color "9c9c9c"; inactive-color "2a2a2a";}
     shadow { off; }
     default-column-width { proportion 0.800000; }
     preset-column-widths {
