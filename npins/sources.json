@@ -326,6 +326,32 @@
       "url": "https://github.com/sodiboo/niri-flake/archive/8dbf91d91d0e9be3aa0fe2a9fc364a6f7ad053a8.tar.gz",
       "hash": "sha256-wAeDjnP9IZXb+S0cglXN9ITWF6HVFhruPaoyVLbShVI="
     },
+    "niri-stable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "YaLTeR",
+        "repo": "niri"
+      },
+      "branch": "v25.08",
+      "submodules": false,
+      "revision": "01be0e65f4eb91a9cd624ac0b76aaeab765c7294",
+      "url": "https://github.com/YaLTeR/niri/archive/01be0e65f4eb91a9cd624ac0b76aaeab765c7294.tar.gz",
+      "hash": "sha256-RLD89dfjN0RVO86C/Mot0T7aduCygPGaYbog566F0Qo="
+    },
+    "niri-unstable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "YaLTeR",
+        "repo": "niri"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "5f6f131b24826a01374d5cd87b281bd7ea181537",
+      "url": "https://github.com/YaLTeR/niri/archive/5f6f131b24826a01374d5cd87b281bd7ea181537.tar.gz",
+      "hash": "sha256-9xzxgWsZZRbiMDa6iSZfD1dZGlUvsHp2aawWM5LK6F8="
+    },
     "nix-flatpak": {
       "type": "GitRelease",
       "repository": {
@@ -573,6 +599,32 @@
       "revision": "b4cbe858b381c0ee0fe617498549f0562090ad04",
       "url": "https://github.com/denful/with-inputs/archive/b4cbe858b381c0ee0fe617498549f0562090ad04.tar.gz",
       "hash": "sha256-GgKZ4LyKDS9vd946UeArhYqBKw63LdH4JqfbfFf7qNw="
+    },
+    "xwayland-satellite-stable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Supreeeme",
+        "repo": "xwayland-satellite"
+      },
+      "branch": "v0.7",
+      "submodules": false,
+      "revision": "388d291e82ffbc73be18169d39470f340707edaa",
+      "url": "https://github.com/Supreeeme/xwayland-satellite/archive/388d291e82ffbc73be18169d39470f340707edaa.tar.gz",
+      "hash": "sha256-m+9tUfsmBeF2Gn4HWa6vSITZ4Gz1eA1F5Kh62B0N4oE="
+    },
+    "xwayland-satellite-unstable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Supreeeme",
+        "repo": "xwayland-satellite"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "a879e5e0896a326adc79c474bf457b8b99011027",
+      "url": "https://github.com/Supreeeme/xwayland-satellite/archive/a879e5e0896a326adc79c474bf457b8b99011027.tar.gz",
+      "hash": "sha256-wToKwH7IgWdGLMSIWksEDs4eumR6UbbsuPQ42r0oTXQ="
     },
     "zjstatus": {
       "type": "Git",

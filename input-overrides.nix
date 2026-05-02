@@ -59,6 +59,10 @@ in {
   niri.inputs = {
     nixpkgs.follows = "nixpkgs";
     nixpkgs-stable.follows = "nixpkgs";
+    niri-stable.follows = "niri-stable";
+    niri-unstable.follows = "niri-unstable";
+    xwayland-satellite-stable.follows = "xwayland-satellite-stable";
+    xwayland-satellite-unstable.follows = "xwayland-satellite-unstable";
   };
   hexecute.inputs.nixpkgs.follows = "nixpkgs";
   whisper-overlay.inputs = {
@@ -91,6 +95,10 @@ in {
     bun2nix.follows = "bun2nix";
   };
 
+  niri-stable = raw_source;
+  niri-unstable = raw_source;
+  xwayland-satellite-stable = raw_source;
+  xwayland-satellite-unstable = raw_source;
   mysecrets = raw_source;
   octodns-pihole-src = raw_source;
   pihole6api-src = raw_source;
