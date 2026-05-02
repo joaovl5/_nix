@@ -15,9 +15,10 @@
     pkgs,
     inputs,
     nixos_config,
+    system,
     ...
   }: let
-    hister_pkg = inputs.hister.packages.${pkgs.stdenvNoCC.hostPlatform.system}.default;
+    hister_pkg = inputs.hister.packages.${system}.default;
     token_path = nixos_config.sops.secrets.hister_client_access_token.path;
     server_url = "https://hister.trll.ing";
 
