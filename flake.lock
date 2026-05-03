@@ -646,7 +646,7 @@
       "flake": false,
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-hP9XagOD+lpNM1RRCgOSPhQMpsikIRuPh6o0+DTR++U=",
+        "narHash": "sha256-MaVhL4EcdJWGZjuaXvpYsshe7As4uLQI5V3/f0rySFE=",
         "path": "./globals",
         "type": "path"
       },
@@ -1306,7 +1306,9 @@
         "treefmt-nix": [
           "treefmt-nix"
         ],
-        "vpnconfinement": "vpnconfinement",
+        "vpnconfinement": [
+          "vpnconfinement"
+        ],
         "website-builder": "website-builder"
       },
       "locked": {
@@ -1644,6 +1646,7 @@
         "treefmt-nix": "treefmt-nix",
         "unstable": "unstable",
         "unstable-small": "unstable-small",
+        "vpnconfinement": "vpnconfinement",
         "whisper-overlay": "whisper-overlay",
         "zjstatus": "zjstatus"
       }

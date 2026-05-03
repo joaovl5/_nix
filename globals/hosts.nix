@@ -192,7 +192,6 @@ in rec {
           enable = true;
           relay = {
             enable = true;
-            public_ip = temperance.host_ip;
             peer.private_ip = tyrant.config.my."unit.wireguard".interfaces.internal.subnet.ip;
           };
           interfaces.external.name = "enp1s0";
