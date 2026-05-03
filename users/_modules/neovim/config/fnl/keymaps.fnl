@@ -38,15 +38,26 @@
 (n.map [:n :x :o] :e (fn [] (do-req :spider :motion :e)))
 (n.map [:n :x :o] :b (fn [] (do-req :spider :motion :b)))
 ; treewalker
-(n.map [:n :x] "<A-[>" "<cmd>Treewalker Left<cr>")
-(n.map [:n :x] "<A-]>" "<cmd>Treewalker Right<cr>")
-(n.map [:n :x] :<A-k> "<cmd>Treewalker Up<cr>")
-(n.map [:n :x] :<A-j> "<cmd>Treewalker Down<cr>")
+(fn treewalker [subcommand]
+  (let [(ok err) (pcall vim.cmd (.. "Treewalker " subcommand))]
+    (when (not ok)
+      (if (and (= :string (type err))
+               (string.find err
+                            "Treewalker: Treesitter node not found under cursor"
+                            1 true))
+          (vim.notify "Treewalker: no Treesitter node under cursor"
+                      vim.log.levels.WARN)
+          (error err)))))
+
+(n.map [:n :x] "<A-[>" (fn [] (treewalker :Left)))
+(n.map [:n :x] "<A-]>" (fn [] (treewalker :Right)))
+(n.map [:n :x] :<A-k> (fn [] (treewalker :Up)))
+(n.map [:n :x] :<A-j> (fn [] (treewalker :Down)))
 ;; swaps
-(n.map [:n :x] "<A-S-[>" "<cmd>Treewalker SwapLeft<cr>")
-(n.map [:n :x] "<A-S-]>" "<cmd>Treewalker SwapRight<cr>")
-(n.map [:n :x] :<A-K> "<cmd>Treewalker SwapUp<cr>")
-(n.map [:n :x] :<A-J> "<cmd>Treewalker SwapDown<cr>")
+(n.map [:n :x] "<A-S-[>" (fn [] (treewalker :SwapLeft)))
+(n.map [:n :x] "<A-S-]>" (fn [] (treewalker :SwapRight)))
+(n.map [:n :x] :<A-K> (fn [] (treewalker :SwapUp)))
+(n.map [:n :x] :<A-J> (fn [] (treewalker :SwapDown)))
 
 ; # LEADER
 

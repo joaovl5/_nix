@@ -21,6 +21,4 @@
  ; spider (improved w,e,b motions)
  (plugin :chrisgrieser/nvim-spider {:opts true})
  ; monkey-like crazyness
- (plugin :aaronik/treewalker.nvim {:opts {} :cmd :Treewalker})
- ; improved insert mode exp
- (plugin :sontungexpt/bim.nvim {:opts true :event :InsertEnter})]
+ (plugin :aaronik/treewalker.nvim {:opts {} :cmd :Treewalker})]

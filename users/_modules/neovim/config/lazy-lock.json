@@ -3,10 +3,6 @@
     "branch": "master",
     "commit": "e30b7f2008e52442154b66f7c519bfd2f1e32acb"
   },
-  "bim.nvim": {
-    "branch": "main",
-    "commit": "b47d4eead624de1beae78ce30b4b8c151d217111"
-  },
   "blink.compat": {
     "branch": "main",
     "commit": "1454f14a8d855a578ceeba77c62538fa1459a67c"

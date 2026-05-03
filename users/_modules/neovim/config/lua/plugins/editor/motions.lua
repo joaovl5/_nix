@@ -17,5 +17,4 @@ return {
 	},
 	{ "chrisgrieser/nvim-spider", opts = true },
 	{ "aaronik/treewalker.nvim", opts = {}, cmd = "Treewalker" },
-	{ "sontungexpt/bim.nvim", opts = true, event = "InsertEnter" },
 }
