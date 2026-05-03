@@ -1,0 +1,35 @@
+layout {
+  default_tab_template {
+    pane size=1 borderless=true {
+      plugin location="file:zjstatus" {
+        format_left  "#[fg=#CBA6F7,bold]{session} {mode} {tabs}"
+        format_center ""
+
+        mode_normal      "#[fg=#89B4FA,bold] N"
+        mode_tmux        "#[fg=#FAB387,bold] T"
+        mode_rename_tab  "#[fg=#F2CDCD,bold] R"
+        mode_rename_pane "#[fg=#F5C2E7,bold]󰏪 R"
+        mode_resize      "#[fg=#F38BA8,bold]󰩨 R"
+        mode_pane        "#[fg=#A6E3A1,bold] P"
+        mode_tab         "#[fg=#74C7EC,bold]󰓩 T"
+        mode_locked      "#[fg=#EBA0AC,bold]󰌾 L"
+        mode_scroll      "#[fg=#CBA6F7,bold]󱕒 S"
+        mode_enter_search "#[fg=#89DCEB,bold] S"
+        mode_search      "#[fg=#B4BEFE,bold] S"
+        mode_session     "#[fg=#94E2D5,bold] S"
+        mode_move        "#[fg=#CDD6F4,bold] M"
+        mode_prompt      "#[fg=#F9E2AF,bold] P"
+        mode_default_to_mode "normal"
+
+        tab_normal               " #[fg=#7F849C]{fullscreen_indicator}{sync_indicator}{floating_indicator}{name}"
+        tab_active               " #[fg=#ffff8e]{fullscreen_indicator}{sync_indicator}{floating_indicator}{name}"
+        tab_fullscreen_indicator " "
+        tab_sync_indicator       " "
+        tab_floating_indicator   "󰉈 "
+
+        border_enabled  "false"
+      }
+    }
+    children
+  }
+}

@@ -2,7 +2,7 @@
 name = "frag"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = ["cyclopts", "questionary"]
+dependencies = ["cyclopts", "questionary", "rich"]
 
 [project.scripts]
 frag = "frag.cli:main"

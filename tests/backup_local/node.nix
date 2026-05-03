@@ -28,6 +28,8 @@ in {
   system = {
     stateVersion = "25.11";
     activationScripts = {
+      # Materialize a fixed password file inside the VM because the backup units
+      # read the secret at runtime and the test must stay deterministic.
       "backup-test-secrets" = lib.stringAfter ["specialfs"] ''
         mkdir -p /run/secrets
         printf '%s' 'test-password-a' > /run/secrets/backup_restic_password_A
@@ -60,6 +62,8 @@ in {
       };
     };
     policies.test = {
+      # Disable automatic timers so the test controls exactly when backup, forget,
+      # prune, and check units run.
       timerConfig = {
         OnCalendar = "yearly";
         Persistent = "false";

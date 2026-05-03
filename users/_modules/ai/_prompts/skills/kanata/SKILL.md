@@ -5,7 +5,7 @@ description: Configuration assistant for Kanata
 
 # Configuration-Specific Information
 
-- **Configuration for Kanata is located at `~/my_nix/users/_modules/kanata/config.kbd` or at `users/_modules/kanata/config.kbd` if you are already at this folder**
+- **Configuration for Kanata is located at `~/my_nix/users/_modules/desktop/services/kanata/config/config.kbd` or at `users/_modules/desktop/services/kanata/config/config.kbd` if you are already at this folder**
 - !!! No need for running checks after changing kanada configuration.
 
 # Kanata Configuration Cheatsheet

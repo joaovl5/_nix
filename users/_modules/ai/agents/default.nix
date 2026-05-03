@@ -4,7 +4,7 @@ let
     (import ./opencode)
     (import ./code)
     (import ./omp)
-    (import ./agent-browser)
+    (import ./hermes)
   ];
 in
   combine_modules modules

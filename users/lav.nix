@@ -10,33 +10,11 @@
   local_packages = import ../packages {inherit pkgs inputs;};
 
   modules = [
+    (import ./_modules/assets)
     (import ./_modules/cli)
-    (import ./_modules/yazi)
-    (import ./_modules/fish)
-    (import ./_modules/nushell)
-    (import ./_modules/starship)
-    (import ./_modules/gtk)
-    (import ./_modules/audio)
-    (import ./_modules/media)
-    (import ./_modules/anyrun)
-    (import ./_modules/ironbar)
-    (import ./_modules/hyprland)
-    (import ./_modules/niri)
-    (import ./_modules/gnome)
-    (import ./_modules/xdg-portals.nix)
-    (import ./_modules/gaming)
+    (import ./_modules/desktop)
     (import ./_modules/coding)
     (import ./_modules/ai)
-    (import ./_modules/obs)
-    (import ./_modules/term)
-    (import ./_modules/browsing)
-    (import ./_modules/neovim)
-    (import ./_modules/emacs)
-    (import ./_modules/espanso)
-    (import ./_modules/kanata)
-    (import ./_modules/discord)
-    (import ./_modules/syncthing)
-    (import ./_modules/storage)
   ];
   module_imports = extract_imports modules;
 
@@ -109,7 +87,6 @@ in {
           ghostty
           alacritty # backup
           ## multiplexer
-          zellij
           ## tui
           systemctl-tui
           gdu # ncdu alternative (MUCH faster on SSDs)

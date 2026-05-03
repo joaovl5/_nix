@@ -1,0 +1,177 @@
+input {
+    keyboard {
+        xkb {
+            options "compose:ralt"
+        }
+        repeat-delay 600
+        repeat-rate 25
+        track-layout "global"
+    }
+    touchpad {
+        tap
+        dwt
+        dwtp
+        natural-scroll
+    }
+    mouse {
+        accel-speed -0.900000
+        accel-profile "flat"
+    }
+    workspace-auto-back-and-forth
+}
+output "DP-4" {
+    scale 1.333333
+    focus-at-startup
+    transform "normal"
+    position x=1080 y=396
+    mode "3840x2160@240.080000"
+}
+output "HDMI-A-2" {
+    scale 1.000000
+    transform "90"
+    position x=0 y=240
+    mode "1920x1080@100.000000"
+}
+screenshot-path "~/pics/screenshots/%Y-%m-%d %H-%M-%S.png"
+prefer-no-csd
+layout {
+    gaps 5
+    struts {
+        left 50
+        right 50
+        top 85
+        bottom 85
+    }
+    background-color "000000"
+    focus-ring { off; }
+    border { width 1.5; active-color "9c9c9c"; inactive-color "2a2a2a";}
+    shadow { off; }
+    default-column-width { proportion 0.800000; }
+    preset-column-widths {
+        proportion 0.333330
+        proportion 0.500000
+        proportion 0.666670
+        proportion 1.000000
+    }
+    center-focused-column "never"
+    always-center-single-column
+}
+cursor {
+    xcursor-theme "default"
+    xcursor-size 24
+}
+environment {
+    "CLUTTER_BACKEND" "wayland"
+    EDITOR "nvim"
+    "EGL_PLATFORM" "wayland"
+    "ELECTRON_OZONE_PLATFORM_HINT" "auto"
+    "GBM_BACKEND" "nvidia-drm"
+    "GDK_BACKEND" "wayland"
+    "GDK_SCALE" "1.333333"
+    "LIBVA_DRIVER_NAME" "nvidia"
+    "MOZ_DISABLE_RDD_SANDBOX" "1"
+    "MOZ_ENABLE_WAYLAND" "1"
+    "NVD_BACKEND" "direct"
+    "QT_AUTO_SCREEN_SCALE_FACTOR" "1"
+    "QT_QPA_PLATFORM" "wayland;xcb"
+    "QT_QPA_PLATFORMTHEME" "qt5ct;qt6ct"
+    "QT_SCALE_FACTOR" "1"
+    "QT_WAYLAND_DISABLE_WINDOWDECORATION" "1"
+    "SDL_VIDEODRIVER" "wayland"
+    TERMINAL "footclient"
+    "WLR_DRM_NO_ATOMIC" "1"
+    "XDG_CURRENT_DESKTOP" "niri"
+    "XDG_SESSION_DESKTOP" "niri"
+    "XDG_SESSION_TYPE" "niri"
+    "__GLX_VENDOR_LIBRARY_NAME" "nvidia"
+    "__NV_PRIME_RENDER_OFFLOAD" "1"
+    "__VK_LAYER_NV_optimus" "NVIDIA_only"
+}
+binds {
+    Mod+0 { focus-workspace "J"; }
+    Mod+1 { focus-workspace "A"; }
+    Mod+2 { focus-workspace "B"; }
+    Mod+3 { focus-workspace "C"; }
+    Mod+4 { focus-workspace "D"; }
+    Mod+5 { focus-workspace "E"; }
+    Mod+6 { focus-workspace "F"; }
+    Mod+7 { focus-workspace "G"; }
+    Mod+8 { focus-workspace "H"; }
+    Mod+9 { focus-workspace "I"; }
+    Mod+Alt+B { center-window; }
+    Mod+Alt+F { fullscreen-window; }
+    Mod+Alt+H { move-column-to-monitor-left; }
+    Mod+Alt+J { move-column-to-workspace-down; }
+    Mod+Alt+K { move-column-to-workspace-up; }
+    Mod+Alt+L { move-column-to-monitor-right; }
+    Mod+Apostrophe { spawn "emacs"; }
+    Mod+B { center-column; }
+    Mod+Backslash { switch-preset-column-width; }
+    Mod+BracketLeft { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+Comma { consume-window-into-column; }
+    Mod+Grave { spawn "swaync-client" "--toggle-panel"; }
+    Mod+Ctrl+H { move-column-left-or-to-monitor-left; }
+    Mod+Ctrl+J { move-window-down-or-to-workspace-down; }
+    Mod+Ctrl+K { move-window-up-or-to-workspace-up; }
+    Mod+Ctrl+L { move-column-right-or-to-monitor-right; }
+    Mod+Ctrl+O { move-column-to-last; }
+    Mod+Ctrl+Y { move-column-to-first; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+F { maximize-column; }
+    Mod+H { focus-column-left-or-last; }
+    Mod+J { focus-window-or-workspace-down; }
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+L { focus-column-right-or-first; }
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+O { focus-column-last; }
+    Mod+Period { expel-window-from-column; }
+    Mod+Q { close-window; }
+    Mod+Return { spawn "footclient"; }
+    Mod+Shift+0 { move-column-to-workspace "J"; }
+    Mod+Shift+1 { move-column-to-workspace "A"; }
+    Mod+Shift+2 { move-column-to-workspace "B"; }
+    Mod+Shift+3 { move-column-to-workspace "C"; }
+    Mod+Shift+4 { move-column-to-workspace "D"; }
+    Mod+Shift+5 { move-column-to-workspace "E"; }
+    Mod+Shift+6 { move-column-to-workspace "F"; }
+    Mod+Shift+7 { move-column-to-workspace "G"; }
+    Mod+Shift+8 { move-column-to-workspace "H"; }
+    Mod+Shift+9 { move-column-to-workspace "I"; }
+    Mod+Shift+B { center-visible-columns; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+Shift+F { toggle-window-floating; }
+    Mod+Shift+H { focus-monitor-left; }
+    Mod+Shift+I { move-workspace-up; }
+    Mod+Shift+J { focus-workspace-down; }
+    Mod+Shift+K { focus-workspace-up; }
+    Mod+Shift+L { focus-monitor-right; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+S { screenshot; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+Shift+T { toggle-column-tabbed-display; }
+    Mod+Shift+U { move-workspace-down; }
+    Mod+A { spawn "hexecute"; }
+    Mod+Space { spawn "anyrun" "--plugins" "libapplications.so"; }
+    Mod+N { spawn "anyrun" "--plugins" "libsymbols.so"; } // unicode
+    Mod+C { spawn "anyrun" "--plugins" "librink.so"; } // calc
+    Alt+Tab { spawn "anyrun" "--plugins" "libniri_focus.so"; } // calc
+    Mod+Alt+Delete { spawn "anyrun" "--plugins" "libactions.so"; } // calc
+    Mod+Tab { toggle-overview; }
+    Mod+Y { focus-column-first; }
+}
+workspace "A" { open-on-output "DP-4"; }
+workspace "B" { open-on-output "DP-4"; }
+workspace "C" { open-on-output "DP-4"; }
+workspace "D" { open-on-output "DP-4"; }
+workspace "E" { open-on-output "DP-4"; }
+workspace "F" { open-on-output "HDMI-A-2"; }
+workspace "G" { open-on-output "HDMI-A-2"; }
+workspace "H" { open-on-output "HDMI-A-2"; }
+workspace "I" { open-on-output "HDMI-A-2"; }
+workspace "J" { open-on-output "HDMI-A-2"; }
+spawn-sh-at-startup "systemctl --user start ironbar"
+spawn-sh-at-startup "eww -c ~/.config/eww/bar daemon"
+spawn-sh-at-startup "eww -c ~/.config/eww/bar open bar"
+gestures { hot-corners { off; }; }
+xwayland-satellite { path "xwayland-satellite"; }

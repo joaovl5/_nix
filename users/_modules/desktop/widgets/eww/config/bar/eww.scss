@@ -1,0 +1,74 @@
+* {
+  all: unset; // Unsets everything so you can style everything from scratch
+}
+
+// Global Styles
+.bar {
+  background-color: #000;
+  border: 1px solid #2a2a2a;
+  color: #b0b4bc;
+  padding: 12px 4px;
+
+  font-family: Kode Mono;
+  font-size: 15.5px;
+}
+
+.sidestuff slider {
+  all: unset;
+  color: #ffd5cd;
+}
+
+.metric scale trough highlight {
+  all: unset;
+  background-color: #6c5abc;
+  color: #000000;
+  border-radius: 0px;
+}
+
+.metric scale trough {
+  all: unset;
+  background-color: #45444c;
+  border-radius: 0px;
+  min-height: 7px;
+  min-width: 40px;
+  margin-left: 0px;
+}
+
+.metric {
+  font-size: 26px;
+  margin-bottom: 15px;
+}
+
+.workspaces {
+  font-size: 18px;
+}
+
+.workspace-list {
+  min-width: 12px;
+}
+
+.workspace-button {
+  color: #6f737b;
+  min-width: 12px;
+  padding: 1px 0;
+}
+
+.workspace-button.active {
+  color: #b0b4bc;
+}
+
+.workspace-button.focused {
+  color: #8c72ff;
+}
+
+.workspace-button.urgent {
+  color: #ff6b6b;
+}
+
+.workspace-button.empty {
+  opacity: 0.55;
+}
+
+.workspace-button:hover {
+  color: #8c72ff;
+}

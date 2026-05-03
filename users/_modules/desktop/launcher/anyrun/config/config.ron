@@ -1,0 +1,14 @@
+Config(
+  x: Fraction(0.500000),
+  y: Fraction(0.35000),
+  width: Absolute(600),
+  height: Absolute(100),
+  margin: 0,
+  hide_icons: true,
+  ignore_exclusive_zones: true,
+  layer: Overlay,
+  hide_plugin_info: true,
+  close_on_click: false,
+  show_results_immediately: false,
+  max_entries: None,
+)

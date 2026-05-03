@@ -52,6 +52,7 @@
       url = "path:./globals";
       flake = false;
     };
+    vpnconfinement.url = "github:Maroka-chan/VPN-Confinement";
     #### quality-of-life
     ## treefmt
     treefmt-nix = {
@@ -101,6 +102,18 @@
         nixpkgs-stable.follows = "nixpkgs";
       };
     };
+    ## casting spells
+    hexecute = {
+      url = "git+https://github.com/ThatOtherAndrew/Hexecute?shallow=1";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+    whisper-overlay = {
+      ## whisper overlay thing (forked)
+      url = "git+https://github.com/joaovl5/whisper-overlay?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ## rust nightly support
     fenix = {
       url = "git+https://github.com/nix-community/fenix?shallow=1";
@@ -131,6 +144,11 @@
       flake = false;
     };
 
+    hister = {
+      url = "github:asciimoo/hister";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # atticd nix cache server thingy
     atticd = {
       url = "git+https://github.com/zhaofengli/attic?shallow=1";
@@ -140,7 +158,11 @@
     # -arr programs
     nixarr = {
       url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        vpnconfinement.follows = "vpnconfinement";
+        treefmt-nix.follows = "treefmt-nix";
+      };
     };
     # Other ---
     ## ai
@@ -150,6 +172,8 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
+      # inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.treefmt-nix.follows = "treefmt-nix";
     };
     superpowers = {
       url = "github:obra/superpowers?ref=main";

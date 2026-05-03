@@ -1,0 +1,67 @@
+@define-color accent #8c72ff;
+@define-color bg-color #000000;
+@define-color fg-color #b0b4bc;
+@define-color desc-color #cccccc;
+
+window {
+  background: transparent;
+}
+
+box.main {
+  padding: 8px 12px;
+  margin: 0px;
+  border: 2px solid #2a2a2a;
+  background-color: @bg-color;
+  font-family: "Iosevka Nerd Font";
+  font-size: 28px;
+}
+
+text {
+  min-height: 30px;
+  padding: 5px;
+  color: @fg-color;
+}
+
+.matches {
+  background-color: @bg-color;
+}
+
+box.plugin:first-child {
+  margin-top: 10px;
+}
+
+box.plugin.info {
+  min-width: 100px;
+}
+
+list.plugin {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+label.match {
+  color: @fg-color;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+label.match.description {
+  font-size: 20px;
+  color: @desc-color;
+}
+
+label.plugin.info {
+  font-size: 20px;
+  color: @fg-color;
+}
+
+.match {
+  background: transparent;
+  margin: 2px;
+}
+
+.match:selected {
+  border-left: 2px solid @accent;
+  padding-left: 12px;
+  background: transparent;
+}

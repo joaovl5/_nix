@@ -22,5 +22,11 @@ in
         enable = true;
         disable_privileged_ports = true;
       };
+
+      # Keep servers on classic dbus for live-switch deploys; migrating to dbus-broker requires boot + reboot.
+      services.dbus = {
+        enable = true;
+        implementation = o.force "dbus";
+      };
     }
   ])))

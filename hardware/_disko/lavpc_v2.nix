@@ -22,7 +22,7 @@ in {
                 subvolumes = {
                   "@root" = subvolume {mp = "/";};
                   "@nix" = subvolume {mp = "/nix";};
-                  "@swap" = swap {sz = "30G";};
+                  "@swap" = swap {sz = "128G";};
                 };
               };
             };

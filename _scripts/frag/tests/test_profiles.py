@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import pytest
 
 from frag import cli, profiles, prompts
+from frag.exceptions import LegacySchemaError
 
 
 @dataclass
@@ -45,14 +46,20 @@ def stub_enter_runtime(
     monkeypatch.setattr(
         cli.docker_runtime,
         "is_container_running",
-        lambda _profile: True,
+        lambda _profile, *, runtime_metadata=None: True,
     )
+    monkeypatch.setattr(cli, "build_image_assets", lambda: object())
     monkeypatch.setattr(
         cli.docker_runtime,
         "resolve_runtime_spec",
-        lambda *_args, **_kwargs: pytest.fail(
-            "container startup should not be reached"
-        ),
+        lambda *_args, **_kwargs: type(
+            "RuntimeSpec",
+            (),
+            {
+                "image_ref": "loaded:image",
+                "shared_assets_identity": "shared-assets-123",
+            },
+        )(),
     )
     monkeypatch.setattr(
         cli.docker_runtime,
@@ -84,6 +91,12 @@ def stub_image_assets(
     monkeypatch.setattr(cli, "build_image_assets", lambda: FakeImageAssets())
 
 
+def _workspace_root(tmp_path, name: str = "demo") -> str:
+    workspace_root = tmp_path / name
+    workspace_root.mkdir()
+    return str(workspace_root)
+
+
 def test_create_profile_canonicalizes_workspace_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
@@ -93,6 +106,8 @@ def test_create_profile_canonicalizes_workspace_root(
     workspace.mkdir()
     nested = workspace / "nested"
     nested.mkdir()
+    project = nested / "../project"
+    project.mkdir()
     monkeypatch.chdir(nested)
 
     profile = profiles.create_profile(
@@ -102,7 +117,7 @@ def test_create_profile_canonicalizes_workspace_root(
         workspace_root="../project",
     )
 
-    expected_root = str((nested / "../project").resolve())
+    expected_root = str(project.resolve())
     assert profile.workspace_root == expected_root
     assert (
         backend.volumes["frag-profile-demo-profile"][profiles.LABEL_WORKSPACE_ROOT]
@@ -110,14 +125,50 @@ def test_create_profile_canonicalizes_workspace_root(
     )
 
 
-def test_create_profile_creates_labeled_volume() -> None:
+def test_create_profile_rejects_missing_workspace_root(tmp_path) -> None:
+    backend = FakeDockerBackend(volumes={}, running_profiles=set())
+
+    with pytest.raises(
+        profiles.ProfileError,
+        match="workspace root must be an existing directory",
+    ):
+        profiles.create_profile(
+            backend,
+            name="Demo Profile",
+            image="python:3.14",
+            workspace_root=str(tmp_path / "missing"),
+        )
+
+    assert backend.create_volume_calls == []
+
+
+def test_create_profile_rejects_non_directory_workspace_root(tmp_path) -> None:
+    backend = FakeDockerBackend(volumes={}, running_profiles=set())
+    workspace_file = tmp_path / "workspace-file"
+    workspace_file.write_text("not a directory\n")
+
+    with pytest.raises(
+        profiles.ProfileError,
+        match="workspace root must be an existing directory",
+    ):
+        profiles.create_profile(
+            backend,
+            name="Demo Profile",
+            image="python:3.14",
+            workspace_root=str(workspace_file),
+        )
+
+    assert backend.create_volume_calls == []
+
+
+def test_create_profile_creates_labeled_volume(tmp_path) -> None:
     backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
     profile = profiles.create_profile(
         backend,
         name="Demo Profile",
         image="python:3.14",
-        workspace_root="/workspace/demo",
+        workspace_root=_workspace_root(tmp_path),
     )
 
     assert profile.volume_name == "frag-profile-demo-profile"
@@ -125,13 +176,13 @@ def test_create_profile_creates_labeled_volume() -> None:
         "frag-profile-demo-profile": {
             profiles.LABEL_PROFILE: "Demo Profile",
             profiles.LABEL_IMAGE: "python:3.14",
-            profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+            profiles.LABEL_WORKSPACE_ROOT: profile.workspace_root,
             profiles.LABEL_SCHEMA_VERSION: profiles.SCHEMA_VERSION,
         }
     }
 
 
-def test_create_profile_rejects_names_without_alphanumeric_characters() -> None:
+def test_create_profile_rejects_names_without_alphanumeric_characters(tmp_path) -> None:
     backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
     with pytest.raises(
@@ -142,13 +193,15 @@ def test_create_profile_rejects_names_without_alphanumeric_characters() -> None:
             backend,
             name="---",
             image="python:3.14",
-            workspace_root="/workspace/demo",
+            workspace_root=_workspace_root(tmp_path),
         )
 
     assert backend.create_volume_calls == []
 
 
-def test_create_profile_rejects_distinct_names_with_same_normalized_volume() -> None:
+def test_create_profile_rejects_distinct_names_with_same_normalized_volume(
+    tmp_path,
+) -> None:
     backend = FakeDockerBackend(
         volumes={
             "frag-profile-demo-profile": {
@@ -166,7 +219,7 @@ def test_create_profile_rejects_distinct_names_with_same_normalized_volume() -> 
             backend,
             name="Demo_Profile",
             image="python:3.14",
-            workspace_root="/workspace/other",
+            workspace_root=_workspace_root(tmp_path, "other"),
         )
 
     assert backend.volumes == {
@@ -179,7 +232,9 @@ def test_create_profile_rejects_distinct_names_with_same_normalized_volume() -> 
     }
 
 
-def test_create_profile_rejects_reusing_existing_name_with_different_metadata() -> None:
+def test_create_profile_rejects_reusing_existing_name_with_different_metadata(
+    tmp_path,
+) -> None:
     backend = FakeDockerBackend(
         volumes={
             "frag-profile-demo-profile": {
@@ -197,7 +252,7 @@ def test_create_profile_rejects_reusing_existing_name_with_different_metadata() 
             backend,
             name="Demo Profile",
             image="python:3.15",
-            workspace_root="/workspace/other",
+            workspace_root=_workspace_root(tmp_path, "other"),
         )
 
     assert backend.create_volume_calls == []
@@ -211,13 +266,14 @@ def test_create_profile_rejects_reusing_existing_name_with_different_metadata() 
     }
 
 
-def test_create_profile_is_idempotent_for_matching_existing_metadata() -> None:
+def test_create_profile_is_idempotent_for_matching_existing_metadata(tmp_path) -> None:
+    workspace_root = _workspace_root(tmp_path, "demo")
     backend = FakeDockerBackend(
         volumes={
             "frag-profile-demo-profile": {
                 profiles.LABEL_PROFILE: "Demo Profile",
                 profiles.LABEL_IMAGE: "python:3.14",
-                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_WORKSPACE_ROOT: workspace_root,
                 profiles.LABEL_SCHEMA_VERSION: profiles.SCHEMA_VERSION,
             }
         },
@@ -228,13 +284,13 @@ def test_create_profile_is_idempotent_for_matching_existing_metadata() -> None:
         backend,
         name="Demo Profile",
         image="python:3.14",
-        workspace_root="/workspace/demo",
+        workspace_root=workspace_root,
     )
 
     assert profile == profiles.Profile(
         name="Demo Profile",
         image="python:3.14",
-        workspace_root="/workspace/demo",
+        workspace_root=workspace_root,
         volume_name="frag-profile-demo-profile",
     )
     assert backend.create_volume_calls == []
@@ -264,6 +320,130 @@ def test_list_profiles_reconstructs_metadata_from_volume_labels() -> None:
         )
     ]
     assert profiles.get_profile(backend, "demo") == listed[0]
+
+
+def test_list_profiles_ignores_unrelated_legacy_schema1_volume() -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: profiles.SCHEMA_VERSION,
+            },
+            "frag-profile-work": {
+                profiles.LABEL_PROFILE: "work",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/work",
+                profiles.LABEL_SCHEMA_VERSION: "1",
+            },
+        },
+        running_profiles=set(),
+    )
+
+    listed = profiles.list_profiles(backend)
+
+    assert listed == [
+        profiles.Profile(
+            name="demo",
+            image="python:3.14",
+            workspace_root="/workspace/demo",
+            volume_name="frag-profile-demo",
+        )
+    ]
+    assert profiles.get_profile(backend, "demo") == listed[0]
+
+
+def test_get_profile_refuses_legacy_schema1_volume() -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: "1",
+            }
+        },
+        running_profiles=set(),
+    )
+
+    with pytest.raises(
+        LegacySchemaError,
+        match="schema 1 profile volume .*demo.* is not supported",
+    ):
+        profiles.get_profile(backend, "demo")
+
+
+def test_get_profile_raises_typed_legacy_schema_error() -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: "1",
+            }
+        },
+        running_profiles=set(),
+    )
+
+    with pytest.raises(LegacySchemaError) as exc_info:
+        profiles.get_profile(backend, "demo")
+
+    assert "schema 1 profile volume" in str(exc_info.value)
+
+
+def test_get_profile_skips_malformed_same_name_schema2_volume() -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo-broken": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/broken",
+                profiles.LABEL_SCHEMA_VERSION: profiles.SCHEMA_VERSION,
+            },
+            "frag-profile-demo": {
+                profiles.LABEL_PROFILE: "demo",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: profiles.SCHEMA_VERSION,
+            },
+        },
+        running_profiles=set(),
+    )
+
+    assert profiles.get_profile(backend, "demo") == profiles.Profile(
+        name="demo",
+        image="python:3.14",
+        workspace_root="/workspace/demo",
+        volume_name="frag-profile-demo",
+    )
+
+
+def test_create_profile_refuses_legacy_schema1_name_conflict(tmp_path) -> None:
+    backend = FakeDockerBackend(
+        volumes={
+            "frag-profile-demo-profile": {
+                profiles.LABEL_PROFILE: "Demo Profile",
+                profiles.LABEL_IMAGE: "python:3.14",
+                profiles.LABEL_WORKSPACE_ROOT: "/workspace/demo",
+                profiles.LABEL_SCHEMA_VERSION: "1",
+            }
+        },
+        running_profiles=set(),
+    )
+
+    with pytest.raises(
+        LegacySchemaError,
+        match="schema 1 profile volume .*Demo Profile.* is not supported",
+    ):
+        profiles.create_profile(
+            backend,
+            name="Demo Profile",
+            image="python:3.15",
+            workspace_root=_workspace_root(tmp_path, "other"),
+        )
+
+    assert backend.create_volume_calls == []
 
 
 def test_remove_profile_refuses_running_profiles() -> None:
@@ -759,3 +939,27 @@ def test_docker_cli_backend_wraps_missing_docker_binary(
 
     with pytest.raises(profiles.DockerBackendError):
         backend.create_volume("frag-profile-demo", labels={})
+
+
+def test_runtime_metadata_labels_round_trip_includes_identity_state() -> None:
+    metadata = profiles.RuntimeProfileMetadata(
+        image_ref="loaded:image",
+        shared_assets_identity="shared-assets-123",
+        target_uid="1000",
+        target_gid="1001",
+        supplementary_gids=(2001, 2002),
+    )
+
+    assert profiles.runtime_metadata_labels(metadata) == {
+        profiles.LABEL_RUNTIME_IMAGE_REF: "loaded:image",
+        profiles.LABEL_SHARED_ASSETS_IDENTITY: "shared-assets-123",
+        profiles.LABEL_TARGET_UID: "1000",
+        profiles.LABEL_TARGET_GID: "1001",
+        profiles.LABEL_TARGET_SUPPLEMENTARY_GIDS: "2001,2002",
+    }
+    assert (
+        profiles.runtime_metadata_from_labels(
+            profiles.runtime_metadata_labels(metadata)
+        )
+        == metadata
+    )

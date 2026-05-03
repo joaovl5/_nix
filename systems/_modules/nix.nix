@@ -24,6 +24,9 @@ in
               warn-dirty = false;
               builders-use-substitutes = true;
               auto-optimise-store = true;
+              # Prevent heavyweight local builds (Firefox/Rust LTO, CUDA) from exhausting RAM.
+              max-jobs = 1;
+              cores = 4;
               experimental-features = [
                 "nix-command"
                 "flakes"
@@ -81,9 +84,9 @@ in
           settings.period = "7d";
         };
 
-        environment.variables.LD_LIBRARY_PATH = lib.mkForce [
-          "/run/current-system/sw/lib"
-        ];
+        # environment.variables.LD_LIBRARY_PATH = lib.mkForce [
+        #   "/run/current-system/sw/lib"
+        # ];
       })
 
       (o.when (!is_darwin && opts.x86.enable) {

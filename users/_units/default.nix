@@ -14,10 +14,12 @@ in {
     ./reverse-proxy
     ./octodns
     ./fxsync
+    ./network_namespaces
     ./wireguard
     ./qbittorrent
     ./syncthing
     ./forgejo
+    ./hister
     unit_global_cfg
   ];
 }

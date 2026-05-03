@@ -1,10 +1,5 @@
-{
-  pkgs,
-  lib,
-}: let
-  exe = pkg: (lib.getExe pkgs.${pkg});
-in {
-  nixos = {
-    command = exe "mcp-nixos";
-  };
+_: {
+  # nixos = {
+  #   command = exe "mcp-nixos";
+  # };
 }

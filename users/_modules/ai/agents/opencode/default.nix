@@ -10,9 +10,7 @@
     lib,
     inputs,
     ...
-  }: let
-    agent_browser_skill = ../../_prompts/skills/agent-browser/SKILL.md;
-  in {
+  }: {
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
@@ -41,8 +39,6 @@
         source = inputs.superpowers + "/skills";
         recursive = true;
       };
-
-      "opencode/skill/agent-browser/SKILL.md".source = agent_browser_skill;
     };
   };
 }

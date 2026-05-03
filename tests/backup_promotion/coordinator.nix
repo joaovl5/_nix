@@ -36,6 +36,7 @@ in {
         chmod 444 /run/secrets/backup_restic_password_A
         chmod 444 /run/secrets/backup_restic_password_B
 
+        # The promotion test connects to the storage node over SFTP as root.
         mkdir -p /root/.ssh
         cp ${test_ssh_key}/id_ed25519 /root/.ssh/id_ed25519_backup
         chmod 600 /root/.ssh/id_ed25519_backup
@@ -56,7 +57,16 @@ in {
     };
   };
 
-  environment.systemPackages = [pkgs.restic];
+  environment.systemPackages = [
+    pkgs.postgresql
+    pkgs.restic
+  ];
+
+  # A local PostgreSQL service keeps the postgres_dump fixture test-local.
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = ["testdb"];
+  };
 
   my."unit.backup" = {
     enable = true;
@@ -104,10 +114,22 @@ in {
       promote_to = ["B"];
       forget = ["--keep-last 2" "--group-by host"];
     };
-    host_items."my-path" = {
-      kind = "path";
-      policy = "test";
-      path.paths = ["/test-data"];
+    host_items = {
+      # Path snapshots are rotated on repo B to prove item-scoped forget.
+      "my-path" = {
+        kind = "path";
+        policy = "test";
+        path.paths = ["/test-data"];
+      };
+
+      # Postgres snapshots share the promotion policy so the test can prove
+      # remote forget/prune leaves unrelated item tags restorable.
+      "my-postgres" = {
+        kind = "postgres_dump";
+        policy = "test";
+        run_as_user = "postgres";
+        postgres_dump.database = "testdb";
+      };
     };
   };
 }

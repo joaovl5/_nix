@@ -1,11 +1,7 @@
 let
   inherit (import ../../../_lib/modules) combine_modules;
   modules = [
-    (import ./langs/js.nix)
-    (import ./langs/python.nix)
-    (import ./langs/fennel.nix)
-    (import ./langs/lua.nix)
-    (import ./langs/nix.nix)
+    (import ./langs)
     (import ./git.nix)
     (import ./vscode.nix)
   ];

@@ -18,6 +18,10 @@
 - Searching packages
   - `nh search <query>`
 
+## Repo-local skills
+
+- When adding, editing, reviewing, or debugging NixOS VM/integration tests under `tests/`, read `.agents/skills/writing-nixos-tests/SKILL.md` first.
+
 ## Required checks after changes
 
 In this order:
