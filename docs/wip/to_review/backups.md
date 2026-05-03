@@ -4,7 +4,7 @@
 
 ### What this system is
 
-This repository implements a declarative, Restic-based backup pipeline driven from Nix configuration.
+This repository implements a declarative, Restic-based backup framework pipeline driven from Nix configuration.
 
 At a high level:
 

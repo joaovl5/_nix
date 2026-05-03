@@ -15,7 +15,7 @@ Desired properties:
 3. Use the repo's `mylib` helpers to reduce repeated endpoint, mount, route, and container boilerplate.
 4. Explore alternatives and trade-offs.
 
-Hard constraint for this research phase: **do not use MicroVMs**.
+Initial hard constraint for the first pass: **do not use MicroVMs**. Appendix A reopens that constraint and researches MicroVMs as a stronger-isolation alternative.
 
 This document is a research snapshot only. No implementation decisions are locked in yet.
 
@@ -774,6 +774,575 @@ Verification for future implementation should follow repo procedure:
 - targeted `nix eval` / host toplevel build
 - `nix flake check --all-systems` only when appropriate for Nix code changes and when the broader check cost is acceptable
 
+## Appendix A: MicroVMs as a server isolation backend
+
+Date: 2026-05-03
+
+This appendix reconsiders the original no-MicroVM constraint. It does not replace the native-container research above; it asks whether MicroVMs can be a clean repo-supported server isolation tier and what decisions are still open.
+
+### Short answer
+
+Yes, MicroVMs can be used cleanly in this repo, but not as a drop-in replacement for the native `containers.<name>` plan.
+
+They become clean if the repo gives them a dedicated contract:
+
+- a shared guest baseline module
+- explicit TAP/routed networking
+- stable IP/MAC/interface allocation
+- explicit Traefik sources pointing at guest addresses
+- state declared as volumes or shares
+- secrets and logs handled deliberately
+- host-side backup declarations that understand where state lives
+
+They are not clean if the repo only copies the current `microvms/postgres/default.nix` sample. That sample proves the input works, but it does not define networking, persistence, firewall rules, ingress, backups, or secrets.
+
+The practical conclusion is: keep native NixOS containers as the simpler default, and treat MicroVMs as a stronger-isolation tier for selected services where the extra operational cost is justified.
+
+### What MicroVMs add over NixOS containers
+
+| Dimension              | Native NixOS containers                                          | MicroVMs                                                                                 |
+| ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Isolation boundary     | Shared host kernel through systemd-nspawn/container primitives   | Separate guest kernel behind a hypervisor                                                |
+| NixOS guest config     | Direct `containers.<name>.config`                                | Direct NixOS config through `microvm.vms.<name>.config` or `nixosConfigurations.<guest>` |
+| Operational weight     | Lower                                                            | Higher: VM boot, fixed RAM, hypervisor process, guest networking                         |
+| Network model          | NixOS container veth/namespace with `hostAddress`/`localAddress` | TAP, bridge, macvtap, or hypervisor user networking                                      |
+| Host reverse proxy fit | Very direct through container IP/hostname or host forwards       | Direct if guest has stable host-routable IP; otherwise needs forwarding                  |
+| State model            | Bind mounts, tmpfs, container root                               | Read-only root plus volumes or host shares                                               |
+| Best use               | Normal trusted service compartmentalization                      | Higher-risk/high-value services or stronger fault/security boundary                      |
+
+MicroVMs reduce the shared-kernel attack surface that native containers retain. The trade-off is more lifecycle, networking, storage, and resource management.
+
+### Current repo MicroVM state
+
+The repo already has MicroVM capability, but not yet a server framework.
+
+Verified repo facts:
+
+- `flake.nix` declares the `microvm` input and makes it follow repo `nixpkgs`.
+- `flake.lock` pins `microvm-nix/microvm.nix` at revision `2f2f62fdfdca2750e3399f66bd03986ab967e5ca`.
+- `outputs/hosts/default.nix` imports `microvm.nixosModules.host` through `HYPERVISOR_HOST_MODULES`. This is included for `lavpc`, `tyrant`, and `temperance`; `iso` does not receive it.
+- `_modules/vm.nix` is a generic `virtualisation.vmVariant` profile. It is not the MicroVM server framework.
+- `microvms/postgres/default.nix` is the only guest sample. It hardcodes `microvm.hypervisor = "cloud-hypervisor"`, shares `/nix/store` read-only through `virtiofs`, and enables PostgreSQL. It does not declare guest networking, state, firewall, ingress, secrets, or backups.
+
+So the repo is one layer ahead of zero: host capability exists, but clean service isolation would still need a repo API.
+
+### microvm.nix facts relevant here
+
+`microvm.nix` supports two main workflows:
+
+1. **Fully declarative MicroVMs**
+   - host declares `microvm.vms.<name>.config`
+   - the MicroVM is built with the host NixOS configuration
+   - this is closest to `containers.<name>.config`
+   - default for `microvm.vms.<name>.restartIfChanged` is true when `config` is used
+   - downside: host rebuilds become larger/slower because VM systems are included
+2. **Declarative deployment / imperative update**
+   - host declares `microvm.vms.<name>.flake` and optional `updateFlake`
+   - initial deployment is host-declarative under `/var/lib/microvms`
+   - later updates use `microvm -u <name>` or deploy helpers
+   - downside: lifecycle is less purely tied to host rebuilds
+
+The host module provides:
+
+- `/var/lib/microvms` state directory
+- `microvm@.service` for running guests
+- `microvms.target` for autostarted guests
+- TAP/MACVTAP setup services
+- `microvm-virtiofsd@.service` for `virtiofs` shares
+- PCI prep services for passthrough
+- `microvm.vms`, `microvm.autostart`, `microvm.stateDir`, and host timeout/readiness options
+
+Guest-level options important for server services include:
+
+- `microvm.hypervisor`
+- `microvm.vcpu`
+- `microvm.mem`
+- `microvm.interfaces`
+- `microvm.shares`
+- `microvm.volumes`
+- `microvm.devices`
+- `microvm.forwardPorts` for QEMU user networking only
+- `microvm.storeOnDisk`
+- `microvm.writableStoreOverlay`
+- `microvm.machineId`
+- `microvm.registerWithMachined`
+
+### Hypervisor choice
+
+`microvm.nix` supports several hypervisors. For this repo, the meaningful first choices are probably `qemu`, `cloud-hypervisor`, and maybe `firecracker` later.
+
+| Hypervisor                          | Why consider it                                                                                 | Caveats                                                                                                          | Fit here                                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `qemu`                              | Most flexible, supports 9p/virtiofs, user networking/port forwarding, broad debugging ecosystem | Larger/older C codebase; more knobs                                                                              | Best first prototype unless there is a strong reason to prefer Rust hypervisors immediately |
+| `cloud-hypervisor`                  | Rust, MicroVM-focused, already used by repo sample                                              | No 9p shares; smaller feature/debugging surface than QEMU                                                        | Good second candidate or default once storage/networking pattern is proven                  |
+| `firecracker`                       | Strong isolation story and production MicroVM reputation                                        | No 9p/virtiofs shares; state/store model must use block devices/images; less convenient for repo-first iteration | Possible hardened tier, not first prototype                                                 |
+| `kvmtool` / `stratovirt` / `alioth` | Lightweight alternatives                                                                        | No virtiofs and/or no control socket according to upstream table                                                 | Not first choices                                                                           |
+| `vfkit`                             | macOS support                                                                                   | macOS-only and no TAP/bridge networking                                                                          | Not relevant for `tyrant` server path                                                       |
+
+Recommended first decision: use `qemu` for the first server prototype, even if the desired long-term hypervisor is `cloud-hypervisor` or `firecracker`. QEMU gives the most escape hatches while the repo API is still unsettled.
+
+### Networking options for MicroVM services
+
+The reverse proxy contract should stay the same as the main document:
+
+- HTTP services register `my.vhosts.<name>.sources`
+- raw TCP uses `my.tcp_routes`
+- raw UDP uses `my.udp_routes`
+
+This keeps the memory/repo rule intact: `my.vhosts` remains HTTP-only, and protocol routing remains explicit.
+
+#### Option A: routed TAP per MicroVM
+
+Each MicroVM gets a TAP interface and a stable host-routed address. Traefik on the host points directly at the guest IP.
+
+Example shape:
+
+```nix
+microvm.vms.actual = {
+  pkgs = pkgs;
+  specialArgs = {
+    inherit inputs mylib;
+  };
+
+  config = { lib, pkgs, ... }: {
+    networking.hostName = "actual";
+
+    microvm = {
+      hypervisor = "qemu";
+      mem = 1024;
+      vcpu = 2;
+      interfaces = [
+        {
+          type = "tap";
+          id = "vm-actual";
+          mac = "02:00:00:00:11:02";
+        }
+      ];
+      shares = [
+        {
+          tag = "ro-store";
+          source = "/nix/store";
+          mountPoint = "/nix/.ro-store";
+          proto = "virtiofs";
+          readOnly = true;
+        }
+      ];
+    };
+
+    systemd.network.enable = true;
+    systemd.network.networks."10-eth" = {
+      matchConfig.MACAddress = "02:00:00:00:11:02";
+      address = ["10.88.11.2/32"];
+      routes = [
+        {
+          Destination = "10.88.11.1/32";
+          GatewayOnLink = true;
+        }
+        {
+          Destination = "0.0.0.0/0";
+          Gateway = "10.88.11.1";
+          GatewayOnLink = true;
+        }
+      ];
+      networkConfig.DNS = ["10.88.11.1"];
+    };
+
+    networking.firewall.allowedTCPPorts = [5006];
+  };
+};
+
+my.vhosts.actual-budget = {
+  target = "actual";
+  sources = ["http://10.88.11.2:5006"];
+};
+```
+
+The guest-side network shape is shown here; a real implementation must also generate matching host-side route/interface config for `vm-actual`.
+
+Pros:
+
+- strongest clean fit for host Traefik
+- no host high-port namespace for HTTP services
+- avoids putting guests on a shared L2 bridge
+- gives each MicroVM a clear identity and route
+- maps well to a future numeric ID registry
+
+Cons:
+
+- most networking boilerplate
+- needs host-side systemd-networkd or equivalent route setup
+- requires a central IP/MAC/TAP allocation convention
+- guest services must bind to reachable guest interfaces, not only loopback
+
+This is the recommended MicroVM networking model if MicroVMs become a real server tier.
+
+#### Option B: host-internal bridge + NAT
+
+The host creates an internal bridge, MicroVM TAP interfaces attach to it, and guests use static IPs or DHCP. Host NAT provides outbound connectivity.
+
+Pros:
+
+- documented upstream pattern
+- easy mental model
+- simpler than per-interface host routes
+- good enough for many private host-only service networks
+
+Cons:
+
+- shared L2 segment between VMs
+- compromised guests can attempt ARP/NDP/DHCP/link-local mischief unless filtered
+- still needs bridge and address management
+
+Good fallback if routed TAP is too much for the first implementation.
+
+#### Option C: QEMU user networking + `microvm.forwardPorts`
+
+The MicroVM uses hypervisor user networking and forwards a host port to the guest service.
+
+Example shape:
+
+```nix
+microvm = {
+  hypervisor = "qemu";
+  interfaces = [
+    {
+      type = "user";
+      id = "usernet";
+      mac = "02:00:00:00:11:02";
+    }
+  ];
+  forwardPorts = [
+    {
+      from = "host";
+      proto = "tcp";
+      host.port = 15006;
+      guest.port = 5006;
+    }
+  ];
+};
+
+my.vhosts.actual-budget.sources = ["http://127.0.0.1:15006"];
+```
+
+Pros:
+
+- least host networking setup
+- useful for quick smoke tests
+- easy to adapt existing `localhost` endpoint assumptions
+
+Cons:
+
+- QEMU-specific for forwarding
+- host port namespace returns
+- less explicit service identity
+- weaker production shape than TAP/routed networking
+
+This is a prototype fallback, not the clean server architecture.
+
+#### Option D: LAN bridge / macvtap
+
+The MicroVM becomes a peer on the LAN, either through a bridge attached to the physical NIC or MACVTAP.
+
+Pros:
+
+- useful for services that need LAN identity
+- can avoid host Traefik for selected protocols
+
+Cons:
+
+- larger network exposure
+- external IP/MAC/DHCP planning required
+- less desirable for services intended to be consumed only by host Traefik
+
+Keep this for exceptional services, not default web apps.
+
+### State model
+
+MicroVM roots are intended to be read-only, with persistent state externalized. This is good for clarity but forces an early storage decision.
+
+Main choices:
+
+1. **Host shares**
+   - `microvm.shares` mounts a host directory through 9p or virtiofs
+   - easiest for host-side backups and inspection
+   - `virtiofs` is usually preferred over 9p for performance
+   - hypervisor support matters: for example, `firecracker` lacks 9p/virtiofs support
+2. **Block volumes**
+   - `microvm.volumes` attaches image files as disks
+   - better fit for databases or filesystems needing normal block semantics
+   - less transparent to host backup tooling unless backed up as an image or dumped from inside the guest
+3. **Guest-managed remote state**
+   - app stores data in a DB or remote service outside the MicroVM
+   - can simplify VM replacement
+   - pushes isolation problem to the external dependency
+
+Recommended first-pass policy:
+
+- use a read-only `/nix/store` share for build/closure efficiency when the chosen hypervisor supports it
+- use explicit host shares for simple app state that the existing backup system should see
+- use volumes for databases only when the backup story is a service-level dump, not raw file backup
+- avoid `microvm.writableStoreOverlay` for normal server services unless the guest must build Nix derivations at runtime
+
+### Secrets model
+
+MicroVM secrets need a more deliberate answer than native containers because the guest has its own boot/lifecycle.
+
+Possible approaches:
+
+1. **Host-managed read-only secret shares**
+   - host decrypts secrets as today
+   - only selected files are shared into the guest
+   - easiest first implementation
+   - caveat: upstream FAQ notes that virtiofs-shared sops-nix `/run/secrets` can disappear on host update unless mitigated, and updated secrets still require guest restart/reload
+2. **Guest-managed sops-nix**
+   - the MicroVM imports the secrets module and decrypts inside the guest
+   - cleaner VM autonomy
+   - requires deciding the guest's age/GPG key story and where keys live
+3. **Service-specific secret injection**
+   - systemd credentials, env files, or app-specific config material generated at boot
+   - can be clean, but needs per-service conventions
+
+Recommended first prototype: host-managed read-only secret shares for non-critical secrets, with the limitation documented. Do not silently share the whole host secret tree.
+
+### Backups
+
+Current repo backup conventions are host-oriented. MicroVMs can preserve that, but only if state placement is explicit.
+
+Recommended backup contract:
+
+- host backup declarations remain under the owning unit
+- host shares are backed up by their host paths
+- volume-backed databases must define a dump job, not rely on raw image backup by default
+- guest-only state is not acceptable unless the backup module has a VM-aware collection path
+- if logs matter, share guest journals intentionally rather than expecting host journald to include them automatically
+
+For database services, a dump over guest IP or a guest-side timer that writes to a host share is cleaner than backing up live disk images.
+
+### Logging and operations
+
+Useful upstream features:
+
+- `microvm.machineId` can make guest journald identity stable
+- guest `/var/log/journal` can be shared to the host through `virtiofs`
+- `microvm.registerWithMachined` can expose VMs through `machinectl` for supported operations
+- `microvm.deploy.installOnHost`, `sshSwitch`, and `rebuild` exist for SSH-oriented deployment workflows
+
+Repo implications:
+
+- first implementation should define how to inspect guest logs from the host
+- health checks should test the guest service over the same path Traefik uses
+- updates need a clear rule: host rebuild restarts guest, or VM update is managed separately
+- resource budgets should be explicit: `microvm.mem` and `microvm.vcpu` are part of the service contract
+
+### Suggested repo API shape
+
+MicroVM helpers should mirror the native-container helper direction but stay separate to avoid mixing semantics.
+
+Possible helper namespace:
+
+```nix
+u.microvm = {
+  mk_vm = { name, id, config, ... }: { ... };
+  http_endpoint = { name, port, target ? name, ... }: { ... };
+  tap_interface = { name, id, ... }: { ... };
+  routed_network = { id, ... }: { ... };
+  share_ro = { tag, source, mount_point, ... }: { ... };
+  share_rw = { tag, source, mount_point, ... }: { ... };
+  volume = { image, mount_point, size, ... }: { ... };
+};
+```
+
+Keep route registration explicit at first:
+
+```nix
+my.vhosts.actual-budget = cfg.endpoint;
+my.tcp_routes.forgejo_ssh = { ... };
+```
+
+Avoid a first version that auto-emits `my.vhosts` from `u.microvm.mk_vm`. Hidden route emission would make it too easy to blur the existing HTTP/TCP/UDP split.
+
+A later full module could be:
+
+```nix
+my.microvms.actual = {
+  enable = true;
+  id = 11;
+  hypervisor = "qemu";
+  mem = 1024;
+  vcpu = 2;
+
+  http.actual-budget = {
+    port = 5006;
+    target = "actual";
+  };
+
+  shares.state = {
+    source = "/var/lib/microvms/actual/state";
+    mount_point = "/var/lib/actual";
+    read_only = false;
+  };
+
+  config = { pkgs, ... }: {
+    services.actual.enable = true;
+  };
+};
+```
+
+That later module could add assertions for:
+
+- duplicate IDs
+- duplicate IPs
+- duplicate MACs
+- invalid TAP names
+- unsupported hypervisor/share combinations
+- missing backup declaration for writable state
+- accidental TCP/UDP route registration through `my.vhosts`
+
+### Candidate first services
+
+#### Actual Budget
+
+Best low-risk MicroVM prototype.
+
+Why:
+
+- HTTP-only from the host perspective
+- simple reverse proxy shape
+- likely straightforward persistent state
+- less protocol complexity than Forgejo or Pi-hole
+
+What it would prove:
+
+- MicroVM build through host config
+- TAP/routed networking
+- Traefik to guest IP
+- host-visible state share
+- backup path for shared state
+
+#### Forgejo
+
+Good second candidate, not first.
+
+Why:
+
+- exercises HTTP plus raw TCP SSH
+- high-value service where stronger isolation may be worthwhile
+
+Risks:
+
+- SSH routing and clone URLs must be handled carefully
+- state/database/runner integration is larger
+
+#### PostgreSQL
+
+The repo already has a skeletal sample, but it is not a good first production candidate by itself.
+
+Why:
+
+- database state/backup semantics are the hard part
+- direct Traefik ingress is irrelevant
+- service consumers would need network/secrets changes
+
+It is useful as a build/evaluation example, not as a service-isolation template yet.
+
+#### Pi-hole / DNS services
+
+Not a first candidate.
+
+Why:
+
+- DNS/DHCP/LAN behavior is network-sensitive
+- may require LAN identity or privileged networking
+- mistakes affect the whole network
+
+### Proposed MicroVM prototype path
+
+If MicroVMs are selected for a prototype, use this path:
+
+1. Keep the native-container recommendation intact as the simple default.
+2. Add MicroVM helpers separately under `mylib.units.microvm` or `mylib.units.vm` after naming is decided.
+3. Start with one HTTP-only service, probably Actual Budget.
+4. Use fully declarative `microvm.vms.<name>.config` for the prototype.
+5. Use `qemu` first for flexibility.
+6. Use TAP networking with either routed /32 addresses or an internal host bridge.
+7. Point `my.vhosts.*.sources` at the guest IP and service port.
+8. Put all state in a declared host share or declared volume with a backup plan.
+9. Use host-managed read-only secret shares only for explicitly selected files.
+10. Add logs/health checks to the acceptance criteria.
+11. Only after the prototype works, decide whether to move to `cloud-hypervisor` or a stricter hypervisor.
+
+Prototype acceptance criteria:
+
+- host config evaluates
+- MicroVM runner builds
+- `microvm@<name>.service` starts
+- guest has expected IP address
+- host can reach `http://<guest-ip>:<port>`
+- Traefik routes through `my.vhosts` to the guest backend
+- state survives guest restart
+- backup declaration covers the state path or dump artifact
+- logs are inspectable from the host
+
+### Decisions to make
+
+1. **Role of MicroVMs**
+   - replace native containers for server isolation
+   - or act as a stronger-isolation tier for selected services
+2. **First service**
+   - low-risk HTTP service such as Actual Budget
+   - or high-value service such as Forgejo
+3. **Hypervisor default**
+   - `qemu` for flexibility
+   - `cloud-hypervisor` for a Rust MicroVM-focused runtime
+   - `firecracker` later for a stricter model with more storage constraints
+4. **Networking model**
+   - routed TAP
+   - internal bridge + NAT
+   - QEMU user networking/forwarded ports for prototypes only
+   - LAN bridge/macvtap for exceptional services
+5. **Address registry**
+   - manual IP/MAC/TAP declarations
+   - numeric ID deriving IP/MAC/interface names
+   - central `my.microvms` module with assertions
+6. **Lifecycle model**
+   - fully declarative host rebuilds
+   - declarative deployment plus `microvm -u`
+   - SSH deploy/switch scripts
+7. **State model**
+   - host shares for inspectable state
+   - block volumes for database-like state
+   - remote/external state
+8. **Secrets model**
+   - host-managed read-only secret shares
+   - guest-managed sops-nix
+   - systemd credentials or service-specific injection
+9. **Backup model**
+   - host path backup
+   - guest service dumps
+   - image-level backup
+10. **Observability model**
+    - shared journald
+    - guest SSH
+    - `machinectl` registration
+    - service-level metrics/log shipping
+11. **Helper API boundary**
+    - small `u.microvm.*` helpers
+    - full `my.microvms.<name>` module
+    - per-unit isolation toggles
+
+### Deferred questions for review
+
+These are intentionally deferred because they are not blocking for the research appendix.
+
+1. Should MicroVMs become the preferred server isolation path, or only a stronger-isolation tier for selected services?
+2. Which service should be the first MicroVM prototype: Actual Budget, Forgejo, PostgreSQL, or something else?
+3. For `tyrant`, are you comfortable introducing host-routed TAP/systemd-networkd-style VM networking, or should the first prototype use an internal bridge?
+4. Do you prefer `qemu` first for flexibility, or `cloud-hypervisor` first because the repo sample already uses it?
+5. Should persistent state favor host-visible shares for backup simplicity, or block volumes for stronger VM filesystem separation?
+6. Should secrets be host-decrypted and shared read-only first, or should MicroVM guests get their own sops-nix key story from day one?
+7. Should MicroVM updates be tied to host rebuilds, or should guests have a separate `microvm -u` / SSH deploy lifecycle?
+8. Do you want the eventual helper to stay explicit (`u.microvm.*`) or grow into a central `my.microvms.<name>` option module with assertions?
+
 ## Source index
 
 ### Repo sources
@@ -787,6 +1356,11 @@ Verification for future implementation should follow repo procedure:
 - `_lib/units/default.nix`
 - `_lib/units/endpoint.nix`
 - `_lib/units/_backup/types.nix`
+- `flake.nix`
+- `flake.lock`
+- `outputs/hosts/default.nix`
+- `_modules/vm.nix`
+- `microvms/postgres/default.nix`
 - `systems/_bootstrap/host.nix`
 - `systems/_bootstrap/server.nix`
 - `systems/_modules/dns/default.nix`
@@ -822,3 +1396,22 @@ Verification for future implementation should follow repo procedure:
 - machinectl man page: https://man7.org/linux/man-pages/man1/machinectl.1.html
 - NixOS OCI containers options: https://search.nixos.org/options?query=virtualisation.oci-containers
 - Arion docs: https://docs.hercules-ci.com/arion/
+- microvm.nix README at pinned repo revision: https://raw.githubusercontent.com/microvm-nix/microvm.nix/2f2f62fdfdca2750e3399f66bd03986ab967e5ca/README.md
+- microvm.nix handbook intro: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/intro.md
+- microvm.nix declaring MicroVMs: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declaring.md
+- microvm.nix declarative MicroVMs: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declarative.md
+- microvm.nix host preparation: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host.md
+- microvm.nix host systemd services: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host-systemd.md
+- microvm.nix options overview: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/options.md
+- microvm.nix options source: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/microvm/options.nix
+- microvm.nix host options source: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/host/options.nix
+- microvm.nix network interfaces: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/interfaces.md
+- microvm.nix simple network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/simple-network.md
+- microvm.nix advanced network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/advanced-network.md
+- microvm.nix routed network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/routed-network.md
+- microvm.nix shares: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/shares.md
+- microvm.nix device passthrough: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/devices.md
+- microvm.nix output options: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/output-options.md
+- microvm.nix command workflow: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/microvm-command.md
+- microvm.nix SSH deploy workflow: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/ssh-deploy.md
+- microvm.nix FAQ: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/faq.md
