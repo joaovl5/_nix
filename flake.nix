@@ -144,6 +144,11 @@
       flake = false;
     };
 
+    hister = {
+      url = "github:asciimoo/hister";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # atticd nix cache server thingy
     atticd = {
       url = "git+https://github.com/zhaofengli/attic?shallow=1";
@@ -153,8 +158,11 @@
     # -arr programs
     nixarr = {
       url = "git+https://github.com/nix-media-server/nixarr?shallow=1";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.vpnconfinement.follows = "vpnconfinement";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        vpnconfinement.follows = "vpnconfinement";
+        treefmt-nix.follows = "treefmt-nix";
+      };
     };
     # Other ---
     ## ai

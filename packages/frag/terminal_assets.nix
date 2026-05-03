@@ -6,14 +6,6 @@
     import ../../users/_modules/starship/settings.nix {inherit lib;}
   );
 
-  zellij_fragments = [
-    ../../users/_modules/cli/zellij/config/base.kdl
-  ];
-
-  zellij_config = pkgs.writeText "frag-zellij-config.kdl" (
-    lib.concatStringsSep "\n\n" (map builtins.readFile zellij_fragments)
-  );
-
   tmux_plugin_name = "better-mouse-mode";
   tmux_config = pkgs.writeText "frag-tmux.conf" ''
     ${builtins.readFile ../../users/_modules/cli/tmux/tmux.conf}
@@ -38,9 +30,8 @@ in
       "$shared_root/.config/fish/conf.d/container_safe_functions.fish"
     cp ${starship_toml} "$shared_root/.config/starship.toml"
 
-    cp ${zellij_config} "$shared_root/.config/zellij/config.kdl"
-    cp -r ${../../users/_modules/cli/zellij/layouts} \
-      "$shared_root/.config/zellij/layouts"
+    cp -r ${../../users/_modules/cli/zellij/config}/. \
+      "$shared_root/.config/zellij"
     cp ${pkgs.zjstatus}/bin/zjstatus.wasm \
       "$shared_root/.local/share/zellij/plugins/zjstatus.wasm"
 

@@ -9,6 +9,7 @@ let
     (import ./whisper-overlay)
     (import ./hyprland)
     (import ./gtk)
+    (import ./fonts.nix)
     (import ./xdg-portals.nix)
   ];
 in

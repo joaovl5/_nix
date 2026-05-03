@@ -10,6 +10,7 @@
   local_packages = import ../packages {inherit pkgs inputs;};
 
   modules = [
+    (import ./_modules/assets)
     (import ./_modules/cli)
     (import ./_modules/yazi)
     (import ./_modules/fish)

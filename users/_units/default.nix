@@ -19,6 +19,7 @@ in {
     ./qbittorrent
     ./syncthing
     ./forgejo
+    ./hister
     unit_global_cfg
   ];
 }

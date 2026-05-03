@@ -1,13 +1,8 @@
 layout {
   default_tab_template {
-    children
     pane size=1 borderless=true {
       plugin location="file:zjstatus" {
-        // hide_frame_for_single_pane "false"
-
-        format_left  "#[bg=#181825]{mode} {tabs}"
-        format_right "#[fg=#CBA6F7] #[fg=#CDD6F4,bold]{datetime} #[fg=#CBA6F7,bg=#181825,bold]{session}"
-        format_space "#[bg=#181825]"
+        format_left  "#[fg=#CBA6F7,bold]{session} {mode} {tabs}"
         format_center ""
 
         mode_normal      "#[fg=#89B4FA,bold] N"
@@ -26,21 +21,15 @@ layout {
         mode_prompt      "#[fg=#F9E2AF,bold] P"
         mode_default_to_mode "normal"
 
-        tab_normal               " #[fg=#7F849C,bg=#181825]{fullscreen_indicator}{sync_indicator}{floating_indicator}{index}-{name} "
-        tab_active               " #[fg=#CDD6F4,bg=#181825,bold]{fullscreen_indicator}{sync_indicator}{floating_indicator}{index}-{name} "
+        tab_normal               " #[fg=#7F849C]{fullscreen_indicator}{sync_indicator}{floating_indicator}{name}"
+        tab_active               " #[fg=#ffff8e]{fullscreen_indicator}{sync_indicator}{floating_indicator}{name}"
         tab_fullscreen_indicator " "
         tab_sync_indicator       " "
         tab_floating_indicator   "󰉈 "
 
-        border_enabled  "true"
-        border_char     "⎼"
-        border_format   "#[fg=#4f4b48]{char}"
-        border_position "top"
-
-        datetime        "#[fg=#BAC2DE,bold] {format} "
-        datetime_format "%H:%M:%S %d-%m-%y"
-        datetime_timezone "America/Sao_Paulo"
+        border_enabled  "false"
       }
     }
+    children
   }
 }

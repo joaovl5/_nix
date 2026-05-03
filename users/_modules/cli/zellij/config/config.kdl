@@ -1,25 +1,27 @@
 default_mode "normal"
-theme "onedark"
+theme "iceberg-dark"
 support_kitty_keyboard_protocol false
 copy_on_select true
-session_serialization true
+session_serialization false
 serialize_pane_viewport true
 osc8_hyperlinks true
 
+
+pane_frames false
 ui {
   pane_frames {
-    rounded_corners true
+    rounded_corners false
   }
 }
 
 keybinds clear-defaults=true {
   normal {
-    bind "Ctrl z" { SwitchToMode "Locked"; }
+    bind "Alt z" { SwitchToMode "Locked"; }
     bind "Alt q" { CloseFocus; }
     bind "Alt Enter" { NewTab; }
     bind "Alt h" { MoveFocusOrTab "Left"; }
-    bind "Alt n" { MoveFocus "Down"; }
-    bind "Alt u" { MoveFocus "Up"; }
+    bind "Alt u" { MoveFocus "Down"; }
+    bind "Alt i" { MoveFocus "Up"; }
     bind "Alt l" { MoveFocusOrTab "Right"; }
     bind "Alt ," { SwitchToMode "RenameTab"; }
     bind "Alt ." {
@@ -29,18 +31,11 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-    bind "Alt s" {
-      LaunchOrFocusPlugin "choose-tree" {
-        floating true
-        move_to_focused_tab true
-        show_plugins false
-      }
-    }
     bind "Alt f" { ToggleFocusFullscreen; }
   }
 
   locked {
-    bind "Ctrl z" { SwitchToMode "Normal"; }
+    bind "Alt z" { SwitchToMode "Normal"; }
   }
 
   tmux {
@@ -121,7 +116,6 @@ plugins {
   compact-bar { path "compact-bar"; }
 }
 
-// pane_frames false
 // simplified_ui true
 
 
