@@ -7,6 +7,7 @@
 ## Special Instructions
 
 - When altering the `globals/` directory, it's necessary to run `nix flake update globals` to update `flake.lock` with the new info.
+- When creating or maintaining repo-local skills under `.agents/skills/`, use `.agents/skills/skill-authoring/SKILL.md` as the authoritative workflow. Prefer it over generic skill-writing guidance when they conflict.
 
 ## Helpful Tooling
 
