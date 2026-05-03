@@ -1,5 +1,5 @@
 args: let
-  public = import ../../../_modules/public.nix args;
+  public = import ../../../../../_modules/public.nix args;
   mk_var = name: type: params: {
     inherit
       name

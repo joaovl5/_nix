@@ -1,5 +1,5 @@
 let
-  inherit (import ../../../_lib/modules) combine_modules;
+  inherit (import ../../../../../_lib/modules) combine_modules;
   modules = [
     (import ./setup.nix)
     (import ./env.nix)
