@@ -59,14 +59,42 @@ local function _6_()
 	return fun_3_auto("b")
 end
 n.map({ "n", "x", "o" }, "b", _6_)
-n.map({ "n", "x" }, "<A-[>", "<cmd>Treewalker Left<cr>")
-n.map({ "n", "x" }, "<A-]>", "<cmd>Treewalker Right<cr>")
-n.map({ "n", "x" }, "<A-k>", "<cmd>Treewalker Up<cr>")
-n.map({ "n", "x" }, "<A-j>", "<cmd>Treewalker Down<cr>")
-n.map({ "n", "x" }, "<A-S-[>", "<cmd>Treewalker SwapLeft<cr>")
-n.map({ "n", "x" }, "<A-S-]>", "<cmd>Treewalker SwapRight<cr>")
-n.map({ "n", "x" }, "<A-K>", "<cmd>Treewalker SwapUp<cr>")
-n.map({ "n", "x" }, "<A-J>", "<cmd>Treewalker SwapDown<cr>")
+local function treewalker(subcommand)
+	local ok, err = pcall(vim.cmd, "Treewalker " .. subcommand)
+	if not ok then
+		if
+			type(err) == "string" and string.find(err, "Treewalker: Treesitter node not found under cursor", 1, true)
+		then
+			return vim.notify("Treewalker: no Treesitter node under cursor", vim.log.levels.WARN)
+		else
+			return error(err)
+		end
+	end
+end
+n.map({ "n", "x" }, "<A-[>", function()
+	return treewalker("Left")
+end)
+n.map({ "n", "x" }, "<A-]>", function()
+	return treewalker("Right")
+end)
+n.map({ "n", "x" }, "<A-k>", function()
+	return treewalker("Up")
+end)
+n.map({ "n", "x" }, "<A-j>", function()
+	return treewalker("Down")
+end)
+n.map({ "n", "x" }, "<A-S-[>", function()
+	return treewalker("SwapLeft")
+end)
+n.map({ "n", "x" }, "<A-S-]>", function()
+	return treewalker("SwapRight")
+end)
+n.map({ "n", "x" }, "<A-K>", function()
+	return treewalker("SwapUp")
+end)
+n.map({ "n", "x" }, "<A-J>", function()
+	return treewalker("SwapDown")
+end)
 wk.add({
 	km("<leader>q", { group = "Tab" }),
 	km("<leader>qc", { desc = "Create" }, "<cmd>tabnew<CR>"),
