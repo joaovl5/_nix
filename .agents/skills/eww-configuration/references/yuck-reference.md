@@ -14,7 +14,7 @@ $XDG_CONFIG_HOME/eww/
   eww.scss
 ```
 
-This repo currently stores the active bar under `users/_modules/desktop/eww/config/bar/`. Verify the actual `--config` path before running Eww commands.
+This repo currently stores the active bar under `users/_modules/desktop/widgets/eww/config/bar/`. Verify the actual `--config` path before running Eww commands.
 
 Use `(include "./path/file.yuck")` to split a large Yuck file. The current repo config does not use `include`.
 

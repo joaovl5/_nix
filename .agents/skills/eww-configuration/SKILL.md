@@ -1,18 +1,18 @@
 ---
 name: eww-configuration
-description: Use when editing or debugging this repository's Eww/Yuck/SCSS configuration under users/_modules/desktop/eww, including bar widgets, magic variables, GTK styling, or eww commands.
+description: Use when editing or debugging this repository's Eww/Yuck/SCSS configuration under users/_modules/desktop/widgets/eww, including bar widgets, magic variables, GTK styling, or eww commands.
 ---
 
-Use this skill for repo-managed Eww config in `users/_modules/desktop/eww/`.
+Use this skill for repo-managed Eww config in `users/_modules/desktop/widgets/eww/`.
 
 ## Repo facts
 
-- Nix entrypoint: `users/_modules/desktop/eww/default.nix`.
+- Nix entrypoint: `users/_modules/desktop/widgets/eww/default.nix`.
 - Config is linked with `hybrid-links.links.eww.from = ./config` to `~/.config/eww`; do not edit generated `~/.config/eww` directly.
 - `programs.eww.enable = true`; Home Manager adds the package. This repo also currently adds `pkgs.eww` explicitly.
-- Current config files are under `config/bar/`: `eww.yuck`, `eww.scss`, and `scripts/.keep`. No root `config/eww.yuck` exists, so verify the actual `eww --config ...` launch path before assuming default config-root behavior.
+- Current config files are under `config/bar/`: `eww.yuck`, `eww.scss`, and `scripts/niri-workspaces.sh`. No root `config/eww.yuck` exists, so verify the actual `eww --config ...` launch path before assuming default config-root behavior.
 - Current bar tree: `bar` window -> `bar` widget -> vertical `centerbox` -> `workspaces`, `centerstuff`, `sidestuff`.
-- Current data: `defpoll time/date`, `EWW_RAM.used_mem_perc`, `EWW_DISK["/"]`, and hardcoded `wmctrl -s 0..8` workspace buttons.
+- Current data: `defpoll time/date`, `deflisten niri_workspaces`, `EWW_CPU.avg`, `EWW_RAM.used_mem_perc`, and `EWW_DISK["/"]`.
 
 ## Minimal workflow
 
@@ -20,21 +20,19 @@ Use this skill for repo-managed Eww config in `users/_modules/desktop/eww/`.
 2. Change Yuck structure before SCSS selectors. Every custom widget body has one root widget.
 3. Prefer built-in magic vars for system metrics. Use `deflisten` for streaming state, `defpoll` for polling fallback, `for` for JSON arrays, and `literal` only when you must render a full Yuck tree string.
 4. For styling, remember GTK CSS is not browser CSS. Use `eww inspector` to inspect CSS nodes/classes.
-5. After edits, follow repo checks from `AGENTS.md`: `nix fmt`, stage intended files, `prek`; only run `nix flake check` if Nix code changed.
+5. After edits, follow repo checks from `AGENTS.md`: `nix fmt`, stage intended files, `prek`; run `nix flake check --all-systems` only if Nix code changed.
 
 ## SCSS + Yuck quick reference
 
-| Goal                     | Best method                                                                                                                |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Add a metric             | Add a `(metric ...)` call in `sidestuff`; verify magic-var shape first.                                                    |
-| Add a CPU metric         | Add `(metric :label ... :value {EWW_CPU.avg} :onchange "")` in `sidestuff`; shared `.metric` SCSS should apply by default. |
-| Add a style              | Add/confirm `:class` in Yuck, then match it in `eww.scss`; account for `* { all: unset; }`.                                |
-| Style `scale`            | Use GTK nodes like `.metric scale trough highlight`; verify with `eww inspector`.                                          |
-| Add dynamic workspaces   | Put helper scripts in `config/bar/scripts/`; prefer `deflisten` + JSON + `for`; keep `literal` as last resort.             |
-| Use values in attributes | Use `{expr}` for attribute/content expressions and `${expr}` inside strings.                                               |
-| Debug runtime            | `eww reload`, `eww logs`, `eww state`, `eww debug`, `eww open --debug`, `eww inspector`.                                   |
+- Add a metric with another `(metric ...)` call in `sidestuff`; verify the magic-variable shape first.
+- Add a CPU metric with `:value {round(EWW_CPU.avg, 0)}`; shared `.metric` SCSS should apply by default.
+- Add a style by confirming/adding `:class` in Yuck, then matching it in `eww.scss`; account for `* { all: unset; }`.
+- Style `scale` through GTK nodes such as `.metric scale trough highlight`; verify with `eww inspector`.
+- Add dynamic workspace/state UI through `deflisten` + JSON + `for`; keep `literal` as a last resort.
+- Use `{expr}` for expression-valued attributes/content and `${expr}` inside strings.
+- Debug runtime with `eww reload`, `eww logs`, `eww state`, `eww debug`, `eww open --debug`, and `eww inspector`.
 
-Current selector checks, in order: `.label-ram` is defined but Yuck emits `.label`; `.bar` is styled but not explicitly set as `:class "bar"`; `centerstuff` is emitted but unstyled. Treat these as verification points, not proven bugs. If a style does not apply: confirm the Yuck `:class`, confirm a matching SCSS selector after `* { all: unset; }`, then verify the live GTK node/class/state in `eww inspector`.
+Current selector checks: `.bar` is styled but not explicitly set as `:class "bar"`; `centerstuff` and `.label` are emitted but currently unstyled. Treat these as verification points, not proven bugs. If a style does not apply: confirm the Yuck `:class`, confirm a matching SCSS selector after `* { all: unset; }`, then verify the live GTK node/class/state in `eww inspector`.
 
 ## Documentation sources
 
@@ -50,7 +48,6 @@ Current selector checks, in order: `.label-ram` is defined but Yuck emits `.labe
 
 Load these only when needed:
 
-- `references/repo-config.md` — current repo layout, Nix/Home Manager wiring, widget tree, and safe edit checklists.
 - `references/yuck-reference.md` — Yuck syntax, windows/widgets, variables, expressions, magic vars, and dynamic lists.
 - `references/scss-gtk-reference.md` — GTK CSS/SCSS behavior, current selectors, inspector workflow, and styling pitfalls.
 - `references/eww-commands-and-sources.md` — Eww commands, troubleshooting flow, config-dir caveats, and source URL map.
@@ -63,4 +60,4 @@ Load these only when needed:
 - Adding a class in Yuck but no matching SCSS after the global reset.
 - Treating GTK CSS like web CSS (`flexbox`, floats, absolute layout, CSS width/height assumptions).
 - Using `literal` for lists when `for` over JSON can render the list.
-- Copying `.label-ram` or `.bar` without checking whether those selectors match live GTK nodes.
+- Assuming `.bar` or other SCSS selectors match live GTK nodes without checking `eww inspector`.

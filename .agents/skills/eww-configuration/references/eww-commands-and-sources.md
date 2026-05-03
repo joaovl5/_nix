@@ -11,7 +11,7 @@ eww open <window_name>
 
 For a separate config directory, official docs say every Eww command must include `--config /path/to/config/dir`, including `kill`, `logs`, and other commands.
 
-Repo caveat: this repo links `users/_modules/desktop/eww/config` to `~/.config/eww`, but the actual Yuck file is under `bar/`. No launch command was found in repo search. If using the bar sub-config directly, the config directory is expected to be `~/.config/eww/bar`; verify the current CLI flag placement with `eww --help` or the existing launcher before documenting a command.
+Repo caveat: this repo links `users/_modules/desktop/widgets/eww/config` to `~/.config/eww`, but the actual Yuck file is under `bar/`. No launch command was found in repo search. If using the bar sub-config directly, the config directory is expected to be `~/.config/eww/bar`; verify the current CLI flag placement with `eww --help` or the existing launcher before documenting a command.
 
 ## Troubleshooting commands
 
@@ -83,15 +83,13 @@ Run `nix flake check` only when Nix code changed. Do not commit without explicit
 
 ### Current repo evidence
 
-- `users/_modules/desktop/eww/default.nix`
-- `users/_modules/desktop/default.nix`
-- `users/_modules/desktop/eww/config/bar/eww.yuck`
-- `users/_modules/desktop/eww/config/bar/eww.scss`
-- `users/_modules/desktop/eww/config/bar/scripts/.keep`
+- `users/_modules/desktop/widgets/eww/default.nix`
+- `users/_modules/desktop/widgets/eww/config/bar/eww.yuck`
+- `users/_modules/desktop/widgets/eww/config/bar/eww.scss`
+- `users/_modules/desktop/widgets/eww/config/bar/scripts/niri-workspaces.sh`
 
 ## Unknowns to re-check later
 
 - The actual command or service that opens `bar`.
 - Whether `.bar` is an implicit GTK class in live Eww output or dead SCSS.
-- Whether `.label-ram` is intentional future styling or leftover CSS.
-- Whether a third/fourth metric fits comfortably in the current 50%-height right-side dock.
+- Whether a third/fourth metric fits comfortably in the current 30%-height right-side dock.

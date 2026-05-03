@@ -11,6 +11,8 @@ Use this for repo-local skill work in `./.agents/skills/`. It is the repo author
 - Search existing repo-local skills before creating a new one. If the need fits an existing skill, extend that skill instead of creating a near-duplicate.
 - Ground every factual claim in current repo files and primary or upstream sources when external behavior is involved. If something is uncertain, say so.
 - Keep `SKILL.md` operational. Push long examples, detailed checklists, and deeper background into `references/`.
+- Skill docs may refer to local files as `scripts/foo.py` and `references/bar.md`; the harness resolves skill-relative paths.
+- Executable helper scripts in skills should prefer `uv run --script` and PEP 723-style metadata when practical, matching existing skill-local helpers.
 
 ## Editing an existing skill
 

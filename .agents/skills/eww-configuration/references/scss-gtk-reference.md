@@ -12,7 +12,7 @@ Use widget attributes for layout first (`:orientation`, `:halign`, `:valign`, `:
 
 ## Current repo style constraints
 
-`users/_modules/desktop/eww/config/bar/eww.scss` starts with:
+`users/_modules/desktop/widgets/eww/config/bar/eww.scss` starts with:
 
 ```scss
 * {
@@ -29,9 +29,9 @@ Current theme basics:
   background-color: #000;
   border: 1px solid #2a2a2a;
   color: #b0b4bc;
-  padding: 6px 3px;
-  font-family: Iosevka Nerd Font;
-  font-size: 18px;
+  padding: 12px 4px;
+  font-family: Kode Mono;
+  font-size: 15.5px;
 }
 ```
 
@@ -44,9 +44,9 @@ Verify `.bar` with `eww inspector`; the Yuck currently does not explicitly set `
 .metric scale trough highlight
 .metric scale trough
 .metric
-.label-ram
 .workspaces
-.workspaces button:hover
+.workspace-list
+.workspace-button:hover
 ```
 
 Yuck currently emits these classes:
@@ -95,8 +95,8 @@ Use official Eww/GTK tools instead of guessing:
 ## Common styling traps
 
 - Adding `:class "foo"` in Yuck and forgetting `.foo` in SCSS.
-- Styling `.label-ram` when Yuck emits `.label`.
 - Assuming `.bar` is active without inspector evidence.
+- Assuming emitted helper classes like `.label` are styled when no matching SCSS exists.
 - Styling `scale` like a web input instead of using GTK nodes (`scale`, `trough`, `highlight`, `slider`).
 - Relying on flexbox or CSS dimensions instead of Eww/GTK layout attrs.
 - Forgetting `* { all: unset; }` removed default colors, padding, borders, and fonts.

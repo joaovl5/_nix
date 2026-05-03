@@ -42,8 +42,8 @@ Therefore:
 
 1. Create `tests/<suite>/default.nix`.
 2. Add node fixtures under `tests/<suite>/` when setup is substantial.
-3. Add `tests/scripts/src/my_nix_tests/<suite>.py` when orchestration belongs in Python.
-4. Register the Python import in `tests/scripts/default.nix`.
+3. Add `tests/scripts/src/my_nix_tests/<suite>.py` defining `run(...)`; every `mk_test` suite needs a Python module unless `python_module_name` intentionally reuses an existing one.
+4. Register that Python import in `tests/scripts/default.nix`.
 5. Ensure any generated files/secrets used by node fixtures are deterministic and materialized inside the VM.
 6. Run `python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py` for Python syntax.
 7. Stage new suite files before any flake-backed `nix eval` or `nix build` so the git flake input sees them.
@@ -54,14 +54,14 @@ Therefore:
 `tests/example/default.nix`:
 
 ```nix
-{mylib, ...}:
+{mylib, ...} @ args:
 mylib.tests.mk_test {
   name = "example";
   python_module_name = "example";
 
   nodes = {
-    server = import ./server.nix;
-    client = import ./client.nix;
+    server = import ./server.nix args;
+    client = import ./client.nix args;
   };
 }
 ```
