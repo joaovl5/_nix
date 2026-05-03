@@ -9,8 +9,10 @@ let
     (import ./fetchers)
     (import ./nix-tools.nix)
     (import ./lazygit.nix)
-    (import ./tmux)
-    (import ./zellij)
+    (import ./multiplexer)
+    (import ./starship)
+    (import ./yazi)
+    (import ./shell)
     (import ./hister.nix)
   ];
 in
