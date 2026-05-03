@@ -39,30 +39,41 @@ function killp --description 'Kill process that user selects in fzf (from ps aux
     end
 end
 
-function __yazi_zellij_request_file
-    if not set -q ZELLIJ_PANE_ID
+function __yazi_zellij_decode_live_cwd
+    set -l encoded_dir $argv[1]
+    if test -z "$encoded_dir"
         return 1
     end
 
-    set -l runtime_dir /tmp
-    if set -q XDG_RUNTIME_DIR
-        set runtime_dir $XDG_RUNTIME_DIR
-    end
-
-    set -l pane_id (string replace -ra '[^A-Za-z0-9_.-]' '_' -- "$ZELLIJ_PANE_ID")
-    echo "$runtime_dir/yazi_zellij_$pane_id.cwd"
+    printf '%s' "$encoded_dir" | command base64 --decode 2>/dev/null
 end
 
-function __yazi_zellij_consume_request --on-event fish_prompt
-    set -l request_file (__yazi_zellij_request_file)
-    or return 0
-
-    if not test -f "$request_file"
+function __yazi_zellij_apply_live_cwd --on-variable __yazi_zellij_live_cwd
+    if not set -q __yazi_zellij_live_cwd
         return 0
     end
 
-    set -l requested_dir (string trim -- (command cat -- "$request_file"))
-    command rm -f -- "$request_file"
+    set -l payload $__yazi_zellij_live_cwd
+    if test (count $payload) -ne 1
+        return 0
+    end
+
+    set -l parts (string split -m 1 \t -- "$payload[1]")
+    if test (count $parts) -ne 2
+        return 0
+    end
+
+    set -l target_pid $parts[1]
+    if not string match -rq '^[0-9]+$' -- "$target_pid"
+        return 0
+    end
+
+    if test "$target_pid" != "$fish_pid"
+        return 0
+    end
+
+    set -l requested_dir (__yazi_zellij_decode_live_cwd "$parts[2]")
+    or return 0
 
     if test -z "$requested_dir"
         return 0
@@ -77,14 +88,17 @@ function __yazi_zellij_consume_request --on-event fish_prompt
     end
 
     cd -- "$requested_dir"
+    if status is-interactive
+        commandline -f repaint >/dev/null 2>/dev/null
+    end
 end
 
 function yazi_zellij_toggle
-    set -l request_file (__yazi_zellij_request_file)
-    or return 1
+    if not set -q ZELLIJ_PANE_ID
+        return 1
+    end
 
-    command yazi-zellij-toggle "$request_file" "$PWD"
-    __yazi_zellij_consume_request
+    command yazi-zellij-toggle toggle "$PWD" "$fish_pid"
 end
 
 function __yazi_zellij_ctrl_e
@@ -93,7 +107,7 @@ function __yazi_zellij_ctrl_e
         return
     end
 
-    set -l buffer (commandline --current-buffer)
+    set -l buffer (string trim -- (commandline --current-buffer))
     if test -n "$buffer"
         commandline -f end-of-line
         return
