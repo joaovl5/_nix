@@ -19,14 +19,21 @@ Defined in `config/core/core-packages.el`:
 
 `straight-use-package-by-default t` means every `use-package` declaration fetches the package via straight.el unless overridden.
 
-Due to `use-package-always-defer t` (set in `early-init.el`), all packages load lazily. To trigger loading, use one of:
+Due to `use-package-always-defer t` (set in `early-init.el`), packages stay deferred until something triggers them.
+
+Common load triggers here:
 
 - `:hook` - loads when a hook fires
-- `:bind` - loads when a key is pressed
+- `:bind` - loads when a bound key is used
 - `:commands` - loads when an interactive command is invoked
-- `:init` - runs code at init time (but does NOT load the package)
+- `:mode` - loads when visiting matching files
+- `:demand t` - opts out of deferral and loads eagerly
+
+Sequencing keywords:
+
+- `:init` - runs at init time before package load
 - `:config` - runs after the package loads
-- `:after` - loads after another package
+- `:after` - constrains ordering relative to other packages; it does not load a deferred package by itself
 
 ## Nix-managed packages
 
@@ -46,25 +53,27 @@ In the `.el` file, reference them with:
 
 ### When to use Nix vs straight.el
 
-| Use Nix when                               | Use straight.el when    |
-| ------------------------------------------ | ----------------------- |
-| Package needs native compilation (C/Rust)  | Pure Elisp packages     |
-| Package needs system libraries             | Standard MELPA packages |
-| Package has complex build requirements     | Simple packages         |
-| `parinfer-rust-mode`, `org-roam` (emacsql) | Everything else         |
+Use Nix when:
+
+- package needs native compilation (C/Rust)
+- package needs system libraries
+- package has complex build requirements
+- examples here: `parinfer-rust-mode`, `org-roam` (emacsql)
+
+Use straight.el for pure Elisp and standard MELPA packages.
 
 ## Adding a MELPA package
 
 ```elisp
 (use package-name
-     :ensure t
      :hook (some-mode . some-function)
      :bind (("C-c x" . some-command))
+     :commands (some-command)
      :config
      (some-mode 1))
 ```
 
-straight.el handles installation automatically.
+straight.el handles installation automatically because `straight-use-package-by-default t` is enabled in `core-packages.el`.
 
 ## Adding a non-MELPA package (GitHub recipe)
 
@@ -93,7 +102,7 @@ extraPackages = epkgs:
   ];
 ```
 
-2. Reference in the `.el` file with `:straight nil :ensure nil`.
+2. Reference it in Lisp with `:straight nil :ensure nil` so straight.el and package.el both stay out of the way.
 
 ## Removing a package
 

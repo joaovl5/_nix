@@ -45,11 +45,19 @@ def _format_command(command: list[str]) -> str:
     return " ".join(command)
 
 
-def _anchor_for_nvim(anchor: Path) -> str:
+def _find_nfnl_project_root(anchor: Path) -> Path:
+    current = anchor.parent if anchor.is_file() else anchor
+    for candidate in [current, *current.parents]:
+        if (candidate / ".nfnl.fnl").is_file():
+            return candidate
+    raise RuntimeError(f"Could not locate .nfnl.fnl above anchor: {anchor}")
+
+
+def _path_for_nvim(path: Path, base: Path) -> str:
     try:
-        return str(anchor.relative_to(REPO_ROOT))
+        return str(path.relative_to(base))
     except ValueError:
-        return str(anchor)
+        return str(path)
 
 
 @app.default
@@ -65,10 +73,16 @@ def main(
         print(f"Anchor Fennel file not found: {resolved_anchor}")
         return 1
 
+    try:
+        project_root = _find_nfnl_project_root(resolved_anchor)
+    except RuntimeError as error:
+        print(error)
+        return 1
+
     command = [
         nvim_bin,
         "--headless",
-        f"+edit {_anchor_for_nvim(resolved_anchor)}",
+        f"+edit {_path_for_nvim(resolved_anchor, project_root)}",
         "+NfnlCompileAllFiles",
     ]
     if keep_orphans:
@@ -80,7 +94,7 @@ def main(
     print(f"$ {_format_command(command)}")
     completed = subprocess.run(
         command,
-        cwd=REPO_ROOT,
+        cwd=project_root,
         text=True,
         capture_output=True,
         check=False,

@@ -89,7 +89,7 @@ For prefix keymaps:
 ```elisp
 (make-process
  :name "my-proc"
- :command '("rg" "--json" pattern)
+ :command (list "rg" "--json" pattern)
  :buffer "*my-proc*"
  :filter (lambda (proc output)
            (with-current-buffer (process-buffer proc)
@@ -103,7 +103,10 @@ For prefix keymaps:
 For simpler synchronous use:
 
 ```elisp
-(shell-command-to-string "echo hello")
+(with-temp-buffer
+  (let ((status (call-process "git" nil t nil "status" "--porcelain")))
+    (list status (buffer-string))))
+
 (process-lines "git" "status" "--porcelain")
 ```
 
@@ -174,10 +177,9 @@ Use `:inherit` to derive from existing faces. Check face with `facep`.
 (cl-destructuring-bind (key (a b) &rest rest) data
   (list key a b rest))
 
-(cl-multiple-value-bind (stdout stderr exit-code)
-    (shell-command-with-exit "cmd")
-  (when (/= exit-code 0) (error stderr)))
-
+(with-temp-buffer
+  (let ((status (process-file "sh" nil t nil "-c" "printf 'ok'")))
+    (list status (buffer-string))))
 (cl-the integer (+ x y))
 ```
 
@@ -202,13 +204,20 @@ Built-in `repeat-mode` (Emacs 28+) makes commands repeatable via a keymap attach
 ## Pattern: async operations
 
 ```elisp
-(defun my-async-compute (callback)
-  (make-thread
-   (lambda ()
-     (let ((result (expensive-computation)))
-       (thread-first-input
-        (lambda ()
-          (funcall callback result)))))))
+(defun my-start-search (pattern callback)
+  (let ((buffer (generate-new-buffer " *my-rg*")))
+    (make-process
+     :name "my-rg"
+     :command `("rg" "--json" ,pattern)
+     :buffer buffer
+     :sentinel
+     (lambda (proc _event)
+       (when (memq (process-status proc) '(exit signal))
+         (unwind-protect
+             (with-current-buffer (process-buffer proc)
+               (funcall callback (buffer-string) (process-exit-status proc)))
+           (kill-buffer (process-buffer proc)))))
+     :noquery t)))
 ```
 
-Threads require Emacs 28+ compiled with `--enable-checking=yes --with-xwidgets` or native compilation. For portable async, use `make-process` or `url-retrieve`.
+Threads are build-dependent. Check `(fboundp 'make-thread)` or `(featurep 'threads)` before relying on them. For portable async work, prefer processes, timers, or built-in async APIs such as `url-retrieve`.

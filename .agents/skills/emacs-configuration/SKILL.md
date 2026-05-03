@@ -17,25 +17,23 @@ Below, paths are relative to `users/_modules/emacs/`.
 
 ## Where changes go
 
-| What                                                  | Where                          |
-| ----------------------------------------------------- | ------------------------------ |
-| Package bootstrap / straight.el setup                 | `config/core/core-packages.el` |
-| Fonts, theme, modeline, which-key, helpful            | `config/core/core-ui.el`       |
-| Utility functions, search engines, PATH, savehist     | `config/core/core-core.el`     |
-| Meow, golden-ratio, keybindings, window management    | `config/core/core-keys.el`     |
-| Dirvish, Projectile, Vertico, Corfu, Consult, Embark  | `config/core/core-views.el`    |
-| Flycheck, devdocs, Apheleia (formatters)              | `config/core/core-coding.el`   |
-| Org-mode, org-roam, svg-tag-mode, org-download        | `config/modules/mod-org.el`    |
-| parinfer-rust-mode for Lisp editing                   | `config/modules/mod-lisp.el`   |
-| Pre-init: GC tuning, frame settings, deferred loading | `config/early-init.el`         |
-| Entry point: requires core/_ and modules/_            | `config/init.el`               |
-| Nix package list, daemon config, symlink              | `default.nix`                  |
+- `config/core/core-packages.el`: straight.el bootstrap, `use`/`sup` aliases
+- `config/core/core-ui.el`: fonts, theme, modeline, helpful, and the daemon-mode `which-key` workaround
+- `config/core/core-core.el`: utility functions, search engines, PATH, savehist
+- `config/core/core-keys.el`: Meow, golden-ratio, keybindings, window management
+- `config/core/core-views.el`: Dirvish, Projectile, Vertico, Corfu, Consult, Embark
+- `config/core/core-coding.el`: Flycheck, devdocs, Apheleia
+- `config/modules/mod-org.el`: Org-mode, org-roam, svg-tag-mode, org-download
+- `config/modules/mod-lisp.el`: parinfer-rust-mode for Lisp editing
+- `config/early-init.el`: GC tuning, frame settings, deferred loading
+- `config/init.el`: entry point requiring core/_ and modules/_
+- `default.nix`: Nix package list, daemon config, config symlink
 
 ## Package management workflow
 
 1. **Most packages**: just use `(use package-name ...)` or `(sup 'package-name)`. straight.el fetches them automatically.
 2. **Nix-managed packages**: add to `programs.emacs.extraPackages` in `default.nix`, then reference with `:straight nil :ensure nil` in the `.el` file.
-3. **Non-MELPA packages**: pass a recipe to `straight-use-package`, e.g. `'(:type git :host github :repo "user/repo")`.
+3. **Non-MELPA packages**: pass a named recipe to `straight-use-package`, e.g. `'(package-name :type git :host github :repo "user/repo")`.
 
 See `references/emacs-package-management.md` for full details.
 
@@ -49,26 +47,24 @@ See `references/emacs-package-management.md` for full details.
 
 ## Common maintenance tasks
 
-| Task                          | Where to edit                                                         |
-| ----------------------------- | --------------------------------------------------------------------- |
-| Add a MELPA package           | `use-package` in the appropriate `core-*.el` or `mod-*.el`            |
-| Add a Nix-managed package     | `default.nix` `extraPackages` + `:straight nil` in `.el`              |
-| Change keybinding             | `config/core/core-keys.el` (global) or `:bind` in the relevant module |
-| Change theme or font          | `config/core/core-ui.el` (`handle-theme`, `handle-fonts`)             |
-| Change modal editing behavior | `config/core/core-keys.el` (`meow-setup`)                             |
-| Add a new config module       | Create `config/modules/mod-*.el`, add `(require 'mod-*)` to `init.el` |
-| Change Org behavior           | `config/modules/mod-org.el`                                           |
-| Change completion framework   | `config/core/core-views.el` (`handle-minibuf`, `handle-completions`)  |
-| Change formatter config       | `config/core/core-coding.el` (Apheleia `apheleia-formatters`)         |
-| Adjust startup performance    | `config/early-init.el` (GC threshold, deferred loading)               |
+- Add a MELPA package: `use-package` in the appropriate `core-*.el` or `mod-*.el` file
+- Add a Nix-managed package: `default.nix` `extraPackages` plus `:straight nil :ensure nil` in Lisp
+- Change keybindings: `config/core/core-keys.el` (global) or `:bind` in the relevant module
+- Change theme or fonts: `config/core/core-ui.el` (`handle-theme`, `handle-fonts`)
+- Change modal editing behavior: `config/core/core-keys.el` (`meow-setup`)
+- Add a new config module: create `config/modules/mod-*.el`, then require it from `init.el`
+- Change Org behavior: `config/modules/mod-org.el`
+- Change completion behavior: `config/core/core-views.el` (`handle-minibuf`, `handle-completions`)
+- Change formatter config: `config/core/core-coding.el` (Apheleia `apheleia-formatters`)
+- Adjust startup performance: `config/early-init.el`
 
 ## Repo quirks
 
-- **Daemon mode**: Emacs runs as a daemon (`services.emacs` in `default.nix`). Frame-dependent setup uses `server-after-make-frame-hook` (see `core-ui.el` which-key workaround).
-- **Deferred loading**: `use-package-always-defer t` is set in `early-init.el`. Packages load lazily unless you explicitly use `:init`, `:commands`, `:bind`, or `:hook`.
+- **Daemon mode**: Emacs runs as a daemon (`services.emacs` in `default.nix`). Frame-dependent setup uses `server-after-make-frame-hook`; `core-ui.el` has a `which-key` workaround for daemon-created frames.
+- **Deferred loading**: `use-package-always-defer t` is set in `early-init.el`. Packages stay deferred unless something else triggers them, such as `:hook`, `:bind`, `:commands`, `:mode`, or an explicit eager load with `:demand t`. `:init` runs before load, `:config` runs after load, and `:after` only constrains ordering once loading happens.
 - **Meow, not evil**: Modal editing uses Meow (`core-keys.el`). Don't add evil/vim keybindings.
-- **Aliases**: `sup` = `straight-use-package`, `use` = `use-package` (defined in `core-packages.el`).
-- **Module pattern**: Each file defines `handle-*` functions called at the end of the file, then `(provide 'feature-name)`.
+- **Aliases**: `sup` = `straight-use-package`, `use` = `use-package` (defined in `core-packages.el`). `straight-use-package-by-default t` means plain `use-package` forms already install through straight.el.
+- **Module pattern**: Several core UI/view/key files define `handle-*` functions and provide the feature at the end of the file, but do not assume every config file follows that exact shape.
 - **Frame settings**: `early-init.el` sets `undecorated` and `internal-border-width` on `default-frame-alist`.
 - **Custom variables**: `init.el` has `custom-set-variables` and `custom-set-faces` at the bottom. Don't duplicate these blocks.
 
@@ -76,7 +72,7 @@ See `references/emacs-package-management.md` for full details.
 
 ### Before editing
 
-- Identify the correct file from the table above.
+- Identify the correct file from the list above.
 - If adding a package, decide: straight.el (default) vs Nix (needs native compilation or system dependency).
 - If editing daemon-related code, account for `server-after-make-frame-hook`.
 
@@ -89,10 +85,10 @@ See `references/emacs-package-management.md` for full details.
 
 ## Common mistakes
 
-- Adding a package via straight.el when it needs native compilation (use Nix instead).
+- Adding a package via straight.el when it needs native compilation or system libraries (use Nix instead).
 - Forgetting `:straight nil :ensure nil` on Nix-managed packages (causes double-install attempts).
-- Using `:init` when deferred loading means it won't run at the right time (use `:hook`, `:bind`, or `:commands` to trigger loading).
-- Assuming frame is available at load time (daemon mode: use `server-after-make-frame-hook` for frame-dependent setup).
+- Expecting `:init`, `:config`, or `:after` to load a deferred package. Use a real trigger such as `:hook`, `:bind`, `:commands`, `:mode`, or `:demand t` when eager load is intentional.
+- Assuming a frame is available at load time (daemon mode: use `server-after-make-frame-hook` for frame-dependent setup).
 - Adding duplicate `custom-set-variables` or `custom-set-faces` blocks.
 - Forgetting `(provide 'feature-name)` at the end of a new module file.
 

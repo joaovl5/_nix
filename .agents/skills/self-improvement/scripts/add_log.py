@@ -185,7 +185,7 @@ def render_template(template_file: Path, context: LogTemplateInput) -> str:
 
 @app.default
 def main(short_title: str, report_brief: str) -> int:
-    """Create a new docs/logs incident report from the base template."""
+    """Create a new docs/logs entry from the base template."""
 
     try:
         log_input = build_template_input(

@@ -66,7 +66,7 @@ Only create new documentation when:
 
 ## E) Logging ephemeral knowledge
 
-Use `./docs/logs` for incident reports, debugging logs, research notes, and other situation-specific knowledge that is worth keeping but not yet canonical.
+Use `./docs/logs` for debugging logs, research notes, incident notes, and other situation-specific knowledge that is worth keeping but not yet canonical.
 
 Bootstrap the log with the CLI helper:
 
@@ -76,26 +76,10 @@ scripts/add_log.py --short-title "..." --report-brief "..."
 
 The helper:
 
-- fills `timestamp` and `date_slug`
-- validates the provided inputs
-- sanitizes `short_title` into `short_title_slug`
-- creates `./docs/logs/<timestamp>_<short_title_slug>.md`
+- fills `timestamp` and `date_slug`, then slugifies `short_title` into `short_title_slug`
+- validates CLI input: `short_title` must be 10-96 chars, `report_brief` 30-280 chars, both single-line with no control chars, and the title must slugify to a non-empty lowercase ASCII slug
+- uses raw placeholder replacement after Pydantic validation, then creates `./docs/logs/<timestamp>_<short_title_slug>.md`
 
-After generation, fill the remaining body placeholders:
-
-- _Situation_
-  - `(root)` — 1-50 chars — trigger/root cause. Example: `stale secret`, `bad deploy`, `N/A` when unknown or not applicable.
-  - `(method)` — 1-50 chars — how it surfaced. Example: `user report`, `automatic alert`, `manual check`.
-  - `(etc)` — 1-100 chars — extra trigger context when useful.
-  - `(scope)` — 1-100 chars — affected area. Example: `CI deploy pipeline`, `postgres backups`, `N/A`.
-  - `(impact)` — 1-100 chars — severity/effect. Example: `prod deploys blocked`, `minor dev-only regression`, `N/A`.
-- _Process_
-  - `(process)` — any length — key commands, investigation steps, iteration notes, and other useful context.
-- _Findings_
-  - `(findings)` — any length — evidence-backed findings; this is usually the core output of the log.
-- _Conclusion_
-  - `(conclusion)` — any length — what was done, current status, blockers, and immediate outcome.
-- _Next Steps_
-  - `(next_steps)` — any length — remediation, follow-up, prevention, or recommendations.
+After generation, fill the remaining body placeholders in `_Situation_` (`root`, `method`, `etc`, `scope`, `impact`), `_Process_` (`process`), `_Findings_` (`findings`), `_Conclusion_` (`conclusion`), and `_Next Steps_` (`next_steps`).
 
 Keep logs detailed enough to help future correlation, but avoid filler.

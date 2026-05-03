@@ -5,14 +5,13 @@ description: Use when editing this repo's Neovim config under users/_modules/neo
 
 # Neovim Configuration
 
-Use this when editing `users/_modules/neovim/`.
-For Fennel syntax, macros, and `flsproject` / fennel-ls rules, also load `fennel-development`.
-
-Below, paths are relative to `users/_modules/neovim/`.
+- Use this when editing `users/_modules/neovim/`
+- For working with Fennel, also load `fennel-development`
+- Paths mentioned below are relative to `users/_modules/neovim/`
 
 ## First rule
 
-- Never edit generated Lua.
+- **Never edit generated Lua.**
   - `config/lua/**`
   - `config/flsproject.lua`
   - Edit the Fennel source instead, then recompile.
@@ -27,6 +26,10 @@ Below, paths are relative to `users/_modules/neovim/`.
   - `config/local.lua` is the real runtime bootstrap.
   - It sets up lazy.nvim and nfnl.
   - It scans `config/fnl/plugins` to depth `3`.
+- nfnl project root / trust boundary
+  - `config/.nfnl.fnl` is a direct-edit project root file.
+  - Trust it once in interactive Neovim before using the wrapper.
+  - The wrapper does not establish trust for you.
 - Nix wiring
   - `default.nix` controls packages, runtimepath setup, and `_G.plugin_dirs`.
 - Tree-sitter queries
@@ -39,14 +42,12 @@ Below, paths are relative to `users/_modules/neovim/`.
 ## Recompile workflow
 
 - Preferred wrapper
-  - Run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py` from the repo root.
-  - Its default anchor buffer is `config/flsproject.fnl`.
-  - It opens a Fennel buffer, runs `:NfnlCompileAllFiles`, then deletes orphaned generated Lua.
+  - Run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - It still finds the repo root from the skill-local script path; caller cwd does not matter.
+  - Its default anchor is `users/_modules/neovim/config/flsproject.fnl`.
+  - After resolving the anchor, it finds the nearest parent containing `.nfnl.fnl`, opens a Fennel buffer there, runs `:NfnlCompileAllFiles`, and then lists or deletes orphaned generated Lua.
 - Safer orphan inspection
   - Run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py --keep-orphans` to list orphans instead of deleting them.
-- Trust requirement
-  - `config/.nfnl.fnl` must already have been trusted once in interactive Neovim.
-  - The wrapper does not establish trust for you.
 - When to recompile
   - After Fennel edits.
   - Definitely after macro changes, renames, deletes, or `config/flsproject.fnl` edits.
@@ -54,11 +55,9 @@ Below, paths are relative to `users/_modules/neovim/`.
 ## Common maintenance tasks
 
 - Change plugin behavior
-  - Start in `config/fnl/plugins/**`.
-  - Edit the owning `.fnl` file, then run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - Start in `config/fnl/plugins/**`, then recompile through the wrapper.
 - Change core options or keymaps
-  - Edit `config/fnl/options.fnl` or `config/fnl/keymaps.fnl`.
-  - Then run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - Edit `config/fnl/options.fnl` or `config/fnl/keymaps.fnl`, then recompile.
 - Change bootstrap or plugin discovery
   - Edit `config/local.lua`.
 - Change Nix-managed packages or plugin wiring
@@ -66,17 +65,16 @@ Below, paths are relative to `users/_modules/neovim/`.
 - Change tree-sitter query behavior
   - Edit the relevant `.scm` file directly.
 - Rename or delete Fennel files
-  - Recompile through `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - Recompile through the wrapper.
   - Use `--keep-orphans` first if you want to inspect before deletion.
   - If this is a plugin file, keep the renamed path within discovery depth `3`.
 - Change FLS / project metadata
-  - Edit `config/flsproject.fnl`.
-  - Then run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - Edit `config/flsproject.fnl`, then recompile.
 
 ## Repo quirks
 
 - `config/local.lua` is tracked bootstrap code, not a disposable local override.
-- Plugin specs may rely on `_G.plugin_dirs` from `default.nix`.
+- Plugin specs may rely on `_G.plugin_dirs` from `default.nix` - this is how we comunicate Nix statically-provided stuff while retaining dynamic behavior.
 - Plugin discovery only walks depth `3`; deeper plugin files are ignored.
 - `performance.rtp.reset = false` is deliberate.
 
@@ -87,7 +85,7 @@ Below, paths are relative to `users/_modules/neovim/`.
   - If the change is Fennel behavior, stay in `config/fnl/**`, not generated Lua.
   - If macros, renames, or deletes are involved, plan to run the wrapper.
 - Before finishing
-  - Recompile changed Fennel through `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
+  - Recompile changed Fennel through the wrapper.
   - Keep `.scm` edits separate from nfnl assumptions.
   - Do not claim generated Lua was updated if you did not run the wrapper.
 

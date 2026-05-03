@@ -51,10 +51,9 @@ Check if a package is installed (registered with straight):
 ## straight.el troubleshooting
 
 ```elisp
-M-x straight-check-all           ; verify all packages are correctly installed
-M-x straight-rebuild-all         ; rebuild all packages from scratch
-M-x straight-remove-unused-packages  ; clean up orphaned packages
-M-x straight-freeze-versions     ; write lockfile
+M-x straight-check-all                ; verify package registrations and recipes
+M-x straight-rebuild-all              ; rebuild everything from scratch
+M-x straight-remove-unused-packages   ; clean up orphaned packages
 ```
 
 Rebuild a single package:
@@ -93,23 +92,19 @@ Emacs runs as a daemon. Frame-dependent code may fail at init time because no fr
 
 `helpful` is installed and provides richer help buffers. Keybindings from `core-ui.el`:
 
-| Key       | Command                               |
-| --------- | ------------------------------------- |
-| `C-c h f` | `helpful-callable` (functions/macros) |
-| `C-c h v` | `helpful-variable`                    |
-| `C-c h k` | `helpful-key`                         |
-| `C-c h x` | `helpful-command`                     |
-| `C-c h h` | `helpful-at-point`                    |
+- `C-c h f` - `helpful-callable` (functions/macros)
+- `C-c h v` - `helpful-variable`
+- `C-c h k` - `helpful-key`
+- `C-c h x` - `helpful-command`
+- `C-c h h` - `helpful-at-point`
 
 These show source code, docstrings, dependencies, and calling context.
 
 ## Common failure patterns
 
-| Symptom                                              | Likely cause                                 | Fix                                                                         |
-| ---------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
-| Package not found at startup                         | straight.el hasn't fetched it                | `M-x straight-pull-package` or restart Emacs                                |
-| Config loads but feature missing                     | `use-package-always-defer` prevented loading | Add `:hook`, `:bind`, or `:commands` to trigger loading                     |
-| Theme/faces look wrong after daemon connect          | Frame not available at load time             | Use `server-after-make-frame-hook`                                          |
-| Native-comp warnings in `*Messages*`                 | Missing `.eln` cache                         | Restart daemon, or `M-x native-compile-async`                               |
-| `exec-path-from-shell` issues                        | Shell env not propagated                     | Check `exec-path-from-shell-arguments` and shell rc files                   |
-| Package works interactively but not in `use-package` | Deferred loading                             | Check if `:init` is used when `:config` is needed, or add a loading trigger |
+- Package not found at startup: straight.el has not fetched it; run `M-x straight-pull-package` or restart Emacs.
+- Config loads but feature is missing: `use-package-always-defer` kept it deferred; add `:hook`, `:bind`, `:commands`, `:mode`, or intentional `:demand`.
+- Theme/faces look wrong after daemon connect: frame was unavailable at load time; use `server-after-make-frame-hook`.
+- Native-comp warnings in `*Messages*`: missing `.eln` cache; restart daemon or run `M-x native-compile-async`.
+- `exec-path-from-shell` issues: shell env was not propagated; check `exec-path-from-shell-arguments` and shell rc files.
+- Package works interactively but not in `use-package`: setup is split across wrong keywords; put pre-load code in `:init`, post-load code in `:config`, and add a real load trigger.
