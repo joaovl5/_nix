@@ -1,16 +1,1 @@
-local live_cwd_helper = os.getenv("YAZI_ZELLIJ_LIVE_CWD")
-local origin_fish_pid = os.getenv("YAZI_ZELLIJ_ORIGIN_FISH_PID")
-
-if live_cwd_helper and live_cwd_helper ~= "" and origin_fish_pid and origin_fish_pid ~= "" then
-	ps.sub("cd", function()
-		local cwd = tostring(cx.active.current.cwd)
-
-		ya.async(function()
-			local _, err = Command(live_cwd_helper):arg({ origin_fish_pid, cwd }):status()
-
-			if err then
-				ya.err("yazi-zellij-live-cwd failed: " .. tostring(err))
-			end
-		end)
-	end)
-end
+require("zellij-live-cwd"):setup()

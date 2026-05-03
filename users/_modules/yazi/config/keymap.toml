@@ -1,4 +1,9 @@
 [[mgr.prepend_keymap]]
+on = "q"
+run = '''shell -- if [ -n "$YAZI_ZELLIJ_TOGGLE" ]; then "$YAZI_ZELLIJ_TOGGLE" hide; fi'''
+desc = "Hide the live Yazi drawer"
+
+[[mgr.prepend_keymap]]
 on = "<C-e>"
 run = '''shell -- if [ -n "$YAZI_ZELLIJ_TOGGLE" ]; then "$YAZI_ZELLIJ_TOGGLE" hide; fi'''
 desc = "Hide the live Yazi drawer"

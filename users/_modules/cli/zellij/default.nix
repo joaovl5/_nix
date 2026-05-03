@@ -22,7 +22,7 @@
         fi
 
         payload="$fish_pid"$'\t'"$(printf '%s' "$path" | "$base64_bin" -w0)"
-        "$fish_bin" -c "set -U __yazi_zellij_live_cwd -- \"\$argv[1]\"" -- "$payload"
+        "$fish_bin" -c "set -U __yazi_zellij_live_cwd \"\$argv[1]\"" -- "$payload"
       '';
     };
 
@@ -128,6 +128,16 @@
           return "$status"
         }
 
+        export_live_cwd_from_pane() {
+          local fish_pid=''${YAZI_ZELLIJ_ORIGIN_FISH_PID:-}
+
+          if [[ ! $fish_pid =~ ^[0-9]+$ ]]; then
+            return 0
+          fi
+
+          "$live_cwd_bin" "$fish_pid" "$PWD" >/dev/null 2>&1 || true
+        }
+
         create_drawer() {
           local pane_title=$1
           local start_cwd=$2
@@ -143,6 +153,7 @@
             --y 56% \
             --width 84% \
             --height 38% \
+            --close-on-exit \
             -- "$env_bin" \
               "YAZI_ZELLIJ_ORIGIN_FISH_PID=$fish_pid" \
               "YAZI_ZELLIJ_ORIGIN_PANE_ID=$origin_pane_id" \
@@ -203,6 +214,7 @@
             fi
 
             tab_id=$(current_tab_id)
+            export_live_cwd_from_pane
             hide_floating_panes "$tab_id"
 
             if [[ -n ''${YAZI_ZELLIJ_ORIGIN_PANE_ID:-} ]] && pane_exists_in_tab "$YAZI_ZELLIJ_ORIGIN_PANE_ID" "$tab_id"; then
