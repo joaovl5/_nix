@@ -22,6 +22,7 @@
     ssh_user ? "root",
     user ? "root",
     ssh_port ? 22,
+    fast_connection ? null,
     opts ? {},
     ...
   }: ({
@@ -32,6 +33,11 @@
       };
       sshOpts = ["-p" (toString ssh_port)];
     }
+    // (
+      if fast_connection == null
+      then {}
+      else {fastConnection = fast_connection;}
+    )
     // opts);
 
   nodes = builtins.mapAttrs (name: host: _n (host // {host = name;})) hosts;

@@ -28,6 +28,9 @@ in {
         inherit globals self pkgs;
         inherit (nixpkgs) lib;
       };
+      deploy_contract_checks = import ./deploy.nix {
+        inherit self pkgs;
+      };
       formatting_checks = {
         formatting = treefmt.format_check pkgs;
       };
@@ -35,6 +38,7 @@ in {
       formatting_checks
       // backup_checks
       // test_checks
+      // deploy_contract_checks
       // deploy_checks
   );
 }

@@ -6,6 +6,7 @@ in rec {
     host_ip = "192.168.15.2";
     ssh_user = "lav";
     ssh_port = default_ssh_port;
+    fast_connection = true;
     config = {
       my = {
         desktop.enable = true;
