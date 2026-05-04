@@ -4,9 +4,9 @@
 
 **Goal:** Add a native Nix package and `users/_units/degoog` module for a LAN-only Degoog search service at `search.<tld>`, with SOPS-protected settings mutations and persistent domain blocking state.
 
-**Architecture:** Pin upstream Degoog with npins, package it natively with Bun/bun2nix into an immutable runtime tree, and run it through a systemd service with mutable state in `/var/lib/degoog`. The unit registers a normal repo vhost target `search`, relies on existing Traefik LAN-only behavior, writes `DEGOOG_SETTINGS_PASSWORDS` from SOPS into `/run/degoog/env`, and seeds first-boot settings so block-result actions are usable after settings login.
+**Architecture:** Pin upstream Degoog with npins, package it natively with nixpkgs `buildNpmPackage`/npm cache while using Bun for upstream build and runtime, and run it through a systemd service with mutable state in `/var/lib/degoog`. The unit registers a normal repo vhost target `search`, relies on existing Traefik LAN-only behavior, writes `DEGOOG_SETTINGS_PASSWORDS` from SOPS into `/run/degoog/env`, and seeds first-boot settings so block-result actions are usable after settings login.
 
-**Tech Stack:** Nix, npins, Bun, bun2nix, systemd, SOPS, Traefik vhost declarations.
+**Tech Stack:** Nix, npins, Bun, buildNpmPackage, npm lock/cache, systemd, SOPS, Traefik vhost declarations.
 
 ---
 
@@ -14,6 +14,7 @@
 
 - User selected Degoog over SearXNG.
 - Native Nix package only, Kaneo-style. If native packaging is blocked, stop and report; do not fall back to containers.
+- Bun/bun2nix hook packaging was investigated first and blocked by Bun 1.3.11 segfaulting in `bun install` from bun2nix's synthetic cache. User selected an npm-compatible lock/cache path while still using Bun for build/runtime.
 - Default vhost target is `search`, giving `search.<tld>`.
 - Default exposure is LAN-only through existing Traefik behavior: do not add `search` to public vhosts.
 - Settings mutations must be protected by a SOPS-backed password via `DEGOOG_SETTINGS_PASSWORDS`.
@@ -31,6 +32,7 @@
 - Settings auth is enabled only when `DEGOOG_SETTINGS_PASSWORDS` is non-empty.
 - Domain block UI and enforcement require persisted settings `domainBlockUiEnabled = "true"` and `domainBlockEnabled = "true"`.
 - There is no dedicated health endpoint. Use package import checks and eval checks; runtime smoke can use `/api/engines`, `/opensearch.xml`, or `/api/search` without `q` expecting HTTP 400.
+- Degoog has no upstream `package-lock.json`; commit a generated `packages/degoog/package-lock.json` so nixpkgs `buildNpmPackage` can create `node_modules` without relying on bun2nix's incomplete cache.
 
 ## Validation commands
 
@@ -107,80 +109,87 @@ git commit -m "chore: pin degoog source"
 **Files:**
 
 - Create: `packages/degoog/default.nix`
-- Create: `packages/degoog/bun.nix`
+- Create: `packages/degoog/package-lock.json`
 - Modify: `packages/default.nix`
 - Modify: `outputs/packages/default.nix`
 
-- [ ] **Step 1: Generate bun2nix dependency expression**
+- [ ] **Step 1: Generate npm-compatible lockfile from the pinned source**
 
-Generate `packages/degoog/bun.nix` from the pinned upstream `bun.lock`. Use the pinned source, not a floating clone.
+Generate `packages/degoog/package-lock.json` from the pinned upstream source. Use the repo's pinned nixpkgs `nodejs`/`npm`, not host-global npm, and do not edit upstream source in place.
+Patch npm `overrides` from upstream `resolutions` before generating the lockfile because npm ignores `resolutions`. Apply the same patch in the derivation `postPatch`.
 
-One acceptable workflow:
+Run:
 
 ```bash
 worktree=$PWD
 mkdir -p "$worktree/packages/degoog"
 degoog_src=$(nix eval --raw --impure --expr '(import ./inputs.nix).degoog-src.outPath')
-bun2nix_store=$(nix build --no-link --print-out-paths --impure --expr '(import ./inputs.nix).bun2nix.packages.x86_64-linux.bun2nix')
+nodejs_store=$(nix build --no-link --print-out-paths --impure --expr '(import ./inputs.nix).nixpkgs.legacyPackages.x86_64-linux.nodejs')
 tmpdir=$(mktemp -d)
 cp -a "$degoog_src"/. "$tmpdir"/
 (
   cd "$tmpdir"
-  "$bun2nix_store/bin/bun2nix" -o "$worktree/packages/degoog/bun.nix"
+  "$nodejs_store/bin/node" -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.overrides = { ...(pkg.overrides || {}), ...(pkg.resolutions || {}) }; fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");'
+  "$nodejs_store/bin/npm" install --package-lock-only --ignore-scripts
+  cp package-lock.json "$worktree/packages/degoog/package-lock.json"
 )
 ```
 
-If this workflow fails, stop and report the exact Nix/bun2nix error; do not switch to a floating clone or unpinned dependency generator.
+Expected: `packages/degoog/package-lock.json` exists and pins the dependency graph that npm will install for Degoog `0.15.0`. If npm fails to resolve or produces a materially surprising lockfile, stop and report the exact issue.
 
-Expected: `packages/degoog/bun.nix` exists and references the dependencies from Degoog's `bun.lock`.
+- [ ] **Step 2: Compute the npm dependency hash**
 
-- [ ] **Step 2: Create the derivation**
+Run:
 
-Create `packages/degoog/default.nix` as a focused Bun derivation.
+```bash
+prefetch_npm_deps=$(nix build --no-link --print-out-paths --impure --expr '(import ./inputs.nix).nixpkgs.legacyPackages.x86_64-linux.prefetch-npm-deps')
+"$prefetch_npm_deps/bin/prefetch-npm-deps" packages/degoog/package-lock.json
+```
+
+Expected: command prints a `sha256-...` hash. Use that exact hash as `npmDepsHash` in the derivation.
+
+- [ ] **Step 3: Create the derivation**
+
+Create `packages/degoog/default.nix` as a focused native derivation using nixpkgs `buildNpmPackage` for dependency installation and Bun for the upstream build/runtime.
 
 Required shape:
 
 ```nix
 {
   lib,
-  stdenv,
+  buildNpmPackage,
   inputs,
   bun,
   makeWrapper,
   ...
 }: let
-  bun2nix = inputs.bun2nix.packages.${stdenv.hostPlatform.system}.bun2nix;
   src = inputs.degoog-src.outPath;
   package_json = builtins.fromJSON (builtins.readFile "${src}/package.json");
 in
-  stdenv.mkDerivation {
+  buildNpmPackage {
     pname = "degoog";
-    version = "${package_json.version}-${inputs.degoog-src.shortRev or "unstable"}";
+    version = package_json.version;
     inherit src;
+
+    npmDepsHash = "sha256-...";
+
+    postPatch = ''
+      node -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.overrides = { ...(pkg.overrides || {}), ...(pkg.resolutions || {}) }; fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");'
+      cp ${./package-lock.json} package-lock.json
+    '';
 
     nativeBuildInputs = [
       bun
-      bun2nix.hook
       makeWrapper
     ];
 
-    bunDeps = bun2nix.fetchBunDeps {
-      bunNix = ./bun.nix;
-    };
-
-    dontUseBunBuild = true;
-
-    buildPhase = ''
-      runHook preBuild
-      bun run build
-      runHook postBuild
-    '';
+    npmBuildScript = "build";
 
     installPhase = ''
       runHook preInstall
       runtime_root="$out/libexec/degoog"
       mkdir -p "$out/bin" "$runtime_root"
-      cp -a package.json bun.lock node_modules src "$runtime_root"/
+      cp -a package.json package-lock.json node_modules src "$runtime_root"/
       makeWrapper ${bun}/bin/bun "$out/bin/degoog" \
         --chdir "$runtime_root" \
         --add-flags "run src/server/index.ts"
@@ -208,9 +217,9 @@ in
   }
 ```
 
-Adjust only as needed for actual bun2nix hook behavior. Keep the runtime root immutable and preserve the `src/` layout.
+Keep the runtime root immutable and preserve the `src/` layout. Do not run `bun install` during the package build; dependency installation is handled by `buildNpmPackage`/npm cache from the committed lockfile.
 
-- [ ] **Step 3: Export the package locally**
+- [ ] **Step 4: Export the package locally**
 
 In `packages/default.nix`:
 
@@ -222,18 +231,18 @@ and include `degoog` in the returned `inherit` set.
 
 In `outputs/packages/default.nix`, re-export `degoog` in `packages.${DEFAULT_SYSTEM}`.
 
-- [ ] **Step 4: Stage and build the package**
+- [ ] **Step 5: Stage and build the package**
 
 Stage new files before flake-backed builds so Nix sees the new package directory:
 
 ```bash
-git add packages/degoog/default.nix packages/degoog/bun.nix packages/default.nix outputs/packages/default.nix
+git add packages/degoog/default.nix packages/degoog/package-lock.json packages/default.nix outputs/packages/default.nix
 nix build .#degoog
 ```
 
 Expected: package builds and install checks pass.
 
-- [ ] **Step 5: Commit the package**
+- [ ] **Step 6: Commit the package**
 
 Run:
 
