@@ -107,6 +107,7 @@ in {
   octodns-pihole-src = raw_source;
   pihole6api-src = raw_source;
   kaneo-src = raw_source;
+  degoog-src = raw_source;
   anthropic-skills = raw_source;
   superpowers = raw_source;
 }
