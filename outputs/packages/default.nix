@@ -16,6 +16,7 @@ in {
         iso.config.system.build.isoImage;
       inherit
         (local_packages)
+        degoog
         kaneo
         octodns-pihole
         pihole6api

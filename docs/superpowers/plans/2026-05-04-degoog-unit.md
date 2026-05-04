@@ -15,6 +15,7 @@
 - User selected Degoog over SearXNG.
 - Native Nix package only, Kaneo-style. If native packaging is blocked, stop and report; do not fall back to containers.
 - Bun/bun2nix hook packaging was investigated first and blocked by Bun 1.3.11 segfaulting in `bun install` from bun2nix's synthetic cache. User selected an npm-compatible lock/cache path while still using Bun for build/runtime.
+- The default nixpkgs `bun` x86_64-linux asset segfaults on this host even for `bun --version`; use Bun's upstream `bun-linux-x64-baseline.zip` asset for x86_64-linux while keeping nixpkgs `bun` elsewhere. The baseline asset is the same Bun version and is pinned by hash.
 - Default vhost target is `search`, giving `search.<tld>`.
 - Default exposure is LAN-only through existing Traefik behavior: do not add `search` to public vhosts.
 - Settings mutations must be protected by a SOPS-backed password via `DEGOOG_SETTINGS_PASSWORDS`.
@@ -33,6 +34,7 @@
 - Domain block UI and enforcement require persisted settings `domainBlockUiEnabled = "true"` and `domainBlockEnabled = "true"`.
 - There is no dedicated health endpoint. Use package import checks and eval checks; runtime smoke can use `/api/engines`, `/opensearch.xml`, or `/api/search` without `q` expecting HTTP 400.
 - Degoog has no upstream `package-lock.json`; commit a generated `packages/degoog/package-lock.json` so nixpkgs `buildNpmPackage` can create `node_modules` without relying on bun2nix's incomplete cache.
+- Bun v1.3.11 upstream release publishes `bun-linux-x64-baseline.zip` with digest `sha256-q+NG9jQUVHzfazW3pkmkkMcouT0AYiYVaSORioTA5Zs=`; this binary runs where nixpkgs' default `bun-linux-x64.zip` segfaults.
 
 ## Validation commands
 
@@ -146,7 +148,7 @@ prefetch_npm_deps=$(nix build --no-link --print-out-paths --impure --expr '(impo
 "$prefetch_npm_deps/bin/prefetch-npm-deps" packages/degoog/package-lock.json
 ```
 
-Expected: command prints a `sha256-...` hash. Use that exact hash as `npmDepsHash` in the derivation.
+Expected: command prints a `sha256-...` hash. Use that exact hash as `hash` in the derivation's explicit `fetchNpmDeps` call.
 
 - [ ] **Step 3: Create the derivation**
 
@@ -158,6 +160,10 @@ Required shape:
 {
   lib,
   buildNpmPackage,
+  stdenv,
+  fetchurl,
+  fetchNpmDeps,
+  nodejs,
   inputs,
   bun,
   makeWrapper,
@@ -165,21 +171,39 @@ Required shape:
 }: let
   src = inputs.degoog-src.outPath;
   package_json = builtins.fromJSON (builtins.readFile "${src}/package.json");
+  patch_package_json = ''
+    node -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.overrides = { ...(pkg.overrides || {}), ...(pkg.resolutions || {}) }; fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");'
+    cp ${./package-lock.json} package-lock.json
+  '';
+  bun_runtime =
+    if stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isx86_64 then
+      bun.overrideAttrs (old: {
+        src = fetchurl {
+          url = "https://github.com/oven-sh/bun/releases/download/bun-v${old.version}/bun-linux-x64-baseline.zip";
+          hash = "sha256-q+NG9jQUVHzfazW3pkmkkMcouT0AYiYVaSORioTA5Zs=";
+        };
+        sourceRoot = "bun-linux-x64-baseline";
+      })
+    else
+      bun;
 in
   buildNpmPackage {
     pname = "degoog";
     version = package_json.version;
     inherit src;
 
-    npmDepsHash = "sha256-...";
+    npmDeps = fetchNpmDeps {
+      name = "degoog-${package_json.version}-npm-deps";
+      inherit src;
+      hash = "sha256-...";
+      nativeBuildInputs = [nodejs];
+      postPatch = patch_package_json;
+    };
 
-    postPatch = ''
-      node -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.overrides = { ...(pkg.overrides || {}), ...(pkg.resolutions || {}) }; fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");'
-      cp ${./package-lock.json} package-lock.json
-    '';
+    postPatch = patch_package_json;
 
     nativeBuildInputs = [
-      bun
+      bun_runtime
       makeWrapper
     ];
 
@@ -190,7 +214,7 @@ in
       runtime_root="$out/libexec/degoog"
       mkdir -p "$out/bin" "$runtime_root"
       cp -a package.json package-lock.json node_modules src "$runtime_root"/
-      makeWrapper ${bun}/bin/bun "$out/bin/degoog" \
+      makeWrapper ${bun_runtime}/bin/bun "$out/bin/degoog" \
         --chdir "$runtime_root" \
         --add-flags "run src/server/index.ts"
       runHook postInstall
@@ -200,7 +224,7 @@ in
     installCheckPhase = ''
       runHook preInstallCheck
       cd "$out/libexec/degoog"
-      ${bun}/bin/bun -e 'await import("hono"); await import("./src/server/utils/paths.ts"); console.log("runtime imports ok")'
+      ${bun_runtime}/bin/bun -e 'await import("hono"); await import("./src/server/utils/paths.ts"); console.log("runtime imports ok")'
       test -f src/public/app.js
       test -f src/public/settings-page.js
       test -f src/public/themes/degoog-theme/style.css
