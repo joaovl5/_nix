@@ -1,11 +1,10 @@
 # Emacs Debugging Reference
 
-## _Messages_ buffer
+## Messages buffer
 
-`M-m` (bound in `core-keys.el`) opens the echo area. The `*Messages*` buffer logs all Emacs messages.
-
-- `C-h e` or `M-x view-echo-area-messages` to open `*Messages*` directly.
-- Search for error text or package names to find load failures.
+- **Open log:** use `C-h e` or `M-x view-echo-area-messages`
+- **Search failures:** search for error text or package names to find load failures
+- **Repo note:** `M-m` in `config/core/core-keys.el` opens the echo area
 
 ## Debug on error
 
@@ -14,49 +13,41 @@
 (toggle-debug-on-error)   ; disable again
 ```
 
-Or start Emacs with:
-
-```bash
-emacs --debug-init
-```
-
-This shows a backtrace for any error during init.
+- **Init crashes:** start Emacs with `emacs --debug-init` to get an init-time backtrace
 
 ## Feature loading
 
-Check if a feature is loaded:
+- **Feature state:** check whether a feature is loaded
 
 ```elisp
 (featurep 'core-ui)         ; => t or nil
 ```
 
-Check the load path:
+- **Load path:** inspect the active load path
 
 ```elisp
 load-path                   ; list of directories
 ```
 
-Check if a package was loaded by straight:
+- **Feature state:** use `featurep` for provided features; package names and feature names can differ
 
 ```elisp
-(straight--loaded-p 'package-name)   ; => t or nil
+(featurep 'core-ui)
 ```
 
-Check if a package is installed (registered with straight):
-
-```elisp
-(straight--installed-p 'package-name)
-```
+- **Straight state:** use straight's maintenance commands instead of private predicates
 
 ## straight.el troubleshooting
 
+- **Main commands:** use straight's maintenance commands
+
 ```elisp
-M-x straight-check-all                ; verify package registrations and recipes
-M-x straight-rebuild-all              ; rebuild everything from scratch
-M-x straight-remove-unused-packages   ; clean up orphaned packages
+M-x straight-check-all
+M-x straight-rebuild-all
+M-x straight-remove-unused-repos
 ```
 
-Rebuild a single package:
+- **Single package:** rebuild one package when the failure is isolated
 
 ```elisp
 M-x straight-rebuild-package RET package-name RET
@@ -64,15 +55,10 @@ M-x straight-rebuild-package RET package-name RET
 
 ## Daemon-specific issues
 
-Emacs runs as a daemon. Frame-dependent code may fail at init time because no frame exists yet.
-
-**Symptoms:**
-
-- Theme or font not applying
-- which-key crashes (known issue: github.com/justbur/emacs-which-key/issues/306)
-- Package works in standalone Emacs but not in daemon mode
-
-**Fix pattern** (used in `core-ui.el`):
+- **Core fact:** daemon Emacs can run frame-dependent code during init before any frame exists
+- **Symptoms:** theme or font not applying, `which-key` crashing, or code working in standalone Emacs but not in daemon mode
+- **Known issue:** the `which-key` crash workaround exists because of <https://github.com/justbur/emacs-which-key/issues/306>
+- **Fix pattern:** use `server-after-make-frame-hook` for frame-dependent setup
 
 ```elisp
 (if (daemonp)
@@ -80,7 +66,7 @@ Emacs runs as a daemon. Frame-dependent code may fail at init time because no fr
   (my-setup-function))
 ```
 
-**Debugging daemon frames:**
+- **Inspect state:** check daemon and frame state directly
 
 ```elisp
 (daemonp)                        ; => t if running as daemon
@@ -90,21 +76,19 @@ Emacs runs as a daemon. Frame-dependent code may fail at init time because no fr
 
 ## Using helpful
 
-`helpful` is installed and provides richer help buffers. Keybindings from `core-ui.el`:
-
-- `C-c h f` - `helpful-callable` (functions/macros)
-- `C-c h v` - `helpful-variable`
-- `C-c h k` - `helpful-key`
-- `C-c h x` - `helpful-command`
-- `C-c h h` - `helpful-at-point`
-
-These show source code, docstrings, dependencies, and calling context.
+- **Purpose:** `helpful` gives richer help buffers, with keybindings from `config/core/core-ui.el`
+- **Function help:** `C-c h f` runs `helpful-callable`
+- **Variable help:** `C-c h v` runs `helpful-variable`
+- **Key help:** `C-c h k` runs `helpful-key`
+- **Command help:** `C-c h x` runs `helpful-command`
+- **Point help:** `C-c h h` runs `helpful-at-point`
+- **What it shows:** source code, docstrings, dependencies, and calling context
 
 ## Common failure patterns
 
-- Package not found at startup: straight.el has not fetched it; run `M-x straight-pull-package` or restart Emacs.
-- Config loads but feature is missing: `use-package-always-defer` kept it deferred; add `:hook`, `:bind`, `:commands`, `:mode`, or intentional `:demand`.
-- Theme/faces look wrong after daemon connect: frame was unavailable at load time; use `server-after-make-frame-hook`.
-- Native-comp warnings in `*Messages*`: missing `.eln` cache; restart daemon or run `M-x native-compile-async`.
-- `exec-path-from-shell` issues: shell env was not propagated; check `exec-path-from-shell-arguments` and shell rc files.
-- Package works interactively but not in `use-package`: setup is split across wrong keywords; put pre-load code in `:init`, post-load code in `:config`, and add a real load trigger.
+- **Package missing at startup:** straight has not fetched it yet, so run `M-x straight-pull-package` or restart Emacs
+- **Feature missing after config load:** `use-package-always-defer` kept it deferred, so add a real trigger like `:hook`, `:bind`, `:commands`, `:mode`, or `:demand t`
+- **Theme or faces wrong after daemon connect:** the frame was unavailable at load time, so move setup to `server-after-make-frame-hook`
+- **Native-comp warnings in `*Messages*`:** the `.eln` cache is missing, so restart the daemon or run `M-x native-compile-async`
+- **`exec-path-from-shell` issues:** the shell environment did not propagate, so inspect `exec-path-from-shell-arguments` and shell rc files
+- **`use-package` setup split wrong:** put pre-load code in `:init`, post-load code in `:config`, and use a real load trigger

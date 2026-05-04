@@ -13,7 +13,7 @@ import subprocess
 
 from cyclopts import App, CycloptsError
 
-DEFAULT_ANCHOR = Path("users/_modules/neovim/config/flsproject.fnl")
+DEFAULT_ANCHOR = Path("users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl")
 
 app = App(
     name="recompile-nfnl",
@@ -110,7 +110,7 @@ def main(
         print("Hints:")
         print("- Make sure `nvim` is the repo's configured Neovim on PATH.")
         print(
-            "- Trust `users/_modules/neovim/config/.nfnl.fnl` once in interactive Neovim before using this script."
+            "- Trust `users/_modules/desktop/apps/editor/neovim/config/.nfnl.fnl` once in interactive Neovim before using this script."
         )
         print(
             "- The script opens a Fennel buffer first because nfnl commands are buffer-local."

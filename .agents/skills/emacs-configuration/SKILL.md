@@ -1,97 +1,61 @@
 ---
 name: emacs-configuration
-description: Use when editing this repo's Emacs config under users/_modules/emacs; covers straight.el package management, daemon-mode quirks, module structure, and Nix integration boundaries.
+description: Use when editing this repo's Emacs config under users/_modules/desktop/apps/editor/emacs
 ---
 
 # Emacs Configuration
 
-Use this when editing `users/_modules/emacs/`.
-For Nix-layer changes (packages, services), also check the repo's AGENTS.md for required checks.
+Use this when editing `users/_modules/desktop/apps/editor/emacs/`
 
-Below, paths are relative to `users/_modules/emacs/`.
+For Nix-layer changes like packages or services, also check the repo's AGENTS.md for required checks
 
-## First rule
+Below, paths are relative to `users/_modules/desktop/apps/editor/emacs/`
 
-- Never add `lexical-binding` declarations without checking consistency across files.
-- Never run `nix flake check` on changes that strictly touch `.el` files (per `config/AGENTS.md`).
+## First checks
 
-## Where changes go
+- **Lexical binding:** prefer adding `lexical-binding` unless it would change existing behavior
 
-- `config/core/core-packages.el`: straight.el bootstrap, `use`/`sup` aliases
-- `config/core/core-ui.el`: fonts, theme, modeline, helpful, and the daemon-mode `which-key` workaround
-- `config/core/core-core.el`: utility functions, search engines, PATH, savehist
-- `config/core/core-keys.el`: Meow, golden-ratio, keybindings, window management
-- `config/core/core-views.el`: Dirvish, Projectile, Vertico, Corfu, Consult, Embark
-- `config/core/core-coding.el`: Flycheck, devdocs, Apheleia
-- `config/modules/mod-org.el`: Org-mode, org-roam, svg-tag-mode, org-download
-- `config/modules/mod-lisp.el`: parinfer-rust-mode for Lisp editing
-- `config/early-init.el`: GC tuning, frame settings, deferred loading
-- `config/init.el`: entry point requiring core/_ and modules/_
-- `default.nix`: Nix package list, daemon config, config symlink
+## Layout
 
-## Package management workflow
+- **Entry point:** `default.nix` manages packages, daemon config, and the dynamic config symlink
+- **Startup files:** `config/early-init.el` handles early performance and visual setup, `config/init.el` is the main entrypoint
+- **Core files:** `config/core/` holds shared building blocks like packages, UI, keys, views, and coding helpers
+- **Modules:** `config/modules/` holds focused modules like `mod-org.el` and `mod-lisp.el`
 
-1. **Most packages**: just use `(use package-name ...)` or `(sup 'package-name)`. straight.el fetches them automatically.
-2. **Nix-managed packages**: add to `programs.emacs.extraPackages` in `default.nix`, then reference with `:straight nil :ensure nil` in the `.el` file.
-3. **Non-MELPA packages**: pass a named recipe to `straight-use-package`, e.g. `'(package-name :type git :host github :repo "user/repo")`.
+## Package workflow
 
-See `references/emacs-package-management.md` for full details.
+- **Default forms:** use `(use package-name ...)` or `(sup 'package-name)` for most packages
+- **Custom recipes:** use `straight-use-package` when the package needs an explicit recipe
+- **Nix-managed packages:** add them to `programs.emacs.extraPackages` in `default.nix`, then pair the Elisp form with `:straight nil :ensure nil`
+- **Load truth:** deferred packages need a real trigger like `:hook`, `:bind`, `:commands`, `:mode`, or `:demand t`; `:after` only orders
+- **Reference:** see `references/emacs-package-management.md` for load semantics and add or remove flows
 
-## Nix integration
+## Common edits
 
-- Config directory is symlinked to `~/.config/emacs` via `hybrid-links.links.emacs` in `default.nix`.
-- `exec-path-from-shell` bridges Nix's PATH into Emacs (in `core-core.el`).
-- Packages requiring native compilation (e.g. `parinfer-rust-mode`, `org-roam`) come from Nix. All others come from straight.el.
-- Changes to `.el` files: no `nix flake check` needed.
-- Changes to `default.nix`: run `nix flake check` and rebuild.
-
-## Common maintenance tasks
-
-- Add a MELPA package: `use-package` in the appropriate `core-*.el` or `mod-*.el` file
-- Add a Nix-managed package: `default.nix` `extraPackages` plus `:straight nil :ensure nil` in Lisp
-- Change keybindings: `config/core/core-keys.el` (global) or `:bind` in the relevant module
-- Change theme or fonts: `config/core/core-ui.el` (`handle-theme`, `handle-fonts`)
-- Change modal editing behavior: `config/core/core-keys.el` (`meow-setup`)
-- Add a new config module: create `config/modules/mod-*.el`, then require it from `init.el`
-- Change Org behavior: `config/modules/mod-org.el`
-- Change completion behavior: `config/core/core-views.el` (`handle-minibuf`, `handle-completions`)
-- Change formatter config: `config/core/core-coding.el` (Apheleia `apheleia-formatters`)
-- Adjust startup performance: `config/early-init.el`
+- **Keybindings:** edit `config/core/core-keys.el` for global keys or use `:bind` in the relevant module
+- **Theme or fonts:** edit `config/core/core-ui.el`, especially `handle-theme` and `handle-fonts`
+- **Modal editing:** edit `config/core/core-keys.el`, especially `meow-setup`
+- **New module:** add `config/modules/mod-*.el` and require it from `config/init.el`
+- **Org behavior:** edit `config/modules/mod-org.el`
+- **Completion behavior:** edit `config/core/core-views.el`, especially `handle-minibuf` and `handle-completions`
+- **Formatter config:** edit `config/core/core-coding.el`, especially Apheleia `apheleia-formatters`
+- **Startup performance:** edit `config/early-init.el`
 
 ## Repo quirks
 
-- **Daemon mode**: Emacs runs as a daemon (`services.emacs` in `default.nix`). Frame-dependent setup uses `server-after-make-frame-hook`; `core-ui.el` has a `which-key` workaround for daemon-created frames.
-- **Deferred loading**: `use-package-always-defer t` is set in `early-init.el`. Packages stay deferred unless something else triggers them, such as `:hook`, `:bind`, `:commands`, `:mode`, or an explicit eager load with `:demand t`. `:init` runs before load, `:config` runs after load, and `:after` only constrains ordering once loading happens.
-- **Meow, not evil**: Modal editing uses Meow (`core-keys.el`). Don't add evil/vim keybindings.
-- **Aliases**: `sup` = `straight-use-package`, `use` = `use-package` (defined in `core-packages.el`). `straight-use-package-by-default t` means plain `use-package` forms already install through straight.el.
-- **Module pattern**: Several core UI/view/key files define `handle-*` functions and provide the feature at the end of the file, but do not assume every config file follows that exact shape.
-- **Frame settings**: `early-init.el` sets `undecorated` and `internal-border-width` on `default-frame-alist`.
-- **Custom variables**: `init.el` has `custom-set-variables` and `custom-set-faces` at the bottom. Don't duplicate these blocks.
-
-## Quick checklist
-
-### Before editing
-
-- Identify the correct file from the list above.
-- If adding a package, decide: straight.el (default) vs Nix (needs native compilation or system dependency).
-- If editing daemon-related code, account for `server-after-make-frame-hook`.
-
-### Before finishing
-
-- `.el`-only changes: run `nix fmt` then `prek` (per repo AGENTS.md). No `nix flake check`.
-- `default.nix` changes: run `nix fmt`, `prek`, then `nix flake check --all-systems`.
-- Verify the module has `(provide 'feature-name)` at the bottom.
-- Verify new modules are required in `init.el`.
+- **Daemon mode:** this config runs Emacs as a daemon via `services.emacs` in `default.nix`
+- **Frame setup:** use `server-after-make-frame-hook` for frame-dependent work; `core-ui.el` already carries a `which-key` workaround for daemon-created frames
+- **Deferred loading:** `use-package-always-defer t` is set in `config/early-init.el`, so `:init`, `:config`, and `:after` do not load a package by themselves
+- **Modal stack:** this config uses Meow in `core-keys.el`, not Evil
+- **Aliases:** `use` means `use-package`, `sup` means `straight-use-package`
 
 ## Common mistakes
 
-- Adding a package via straight.el when it needs native compilation or system libraries (use Nix instead).
-- Forgetting `:straight nil :ensure nil` on Nix-managed packages (causes double-install attempts).
-- Expecting `:init`, `:config`, or `:after` to load a deferred package. Use a real trigger such as `:hook`, `:bind`, `:commands`, `:mode`, or `:demand t` when eager load is intentional.
-- Assuming a frame is available at load time (daemon mode: use `server-after-make-frame-hook` for frame-dependent setup).
-- Adding duplicate `custom-set-variables` or `custom-set-faces` blocks.
-- Forgetting `(provide 'feature-name)` at the end of a new module file.
+- **Double install:** forgetting `:straight nil :ensure nil` on Nix-managed packages makes straight and package.el compete
+- **Missing wire-up:** new modules still need `(provide 'feature-name)` and a matching require in `config/init.el`
+- **Custom blocks:** avoid duplicate `custom-set-variables` or `custom-set-faces` blocks
 
-## Debugging
+## References
 
-See `references/emacs-debugging.md` for troubleshooting techniques.
+- **Package management:** `references/emacs-package-management.md`
+- **Debugging:** `references/emacs-debugging.md`

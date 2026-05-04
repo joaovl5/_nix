@@ -1,74 +1,46 @@
 ---
 name: emacs-lisp-development
-description: Use when reading, writing, or reviewing Emacs Lisp code; covers language semantics, idiomatic patterns, standard library, and common mistakes.
+description: Use when reading, writing, or reviewing Emacs Lisp code; covers language semantics, idiomatic patterns, standard library, and common mistakes
 ---
 
-For repo-specific Emacs configuration, package setup, and keybindings, also load `emacs-configuration`.
+For repo-specific Emacs configuration, package setup, and keybindings, also load `emacs-configuration`
 
-## Mental model
+## First pass
 
-- Lisp-2: variables and functions are separate namespaces. Use `funcall` for a function object stored in a variable.
-- Dynamic binding is the default unless the file declares lexical binding.
-- Everything is an expression.
-- Symbols are interned objects, not just strings.
+- **Scope:** use this skill for language behavior, APIs, macros, and runtime patterns
+- **References:** keep this file as the short map; load only the reference files that match the task
+- **Lexical binding:** start new files with `;; -*- lexical-binding: t; -*-`
+- **Namespaces:** variables and functions live in separate namespaces; use `funcall` for function values
+- **Strings:** treat strings as mutable arrays; use `concat`, `format`, or `copy-sequence` when you need fresh data
+- **Regex predicates:** prefer `string-match-p` when you only need a boolean and want match data left alone
+- **Macros:** use a macro only when you need unevaluated code; use `cl-gensym` or `cl-with-gensyms` for fresh names
+- **Declared state:** use `defvar`, `defcustom`, `defconst`, or `defvar-local` before `setq`
+- **Hooks and advice:** prefer named functions when callers may remove, reuse, or inspect them
+- **Cleanup:** use `condition-case` for expected failures and `unwind-protect` for cleanup
 
-## First line for new files
+## Quick reminders
 
-```elisp
-;; -*- lexical-binding: t; -*-
-```
-
-Why it matters:
-
-- Closures capture lexical bindings from the enclosing environment; shared bindings share later mutation.
-- Lexical scope prevents callers from shadowing free variables accidentally.
-- The byte compiler can optimize lexical closures.
-- Variables declared with `defvar`, `defcustom`, or `defconst` are always dynamically scoped, even with lexical binding.
-
-## Core patterns
-
-- Use `defun` for functions and add `(interactive ...)` only when the function is a command.
-- Use `cl-defun` when keyword or optional arguments make the API clearer.
-- Use `defvar`, `defcustom`, `defconst`, and `defvar-local` for declared state.
-- Use `setq-local` for buffer-local values and `setq-default` for defaults.
-- Prefer named functions for reusable/removable hooks and advice; anonymous lambdas are supported but easier to duplicate or lose.
-- Use `condition-case` for expected error classes, `user-error` for caller-facing failures, and `unwind-protect` for cleanup.
-- Strings are mutable arrays; use `concat`, `format`, or `copy-sequence` when you need fresh data.
-
-## Loading and macros
-
-```elisp
-(require 'cl-lib)
-(require 'magit)
-(provide 'my-module)
-```
-
-- `require` loads a feature from `load-path`.
-- `provide` registers the feature; conventionally place it at the end of the file.
-- `autoload` defers loading until a function is first called.
-- `with-eval-after-load` runs code after a feature loads.
-- Use macros only when you need unevaluated code as input; if a function works, prefer it.
-- Use `cl-gensym` or `cl-with-gensyms` for generated names in macros.
-
-## `use-package`
-
-`use-package` is configuration/package machinery, not core language. For repo-specific load order and package management, load `emacs-configuration`. If you encounter it elsewhere: `:preface` and `:init` run before package load, `:config` runs after load, and `:commands`/`:bind`/`:hook` commonly establish deferred entry points.
+- **Lexical closures:** capture bindings from the enclosing environment; shared bindings still reflect later mutation
+- **Special vars:** `defvar`, `defcustom`, and `defconst` stay dynamically scoped even with lexical binding
+- **Buffer locals:** use `setq-local` for buffer-local values and `setq-default` for defaults
+- **Loading:** `require` loads a feature, `provide` registers it, `autoload` defers it, and `with-eval-after-load` patches after load
+- **`use-package`:** treat it as configuration machinery; for repo-specific package setup, load `emacs-configuration`
 
 ## Common mistakes
 
-- Missing `lexical-binding: t` in new files.
-- Confusing `eq`/`eql`/`equal`: use `eq` for identity and `equal` for structural equality.
-- Forgetting `funcall` for function values.
-- Mutating string literals or shared strings in place.
-- Forgetting Emacs regex string escaping: regexp `\(` is string `"\\("`.
-- Using `setq` on undeclared variables; use `defvar` first.
-- Confusing `set` and `setq`: `setq` takes a symbol literally; `set` evaluates its first argument.
-- Ignoring match-data lifetime; any new search clobbers it.
-- Using `fset` to advise; use `advice-add`.
-- Assuming list length is O(1); use vectors for indexed access.
+- **Missing header:** forgetting `lexical-binding: t` in new files
+- **Equality:** use `eq` for identity and `equal` for structural equality
+- **Function values:** forgetting `funcall` for a function stored in a variable
+- **Shared strings:** mutating string literals or reused strings in place
+- **Regex escaping:** regexp `\(` is string `"\\("`
+- **Undeclared state:** using `setq` on undeclared variables
+- **`set` vs `setq`:** `setq` takes a symbol literally; `set` evaluates its first argument
+- **Match data:** assuming match data survives later searches
+- **Advice:** using `fset` to advise instead of `advice-add`
+- **Indexed access:** assuming list length is O(1) instead of using vectors
 
 ## References
 
-- `references/elisp-language-core.md`: core syntax, data structures, control flow, regex, hooks/advice, and compact example.
-- `references/elisp-patterns.md`: idiomatic patterns for modes, keymaps, overlays, processes, windows, faces, text properties, CL, repeat maps, and async.
-- `references/elisp-stdlib.md`: concise standard-library function index.
+- **Language core:** `references/elisp-language-core.md` covers functions, scope, data, control flow, regex, hooks, advice, and the compact example
+- **Patterns:** `references/elisp-patterns.md` covers modes, keymaps, overlays, timers, processes, windows, faces, text properties, `cl-lib`, repeat maps, and async
+- **Stdlib:** `references/elisp-stdlib.md` is the API index for common built-ins

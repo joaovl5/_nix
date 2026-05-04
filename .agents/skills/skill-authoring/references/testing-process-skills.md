@@ -1,27 +1,27 @@
 # Testing process and discipline skills
 
-Use this when the skill changes agent behavior rather than only supplying factual reference.
+Use when a skill changes agent behavior instead of only adding factual reference
 
 ## RED: establish baseline failure
 
-- Write a pressure scenario that makes the unwanted shortcut tempting.
-- Use combined pressures when possible: time pressure, ambiguity, sunk-cost pressure, conflicting cues, or authority pressure.
-- Run the scenario without the new skill.
-- Record what the agent did, what it skipped, and the exact rationalizations that let it violate the intended process.
+- **Scenario:** write a scenario that makes the unwanted shortcut tempting
+- **Pressure:** stack time pressure, ambiguity, sunk cost, conflicting cues, or authority pressure when useful
+- **Baseline run:** run the scenario without the new skill
+- **Capture failure:** record what the agent did, what it skipped, and the exact rationalizations that allowed the violation
 
 ## GREEN: add the minimum skill
 
-- Add only the guidance needed to block the observed failure modes.
-- Prefer direct counters to the exact rationalizations you saw.
-- Keep the main `SKILL.md` short; move longer testing notes or examples here.
+- **Minimum scope:** add only the guidance needed to block the observed failure modes
+- **Direct counters:** target the exact rationalizations you saw
+- **Boundary:** keep the main `SKILL.md` short, move longer testing notes or examples here
 
 ## RE-TEST
 
-- Run the same or equivalent pressure scenario with the skill enabled.
-- Verify the agent now follows the intended workflow under pressure, not just in the happy path.
-- If new loopholes appear, tighten the skill and test again.
+- **Same pressure:** run the same or an equivalent scenario with the skill enabled
+- **Behavior check:** verify the agent follows the workflow under pressure, not only on the happy path
+- **Tighten loop:** if new loopholes appear, tighten the skill and test again
 
 ## When lighter verification is enough
 
-- If the skill is mainly factual reference, prioritize source verification and careful review instead of pressure-scenario testing.
-- If a reference skill adds scripts, syntax-check them before claiming completion.
+- **Reference skills:** prioritize source verification and careful review
+- **Script additions:** syntax-check added scripts before claiming completion

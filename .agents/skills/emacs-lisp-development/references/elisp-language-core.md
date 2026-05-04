@@ -10,7 +10,8 @@
 (lambda (x) (+ x 1))
 ```
 
-Interactive forms make a function callable from `M-x`:
+- **Commands:** add `(interactive ...)` only when the function is a command
+- **Interactive codes:** `"*"` errors on read-only buffers, `"r"` passes region bounds, `"s"` reads a string, `"n"` reads a number, and `"d"` passes point
 
 ```elisp
 (defun greet-user ()
@@ -24,8 +25,6 @@ Interactive forms make a function callable from `M-x`:
   (insert (format-time-string "%Y-%m-%d")))
 ```
 
-Useful interactive codes: `"*"` errors if the buffer is read-only; `"r"` passes region bounds; `"s"` reads a string; `"n"` reads a number; `"d"` passes point.
-
 ## Variables and scope
 
 ```elisp
@@ -35,22 +34,22 @@ Useful interactive codes: `"*"` errors if the buffer is read-only; `"r"` passes 
 (defvar-local my-buffer-flag nil "Buffer-local state.")
 ```
 
-- `defvar` declares a special dynamically scoped variable and does not re-evaluate if already bound.
-- `defcustom` integrates with Customize.
-- `defconst` signals intent that the value should not change.
-- `defvar-local` is shorthand for `defvar` plus buffer-local behavior.
-- `let` evaluates all init forms in the outer scope; `let*` evaluates sequentially.
-- `setq-local` creates/sets a buffer-local binding.
-- `setq-default` sets the default value of a buffer-local variable.
+- **`defvar`:** declares a special dynamically scoped variable and skips re-evaluation when already bound
+- **`defcustom`:** integrates with Customize
+- **`defconst`:** signals intent that the value should not change
+- **`defvar-local`:** combines `defvar` with buffer-local behavior
+- **`let` vs `let*`:** `let` evaluates init forms in the outer scope, `let*` does it sequentially
+- **`setq-local`:** creates or sets a buffer-local binding
+- **`setq-default`:** sets the default value for a buffer-local variable
 
 ## Data structures
 
-- Lists are chains of cons cells ending in `nil`: `(list 1 2 3)`.
-- Alists are `((key . value) ...)`; use `alist-get`, `assoc`, or `assq`.
-- Plists are `(:key value ...)`; use `plist-get` and `plist-member`.
-- Vectors are fixed-length and O(1) for indexed access.
-- Records are vectors with a type symbol in slot 0; use `cl-defstruct`.
-- Hash tables support `eq`, `eql`, or `equal` tests; use `equal` for string keys.
+- **Lists:** chains of cons cells ending in `nil`, as in `(list 1 2 3)`
+- **Alists:** `((key . value) ...)`; use `alist-get`, `assoc`, or `assq`
+- **Plists:** `(:key value ...)`; use `plist-get` and `plist-member`
+- **Vectors:** fixed-length and O(1) for indexed access
+- **Records:** vectors with a type symbol in slot 0; use `cl-defstruct`
+- **Hash tables:** support `eq`, `eql`, or `equal` tests; use `equal` for string keys
 
 ## Control flow and cleanup
 
@@ -68,9 +67,9 @@ Useful interactive codes: `"*"` errors if the buffer is read-only; `"r"` passes 
   (_        "fallback"))
 ```
 
-- `progn` returns the last value.
-- `prog1` returns the first value.
-- `prog2` returns the second value.
+- **`progn`:** returns the last value
+- **`prog1`:** returns the first value
+- **`prog2`:** returns the second value
 
 ```elisp
 (condition-case err
@@ -90,7 +89,7 @@ Useful interactive codes: `"*"` errors if the buffer is read-only; `"r"` passes 
   (release-resource))
 ```
 
-Use `ignore-errors` only when discarding failures is intentional.
+- **Ignored failures:** use `ignore-errors` only when discarding failures is intentional
 
 ## Iteration
 
@@ -106,21 +105,18 @@ Use `ignore-errors` only when discarding failures is intentional.
          collect (* x x))
 ```
 
-Prefer `mapc` over `mapcar` when you do not need the returned list. Prefer `seq-*` functions when working with mixed sequence types.
+- **Side effects:** prefer `mapc` over `mapcar` when you do not need the returned list
+- **Mixed sequences:** prefer `seq-*` helpers when the input may be a list, vector, or string
 
 ## Strings and regex
 
-Emacs regex differs from PCRE:
-
-- Grouping uses `\(` and `\)`, not plain `(` and `)`.
-- Alternation is `\|`.
-- `+` and `?` are postfix operators; interval repetition uses `\{n,m\}` in regexp syntax.
-- Backreferences use `\1`.
-- Use POSIX classes such as `[[:alpha:]]`; PCRE shorthands like `\w` and `\d` are not portable here.
-
-In Lisp strings, double-escape backslashes: regexp `\(` becomes string `"\\("`.
-
-Useful functions: `string-match-p`, `looking-at-p`, `re-search-forward`, `replace-regexp-in-string`, `replace-match`.
+- **Grouping:** use `\(` and `\)`, not plain `(` and `)`
+- **Alternation:** use `\|`
+- **Quantifiers:** `+` and `?` are postfix operators; interval repetition uses `\{n,m\}`
+- **Backreferences:** use `\1`
+- **Classes:** prefer POSIX classes like `[[:alpha:]]`; `\w` and `\d` are not portable here
+- **Escaping:** in Lisp strings, double-escape backslashes so regexp `\(` becomes string `"\\("`
+- **Useful APIs:** `string-match-p`, `looking-at-p`, `re-search-forward`, `replace-regexp-in-string`, `replace-match`
 
 ## Buffers, hooks, and advice
 
@@ -144,7 +140,8 @@ Useful functions: `string-match-p`, `looking-at-p`, `re-search-forward`, `replac
 (remove-hook 'prog-mode-hook #'my-prog-mode-setup)
 ```
 
-Third arg `t` makes a hook buffer-local.
+- **Buffer-local hooks:** pass `t` as the fourth arg to `add-hook` or `remove-hook`
+- **Advice kinds:** use `:before`, `:after`, `:around`, or `:override`
 
 ```elisp
 (defun my-kill-buffer-around (old-fn &rest args)
@@ -154,14 +151,10 @@ Third arg `t` makes a hook buffer-local.
 (advice-remove 'kill-buffer #'my-kill-buffer-around)
 ```
 
-Advice types: `:before`, `:after`, `:around`, `:override`.
-
 ## Compact example
 
 ```elisp
 ;;; my-search.el --- Enhanced search utilities -*- lexical-binding: t; -*-
-
-(require 'seq)
 
 (defgroup my-search nil
   "Enhanced search utilities."
@@ -175,7 +168,7 @@ Advice types: `:before`, `:after`, `:around`, `:override`.
   :group 'my-search)
 
 (defun my-search--smart-case-p (pattern)
-  (not (seq-some #'uppercase-p pattern)))
+  (not (string-match-p "[[:upper:]]" pattern)))
 
 (defun my-search-in-buffer (pattern &optional backward)
   "Search for PATTERN in current buffer.

@@ -2,55 +2,69 @@
 
 ## Strings
 
-- Extract/join/format: `substring`, `concat`, `format`.
-- Regex and match data: `string-match-p` for predicates without match-data mutation; `string-match` + `match-string` when you need captures; `replace-regexp-in-string` and `replace-match` for replacements.
-- Splitting/trimming: `split-string`, `string-trim`, `string-trim-left`, `string-trim-right`.
-- Predicates/order: `string-prefix-p`, `string-suffix-p`, `string-equal` (`string=`), `string-lessp` (`string<`).
-- Conversion/case: `string-to-number`, `number-to-string`, `upcase`, `downcase`, `capitalize`, `char-to-string`, `string-to-char`.
-- Length: `length` returns character length for strings.
+- **Basics:** `substring`, `concat`, `format`
+- **Regex predicate:** `string-match-p` for boolean checks without match-data mutation
+- **Captures:** `string-match` with `match-string` when you need capture groups
+- **Replacement:** `replace-regexp-in-string`, `replace-match`
+- **Splitting:** `split-string`, `string-trim`, `string-trim-left`, `string-trim-right`
+- **Comparison:** `string-prefix-p`, `string-suffix-p`, `string-equal` (`string=`), `string-lessp` (`string<`)
+- **Conversion:** `string-to-number`, `number-to-string`, `char-to-string`, `string-to-char`
+- **Case:** `upcase`, `downcase`, `capitalize`
+- **Length:** `length` returns character length for strings
 
 ## Lists
 
-- Basics: `car`, `cdr`, `cons`, `list`, `append` (copies all but the last list).
-- Stack-style mutation: `push`, `pop`.
-- Access and shape: `nth`, `last`, `butlast`, `reverse`, `sort` (destructive).
-- Mapping: `mapcar` returns a list; `mapc` is for side effects; `mapconcat` maps then joins strings.
-- Alists: `alist-get`, `assoc`, `assq`, `rassoc`.
-- Plists: `plist-get`, `plist-put`.
-- `seq.el` works on lists, vectors, and strings: `seq-map`, `seq-filter`, `seq-remove`, `seq-reduce`, `seq-find`, `seq-some`, `seq-every-p`, `seq-contains`, `seq-length`, `seq-into`, `seq-concatenate`.
-- `cl-lib` sequence helpers: `cl-remove-if`, `cl-remove-if-not`, `cl-sort`, `cl-position`, `cl-count`, `cl-substitute`.
+- **Basics:** `car`, `cdr`, `cons`, `list`
+- **Append:** `append` copies all but the last list
+- **Stack mutation:** `push`, `pop`
+- **Access:** `nth`, `last`, `butlast`
+- **Transforms:** `reverse`, `sort` where `sort` is destructive
+- **Mapping:** `mapcar` returns a list
+- **Side effects:** `mapc`
+- **Map and join:** `mapconcat`
+- **Alists:** `alist-get`, `assoc`, `assq`, `rassoc`
+- **Plists:** `plist-get`, `plist-put`
+- **`seq.el`:** `seq-map`, `seq-filter`, `seq-remove`, `seq-reduce`, `seq-find`
+- **`seq.el`:** `seq-some`, `seq-every-p`, `seq-contains`, `seq-length`, `seq-into`, `seq-concatenate`
+- **`cl-lib`:** `cl-remove-if`, `cl-remove-if-not`, `cl-sort`, `cl-position`, `cl-count`, `cl-substitute`
 
 ## Buffers
 
-- Buffer lookup/context: `current-buffer`, `get-buffer`, `get-buffer-create`, `with-current-buffer`, `set-buffer` (prefer `with-current-buffer`).
-- Temporary state: `save-excursion`, `with-temp-buffer`.
-- Positions and movement: `point`, `point-min`, `point-max`, `region-beginning`, `region-end`, `goto-char`, `forward-char`, `backward-char`, `forward-line`.
-- Text changes/extraction: `insert`, `delete-region`, `buffer-substring`, `buffer-substring-no-properties`, `buffer-string`.
-- Metadata/lifecycle: `buffer-name`, `buffer-file-name`, `kill-buffer`, `bury-buffer`.
+- **Lookup:** `current-buffer`, `get-buffer`, `get-buffer-create`
+- **Context:** `with-current-buffer`, `set-buffer`; prefer `with-current-buffer`
+- **Temporary state:** `save-excursion`, `with-temp-buffer`
+- **Positions:** `point`, `point-min`, `point-max`, `region-beginning`, `region-end`
+- **Movement:** `goto-char`, `forward-char`, `backward-char`, `forward-line`
+- **Text changes:** `insert`, `delete-region`
+- **Text reads:** `buffer-substring`, `buffer-substring-no-properties`, `buffer-string`
+- **Lifecycle:** `buffer-name`, `buffer-file-name`, `kill-buffer`, `bury-buffer`
 
 ## Files
 
-- Paths: `expand-file-name`, `file-name-directory`, `file-name-nondirectory`, `file-name-extension`, `file-name-sans-extension`, `file-name-base`.
-- Predicates: `file-exists-p`, `file-directory-p`, `file-readable-p`, `file-writable-p`.
-- Directory listing: `directory-files`, `directory-files-recursively`.
-- Reading/opening: `find-file-noselect`, `insert-file-contents`.
-- Writing/creating: `write-region`, `make-directory`.
+- **Paths:** `expand-file-name`, `file-name-directory`, `file-name-nondirectory`
+- **Path parts:** `file-name-extension`, `file-name-sans-extension`, `file-name-base`
+- **Predicates:** `file-exists-p`, `file-directory-p`, `file-readable-p`, `file-writable-p`
+- **Listing:** `directory-files`, `directory-files-recursively`
+- **Reading:** `find-file-noselect`, `insert-file-contents`
+- **Writing:** `write-region`, `make-directory`
 
 ## Hash tables
 
-- Create/copy: `make-hash-table` (`:test`, `:size`, `:weakness`), `copy-hash-table`.
-- Access/update: `gethash`, `puthash`, `remhash`, `clrhash`.
-- Iterate/count: `maphash`, `hash-table-count`.
-- Predicate: `hash-table-p`.
+- **Create:** `make-hash-table` with `:test`, `:size`, `:weakness`
+- **Copy:** `copy-hash-table`
+- **Access:** `gethash`, `puthash`, `remhash`, `clrhash`
+- **Iteration:** `maphash`, `hash-table-count`
+- **Predicate:** `hash-table-p`
 
 ## Sequences
 
-- Generic access: `length`, `elt`, `seq-length`, `seq-elt`.
-- Generic transforms: `seq-map`, `seq-filter`, `seq-reduce`.
+- **Access:** `length`, `elt`, `seq-length`, `seq-elt`
+- **Transforms:** `seq-map`, `seq-filter`, `seq-reduce`
 
 ## Predicates
 
-- Core types: `stringp`, `listp`, `consp`, `null`, `vectorp`, `bufferp`, `hash-table-p`, `processp`, `windowp`, `framep`.
-- Callable/binding state: `functionp`, `boundp`, `fboundp`, `featurep`.
-- Symbol/number helpers: `keywordp`, `integerp`, `floatp`, `numberp`, `char-or-string-p`.
-- File existence: `file-exists-p`.
+- **Core types:** `stringp`, `listp`, `consp`, `null`, `vectorp`
+- **Runtime objects:** `bufferp`, `hash-table-p`, `processp`, `windowp`, `framep`
+- **Callable state:** `functionp`, `boundp`, `fboundp`, `featurep`
+- **Symbol and number:** `keywordp`, `integerp`, `floatp`, `numberp`, `char-or-string-p`
+- **Files:** `file-exists-p`

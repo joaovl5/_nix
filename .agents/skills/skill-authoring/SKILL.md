@@ -1,52 +1,54 @@
 ---
 name: skill-authoring
-description: Use when creating, editing, or reviewing repo-local skills under `.agents/skills` in this repo; covers overlap checks, concise skill structure, verification, and skill-specific testing.
+description: Use when creating, editing, or reviewing repo-local skills under `.agents/skills` in this repo; covers overlap checks, concise skill structure, verification, and skill-specific testing
 ---
 
-Use this for repo-local skill work in `./.agents/skills/`. It is the repo authority for that scope.
+Use this for repo-local skill work in `./.agents/skills/`. It is the repo authority for that scope
 
 ## First decisions
 
-- Confirm the target is a repo-local skill in `./.agents/skills/`.
-- Search existing repo-local skills before creating a new one. If the need fits an existing skill, extend that skill instead of creating a near-duplicate.
-- Ground every factual claim in current repo files and primary or upstream sources when external behavior is involved. If something is uncertain, say so.
-- Keep `SKILL.md` operational. Push long examples, detailed checklists, and deeper background into `references/`.
-- Skill docs may refer to local files as `scripts/foo.py` and `references/bar.md`; the harness resolves skill-relative paths.
-- Executable helper scripts in skills should prefer `uv run --script` and PEP 723-style metadata when practical, matching existing skill-local helpers.
+- **Scope:** confirm target is a skill in `./.agents/skills/`
+- **Overlap:** search repo skills first, extend an existing one when it fits
+- **Evidence:** ground claims in files and primary or upstream sources
+- **Boundary:**
+  - keep `SKILL.md` slim and operational
+  - move long examples, checklists, and subject-specific detail into `references/`
+- **Paths:** use skill-relative paths like `scripts/foo.py` and `references/bar.md`
+- **Scripts:**
+  - write helpers with `uv run --script`, not plain `python`
+  - run helpers with `uv run ...`, not `python ...`
 
-## Editing an existing skill
+## Style rules
 
-- Read the current `SKILL.md` and any referenced files before changing behavior or guidance.
-- Verify the skill still matches current repo reality, scripts, and workflows.
-- Fix focused high-confidence or medium-confidence issues directly.
-- If a section is becoming long, move the detail into `references/` and leave a short pointer.
-- Preserve valid frontmatter with only `name` and `description`.
+- **Bullets:**
+  - keep to 1-2 short sentences
+  - split longer points into sub-bullets
+  - use bold lead-ins with the colon inside, then keep the next word lowercase when natural
+  - don't end bullets with periods unless code or a quote needs one
+- **Language:** cut filler, prefer short words, sacrifice grammar for brevity
+- **Repeats:** say each rule once, link to references instead of restating
 
-## Creating a new skill
+## Editing skills
 
-- Confirm no existing repo-local skill already covers the job.
-- Write a trigger-focused description that starts with `Use when...` and makes the activation boundary obvious.
-- Keep the base skill short: what it is for, the core rules, the main workflow, and the required checks.
-- Add `references/` or `scripts/` only when they reduce clutter or carry real operational weight.
-- Do not rely on same-name shadowing of external skills.
+- **Context:** check repo reality, then read `SKILL.md` and sources before changing behavior
+- **Extract:** move growing sections into `references/` and leave a short pointer
 
-## Testing and verification
+## Creating skills
 
-- Treat discipline or process skills as behavior-changing artifacts: run pressure-scenario/TDD testing. Capture baseline behavior without the skill, add the minimum guidance that closes the failure, then re-test with the skill.
-- For pure reference skills, source verification and review are the primary quality gates; pressure-scenario testing is optional.
-- Syntax-check every script added to a skill.
-- After changes, run repo checks in this order: `nix fmt`, `git add .`, `prek`.
-- Run `nix flake check --all-systems` only when Nix files changed.
-- Do not commit unless the user or task explicitly permits it.
+- **Need:** confirm no existing repo skill already fits
+- **Trigger:** start the frontmatter description with `Use when...`
+- **Base:** keep the main skill to purpose, rules, workflow, and checks
+- **Support:** add `references/` or `scripts/` only when they cut clutter or save time
 
-## Common mistakes
+## Testing
 
-- Guessing instead of checking current files or upstream docs.
-- Turning `SKILL.md` into a long manual instead of a quick operational guide.
-- Creating a new skill when a targeted update to an existing one would do.
-- Leaving skill-specific scripts unchecked.
-- Editing low-confidence issues without either verifying them or asking the user.
+- **Process skills:** use pressure-scenario or TDD testing
+  - capture baseline failure
+  - add the minimum guidance
+  - re-test until the loophole closes
+- **Reference skills:** prefer source verification and review
+- **Scripts:** run script checks and lints
 
 ## References
 
-- `references/testing-process-skills.md`: compact workflow for pressure-scenario/TDD testing of behavior-changing skills.
+- **Testing:** `references/testing-process-skills.md` covers behavior-changing skills

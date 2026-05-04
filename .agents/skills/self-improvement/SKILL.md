@@ -7,79 +7,51 @@ description: Use when a non-trivial task yields reusable wisdom, a post-mortem, 
 
 Use this after a non-trivial task yields either:
 
-- **REUSABLE WISDOM:** update canonical knowledge
-  - **A:** update an existing skill at `./.agents/skills`
-  - **B:** update existing documentation at `./docs/wip`
-  - **C:** create a new skill
-  - **D:** create new documentation
-- **EPHEMERAL KNOWLEDGE:** store situation-specific but useful context
-  - **E:** add a log at `./docs/logs`
+- **Reusable wisdom:** update canonical knowledge
+  - **Existing skill:** update `./.agents/skills`
+  - **Existing docs:** update `./docs/wip`
+  - **New skill:** create one only if no current skill fits
+  - **New docs:** create them only if no current page can absorb the change
+- **Ephemeral knowledge:** store situation-specific context in `./docs/logs`
 
-Use the decision guide below, and remember multiple actions may apply:
+Use the guide below; more than one action may apply:
 
 ```text
-IF <critical environment incident>:
-    (E)
+if (useful but situation-specific) or (critical environment incident) -> (E)
+if (non-trivial reusable wisdom) ->
+    if (fits existing skill) -> (A)
+    elif (reusable for future agents) and (not situation-specific) -> (C)
 
-IF <non-trivial reusable wisdom>:
-    IF <fits existing skill>:
-        (A)
-    ELIF <reusable for future agents and not situation-specific>:
-        (C)
-
-    IF <fits existing docs>:
-        (B)
-    ELIF <reusable for agents/users and not situation-specific>:
-        (D)
-
-IF <useful but situation-specific>:
-    (E)
+    if (fits existing docs) -> (B)
+    elif (reusable for agents/users) and (not situation-specific) -> (D)
 ```
 
-## Shared Principles
+## Shared principles
 
-- **STRUCTURE:** prefer the smallest structural update that fits the new knowledge.
-- **CONCISENESS:** keep the skill/doc update short; only logs should expand when detail is useful.
-- **SKILLS:** use supporting skills when relevant (for example `superpowers:writing-skills`).
+- **Scope:** prefer the smallest structural update that fits the new knowledge
+- **Concision:** keep skill and doc updates short, logs may stay detailed when detail helps
+- **Skill support:** use supporting skills when relevant
 
-## A) Updating existing skills
+## Procedures
 
-Update an existing skill when the new wisdom already fits there. Prefer extending the current skill over creating a near-duplicate.
-
-## B) Updating existing documentation
-
-Update existing documentation when it is the best long-term home for the new knowledge.
-
-## C) Creating new skills
-
-Only create a new skill when:
-
-- [ ] No existing skill already covers the subject.
-- [ ] The skill is reusable for future agents and is not situation-specific.
-
-## D) Creating new documentation
-
-Only create new documentation when:
-
-- [ ] No existing documentation page can absorb it, even with restructuring.
-- [ ] The documentation is reusable and relevant to both agents and users.
-
-## E) Logging ephemeral knowledge
-
-Use `./docs/logs` for debugging logs, research notes, incident notes, and other situation-specific knowledge that is worth keeping but not yet canonical.
-
-Bootstrap the log with the CLI helper:
-
-```bash
-scripts/add_log.py --short-title "..." --report-brief "..."
-```
-
-The helper:
-
-- fills `timestamp` and `date_slug`, then slugifies `short_title` into `short_title_slug`
-- validates CLI input: `short_title` must be 10-96 chars, `report_brief` 30-280 chars, both single-line with no control chars, and the title must slugify to a non-empty lowercase ASCII slug
-- uses raw placeholder replacement after Pydantic validation, then creates `./docs/logs/<timestamp>_<short_title_slug>.md`
-
-After generation, fill the remaining body placeholders in `_Situation_` (`root`, `method`, `etc`, `scope`, `impact`), `_Process_` (`process`), `_Findings_` (`findings`), `_Conclusion_` (`conclusion`), and `_Next Steps_` (`next_steps`).
-
-Keep logs detailed enough to help future correlation, but avoid filler.
+- **(A) Updating skills:** when new wisdom fits a skill, extend it instead of creating a near-duplicate
+- **(B) Updating docs:** use when an existing doc is the best long-term home
+- **(C) Adding skills:** only when
+  - **Gap:** no current skill covers the subject
+  - **Reuse:** it will be reusable later, not situation-specific
+- **(D) Adding docs:** only when
+  - **No fit:** no current page can absorb it, even after restructuring
+  - **Shared value:** it matters to agents and developers
+- **(E) Logging ephemeral knowledge:** use for debugging logs, research notes, incident reports, and other situation-specific material worth keeping
+  - **Location:** `./docs/logs`
+  - **Adding a log:** bootstrap it with the helper
+    - **Command:** `uv run scripts/add_log.py --short-title "..." --report-brief "..."`
+    - **Auto-filled:** `timestamp`, `date_slug`, and slugified `short_title_slug`
+    - **Validated:**
+      - `short_title` must be 10-96 chars and single-line
+      - `report_brief` must be 30-280 chars and single-line
+    - **Output:** generated log path
+    - **After running:**
+      - use template comments as the basis for filling placeholders
+      - remove the comments after filling every placeholder
+      - keep logs detailed enough for future correlation, but cut filler

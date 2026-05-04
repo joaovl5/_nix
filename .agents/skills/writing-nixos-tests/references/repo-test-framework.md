@@ -1,16 +1,16 @@
 # Repo NixOS test framework reference
 
-This flake wraps the NixOS VM test framework with a small repo-specific Python package convention.
+Use this for repo wiring facts. Load other references for driver API semantics or assertion patterns
 
 ## Files involved
 
-- `tests/default.nix` exposes test suites as flake checks.
-- `_lib/tests/default.nix` defines `mylib.tests.mk_test`.
-- `tests/<suite>/default.nix` defines a suite and calls `mylib.tests.mk_test`.
-- `tests/<suite>/*.nix` can hold node fixtures for multi-node or large setup.
-- `tests/scripts/` builds the `my-nix-tests` Python package.
-- `tests/scripts/src/my_nix_tests/<suite>.py` contains Python orchestration.
-- `tests/scripts/default.nix` registers import checks through `pythonImportsCheck`.
+- **Flake entrypoint:** `tests/default.nix` exposes suites as flake checks
+- **Wrapper definition:** `_lib/tests/default.nix` defines `mylib.tests.mk_test`
+- **Suite file:** `tests/<suite>/default.nix` calls `mylib.tests.mk_test`
+- **Fixture nodes:** `tests/<suite>/*.nix` holds substantial node setup
+- **Python package:** `tests/scripts/` builds the `my-nix-tests` package
+- **Driver module:** `tests/scripts/src/my_nix_tests/<suite>.py` contains orchestration
+- **Import checks:** `tests/scripts/default.nix` registers modules through `pythonImportsCheck`
 
 ## `mylib.tests.mk_test` contract
 
@@ -24,30 +24,31 @@ mylib.tests.mk_test {
 }
 ```
 
-The wrapper adds the repo Python package to `extraPythonPackages` and generates this test script:
+The wrapper adds the repo Python package to `extraPythonPackages` and generates:
 
 ```python
 from my_nix_tests.<python_module_name> import run
 run(globals())
 ```
 
-Therefore:
+Keep these facts true:
 
-- the Python file must define `run(driver_globals: dict[str, object]) -> None` or equivalent;
-- the module name must match `python_module_name`;
-- named NixOS nodes are accessed from `driver_globals`, e.g. `driver_globals["relay"]`;
-- new Python modules should be added to `tests/scripts/default.nix` `pythonImportsCheck`.
+- **Driver function:** the Python file defines `run(driver_globals: dict[str, object]) -> None` or an equivalent signature
+- **Module contract:** `python_module_name = "example"` means `from my_nix_tests.example import run`
+- **Per-suite module:** each suite needs its own module unless `python_module_name` intentionally reuses one
+- **Named nodes:** read named NixOS nodes from `driver_globals`, for example `driver_globals["relay"]`
+- **Import registration:** add new Python modules to `tests/scripts/default.nix` `pythonImportsCheck`
 
 ## New-suite checklist
 
-1. Create `tests/<suite>/default.nix`.
-2. Add node fixtures under `tests/<suite>/` when setup is substantial.
-3. Add `tests/scripts/src/my_nix_tests/<suite>.py` defining `run(...)`; every `mk_test` suite needs a Python module unless `python_module_name` intentionally reuses an existing one.
-4. Register that Python import in `tests/scripts/default.nix`.
-5. Ensure any generated files/secrets used by node fixtures are deterministic and materialized inside the VM.
-6. Run `python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py` for Python syntax.
-7. Stage new suite files before any flake-backed `nix eval` or `nix build` so the git flake input sees them.
-8. Run `nix build .#checks.x86_64-linux.<test_name>` for the targeted VM test.
+- **Suite file:** create `tests/<suite>/default.nix`
+- **Fixture files:** add `tests/<suite>/*.nix` when setup is substantial
+- **Driver module:** add `tests/scripts/src/my_nix_tests/<suite>.py` defining `run(...)`
+- **Import check:** register the Python import in `tests/scripts/default.nix`
+- **Deterministic inputs:** materialize generated files or secrets inside the VM and keep them deterministic
+- **Syntax check:** run `uv run python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py`
+- **Flake visibility:** stage new suite files before flake-backed `nix eval` or `nix build`
+- **Targeted build:** run `nix build .#checks.x86_64-linux.<test_name>` for the suite you changed
 
 ## Minimal complex-suite template
 
@@ -69,10 +70,39 @@ mylib.tests.mk_test {
 `tests/example/server.nix`:
 
 ```nix
-_: {pkgs, ...}: {
-  # Explain non-obvious topology, fixture services, ports, and why this node exists.
+_: {pkgs, ...}: let
+  example_server = pkgs.writeShellScript "example-server" ''
+    exec ${pkgs.python3}/bin/python -u - <<'PY'
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = b"expected"
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    HTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
+    PY
+  '';
+in {
+  # Explain non-obvious topology, fixture service, ports, and why this node exists
   system.stateVersion = "25.11";
   networking.firewall.allowedTCPPorts = [8080];
+
+  systemd.services.example-http = {
+    wantedBy = ["multi-user.target"];
+    serviceConfig.ExecStart = example_server;
+  };
+}
+```
+
+`tests/example/client.nix`:
+
+```nix
+_: {pkgs, ...}: {
+  system.stateVersion = "25.11";
   environment.systemPackages = [pkgs.curl];
 }
 ```
@@ -80,11 +110,11 @@ _: {pkgs, ...}: {
 `tests/scripts/src/my_nix_tests/example.py`:
 
 ```python
-"""Integration test: one-sentence topology and behavior contract."""
+"""Integration test: one-sentence topology and behavior contract"""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-if False:
+if TYPE_CHECKING:
     from nix_machine_protocol import Machine
 
 SERVICE_PORT = 8080
@@ -103,16 +133,17 @@ def run(driver_globals: dict[str, object]) -> None:
     server = cast("Machine", driver_globals["server"])
     client = cast("Machine", driver_globals["client"])
 
-    # 1. Boot nodes and wait for the service that owns the behavior under test.
-    server.wait_for_unit("multi-user.target")
-    client.wait_for_unit("multi-user.target")
+    # 1. Wait for the service that owns the behavior and a client readiness probe
+    server.wait_for_unit("example-http.service")
+    client.wait_until_succeeds("command -v curl")
 
-    # 2. Assert the observable behavior with exact output, token, source, or state evidence.
+    # 2. Assert observable behavior with exact output, token, source, or state evidence
+    client.wait_until_succeeds(f"curl --fail --silent http://server:{SERVICE_PORT}/")
     _assert_service_responds(client)
 ```
 
 ## Comment expectations
 
-- Nix fixtures should explain non-obvious topology, secrets, addresses, firewall/NAT, and fixture-service purpose.
-- Python drivers should explain scenario phases, control paths for negative assertions, and known limitations.
-- Keep comments close to the code that needs them. Do not create a separate scenario matrix unless the user explicitly asks.
+- **Nix fixtures:** explain non-obvious topology, secrets, addresses, firewall or NAT rules, and fixture-service purpose
+- **Python drivers:** explain scenario phases, control paths for negative assertions, and known limitations
+- **Placement:** keep comments close to the code that needs them

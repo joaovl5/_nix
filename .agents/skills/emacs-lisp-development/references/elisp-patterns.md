@@ -22,9 +22,9 @@
   (remove-overlays (point-min) (point-max) 'my-highlight t))
 ```
 
-- `define-minor-mode` automatically creates the toggle variable (`my-highlight-mode`).
-- Use `nil t` in `add-hook` to make it buffer-local.
-- Clean up hooks and overlays on disable.
+- **Mode variable:** `define-minor-mode` creates the toggle variable `my-highlight-mode`
+- **Buffer-local hook:** use `nil t` in `add-hook` to keep the hook local to the buffer
+- **Disable cleanup:** remove hooks and overlays when the mode turns off
 
 ## Creating a custom keymap
 
@@ -38,7 +38,7 @@
   "Keymap for `my-mode'.")
 ```
 
-For prefix keymaps:
+- **Prefix maps:** build a sparse keymap, then bind it under a prefix key
 
 ```elisp
 (defvar my-prefix-map
@@ -60,10 +60,10 @@ For prefix keymaps:
   (overlay-put ov 'evaporate t))
 ```
 
-- `evaporate` property makes the overlay self-delete when its text is deleted.
-- Query with `overlays-at`, `overlays-in`.
-- Remove with `delete-overlay`.
-- Filter by property: `(seq-filter (lambda (ov) (overlay-get ov 'my-data)) (overlays-at pos))`.
+- **Self-removal:** `evaporate` makes an overlay delete itself when its text is deleted
+- **Queries:** use `overlays-at` and `overlays-in`
+- **Removal:** use `delete-overlay`
+- **Property filter:** `(seq-filter (lambda (ov) (overlay-get ov 'my-data)) (overlays-at pos))`
 
 ## Using timers
 
@@ -79,10 +79,10 @@ For prefix keymaps:
   (message "Refreshed!"))
 ```
 
-- `run-at-time time repeat function &rest args` — absolute or relative time.
-- `run-with-idle-timer secs repeat function &rest args` — run after idle.
-- `run-with-timer secs repeat function &rest args` — run after delay.
-- Always cancel timers when done. Store timer object for cancellation.
+- **Absolute or relative timer:** `run-at-time time repeat function &rest args`
+- **Idle timer:** `run-with-idle-timer secs repeat function &rest args`
+- **Delay timer:** `run-with-timer secs repeat function &rest args`
+- **Lifecycle:** keep the timer object and cancel it when done
 
 ## Process handling
 
@@ -100,7 +100,7 @@ For prefix keymaps:
  :noquery t)
 ```
 
-For simpler synchronous use:
+- **Synchronous work:** use `call-process`, `process-file`, or `process-lines` when async adds no value
 
 ```elisp
 (with-temp-buffer
@@ -121,7 +121,7 @@ For simpler synchronous use:
 (display-buffer buffer &optional action)
 ```
 
-`display-buffer` is non-destructive (doesn't change focus). `pop-to-buffer` may change focus. `switch-to-buffer` always changes focus.
+- **Display choices:** `display-buffer` is non-destructive, `pop-to-buffer` may move focus, and `switch-to-buffer` always does
 
 ```elisp
 (save-selected-window
@@ -142,7 +142,8 @@ For simpler synchronous use:
 (face-attribute 'my-warning-face :foreground)
 ```
 
-Use `:inherit` to derive from existing faces. Check face with `facep`.
+- **Inheritance:** use `:inherit` to derive from existing faces
+- **Predicates:** use `facep` when callers may pass an unknown face
 
 ## Text properties
 
@@ -154,9 +155,9 @@ Use `:inherit` to derive from existing faces. Check face with `facep`.
 (remove-text-properties start end '(my-prop nil))
 ```
 
-- Properties are more efficient than overlays for large regions.
-- Overlays are easier to manage for small, dynamic regions.
-- Use `font-lock` for syntax highlighting instead of manual text properties.
+- **Large regions:** text properties are usually cheaper than overlays
+- **Dynamic spans:** overlays are easier for small changing regions
+- **Syntax highlight:** prefer `font-lock` over manual face properties
 
 ## CL integration (`cl-lib`)
 
@@ -177,13 +178,10 @@ Use `:inherit` to derive from existing faces. Check face with `facep`.
 (cl-destructuring-bind (key (a b) &rest rest) data
   (list key a b rest))
 
-(with-temp-buffer
-  (let ((status (process-file "sh" nil t nil "-c" "printf 'ok'")))
-    (list status (buffer-string))))
 (cl-the integer (+ x y))
 ```
 
-Always use `cl-lib` (prefixed) instead of deprecated `cl` (unprefixed). `cl-lib` is built into Emacs 24.3+.
+- **Prefix:** use `cl-lib` APIs, not deprecated unprefixed `cl`
 
 ## Pattern: transient state / hydra
 
@@ -199,7 +197,7 @@ Always use `cl-lib` (prefixed) instead of deprecated `cl` (unprefixed). `cl-lib`
 (put 'previous-line 'repeat-map 'my-repeat-map)
 ```
 
-Built-in `repeat-mode` (Emacs 28+) makes commands repeatable via a keymap attached to the command symbol.
+- **Repeat mode:** built-in `repeat-mode` in Emacs 28+ repeats commands through a keymap on the command symbol
 
 ## Pattern: async operations
 
@@ -220,4 +218,5 @@ Built-in `repeat-mode` (Emacs 28+) makes commands repeatable via a keymap attach
      :noquery t)))
 ```
 
-Threads are build-dependent. Check `(fboundp 'make-thread)` or `(featurep 'threads)` before relying on them. For portable async work, prefer processes, timers, or built-in async APIs such as `url-retrieve`.
+- **Threads:** build support varies, so check `(fboundp 'make-thread)` or `(featurep 'threads)` before relying on them
+- **Portable async:** prefer processes, timers, or built-in async APIs like `url-retrieve`

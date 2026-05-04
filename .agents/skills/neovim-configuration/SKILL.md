@@ -1,103 +1,76 @@
 ---
 name: neovim-configuration
-description: Use when editing this repo's Neovim config under users/_modules/neovim; covers source-vs-generated boundaries, the recompile wrapper, and common maintenance pitfalls.
+description: Use when editing this repo's Neovim config under users/_modules/desktop/apps/editor/neovim; covers source-vs-generated boundaries, the recompile wrapper, and common maintenance pitfalls
 ---
 
 # Neovim Configuration
 
-- Use this when editing `users/_modules/neovim/`
-- For working with Fennel, also load `fennel-development`
-- Paths mentioned below are relative to `users/_modules/neovim/`
+- **Use this when:** editing `users/_modules/desktop/apps/editor/neovim/`
+- **Pairing:** for Fennel work, also load `fennel-development`
+- **Path base:** paths below are relative to `users/_modules/desktop/apps/editor/neovim/`
 
 ## First rule
 
-- **Never edit generated Lua.**
-  - `config/lua/**`
-  - `config/flsproject.lua`
-  - Edit the Fennel source instead, then recompile.
+- **Never edit generated Lua:** leave `config/lua/**` and `config/flsproject.lua` alone; edit Fennel source, then recompile
 
 ## Where changes go
 
-- Plugin and editor behavior
-  - `config/fnl/**` is the source of truth.
-  - Plugin specs and plugin-local behavior usually live in `config/fnl/plugins/**`.
-  - Core editor settings usually live in `config/fnl/options.fnl` and `config/fnl/keymaps.fnl`.
-- Bootstrap and plugin discovery
-  - `config/local.lua` is the real runtime bootstrap.
-  - It sets up lazy.nvim and nfnl.
-  - It scans `config/fnl/plugins` to depth `3`.
-- nfnl project root / trust boundary
-  - `config/.nfnl.fnl` is a direct-edit project root file.
-  - Trust it once in interactive Neovim before using the wrapper.
-  - The wrapper does not establish trust for you.
-- Nix wiring
-  - `default.nix` controls packages, runtimepath setup, and `_G.plugin_dirs`.
-- Tree-sitter queries
-  - `config/queries/**` and `config/after/queries/**` are direct-edit `.scm` files.
-  - They do not go through nfnl.
-- FLS project metadata
-  - `config/flsproject.fnl` is the source of truth.
-  - Detailed `flsproject` / fennel-ls rules live in `fennel-development`.
+- **Plugin behavior:** `config/fnl/**` is the source of truth for Neovim behavior
+- **Plugin specs:** most plugin specs live in `config/fnl/plugins/**`
+- **Core settings:** core options usually live in `config/fnl/options.fnl` and `config/fnl/keymaps.fnl`
+- **Bootstrap:** `config/local.lua` is the real runtime bootstrap for lazy.nvim and nfnl
+- **Plugin discovery:** the bootstrap scans `config/fnl/plugins` to depth `3`
+- **nfnl trust boundary:** `config/.nfnl.fnl` is a direct-edit project root file; trust it once in interactive Neovim before using the wrapper
+- **Nix wiring:** `default.nix` controls packages, runtimepath setup, and `_G.plugin_dirs`
+- **Tree-sitter queries:** `config/queries/**` and `config/after/queries/**` are direct-edit `.scm` files
+- **Query pipeline:** tree-sitter query files bypass nfnl
+- **FLS metadata:** `config/flsproject.fnl` is the source of truth for project metadata
+- **Further FLS rules:** detailed `flsproject` and fennel-ls rules live in `fennel-development`
 
 ## Recompile workflow
 
-- Preferred wrapper
-  - Run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py`.
-  - It still finds the repo root from the skill-local script path; caller cwd does not matter.
-  - Its default anchor is `users/_modules/neovim/config/flsproject.fnl`.
-  - After resolving the anchor, it finds the nearest parent containing `.nfnl.fnl`, opens a Fennel buffer there, runs `:NfnlCompileAllFiles`, and then lists or deletes orphaned generated Lua.
-- Safer orphan inspection
-  - Run `.agents/skills/neovim-configuration/scripts/recompile-nfnl.py --keep-orphans` to list orphans instead of deleting them.
-- When to recompile
-  - After Fennel edits.
-  - Definitely after macro changes, renames, deletes, or `config/flsproject.fnl` edits.
+- **Preferred wrapper:** from `.agents/skills/neovim-configuration`, run `uv run scripts/recompile-nfnl.py`
+- **Repo root:** the helper is skill-local and finds the repo root by searching upward for `flake.nix`, so caller cwd does not matter
+- **Project anchor:** the default anchor is `users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl`
+- **nfnl root:** from that anchor, the helper finds the nearest parent with `.nfnl.fnl`
+- **Compile action:** it opens a Fennel buffer there and runs `:NfnlCompileAllFiles`
+- **Orphan handling:** after compile, it lists or deletes orphaned generated Lua
+- **Safer orphan inspection:** run `uv run scripts/recompile-nfnl.py --keep-orphans` to list orphans instead of deleting them
+- **When to recompile:** recompile after Fennel edits, especially after macro changes, renames, deletes, or `config/flsproject.fnl` edits
 
 ## Common maintenance tasks
 
-- Change plugin behavior
-  - Start in `config/fnl/plugins/**`, then recompile through the wrapper.
-- Change core options or keymaps
-  - Edit `config/fnl/options.fnl` or `config/fnl/keymaps.fnl`, then recompile.
-- Change bootstrap or plugin discovery
-  - Edit `config/local.lua`.
-- Change Nix-managed packages or plugin wiring
-  - Edit `default.nix`.
-- Change tree-sitter query behavior
-  - Edit the relevant `.scm` file directly.
-- Rename or delete Fennel files
-  - Recompile through the wrapper.
-  - Use `--keep-orphans` first if you want to inspect before deletion.
-  - If this is a plugin file, keep the renamed path within discovery depth `3`.
-- Change FLS / project metadata
-  - Edit `config/flsproject.fnl`, then recompile.
+- **Change plugin behavior:** edit `config/fnl/plugins/**`, then recompile through the wrapper
+- **Change core options or keymaps:** edit `config/fnl/options.fnl` or `config/fnl/keymaps.fnl`, then recompile
+- **Change bootstrap or plugin discovery:** edit `config/local.lua`
+- **Change Nix-managed packages or plugin wiring:** edit `default.nix`
+- **Change tree-sitter query behavior:** edit the relevant `.scm` file directly
+- **Rename or delete Fennel files:** recompile through the wrapper after the change
+- **Orphan review:** use `--keep-orphans` first if you want to inspect before deletion
+- **Discovery limit:** keep plugin files within discovery depth `3`
+- **Change FLS or project metadata:** edit `config/flsproject.fnl`, then recompile
 
 ## Repo quirks
 
-- `config/local.lua` is tracked bootstrap code, not a disposable local override.
-- Plugin specs may rely on `_G.plugin_dirs` from `default.nix` - this is how we comunicate Nix statically-provided stuff while retaining dynamic behavior.
-- Plugin discovery only walks depth `3`; deeper plugin files are ignored.
-- `performance.rtp.reset = false` is deliberate.
+- **Tracked bootstrap:** `config/local.lua` is tracked bootstrap code, not a disposable local override
+- **Static plugin dirs:** plugin specs may rely on `_G.plugin_dirs` from `default.nix`
+- **Why it matters:** that is how this repo threads Nix-provided paths into dynamic behavior
+- **Discovery depth:** plugin discovery only walks depth `3`; deeper plugin files are ignored
+- **Runtimepath reset:** `performance.rtp.reset = false` is deliberate
 
 ## Quick checklist
 
-- Before editing
-  - Pick the real source file first.
-  - If the change is Fennel behavior, stay in `config/fnl/**`, not generated Lua.
-  - If macros, renames, or deletes are involved, plan to run the wrapper.
-- Before finishing
-  - Recompile changed Fennel through the wrapper.
-  - Keep `.scm` edits separate from nfnl assumptions.
-  - Do not claim generated Lua was updated if you did not run the wrapper.
+- **Before editing:** pick the real source file first
+- **Fennel changes:** if the change is Fennel behavior, stay in `config/fnl/**`, not generated Lua
+- **Rename-sensitive work:** if macros, renames, or deletes are involved, plan to run the wrapper
+- **Before finishing:** recompile changed Fennel through the wrapper
+- **Query boundary:** keep `.scm` edits separate from nfnl assumptions
+- **Claim discipline:** do not claim generated Lua changed if you did not run the wrapper
 
 ## Common mistakes
 
-- Editing `config/lua/**` or `config/flsproject.lua`
-  - Do not do this.
-- Treating `config/local.lua` as machine-local
-  - It is tracked bootstrap code.
-- Adding plugin files deeper than the scan depth
-  - Discovery here only walks depth `3`.
-- Forgetting to recompile after macro changes, renames, or deletes
-  - Those changes affect more than one generated file.
-- Looking for an nfnl step after editing `.scm`
-  - Query files bypass nfnl.
+- **Generated Lua edits:** do not edit `config/lua/**` or `config/flsproject.lua`
+- **Local override assumption:** `config/local.lua` is tracked bootstrap code
+- **Deep plugin files:** discovery only walks depth `3`
+- **Missed recompiles:** macro changes, renames, and deletes affect more than one generated file
+- **nfnl on queries:** `.scm` query files bypass nfnl
