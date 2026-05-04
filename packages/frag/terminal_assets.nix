@@ -3,12 +3,12 @@
   lib ? pkgs.lib,
 }: let
   starship_toml = (pkgs.formats.toml {}).generate "frag-starship.toml" (
-    import ../../users/_modules/starship/settings.nix {inherit lib;}
+    import ../../users/_modules/cli/starship/settings.nix {inherit lib;}
   );
 
   tmux_plugin_name = "better-mouse-mode";
   tmux_config = pkgs.writeText "frag-tmux.conf" ''
-    ${builtins.readFile ../../users/_modules/cli/tmux/tmux.conf}
+    ${builtins.readFile ../../users/_modules/cli/multiplexer/tmux/tmux.conf}
 
     run-shell ~/.config/tmux/plugins/${tmux_plugin_name}/scroll_copy_mode.tmux
   '';
@@ -22,15 +22,15 @@ in
       "$shared_root/.config/tmux/plugins" \
       "$shared_root/.local/share/zellij/plugins"
 
-    cp ${../../users/_modules/fish/src/frag_init.fish} \
+    cp ${../../users/_modules/cli/shell/fish/src/frag_init.fish} \
       "$shared_root/.config/fish/conf.d/frag_init.fish"
-    cp ${../../users/_modules/fish/src/container_safe_vars.fish} \
+    cp ${../../users/_modules/cli/shell/fish/src/container_safe_vars.fish} \
       "$shared_root/.config/fish/conf.d/container_safe_vars.fish"
-    cp ${../../users/_modules/fish/src/container_safe_functions.fish} \
+    cp ${../../users/_modules/cli/shell/fish/src/container_safe_functions.fish} \
       "$shared_root/.config/fish/conf.d/container_safe_functions.fish"
     cp ${starship_toml} "$shared_root/.config/starship.toml"
 
-    cp -r ${../../users/_modules/cli/zellij/config}/. \
+    cp -r ${../../users/_modules/cli/multiplexer/zellij/config}/. \
       "$shared_root/.config/zellij"
     cp ${pkgs.zjstatus}/bin/zjstatus.wasm \
       "$shared_root/.local/share/zellij/plugins/zjstatus.wasm"

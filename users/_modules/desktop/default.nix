@@ -1,16 +1,17 @@
 let
   inherit (import ../../../_lib/modules) combine_modules;
   modules = [
-    (import ./niri)
-    (import ./eww)
-    (import ./gnome)
-    (import ./anyrun)
+    (import ./wm)
+    (import ./widgets)
+    (import ./launcher)
     (import ./hexecute)
     (import ./whisper-overlay)
-    (import ./hyprland)
     (import ./gtk)
     (import ./fonts.nix)
     (import ./xdg-portals.nix)
+    (import ./audio)
+    (import ./apps)
+    (import ./services)
   ];
 in
   combine_modules modules

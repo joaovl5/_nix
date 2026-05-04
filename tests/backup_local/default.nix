@@ -5,6 +5,9 @@
   system,
   ...
 } @ args:
+# Single-node backup fixture: machine writes path/custom/postgres snapshots into a
+# local filesystem repo so the driver can exercise restore, retention, and
+# maintenance behavior without network dependencies.
 mylib.tests.mk_test {
   name = "backup_local";
   python_module_name = "backup_local";

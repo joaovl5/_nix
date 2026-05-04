@@ -13,6 +13,7 @@ in {
     ./reverse-proxy
     ./octodns
     ./fxsync
+    ./network_namespaces
     ./wireguard
     ./qbittorrent
     ./syncthing

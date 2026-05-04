@@ -1,4 +1,0 @@
-[mgr]
-prepend_keymap = [
-  { on = "<C-e>", run = "quit", desc = "Quit and write cwd file" },
-]

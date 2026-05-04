@@ -20,6 +20,7 @@ _: {
     settings.PasswordAuthentication = false;
   };
 
+  # This fixture user is the only SSH principal repo B accepts during the test.
   users.users.backup-user = {
     isNormalUser = true;
     home = "/home/backup-user";
@@ -27,8 +28,8 @@ _: {
     openssh.authorizedKeys.keyFiles = ["${test_ssh_key}/id_ed25519.pub"];
   };
 
-  # Provision the remote restic repo path here so the promotion test only
-  # exercises the backup flow, not storage-side shell setup.
+  # Provision repo B ahead of time so failures come from promotion/maintenance,
+  # not missing storage-side directories.
   system.activationScripts."backup-repos-dir" = lib.stringAfter ["users"] ''
     mkdir -p /var/lib/backups/repos/coordinator
     chown -R backup-user /var/lib/backups/repos

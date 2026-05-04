@@ -6,9 +6,12 @@
 
 ## Special Instructions
 
-- Dependency pins are managed in `npins/sources.json`; `flake.nix` is a thin tooling shim over `default.nix`, not the pin source of truth.
-- `globals/` is local repo data. Changing it does not require a pin or lock update.
+- **npins:**
+  - Dependency pins are managed in `npins/sources.json`
+  - `flake.nix` is a thin tooling shim over `default.nix`, not the pin source of truth.
+- `globals/` is repo infra-level data. Changing it does not require a pin or lock update.
 - `mysecrets` updates use `npins update mysecrets` and should stage `npins/sources.json`.
+- When creating or maintaining repo-local skills under `.agents/skills/`, use `.agents/skills/skill-authoring/SKILL.md` as the authoritative workflow. Prefer it over generic skill-writing guidance when they conflict.
 
 ## Helpful Tooling
 
@@ -18,6 +21,10 @@
   - these options also search declared options (some new ones may be missing if a system rebuild is pending)
 - Searching packages
   - `nh search <query>`
+
+## Repo-local skills
+
+- When adding, editing, reviewing, or debugging NixOS VM/integration tests under `tests/`, read `.agents/skills/writing-nixos-tests/SKILL.md` first.
 
 ## Required checks after changes
 

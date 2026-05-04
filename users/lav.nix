@@ -12,26 +12,9 @@
   modules = [
     (import ./_modules/assets)
     (import ./_modules/cli)
-    (import ./_modules/yazi)
-    (import ./_modules/fish)
-    (import ./_modules/nushell)
-    (import ./_modules/starship)
     (import ./_modules/desktop)
-    (import ./_modules/audio)
-    (import ./_modules/media)
-    (import ./_modules/gaming)
     (import ./_modules/coding)
     (import ./_modules/ai)
-    (import ./_modules/obs)
-    (import ./_modules/term)
-    (import ./_modules/browsing)
-    (import ./_modules/neovim)
-    (import ./_modules/emacs)
-    (import ./_modules/espanso)
-    (import ./_modules/kanata)
-    (import ./_modules/discord)
-    (import ./_modules/syncthing)
-    (import ./_modules/storage)
   ];
   module_imports = extract_imports modules;
 

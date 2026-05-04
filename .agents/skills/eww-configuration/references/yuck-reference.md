@@ -1,12 +1,13 @@
 # Yuck Reference for This Repo
 
-Sources: official Eww configuration docs, expression docs, magic variables docs, and widgets docs.
+Sources: official Eww configuration, expression, magic variable, and widget docs
 
 ## File model
 
-Eww is configured in Yuck, an S-expression language, and styled with `eww.scss` or `eww.css`.
-
-Official default layout:
+- **Language split:** use Yuck for structure and `eww.scss` or `eww.css` for styling
+- **Official layout:** docs show one config dir with `eww.yuck` and `eww.scss`
+- **Repo caveat:** this repo keeps the active bar under `users/_modules/desktop/widgets/eww/config/bar/`, so prove the real `--config` target before running commands
+- **Includes:** use `(include "./path/file.yuck")` to split config, but current repo files do not use it
 
 ```text
 $XDG_CONFIG_HOME/eww/
@@ -14,11 +15,7 @@ $XDG_CONFIG_HOME/eww/
   eww.scss
 ```
 
-This repo currently stores the active bar under `users/_modules/desktop/eww/config/bar/`. Verify the actual `--config` path before running Eww commands.
-
-Use `(include "./path/file.yuck")` to split a large Yuck file. The current repo config does not use `include`.
-
-## Forms used most often
+## Common forms
 
 ### Window
 
@@ -34,12 +31,8 @@ Use `(include "./path/file.yuck")` to split a large Yuck file. The current repo 
   (bar))
 ```
 
-Common window fields:
-
-- `:monitor`: index, name, `<primary>`, or JSON-array fallback string.
-- `:geometry`: `:x`, `:y`, `:width`, `:height`, `:anchor`.
-- X11-specific docs include `:stacking`, `:wm-ignore`, `:reserve`, `:windowtype`.
-- Wayland-specific docs include `:stacking`, `:exclusive`, `:focusable`, `:namespace`.
+- **Window fields:** common ones are `:monitor`, `:geometry`, `:windowtype`, and platform-specific stacking or focus flags
+- **Geometry:** `:geometry` combines `:x`, `:y`, `:width`, `:height`, and `:anchor`
 
 ### Widget
 
@@ -55,20 +48,17 @@ Common window fields:
            :onchange onchange)))
 ```
 
-Rules:
+- **One root:** widget bodies render exactly one root widget, so wrap sibling children in `box` or `centerbox`
+- **Arguments:** required args are plain names, optional args use `?name` and default to `""`
+- **Children:** wrapper widgets can render children with `(children)` or `(children :nth 0)`
 
-- Widget bodies contain exactly one root widget; wrap multiple children in `box` or `centerbox`.
-- Required args are plain names; optional args use `?name` and default to `""`.
-- Wrapper widgets can render children with `(children)` or `(children :nth 0)`.
+## Attributes and expressions
 
-## Attributes, expressions, and strings
-
-- Attributes are colon-prefixed: `:class`, `:orientation`, `:onclick`.
-- Use `{expr}` for expression-valued attributes/content.
-- Use `${expr}` for interpolation inside strings.
-- JSON access supports `object.field`, `array[0]`, and `object["field"]`.
-- Safe access uses `?.` / `?.[index]`.
-- Useful functions include `round`, `floor`, `ceil`, `min`, `max`, `jq`, `formattime`, and `formatbytes`.
+- **Attributes:** use colon-prefixed attrs such as `:class`, `:orientation`, and `:onclick`
+- **Expressions:** use `{expr}` for expression-valued attrs or text
+- **Interpolation:** use `${expr}` only inside strings
+- **JSON access:** use `object.field`, `array[0]`, `object["field"]`, and safe access with `?.` or `?.[index]`
+- **Useful functions:** common helpers include `round`, `floor`, `ceil`, `min`, `max`, `jq`, `formattime`, and `formatbytes`
 
 Repo examples:
 
@@ -80,37 +70,20 @@ Repo examples:
 
 ## Variables
 
-### `defvar`
-
-Manual state. Update externally with `eww update name="new value"`.
+- **`defvar`:** manual state updated externally with `eww update name="new value"`
+- **`defpoll`:** interval shell command for cheap periodic values
+- **`deflisten`:** long-running command whose stdout lines update the variable, usually best for event streams
+- **Magic vars:** available without imports, most update every 2s, and `EWW_TIME` updates every 1s
 
 ```lisp
 (defvar foo "initial value")
-```
 
-### `defpoll`
-
-Interval shell command. Good for cheap periodic values.
-
-```lisp
 (defpoll time :interval "10s"
   "date '+%H:%M'")
-```
 
-Options documented upstream include `:initial` and `:run-while`.
-
-### `deflisten`
-
-Long-running command whose stdout lines update the variable. Prefer this for event streams, including workspace changes, when a reliable stream exists.
-
-```lisp
 (deflisten workspace_state :initial "[]"
-  "scripts/workspaces")
+  "bash scripts/niri-workspaces.sh")
 ```
-
-### Magic variables
-
-Available without imports. Most update every 2s; `EWW_TIME` updates every 1s.
 
 Relevant shapes:
 
@@ -120,13 +93,14 @@ EWW_DISK = { <mount_point>: { name, total, free, used, used_perc } }
 EWW_CPU  = { cores: [{ core, freq, usage }], avg }
 ```
 
-`EWW_DISK` may be inaccurate on some filesystems such as btrfs and zfs. Verify value ranges before feeding a value to `scale`.
-
-`EWW_CMD` is useful in event handlers, for example `:onclick "${EWW_CMD} update foo=bar"`.
+- **Disk caveat:** `EWW_DISK` can misreport some filesystems such as btrfs or zfs, so verify ranges before feeding a value to `scale`
+- **Command helper:** `EWW_CMD` is useful inside handlers such as `:onclick "${EWW_CMD} update foo=bar"`
 
 ## Lists and dynamic widgets
 
-Prefer `for` over `literal` when rendering a JSON array:
+- **Prefer `for`:** use it when rendering JSON arrays into repeated widgets
+- **Avoid `literal`:** keep it for variables that must contain a full Yuck widget tree string
+- **Performance:** upstream warns `literal` is not very efficient
 
 ```lisp
 (defvar items "[1, 2, 3]")
@@ -137,34 +111,27 @@ Prefer `for` over `literal` when rendering a JSON array:
       entry)))
 ```
 
-Use `literal` only when the variable must contain a complete Yuck widget tree string:
-
 ```lisp
 (defvar dynamic_yuck "(box (button 'foo') (button 'bar'))")
 (literal :content dynamic_yuck)
 ```
 
-Upstream warns `literal` is not very efficient; keep it as a last resort.
-
 ## Widgets used in this bar
 
-- `centerbox`: exactly three children, laid out start/center/end in the chosen orientation.
-- `box`: main container; important attrs include `:orientation`, `:spacing`, `:space-evenly`.
-- `button`: child widget; `:onclick`, `:onmiddleclick`, `:onrightclick` run commands.
-- `scale`: slider; uses `:min`, `:max`, `:value`, `:active`, `:onchange`, `:orientation`.
-- `label` or plain string content: use `label` when you need text-specific attrs.
-- `literal`: render arbitrary Yuck from a string; avoid for simple lists.
-
-Global attrs include `:class`, `:halign`, `:valign`, `:visible`, `:active`, `:tooltip`, `:style`, and `:css`.
+- **Containers:** `centerbox` lays out start, center, and end children, while `box` is the main general container
+- **Interactive bits:** `button` handles click actions and `scale` handles ranged values
+- **Text:** this bar uses bare text inside `box.label`, so add `(label ...)` only when text needs label-specific attrs
+- **Dynamic trees:** `literal` can render arbitrary Yuck from a string, but avoid it for simple lists
+- **Global attrs:** common ones include `:class`, `:halign`, `:valign`, `:visible`, `:active`, `:tooltip`, `:style`, and `:css`
 
 ## Source anchors
 
-- Configuration: https://elkowar.github.io/eww/configuration.html
-- Windows: https://elkowar.github.io/eww/configuration.html#creating-your-first-window
-- Widget definitions: https://elkowar.github.io/eww/configuration.html#your-first-widget
-- Variables: https://elkowar.github.io/eww/configuration.html#adding-dynamic-content
-- `for`: https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for
-- `literal`: https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal
-- Expressions: https://elkowar.github.io/eww/expression_language.html
-- Magic vars: https://elkowar.github.io/eww/magic-vars.html
-- Widgets: https://elkowar.github.io/eww/widgets.html
+- **Configuration:** https://elkowar.github.io/eww/configuration.html
+- **Windows:** https://elkowar.github.io/eww/configuration.html#creating-your-first-window
+- **Widget definitions:** https://elkowar.github.io/eww/configuration.html#your-first-widget
+- **Variables:** https://elkowar.github.io/eww/configuration.html#adding-dynamic-content
+- **`for`:** https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for
+- **`literal`:** https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal
+- **Expressions:** https://elkowar.github.io/eww/expression_language.html
+- **Magic vars:** https://elkowar.github.io/eww/magic-vars.html
+- **Widgets:** https://elkowar.github.io/eww/widgets.html
