@@ -32,6 +32,7 @@ in
     node.pkgsReadOnly = false;
     node.specialArgs = {
       inherit self inputs mylib system test_wireguard_keys;
+      inherit (args) globals;
     };
 
     nodes = {

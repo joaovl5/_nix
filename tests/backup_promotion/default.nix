@@ -56,6 +56,7 @@ in
     node.pkgsReadOnly = false;
     node.specialArgs = {
       inherit self inputs mylib system test_ssh_key;
+      inherit (args) globals;
     };
 
     nodes.coordinator = import ./coordinator.nix args;

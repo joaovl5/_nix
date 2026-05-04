@@ -57,6 +57,7 @@ in
     node.pkgsReadOnly = false;
     node.specialArgs = {
       inherit self inputs mylib system dns_test;
+      inherit (args) globals;
     };
 
     nodes = {

@@ -12,6 +12,7 @@ mylib.tests.mk_test {
   node.pkgsReadOnly = false;
   node.specialArgs = {
     inherit self inputs mylib system;
+    inherit (args) globals;
   };
 
   nodes.machine = import ./node.nix args;
