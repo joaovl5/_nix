@@ -3,6 +3,7 @@
     programs.lazygit = {
       enable = true;
       settings = {
+        promptToReturnFromSubprocess = false;
         gui = {
           tabWidth = 2;
           showCommandLog = false;
