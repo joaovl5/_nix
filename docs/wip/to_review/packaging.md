@@ -2,7 +2,7 @@
 
 ## Goal
 
-This document captures the reusable procedure that was used to package and deploy Kaneo in this repo. It is written for future agents working on similar upstream applications.
+This document captures reusable procedures for packaging and deploying upstream applications in this repo. It is written for future agents working on similar upstream applications. Patterns are illustrated with Kaneo and Degoog examples.
 
 ## Start from upstream Dockerfiles
 
@@ -44,7 +44,9 @@ For Kaneo, the Dockerfiles and source established that:
    - a database bootstrap step
 5. Only then write the local derivation.
 
-## pnpm monorepo packaging notes
+## JS/TS packaging strategies
+
+### pnpm monorepo packaging
 
 For pnpm workspaces in this repo:
 
@@ -63,6 +65,45 @@ Kaneo-specific pattern:
   3. `@kaneo/api`
 
 If a built runtime still needs workspace links to resolve cleanly, copy the required workspace targets into the installed runtime tree as well. Kaneo needed the relevant workspace package directories present so pnpm symlinks stayed valid.
+
+### Bun runtime packaging
+
+When upstream uses Bun for building and running but ships npm-compatible lockfiles:
+
+- use `buildNpmPackage` with `fetchNpmDeps` for dependency fetching
+- use Bun as the runtime binary in `nativeBuildInputs` and the wrapper entrypoint
+- preserve the upstream `src/` layout under `$out/libexec/<name>`
+- wrapper entrypoint: `bun run src/server/index.ts`
+
+Degoog follows this pattern. The upstream project uses Bun exclusively but the npm lockfile lets `buildNpmPackage` handle dependency resolution.
+
+### When Bun segfaults on x86_64-linux
+
+The default nixpkgs `bun` binary segfaults on some x86_64-linux hosts (even for `bun --version`). Fix: use Bun's upstream `bun-linux-x64-baseline.zip` instead:
+
+```nix
+bunRuntime =
+  if stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isx86_64
+  then
+    bun.overrideAttrs (old: {
+      src = fetchurl {
+        url = "https://github.com/oven-sh/bun/releases/download/bun-v${old.version}/bun-linux-x64-baseline.zip";
+        hash = "...";
+      };
+      sourceRoot = "bun-linux-x64-baseline";
+    })
+  else bun;
+```
+
+The global flake overlay in `outputs/channels/default.nix` already patches `bun` for the system pkgs set, but **this does not apply to packages built through `outputs/packages/default.nix`**, which constructs its `pkgs` from raw `inputs.nixpkgs.legacyPackages` without overlays. Package-level overrides are therefore necessary and intentional.
+
+### Lockfile generation for Bun-only upstreams
+
+When upstream only ships a `bun.lockb` (binary Bun lockfile) but no `package-lock.json`, you must generate one:
+
+1. Run `npm install --package-lock-only` against the upstream source
+2. Commit the resulting `package-lock.json` alongside the derivation
+3. Patch `package.json` at build time to resolve `resolutions` into `overrides` if upstream uses non-standard fields
 
 ## Runtime substitution rule
 
@@ -91,6 +132,11 @@ For Kaneo this resulted in one local package, `.#kaneo`, containing:
 - `libexec/kaneo/...` runtime tree for the API/workspace
 - `share/kaneo/web/...` built frontend assets
 
+For Degoog this resulted in `.#degoog`, containing:
+
+- `bin/degoog` (wrapper around `bun run src/server/index.ts`)
+- `libexec/degoog/...` runtime tree with upstream source and node_modules
+
 ## Unit module procedure in this repo
 
 For a new NixOS unit:
@@ -110,6 +156,12 @@ Kaneo-specific structure:
   - `kaneo.trll.ing`
   - `api.kaneo.trll.ing`
 
+Degoog structure:
+
+- `unit.degoog.endpoint` defaults to port 4444, target `search`
+- vhost resolves to `search.<tld>`
+- `degoog-prepare-env.service` creates `/run/degoog/env` from SOPS secret and seeds first-boot `plugin-settings.json`
+
 ## LAN-only Traefik behavior
 
 This repo’s Traefik LAN-only behavior is controlled centrally.
@@ -123,7 +175,7 @@ So for LAN-only apps:
 - add `my.vhosts` entries normally
 - do **not** add the hostnames to `globals/dns.nix` `public_vhosts`
 
-That is how Kaneo remains LAN-only.
+That is how both Kaneo and Degoog remain LAN-only.
 
 ## Shared Postgres procedure
 
@@ -137,6 +189,8 @@ For apps that need Postgres in this repo:
 - preserve explicit TCP localhost auth; do not rely on socket fallback hacks
 
 Kaneo follows this pattern by appending its own database entry into `my."unit.postgres".databases` when enabled.
+
+Degoog does not need Postgres — it uses file-based state under `/var/lib/degoog`.
 
 ## Secret handling notes
 
@@ -156,6 +210,13 @@ Kaneo required:
 - `secrets/postgres.yaml`
   - `admin_password`
 
+Degoog required:
+
+- `secrets/degoog.yaml`
+  - `degoog_settings_passwords`
+
+**Important**: add the encrypted file to the private secrets repo and run `npins update mysecrets` before enabling the unit on any host. Enabling a unit that references missing sops files will fail evaluation.
+
 ## Service state directory pattern
 
 For long-running services in this repo, prefer the built-in systemd directory helpers over ad-hoc writable paths when they fit the app shape:
@@ -171,7 +232,24 @@ Kaneo follows this pattern by using:
 - `RuntimeDirectory = "kaneo-web"` for mutable nginx/web-runtime files
 - `HOME=/var/lib/kaneo` for both services
 
+Degoog follows this pattern by using:
+
+- `StateDirectory = "degoog"` for persistent writable state
+- `RuntimeDirectory = "degoog"` for the env file and runtime config
+- `HOME=/var/lib/degoog` for the service
+
 This keeps writable state out of the Nix store while avoiding unnecessary custom directory management.
+
+## Prepare-env service pattern
+
+When a service needs runtime-only secrets or first-boot seeding, use a `prepare-env` oneshot service:
+
+- declare it as `before` + `requiredBy` + `partOf` the main service
+- read SOPS secret, write it to a `RuntimeDirectory` env file with restricted permissions
+- seed first-boot config files if they don't already exist
+- the main service reads the env file via `EnvironmentFile`
+
+Degoog follows this pattern: `degoog-prepare-env.service` reads the SOPS secret, writes `/run/degoog/env`, and seeds `plugin-settings.json` with domain blocking enabled.
 
 ## Kaneo runtime checklist
 
@@ -207,9 +285,18 @@ Useful focused checks for packaging work:
 - `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
 - targeted `nix eval` for vhosts, service toggles, and important settings
 
-## Kaneo-specific gotchas
+## App-specific gotchas
+
+### Kaneo
 
 - The API entrypoint defaults to port `1337`; if you need a different port, make the wrapper or service set it deliberately rather than assuming upstream already supports a generic env var.
 - pnpm workspace symlinks can leave dangling targets if you copy too little of the workspace into the runtime tree.
 - runtime web substitutions must happen outside the Nix store.
 - enabling a unit that references new sops files will fail evaluation until those files exist in the private secrets repo or its flake input is refreshed.
+
+### Degoog
+
+- Bun segfaults on some x86_64-linux hosts; the `bunRuntime` override in the package is required even though a global overlay exists (see above).
+- The upstream project only ships `bun.lockb`; a `package-lock.json` must be generated and committed alongside the derivation.
+- `resolutions` in `package.json` must be patched into `overrides` at build time for npm compatibility.
+- `DEGOOG_PUBLIC_INSTANCE` must remain unset to keep the instance LAN-only.
