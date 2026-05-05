@@ -87,6 +87,10 @@ in rec {
           enable = true;
         };
 
+        "unit.degoog" = {
+          enable = true;
+        };
+
         "unit.qbittorrent" = {
           enable = true;
         };
