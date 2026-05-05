@@ -334,9 +334,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f0d78a4abd1a596f800709b4b22df4c520473480",
+      "revision": "f309344c97b061e48a1d95b84d7c8858ad2de10c",
       "url": null,
-      "hash": "sha256-BpI9N+CsiN4d4PmzS+o9Ac12F3Z+WOZixW/JnhzqrGY="
+      "hash": "sha256-T7IdUjr13DH28EyY1+yHGksgw4KhvrtjI+O1edKvBI0="
     },
     "niri": {
       "type": "Git",
