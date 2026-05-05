@@ -60,41 +60,51 @@ local function _6_()
 end
 n.map({ "n", "x", "o" }, "b", _6_)
 local function treewalker(subcommand)
-	local ok, err = pcall(vim.cmd, "Treewalker " .. subcommand)
+	local ok, err = pcall(vim.cmd, ("Treewalker " .. subcommand))
 	if not ok then
 		if
-			type(err) == "string" and string.find(err, "Treewalker: Treesitter node not found under cursor", 1, true)
+			("string" == type(err)) and string.find(err, "Treewalker: Treesitter node not found under cursor", 1, true)
 		then
 			return vim.notify("Treewalker: no Treesitter node under cursor", vim.log.levels.WARN)
 		else
 			return error(err)
 		end
+	else
+		return nil
 	end
 end
-n.map({ "n", "x" }, "<A-[>", function()
+local function _9_()
 	return treewalker("Left")
-end)
-n.map({ "n", "x" }, "<A-]>", function()
+end
+n.map({ "n", "x" }, "<A-[>", _9_)
+local function _10_()
 	return treewalker("Right")
-end)
-n.map({ "n", "x" }, "<A-k>", function()
+end
+n.map({ "n", "x" }, "<A-]>", _10_)
+local function _11_()
 	return treewalker("Up")
-end)
-n.map({ "n", "x" }, "<A-j>", function()
+end
+n.map({ "n", "x" }, "<A-k>", _11_)
+local function _12_()
 	return treewalker("Down")
-end)
-n.map({ "n", "x" }, "<A-S-[>", function()
+end
+n.map({ "n", "x" }, "<A-j>", _12_)
+local function _13_()
 	return treewalker("SwapLeft")
-end)
-n.map({ "n", "x" }, "<A-S-]>", function()
+end
+n.map({ "n", "x" }, "<A-S-[>", _13_)
+local function _14_()
 	return treewalker("SwapRight")
-end)
-n.map({ "n", "x" }, "<A-K>", function()
+end
+n.map({ "n", "x" }, "<A-S-]>", _14_)
+local function _15_()
 	return treewalker("SwapUp")
-end)
-n.map({ "n", "x" }, "<A-J>", function()
+end
+n.map({ "n", "x" }, "<A-K>", _15_)
+local function _16_()
 	return treewalker("SwapDown")
-end)
+end
+n.map({ "n", "x" }, "<A-J>", _16_)
 wk.add({
 	km("<leader>q", { group = "Tab" }),
 	km("<leader>qc", { desc = "Create" }, "<cmd>tabnew<CR>"),
@@ -102,7 +112,7 @@ wk.add({
 	km("<leader>qh", { desc = "Prev" }, "<cmd>tabprev<CR>"),
 	km("<leader>qd", { desc = "Close" }, "<cmd>tabclose<CR>"),
 })
-local function _7_()
+local function _17_()
 	local name_2_auto = require("zen-mode")
 	local fun_3_auto = name_2_auto.toggle
 	return fun_3_auto({})
@@ -110,136 +120,136 @@ end
 wk.add({
 	km("<leader>w", { group = "Window" }),
 	km("<leader>wr", { desc = "Resize to default!!" }, "<Cmd>lua MiniMisc.resize_window()<CR>"),
-	km("<leader>wz", { desc = "Zen mode" }, _7_),
+	km("<leader>wz", { desc = "Zen mode" }, _17_),
 	km("<leader>wd", { desc = "Quit window" }, "<Cmd>quit<CR>"),
 	km("<leader>wD", { desc = "Quit all windows" }, "<Cmd>quitall<CR>"),
 	km("<leader>ww", { desc = "Alternate window buffers" }, "<Cmd>b#<CR>"),
 	km("<leader>|", { desc = "Split Vertical" }, "<Cmd>vsplit<CR>"),
 	km("<leader>-", { desc = "Split Horizontal" }, "<Cmd>split<CR>"),
 })
-local function _8_()
+local function _18_()
 	return Snacks.scratch()
 end
-local function _9_()
+local function _19_()
 	return Snacks.scratch.select()
 end
 wk.add({
 	km("<leader>b", { group = "Buffer" }),
-	km("<leader>bb", { desc = "Toggle scratch" }, _8_),
-	km("<leader>bB", { desc = "Pick scratch" }, _9_),
+	km("<leader>bb", { desc = "Toggle scratch" }, _18_),
+	km("<leader>bB", { desc = "Pick scratch" }, _19_),
 	km("<leader>bd", { desc = "Delete buffer" }, "<cmd>lua MiniBufremove.delete()<CR>"),
 })
-local function _10_()
+local function _20_()
 	return Snacks.picker.command_history()
 end
-local function _11_()
+local function _21_()
 	return Snacks.picker.buffers()
 end
-local function _12_()
+local function _22_()
 	return Snacks.picker.recent()
 end
-local function _13_()
+local function _23_()
 	return Snacks.picker.projects()
 end
-local function _14_()
+local function _24_()
 	return Snacks.picker.diagnostics()
 end
-local function _15_()
+local function _25_()
 	return Snacks.picker.help()
 end
-local function _16_()
+local function _26_()
 	return Snacks.picker.man()
 end
-local function _17_()
+local function _27_()
 	return Snacks.picker.highlights()
 end
-local function _18_()
+local function _28_()
 	return Snacks.picker.lsp_workspace_symbols()
 end
-local function _19_()
+local function _29_()
 	return Snacks.picker.lsp_symbols()
 end
-local function _20_()
+local function _30_()
 	return Snacks.picker.smart()
 end
-local function _21_()
+local function _31_()
 	local buf_name = vim.api.nvim_buf_get_name(0)
 	local buf_dir = vim.fs.dirname(buf_name)
 	return Snacks.picker.files({ cwd = buf_dir })
 end
-local function _22_()
+local function _32_()
 	return Snacks.picker.grep()
 end
 wk.add({
 	km("<leader>f", { group = "Fuzzy" }),
-	km("<leader>f:", { desc = "':' history" }, _10_),
-	km("<leader>fb", { desc = "Buffers" }, _11_),
-	km("<leader>fr", { desc = "Recent" }, _12_),
-	km("<leader>fp", { desc = "Projects" }, _13_),
-	km("<leader>fd", { desc = "Diagnostics" }, _14_),
-	km("<leader>fh", { desc = "Help Tags" }, _15_),
-	km("<leader>fm", { desc = "Man pages" }, _16_),
-	km("<leader>fH", { desc = "Highlights" }, _17_),
-	km("<leader>fs", { desc = "Symbols" }, _18_),
-	km("<leader>fS", { desc = "Symbols (buffer)" }, _19_),
-	km("<leader><leader>", { desc = "Fuzzy Files" }, _20_),
-	km("<leader>.", { desc = "Fuzzy Files (buffer dir)" }, _21_),
-	km("<leader>/", { desc = "Live Grep" }, _22_),
+	km("<leader>f:", { desc = "':' history" }, _20_),
+	km("<leader>fb", { desc = "Buffers" }, _21_),
+	km("<leader>fr", { desc = "Recent" }, _22_),
+	km("<leader>fp", { desc = "Projects" }, _23_),
+	km("<leader>fd", { desc = "Diagnostics" }, _24_),
+	km("<leader>fh", { desc = "Help Tags" }, _25_),
+	km("<leader>fm", { desc = "Man pages" }, _26_),
+	km("<leader>fH", { desc = "Highlights" }, _27_),
+	km("<leader>fs", { desc = "Symbols" }, _28_),
+	km("<leader>fS", { desc = "Symbols (buffer)" }, _29_),
+	km("<leader><leader>", { desc = "Fuzzy Files" }, _30_),
+	km("<leader>.", { desc = "Fuzzy Files (buffer dir)" }, _31_),
+	km("<leader>/", { desc = "Live Grep" }, _32_),
 	km("<leader>\\", { desc = "Zoxide" }, "<Cmd>Telescope zoxide list<CR>"),
 })
-local function _23_()
+local function _33_()
 	return toggle_term("lazygit", "lazygit")
 end
 wk.add({
 	km("<leader>g", { group = "Git" }),
 	km("<leader>go", { desc = "Toggle Overlay" }, "<cmd>lua MiniDiff.toggle_overlay()<CR>"),
-	km("<leader>gg", { desc = "Lazygit" }, _23_),
+	km("<leader>gg", { desc = "Lazygit" }, _33_),
 })
-local function _24_()
+local function _34_()
 	local name_2_auto = require("tiny-code-action")
 	local fun_3_auto = name_2_auto.code_action
 	return fun_3_auto()
 end
-local function _25_()
+local function _35_()
 	local name_2_auto = require("conform")
 	local fun_3_auto = name_2_auto.format
 	return fun_3_auto({ lsp_fallback = true })
 end
-local function _26_()
+local function _36_()
 	return vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end
-local function _27_()
+local function _37_()
 	local name_2_auto = require("pretty_hover")
 	local fun_3_auto = name_2_auto.hover
 	return fun_3_auto()
 end
 wk.add({
 	km("<leader>c", { group = "Code" }),
-	km("<leader>ca", { desc = "Actions" }, _24_),
-	km("<leader>cf", { desc = "Format" }, _25_),
-	km("<leader>cH", { desc = "Toggle inlay hints" }, _26_),
+	km("<leader>ca", { desc = "Actions" }, _34_),
+	km("<leader>cf", { desc = "Format" }, _35_),
+	km("<leader>cH", { desc = "Toggle inlay hints" }, _36_),
 	km("<leader>cr", { desc = "Rename" }, vim.lsp.buf.rename),
 	km("<leader>cd", { desc = "Diagnostic" }, vim.diagnostic.open_float),
 	km("<leader>cn", { desc = "Navbuddy" }, "<cmd>Navbuddy<CR>"),
 	km("<leader>cg", { desc = "Neogen" }, "<cmd>Neogen<CR>"),
-	km("K", { desc = "Hover" }, _27_),
+	km("K", { desc = "Hover" }, _37_),
 	km("gI", { desc = "Implementations" }, "<cmd>Glance implementations<CR>"),
 	km("gr", { desc = "References" }, "<cmd>Glance references<CR>"),
 	km("gd", { desc = "Definitions" }, "<cmd>Glance definitions<CR>"),
 	km("gt", { desc = "Type Definitions" }, "<cmd>Glance type_definitions<CR>"),
 })
-local function _28_()
+local function _38_()
 	local name_2_auto = require("neogen")
 	local fun_3_auto = name_2_auto.jump_next
 	return fun_3_auto()
 end
-n.map({ "i" }, "<C-l>", _28_)
-local function _29_()
+n.map({ "i" }, "<C-l>", _38_)
+local function _39_()
 	local name_2_auto = require("neogen")
 	local fun_3_auto = name_2_auto.jump_prev
 	return fun_3_auto()
 end
-n.map({ "i" }, "<C-h>", _29_)
+n.map({ "i" }, "<C-h>", _39_)
 wk.add({
 	km("<leader>m", { group = "Map" }),
 	km("<leader>mm", { desc = "Toggle" }, "<cmd>lua MiniMap.toggle()<CR>"),
@@ -247,7 +257,7 @@ wk.add({
 	km("<leader>mr", { desc = "Refresh" }, "<cmd>lua MiniMap.refresh()<CR>"),
 })
 wk.add({ km("<leader>_", { group = "Other" }), km("<leader>_t", { desc = "Choose themes" }, "<cmd>Themery<CR>") })
-local function _30_()
+local function _40_()
 	for _, client in ipairs(vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() })) do
 		local worksp = require("workspace-diagnostics")
 		worksp.populate_workspace_diagnostics(client, 0)
@@ -258,22 +268,22 @@ wk.add({
 	km("<leader>x", { group = "Diagnostics" }),
 	km("<leader>xm", { desc = "Messages (noice)" }, "<cmd>NoiceAll<CR>"),
 	km("<leader>xM", { desc = "Messages" }, "<cmd>messages<CR>"),
-	km("<leader>xp", { desc = "Populate diagnostics" }, _30_),
+	km("<leader>xp", { desc = "Populate diagnostics" }, _40_),
 })
-local function _31_()
+local function _41_()
 	local name_2_auto = require("dapui")
 	local fun_3_auto = name_2_auto.eval
 	return fun_3_auto()
 end
-local function _32_()
-	local function _33_(input)
+local function _42_()
+	local function _43_(input)
 		local name_2_auto = require("dapui")
 		local fun_3_auto = name_2_auto.eval
 		return fun_3_auto(input)
 	end
-	return vim.ui.input({ prompt = "Expression to evaluate" }, _33_)
+	return vim.ui.input({ prompt = "Expression to evaluate" }, _43_)
 end
-local function _34_()
+local function _44_()
 	local name_2_auto = require("dapui")
 	local fun_3_auto = name_2_auto.toggle
 	return fun_3_auto()
@@ -287,9 +297,9 @@ wk.add({
 	km("<leader>dj", { desc = "Step over" }, ":DapStepOver<CR>"),
 	km("<leader>dl", { desc = "Step into" }, ":DapStepInto<CR>"),
 	km("<leader>dr", { desc = "Repl" }, ":DapToggleRepl<CR>"),
-	km("<leader>de", { desc = "Eval under cursor" }, _31_),
-	km("<leader>dx", { desc = "Eval expression" }, _32_),
-	km("<leader>dd", { desc = "Toggle UI" }, _34_),
+	km("<leader>de", { desc = "Eval under cursor" }, _41_),
+	km("<leader>dx", { desc = "Eval expression" }, _42_),
+	km("<leader>dd", { desc = "Toggle UI" }, _44_),
 })
 wk.add({
 	km("<leader>a", { group = "CodeCompanion" }),
@@ -315,21 +325,21 @@ wk.add({
 	km("<leader>nl", { desc = "Link a note", mode = { "v" } }, ":Obsidian link<CR>"),
 })
 n.map({ "n", "i" }, "<A-;>", ":Obsidian toggle_checkbox<CR>")
-local function _35_()
+local function _45_()
 	return Snacks.terminal.toggle()
 end
-n.map({ "n", "t" }, "<A-/>", _35_, { desc = "Toggle Terminal" })
-local function _36_()
+n.map({ "n", "t" }, "<A-/>", _45_, { desc = "Toggle Terminal" })
+local function _46_()
 	return Snacks.terminal.toggle()
 end
-n.map({ "n", "t" }, "<C-/>", _36_, { desc = "Toggle Terminal" })
-local function _37_()
+n.map({ "n", "t" }, "<C-/>", _46_, { desc = "Toggle Terminal" })
+local function _47_()
 	return MiniFiles.open()
 end
-local function _38_()
+local function _48_()
 	return MiniFiles.open(vim.api.nvim_buf_get_name(0))
 end
-wk.add({ km("<leader>E", { desc = "Explore root" }, _37_), km("<leader>e", { desc = "Explore at file" }, _38_) })
+wk.add({ km("<leader>E", { desc = "Explore root" }, _47_), km("<leader>e", { desc = "Explore at file" }, _48_) })
 _G.MiniFilesMappings = {
 	close = "q",
 	go_in = "l",
@@ -367,7 +377,7 @@ local function open_sys()
 	local path = fs_entry.path
 	return vim.ui.open(path)
 end
-local function _40_(args)
+local function _50_(args)
 	local buf_id = args.data.buf_id
 	return wk.add({
 		km("<leader>bh", { desc = "Toggle Hidden Files", buffer = buf_id }, toggle_hidden),
@@ -375,4 +385,4 @@ local function _40_(args)
 		km("<leader>bO", { desc = "Open w/ system handler", buffer = buf_id }, open_sys),
 	})
 end
-return n.autocmd("User", { pattern = "MiniFilesBufferCreate", callback = _40_ })
+return n.autocmd("User", { pattern = "MiniFilesBufferCreate", callback = _50_ })
