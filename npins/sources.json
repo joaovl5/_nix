@@ -142,6 +142,18 @@
       "url": "https://github.com/nix-community/fenix/archive/4d81601e0b73f20d81d066754ad0e7d1e7f75a06.tar.gz",
       "hash": "sha256-thSyElkje577x/kAbP72nHlfiFc1a+tCudskLPHXe9s="
     },
+    "fennel-ls-nvim-docs": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "https://git.sr.ht/~micampe/fennel-ls-nvim-docs"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "a072d3f5d2dd98cf0411cd16446a0f3c96ee7938",
+      "url": null,
+      "hash": "sha256-DpLNcaH3JRrXO8Ds0ZlzoBQFSaOD8xK5+iYZSICBqao="
+    },
     "flake-parts": {
       "type": "Git",
       "repository": {

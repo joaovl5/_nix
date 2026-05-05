@@ -2,6 +2,7 @@
   hm = {
     pkgs,
     lib,
+    inputs,
     ...
   }: let
     treesitter = let
@@ -41,6 +42,8 @@
       from = ./config;
       to = "~/.config/nvim";
     };
+
+    xdg.dataFile."fennel-ls/docsets/nvim.lua".source = inputs.fennel-ls-nvim-docs + "/nvim.lua";
 
     programs.neovim = {
       enable = true;
@@ -92,6 +95,7 @@
       tree-sitter
       curl
       imagemagick
+      neovim-remote
 
       # language support
       gitleaks
