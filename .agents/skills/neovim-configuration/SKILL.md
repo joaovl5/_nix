@@ -33,9 +33,8 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Repo root:** the helper is skill-local and finds the repo root by searching upward for `flake.nix`, so caller cwd does not matter
 - **Project anchor:** the default anchor is `users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl`
 - **nfnl root:** from that anchor, the helper finds the nearest parent with `.nfnl.fnl`
-- **Compile action:** it opens a Fennel buffer there and runs `:NfnlCompileAllFiles`
-- **Orphan handling:** after compile, it lists or deletes orphaned generated Lua
-- **Safer orphan inspection:** run `uv run scripts/recompile-nfnl.py --keep-orphans` to list orphans instead of deleting them
+- **Compile action:** it opens a Fennel buffer, calls `nfnl.api.compile-all-files`, prints status counts/errors, and exits non-zero on compile failures
+- **Orphan handling:** after successful compile, it scans or deletes generated Lua orphans directly; `--keep-orphans` only lists them
 - **When to recompile:** recompile after Fennel edits, especially after macro changes, renames, deletes, or `config/flsproject.fnl` edits
 
 ## Common maintenance tasks
