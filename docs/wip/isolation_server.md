@@ -21,16 +21,19 @@ This document is a research snapshot only. No implementation decisions are locke
 
 ## Short conclusion
 
-The strongest server-side direction is:
+The strongest server-side direction is now:
 
-- use native `containers.<name>` NixOS containers as the primary primitive
-- default to `privateNetwork = true`
-- assign each container a stable host/container address pair
+- use native `containers.<name>` NixOS containers as the runtime primitive
+- expose a repo-level `my.containers.<name>` composer above units
+- keep units as the smallest runnable service modules
+- let containers declare which unit modules they contain
+- make the primary helper path optimize for one container containing one unit
+- still let the underlying container schema support multiple units per container
+- default to routed private networking with stable per-container address pairs
 - have host Traefik consume container HTTP endpoints through normal `my.vhosts.*.sources`
 - keep raw TCP/UDP exposure in `my.tcp_routes` / `my.udp_routes`, not `my.vhosts`
-- add small `mylib.units` helpers first, before introducing a larger repo-wide abstraction
 
-The main reason is fit: native NixOS containers let each isolated service be a real NixOS module while staying declarative in the host config.
+The main reason is fit: native NixOS containers let each isolated service run as a real NixOS system, while `my.containers.<name>` can keep host integration, persistence, and cross-service access explicit.
 
 ## Current repo evidence
 
@@ -389,171 +392,282 @@ Cons:
 
 Probably a later step, not the first prototype.
 
-## Repo abstraction approaches
+## Container / unit contract direction
 
-### Option 1: small pure helpers in `mylib.units.container`
-
-Add helper functions under something like:
+The current design direction is no longer "units decide whether they run on the host or in a container". The cleaner contract is:
 
 ```text
-_lib/units/container.nix
+unit      = smallest runnable service module
+container = composer/deployer of one or more units
+host      = owner of ingress, persistence, backups, shared providers
 ```
 
-Export from `_lib/units/default.nix` as `container`.
+A unit should not know whether it is running directly on the host or inside a native NixOS container. It should only know how to configure its local service inside a NixOS system.
 
-Possible helpers:
+A container should decide:
+
+- which unit modules are imported into the guest
+- what option values those units receive
+- what persistent state is mounted into the guest
+- which endpoints are exposed back to the host
+- which host or peer services the guest may consume
+- which backups and reverse-proxy routes the host owns
+
+### Primary external shape
+
+The preferred public API should be concise for the common case: one container, one unit.
+
+Example shape:
 
 ```nix
-u.container.http_endpoint {
-  port = 5006;
+my.containers.actual-budget = u.container.unit.actual-budget {
+  id = 11;
   target = "actual";
-  container_name = "actual";
-}
+};
 ```
 
-Returns endpoint options like `u.endpoint`, but default `sources` becomes:
+This should mean:
+
+- create a native NixOS container named `actual-budget`
+- import the minimal Actual Budget unit module into the guest
+- enable that unit with its standard defaults
+- allocate the container's routed address pair from `id = 11`
+- mount the unit's persistent state from a host-owned path
+- expose the unit's default HTTP endpoint through `my.vhosts.actual-budget`
+- register host-side backup items for the mounted state
+
+The helper can support narrow overrides without making the callsite verbose:
 
 ```nix
-["http://actual.containers:5006"]
-```
-
-Other helpers:
-
-```nix
-u.container.bind_mount_rw {
-  host_path = "/var/lib/actual";
-  mount_point = "/var/lib/actual";
-}
-
-u.container.bind_mount_ro {
-  host_path = "/etc/static-config";
-  mount_point = "/etc/static-config";
-}
-
-u.container.mk_nixos_container {
-  name = "actual";
-  local_address = "10.88.0.11";
-  host_address = "10.88.0.1";
-  mounts = { ... };
-  config = { pkgs, ... }: { ... };
-}
-```
-
-Pros:
-
-- lowest risk
-- follows existing `u.endpoint` and `u.backup` style
-- keeps service modules explicit
-- avoids a large new option schema too early
-
-Cons:
-
-- more boilerplate remains at callsites
-- uniqueness validation for IPs/ports is harder unless a central module is added later
-
-Recommended first step.
-
-### Option 2: full `my.server_containers.<name>` option module
-
-Define a higher-level repo API:
-
-```nix
-my.server_containers.actual = {
-  enable = true;
+my.containers.actual-budget = u.container.unit.actual-budget {
   id = 11;
 
-  http.actual-budget = {
-    target = "actual";
-    port = 5006;
+  target = "actual";
+
+  state.data.backup.policy = "sensitive_data";
+};
+```
+
+For a database-backed app, the helper can stay similarly small:
+
+```nix
+my.containers.kaneo = u.container.unit.kaneo {
+  id = 12;
+
+  endpoints.web.target = "kaneo";
+  endpoints.api.target = "api.kaneo";
+
+  postgres.enable = true;
+};
+```
+
+The helper is optimized for the one-unit case, but it should expand into a general `my.containers.<name>` schema rather than bypassing it.
+
+### Underlying multi-unit container shape
+
+The underlying container schema should still support multiple units per container. This keeps app stacks possible without changing the model later.
+
+Conceptual expanded shape:
+
+```nix
+my.containers.some-stack = {
+  enable = true;
+  id = 20;
+
+  units = {
+    web = u.container.units.some-web {
+      endpoints.http.port = 8080;
+    };
+
+    worker = u.container.units.some-worker {
+      queue = "default";
+    };
   };
 
-  mounts.state = {
-    host_path = "/var/lib/actual";
-    mount_point = "/var/lib/actual";
-    read_only = false;
-  };
-
-  config = { pkgs, ... }: {
-    services.actual.enable = true;
+  expose.web = {
+    unit = "web";
+    endpoint = "http";
+    target = "some";
   };
 };
 ```
 
-The module would emit:
+This more explicit form is not the primary ergonomics target. It exists so the model can handle multi-process stacks when needed.
 
-- `containers.actual`
-- `my.vhosts.actual-budget`
-- optional `my.tcp_routes.*`
-- optional `my.udp_routes.*`
-- assertions for duplicate IDs, ports, names, and route entrypoints
+### Minimal unit contract
 
-Pros:
+A unit module should be the smallest thing that can run locally in a NixOS system.
 
-- most declarative and least repetitive at callsites
-- can validate IP allocation centrally
-- can encode preferred defaults once
-
-Cons:
-
-- bigger design surface
-- easy to hide too much behavior
-- can blur the currently clean HTTP vs TCP/UDP boundary
-- harder to retrofit services with unusual needs
-
-Good future target after one or two services prove the primitives.
-
-### Option 3: per-unit isolation toggle
-
-Each existing unit gains an isolation setting:
+It may define options such as:
 
 ```nix
 my."unit.actual-budget" = {
   enable = true;
-  isolation = {
-    enable = true;
-    backend = "nixos-container";
-    id = 11;
+
+  endpoint = {
+    port = 5006;
+    bind = "0.0.0.0";
   };
+
+  state.data.path = "/var/lib/actual";
 };
 ```
 
-The unit module decides whether to emit host services or guest container config.
+And it should emit local service config only:
 
-Pros:
+```nix
+services.actual = {
+  enable = true;
+  settings = {
+    dataDir = opts.state.data.path;
+    port = opts.endpoint.port;
+  };
+};
 
-- easy migration path service by service
-- preserves current `unit.<name>` interface
-- lets each service handle its own oddities
+networking.firewall.allowedTCPPorts = [opts.endpoint.port];
+```
 
-Cons:
+A unit should not emit:
 
-- every unit that supports isolation has two runtime paths
-- significant duplication unless helpers are very good
-- harder to enforce global uniqueness and network conventions
+- `my.vhosts`
+- `my.tcp_routes`
+- `my.udp_routes`
+- `containers.<name>`
+- host bind mounts
+- host backup paths
+- cross-container firewall policy
+- shared Postgres registration
 
-Good for gradual migration, but not as the first abstraction layer.
+Those belong to the container/host layer.
 
-### Option 4: OCI / Arion secondary path
+### Container composer responsibilities
 
-Use `virtualisation.oci-containers` or Arion for workloads that are already OCI/Compose-native.
+`my.containers.<name>` owns placement and host integration.
 
-Pros:
+For the simple helper call:
 
-- good fit for prebuilt container images
-- natural migration path for existing Compose-style services
-- NixOS has declarative OCI container options for images, volumes, ports, environment, etc.
+```nix
+my.containers.actual-budget = u.container.unit.actual-budget {
+  id = 11;
+  target = "actual";
+};
+```
 
-Cons:
+The container module should conceptually emit:
 
-- not a real guest NixOS config
-- less aligned with this research goal
-- creates a second server isolation model if used too early
+```nix
+containers.actual-budget = {
+  autoStart = true;
+  privateNetwork = true;
+  privateUsers = "pick";
+  restartIfChanged = true;
 
-Keep this as a secondary option for OCI-native workloads, not the default repo-native isolation framework.
+  hostAddress = "10.88.11.1";
+  localAddress = "10.88.11.2";
+
+  bindMounts."/var/lib/actual" = {
+    hostPath = "/var/lib/containers/actual-budget/actual-budget/data";
+    isReadOnly = false;
+  };
+
+  config = { ... }: {
+    imports = [
+      # minimal unit module, not the full host unit set
+      users/_units/actual-budget/unit.nix
+    ];
+
+    my."unit.actual-budget" = {
+      enable = true;
+      endpoint = {
+        port = 5006;
+        bind = "0.0.0.0";
+      };
+      state.data.path = "/var/lib/actual";
+    };
+  };
+};
+
+my.vhosts.actual-budget = {
+  target = "actual";
+  sources = ["http://actual-budget.containers:5006"];
+};
+```
+
+And host-side backup state:
+
+```nix
+my.containers.actual-budget.backup.items.actual_budget_data = {
+  kind = "path";
+  policy = "sensitive_data";
+  path.paths = [
+    "/var/lib/containers/actual-budget/actual-budget/data"
+  ];
+};
+```
+
+### Helper namespace
+
+The helper namespace should reduce boilerplate, not hide ownership boundaries.
+
+Likely shape:
+
+```nix
+u.container.unit.actual-budget { ... }
+u.container.unit.kaneo { ... }
+```
+
+For generic pieces used by those helpers:
+
+```nix
+u.container = {
+  mk = { name, id, units, expose ? {}, ... }: { ... };
+  state = { guest_path, backup ? null, ... }: { ... };
+  endpoint = { port, target, protocol ? "http", ... }: { ... };
+  postgres_client = { database ? null, ... }: { ... };
+};
+```
+
+The unit-specific helper should know the unit's conventional defaults:
+
+- module path
+- default endpoint names and ports
+- default state names and guest paths
+- default backup policy, if any
+- whether the unit supports a shared Postgres client
+
+### File layout for migrated units
+
+A migrated unit can be split like this:
+
+```text
+users/_units/actual-budget/
+  default.nix  # compatibility host wrapper
+  unit.nix     # minimal runnable service module
+  meta.nix     # defaults used by container helpers
+```
+
+`unit.nix` is the only file imported into a container guest.
+
+`default.nix` keeps the current host usage working and may internally reuse `unit.nix`.
+
+`meta.nix` can provide defaults for helpers without forcing the unit itself to know about containers.
+
+### Explicit non-goals
+
+Avoid these shapes for the first implementation:
+
+- per-unit `isolation.backend` toggles
+- unit modules that decide whether to emit host or container config
+- importing all of `users/_units/default.nix` into a guest
+- guest-side `my.vhosts` declarations
+- automatic route generation from inside unit modules
+- moving Postgres into many per-app containers
+
+OCI/Arion remain secondary for OCI-native or Compose-native workloads. They do not satisfy the primary goal as directly as native NixOS container guests.
 
 ## Proposed default container contract
 
-A future helper should probably encode these defaults:
+The container composer and its helpers should encode these defaults:
 
 ```nix
 {
@@ -589,12 +703,18 @@ Guest baseline should include:
 }
 ```
 
-Open questions:
+Current default decisions:
 
-- Should the host NAT container outbound traffic by default?
-- Should `hostAddress` be one shared host-side address for all containers or one per container?
-- Should helper-generated HTTP sources use `<name>.containers` or literal `localAddress`?
-- Should containers receive host `mylib` through `specialArgs`, or should the helper re-import `mylib` for the guest evaluation context?
+- derive one routed host/container address pair per container ID
+- prefer `<name>.containers` for HTTP upstreams when generated host entries work
+- keep host-owned integration out of guest unit modules
+- pass only the minimum required helper context into guest evaluation
+
+Still-open implementation details:
+
+- Should container outbound Internet access use host NAT by default or be opt-in?
+- Should guests receive `mylib` through `specialArgs`, or should the generated guest config re-import the minimal helpers it needs?
+- What exact private subnet should be reserved for routed containers?
 
 ## IP allocation options
 
@@ -655,6 +775,98 @@ Cons:
 
 Useful fallback, not the default.
 
+## Cross-container and host-provider communication
+
+Cross-container and container-to-host communication should be designed from the start, even if the first prototype only exposes one HTTP app.
+
+The selected network model is **routed per-container links**, not a shared bridge. Each container gets a unique routed pair derived from its numeric ID:
+
+```nix
+id = 12;
+hostAddress = "10.88.12.1";
+localAddress = "10.88.12.2";
+```
+
+The host is the router between containers. That keeps the model stricter than a shared L2 bridge and gives a natural place to generate allow rules.
+
+### Declared consume/provide edges
+
+Containers should not get arbitrary peer access by default. Instead, access should come from declared edges.
+
+Example future shape:
+
+```nix
+my.containers.app = u.container.unit.app {
+  id = 12;
+
+  consumes.redis = {
+    container = "redis";
+    endpoint = "redis";
+  };
+};
+
+my.containers.redis = u.container.unit.redis {
+  id = 13;
+};
+```
+
+The host layer can derive:
+
+```text
+allow 10.88.12.2 -> 10.88.13.2:6379
+```
+
+No declared edge means no intended peer access. The first implementation does not need perfect firewall generation, but the schema should be shaped so firewall assertions and rules can be added without redesigning consumers.
+
+### Host providers
+
+Some shared services should remain host-owned for now. Postgres is the important example: we do not want every app container to carry its own database, and we do not need to migrate Postgres into a container on day one.
+
+Model those as host providers.
+
+Example helper-level shape:
+
+```nix
+my.containers.kaneo = u.container.unit.kaneo {
+  id = 12;
+
+  postgres.enable = true;
+};
+```
+
+The container module can expand this into host-side Postgres grants:
+
+```nix
+my."unit.postgres".container_clients.kaneo = {
+  address = "10.88.12.2/32";
+  databases = ["kaneo"];
+};
+```
+
+And guest-side unit options:
+
+```nix
+my."unit.kaneo".database = {
+  host = "host.containers";
+  port = 5432;
+  name = "kaneo";
+  user = "kaneo";
+  password_file = "/run/container-secrets/postgres-password";
+};
+```
+
+The host can bind or firewall Postgres for declared container clients only. This is less isolated than moving Postgres into its own container, because an RCE in an app container can still try the declared host provider path. That trade-off is acceptable for the first phase because it avoids duplicating databases and keeps migration smaller.
+
+### Host access should still be explicit
+
+Do not give containers blanket access to every host-local service. Prefer named provider grants such as:
+
+```nix
+consumes.host.postgres = true;
+```
+
+Each provider can decide how it exposes itself to the routed container network.
+
 ## State, secrets, and backups
 
 ### State
@@ -672,7 +884,7 @@ Example shape:
 
 ```nix
 bindMounts."/var/lib/actual" = {
-  hostPath = "/var/lib/containers/actual/state";
+  hostPath = "/var/lib/containers/actual-budget/actual-budget/data";
   isReadOnly = false;
 };
 ```
@@ -696,12 +908,13 @@ First prototype should probably use host-managed read-only secret binds unless a
 
 ### Backups
 
-Current `o.module` automatically adds `backup.items` under every unit option tree, and the backup unit already collects those declarations.
+Current `o.module` automatically adds `backup.items` under every unit option tree. For host-run units that remains fine. For containerized units, backup declarations should be rendered by the host-side container composer, not by the guest unit module.
 
-Containerized units should keep backup declarations host-side at first:
+Containerized units should keep backup declarations host-side:
 
 - path backups target host bind-mount paths
-- database dumps connect through container IP/port or use a container-aware command wrapper
+- host-provider databases such as Postgres use the provider's dump/backup model
+- database dumps for future containerized databases should connect through declared provider edges or write dump artifacts to host-mounted state
 - avoid requiring the backup system to inspect container root filesystems directly
 
 If a full app stack moves its database inside the container, the dump helpers may need a container-aware host/port option.
@@ -717,11 +930,30 @@ Good first candidate:
 - current state path is straightforward
 - fewer protocol complications than Forgejo or Pi-hole
 
-Things to check:
+Things to prove:
 
-- bind address inside guest
-- state bind mount path
-- vhost source rewrite to `actual.containers:5006`
+- split a minimal `users/_units/actual-budget/unit.nix` from the current host wrapper
+- keep current host-run `users/_units/actual-budget/default.nix` behavior working
+- add a concise `u.container.unit.actual-budget { id = 11; target = "actual"; }` helper
+- generate state bind mount and host-side backup from unit metadata
+- expose `http://actual-budget.containers:5006` through `my.vhosts.actual-budget`
+
+### Kaneo
+
+Good second candidate for host-provider communication.
+
+Why:
+
+- exercises multiple HTTP endpoints
+- already depends on shared `unit.postgres`
+- can prove container-to-host Postgres access without moving Postgres into a container
+
+Things to prove:
+
+- container helper can register a Postgres database/client grant on the host
+- guest unit can receive database host/user/name/password-file options
+- only the needed secret file is projected into the container
+- API and web endpoints can both be exposed through host-owned `my.vhosts`
 
 ### Forgejo
 
@@ -755,16 +987,20 @@ Reasons:
 
 ## Recommended next implementation path
 
-1. Add pure helper functions under `mylib.units.container`.
-2. Keep service modules explicit: they still declare `my.vhosts`, `my.tcp_routes`, and `my.udp_routes` intentionally.
-3. Prototype one HTTP-only service using native `containers.<name>` with private networking.
-4. Prefer `my.vhosts.*.sources = ["http://<name>.containers:<port>"]` if host resolution works as expected; fall back to literal `localAddress` only if needed.
-5. Add assertions only after the first prototype clarifies the shape:
-   - no duplicate container IDs/IPs
-   - no underscores in container names
-   - no duplicated forwarded host ports
-   - no TCP/UDP route emission with empty upstreams
-6. After the first service works, decide whether to stay with pure helpers or graduate to `my.server_containers.<name>`.
+1. Define the `my.containers.<name>` option schema and a small `u.container` helper namespace.
+2. Keep the underlying schema multi-unit, but make the first helper path `u.container.unit.<unit-name>` for one container containing one unit.
+3. Refactor Actual Budget into a minimal `unit.nix` plus compatibility `default.nix`.
+4. Add `meta.nix` or equivalent unit metadata for Actual Budget defaults: endpoint, state path, backup policy.
+5. Implement `my.containers.actual-budget = u.container.unit.actual-budget { id = 11; target = "actual"; }`.
+6. Use routed per-container addressing derived from `id`.
+7. Generate host-owned `my.vhosts`, bind mounts, and backup declarations from the container composer.
+8. Add assertions early for:
+   - duplicate container IDs/IPs
+   - underscores or invalid characters in container names
+   - duplicate host-side HTTP targets
+   - undeclared expose references to missing units/endpoints
+   - host-provider clients without matching provider support
+9. After Actual Budget works, prototype Kaneo or another Postgres-backed app to prove host-provider communication.
 
 Verification for future implementation should follow repo procedure:
 

@@ -140,6 +140,8 @@ my.containers.some-stack = {
 
   expose.web = { # !ASK What is exactly this and how will this work?
     # !ANSWER `expose.web` is the normalized host-ingress record. It says: take unit `web`'s endpoint named `http`, expose it as a host vhost target `some`, and have the container composer emit `my.vhosts.some-stack` or similar. In the one-unit helper this should be derived; the explicit form is only for multi-unit/multi-endpoint stacks.
+    # !NOTE In that case, we should have a shape where expose is an array of attrsets of shape {unit = "web"; endpoint = "http"; target = "some";} to avoid redundancy
+    # !ANSWER Agreed for the explicit multi-unit shape. A list like `expose = [{ unit = "web"; endpoint = "http"; target = "some"; }];` is clearer and avoids repeating `web` as both key and field. Internally we can still normalize to an attrset if that helps merging/assertions.
     unit = "web";
     endpoint = "http";
     target = "some";
@@ -246,6 +248,8 @@ users/_units/<unit>/
 
 !NOTE There seems to be the implication that we'd want a major refactor for all units to support such a shape. Is this needed for this? Still thinking about it.
 !ANSWER No, a major refactor of all units is not needed. Only units we choose to containerize need a minimal guest-local module. The host `default.nix` can remain as compatibility wrapper. First target should be Actual Budget only; other units can stay unchanged until migrated.
+!ASK Than it's fine, given we have to expose some stuff potentially as separate metadata files, though couldn't we have `unit.nix` just be `default.nix`, with `meta.nix` as-is?
+!ANSWER We can make that work for new/container-first units, but it is not safe as a blanket rule for existing units because today `default.nix` is often the host integration wrapper. Importing it into a guest may bring `my.vhosts`, host backups, or host-local assumptions. The `unit.nix` split is a migration boundary, not a sacred filename. If we later change convention so `default.nix` is always the minimal unit and host integration moves elsewhere, then yes, `unit.nix` can disappear.
 
 `unit.nix` is the only unit file imported into a container guest.
 
@@ -297,13 +301,15 @@ Example:
 
 ```nix
 {
-  name = "actual-budget";
+  name = "actual-budget"; # !NOTE This, along with `module` below, are not needed as metadata IMO
+  # !ANSWER Agreed. `name` is already known from the helper/registry, and `module` can be known by the helper that selected this unit. Metadata should only carry semantic defaults the container composer cannot infer, such as endpoint/state/default backup facts.
   module = ./unit.nix;
 
   endpoints.web = {
     protocol = "http";
     port = 5006;
-    target = "actual";
+    target = "actual"; # !NOTE this would autohandle tld? again I need more clarification on the whole flow for endpoints...
+    # !ANSWER `target` should not mean TLD/FQDN. It is the same vhost target concept currently used by `my.vhosts`: usually a subdomain-like label such as `actual`. Existing DNS/reverse-proxy code then decides how that becomes `actual.<domain>` and whether it is public/LAN-only. Also, endpoint metadata should provide a default target at most; actual exposure should still be container-owned.
   };
 
   state.data = {
@@ -329,6 +335,8 @@ For this input:
 my.containers.actual-budget = u.container.unit.actual-budget {
   id = 11; # !NOTE I'm still not getting where this is used so far
   # !ANSWER `id` is the stable network/allocation identity. With the current proposed scheme, `id = 11` derives `hostAddress = 10.88.11.1` and `localAddress = 10.88.11.2`, and later drives assertions/firewall/provider grants. It is not about unit identity; it is about container network identity.
+  # !ASK then id = 12 would yield what? what part would change in the host address?
+  # !ANSWER With the proposed address formula, `id = 12` yields `hostAddress = "10.88.12.1"` and `localAddress = "10.88.12.2"`. Only the third octet changes. The host side of that container's veth gets `.1`; the guest/container address gets `.2`.
   target = "actual";
 };
 ```
@@ -466,6 +474,31 @@ Canonical lowering rule: `expose.<name>.target` is the host vhost target. Unit e
 
 !ASK This is not clear to me, can you try explaining this in a more concise and intentional manner, with a quick comparison to how things are currently in repo to how things would be?
 !ANSWER Current repo: a unit directly declares `my.vhosts.foo = { target = ...; sources = ["http://localhost:port"]; }`. Proposed container shape: the unit only declares "I serve HTTP on port X"; the container owns host ingress and lowers `target = "actual"` into `my.vhosts.actual-budget = { target = "actual"; sources = ["http://actual-budget.containers:5006"]; }`. So `target` remains the DNS/vhost name, but it is owned by the container layer, not the guest unit.
+!NOTE This makes it clearer, then with that in mind we can have a slightly alterd shape, see below:
+
+```
+highest-level:
+    unit: declares 'unit-scope endpoints' that are served (http/tcp/udp at port X)
+    container (with helper): declares 'container-scope endpoints', processed from unit endpoints (container or unit-scope endpoints don't mean these declarations live inside the container, they're only conceptually designated to them, but will be acessible on host side)
+    host: uses declared endpoints for reverse proxy mapping
+
+lower-level something like:
+    unit:
+        instead of a `meta.nix`, maybe we can declare some stuff inside the unit declaration itself, through read-only options (we'd need some helper functions to deal with that, but it should be fine)
+
+        instead of o.module, a wrapper unit-specific `o.unit` is made:
+
+        o.unit "fxsync" (with o; {
+            enable = toggle "Enable Fxsync" false;
+            ...
+        }) { # 2nd argument reserved for unit metadata
+            endpoints.web = {
+                ... # do we need this here? i feel like we could derive something from the option declarations for endpoint already. maybe from the default options. we could have some helper method that you give default port and target for an endpoint and it autogenerates the metadata for the default endpoint values; besides that, I'm not even sure if we need metadata. still thinking about it
+            }
+        }
+```
+
+!ANSWER This shape is closer. The important distinction is: unit-scope endpoint = "this service can listen on protocol/port X"; container-scope exposure = "the host should publish that endpoint as target Y". I also like `o.unit` carrying read-only metadata if it keeps service options and metadata together. I would not try to derive everything from options automatically yet: port/bind can come from endpoint option defaults, but host exposure/target should remain container-owned.
 
 ## Cross-container communication
 
@@ -483,6 +516,8 @@ my.containers.app = u.container.unit.app {
   consumes.redis = {
     container = "redis"; # !ASK why specify container twice and not just have, say, `consumes` being an array of attrsets of the shape {container = 'container_name'; ...}
     # !ANSWER The attr key (`redis`) is a local dependency alias; `container = "redis"` is the target container. That lets a service call a dependency `cache` while the target container is named `redis`, and supports multiple dependencies to one container. A list of attrsets is also viable; attrsets are usually easier to override/merge in Nix. Since this is future work, we do not need to settle it now.
+    # !NOTE given we're discussing similar patterns elsewhere, I wanna say: if attrsets are usually easier to deal with, we can still have them, but we shouldn't state 'redis' twice then. if we say `consumes.redis` we already should infer `redis` is the container
+    # !ANSWER Agreed. Common form should not duplicate the name. `consumes.redis = { endpoint = "redis"; };` can infer target container `redis`. If the local alias differs, use an explicit override like `consumes.cache = { container = "redis"; endpoint = "redis"; };`.
     endpoint = "redis"; # !ASK why do we need specifying endpoint here? from some text below, it seems 'endpoint' is kind of an abstraction over a port so we can derive firewall rules from (?); if so, that's nice, though this is not properly documented on this spec so far
     # !ANSWER Yes: `endpoint` is meant to name a provided port/protocol bundle on the target, so consumers do not hardcode ports. For example Redis could provide endpoint `redis` = TCP 6379. Then firewall/routing can be derived. This is underdocumented and should be deferred or clarified later.
   };
@@ -523,6 +558,8 @@ my.containers.kaneo = u.container.unit.kaneo {
 
   consumes.host.postgres = { # !ASK can you ellaborate on `host.postgres` internals?
     # !ANSWER Internally, `host.postgres` would be a named provider edge to the host's `unit.postgres`. It is not a container. The provider would translate this into host-side DB/user/client auth, an allowed client address for this container, a guest DB host such as `host.containers`, and a projected password/credential. This should be future work, not v1.
+    # !NOTE agreed on rough internals, but yes it's future work
+    # !ANSWER Agreed; host providers should stay as future design, with only enough vocabulary in this spec to avoid blocking the eventual Postgres/shared-service path.
     database = "kaneo";
   };
 };
@@ -596,6 +633,8 @@ bindMounts."/var/lib/actual" = {
 
 !NOTE Require more thought - sops-nix requires a SOPS key, so that has to be mounted as well, and I think there's an easier way of making container-wide secrets than relying on mounting a key to an isolated host: perhaps we could have secrets as envvars in the container-side instead of mounting the actual secret files themselves. Tell me what do you think.
 !ANSWER I agree that mounting a SOPS key into the guest is the wrong default. Environment variables are simpler but weaker: they can leak through process environments, service introspection, logs, or accidental dumps. A better first shape is host-decrypted, container-specific secret material projected as files or systemd credentials (`LoadCredential`-style), without giving the guest the SOPS key and without mounting the whole secret tree. Container-wide secret projection can be a host-owned `/run/container-secrets/<container>/...` interface.
+!NOTE envvars may leak for the same reasons your proposed alternative would also leak. if a process can attain read access to envvars, they will also get read access elsewhere inside the container
+!ANSWER True for a full container compromise: any secret made available to that container is reachable. My concern is accidental/broader exposure before full compromise. Envvars are inherited by child processes and are easier to leak through service status, process inspection, crash dumps, debug logs, or wrappers. Files/systemd credentials can be scoped per service user, not inherited by unrelated processes, and rotated independently. For container-wide secrets the difference is smaller, but I would still default to file/credential projection and allow envvar sugar only when a unit explicitly needs it.
 
 First-pass model: host-managed read-only secret bind mounts.
 
