@@ -19,6 +19,7 @@ in {
     ./syncthing
     ./forgejo
     ./hister
+    ./degoog
     unit_global_cfg
   ];
 }
