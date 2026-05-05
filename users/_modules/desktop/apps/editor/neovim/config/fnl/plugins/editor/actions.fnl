@@ -13,14 +13,6 @@
                  :multi_server true
                  :max_width nil
                  :max_height nil}})
- ; git
- (plugin :lewis6991/gitsigns.nvim
-         {:opts {}
-          :event :VeryLazy
-          :keys [(key :<leader>gb "<cmd>Gitsigns blame_line<cr>"
-                      {:desc "Blame (line)"})
-                 (key :<leader>gB "<cmd>Gitsigns blame<cr>"
-                      {:desc "Blame (all)"})]})
  ; 'dev' actions / provides actions for refactoring
  ; (plugin :yarospace/dev-tools.nvim
  ;         {:dependencies [(plugin :ThePrimeagen/refactoring.nvim

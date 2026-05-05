@@ -14,15 +14,6 @@ return {
 		opts = { border = "none", wrap = true, multi_server = true, max_width = nil, max_height = nil },
 	},
 	{
-		"lewis6991/gitsigns.nvim",
-		opts = {},
-		event = "VeryLazy",
-		keys = {
-			{ "<leader>gb", "<cmd>Gitsigns blame_line<cr>", desc = "Blame (line)" },
-			{ "<leader>gB", "<cmd>Gitsigns blame<cr>", desc = "Blame (all)" },
-		},
-	},
-	{
 		"rachartier/tiny-code-action.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
