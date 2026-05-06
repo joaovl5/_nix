@@ -103,6 +103,26 @@ in rec {
           peer_device_ids.lavpc = "S7TNWPT-Q35KRUD-Q6SHKYK-REO2WLZ-DMLV7TW-KYPFCXJ-BFVECBC-LTRVHQT";
         };
 
+        "unit.hermes-agent" = {
+          enable = true;
+          nat.external_interface = interface_name;
+          hermes.settings = {
+            model = {
+              default = "glm-5.1";
+              provider = "zai";
+              base_url = "https://api.z.ai/api/coding/paas/v4";
+            };
+            agent = {
+              max_turns = 150;
+            };
+            approvals.mode = "auto";
+            fallback_model = {
+              provider = "openai-codex";
+              model = "gpt-5.4";
+            };
+          };
+        };
+
         "unit.backup" = {
           enable = true;
           coordinator_host = "tyrant";

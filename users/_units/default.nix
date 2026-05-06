@@ -20,6 +20,7 @@ in {
     ./forgejo
     ./hister
     ./degoog
+    ./hermes-agent
     unit_global_cfg
   ];
 }
