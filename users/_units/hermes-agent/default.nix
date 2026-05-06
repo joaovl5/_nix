@@ -72,7 +72,7 @@ in
 
       guest_state_dir = "/var/lib/hermes";
       guest_hermes_home = "${guest_state_dir}/.hermes";
-      guest_home_dir = "${guest_state_dir}/home";
+      guest_home_dir = guest_state_dir;
       guest_workspace = "${guest_state_dir}/workspace";
 
       default_settings = {
@@ -159,7 +159,13 @@ in
           pkgs,
           ...
         }: {
-          environment.systemPackages = [opts.package];
+          environment.systemPackages =
+            [
+              opts.package
+              pkgs.git
+              pkgs.ripgrep
+            ]
+            ++ opts.hermes.extra_packages;
 
           networking = {
             useHostResolvConf = lib.mkForce false;
@@ -178,7 +184,6 @@ in
           systemd.tmpfiles.rules = [
             "d ${guest_state_dir} 0750 hermes hermes - -"
             "d ${guest_hermes_home} 0750 hermes hermes - -"
-            "d ${guest_home_dir} 0750 hermes hermes - -"
             "d ${guest_workspace} 2770 hermes hermes - -"
             "d ${guest_env_dir} 0750 root root - -"
           ];
@@ -186,7 +191,6 @@ in
           system.activationScripts.hermes_agent_setup = lib.stringAfter ["users"] ''
             install -d -o hermes -g hermes -m 0750 ${guest_state_dir}
             install -d -o hermes -g hermes -m 0750 ${guest_hermes_home}
-            install -d -o hermes -g hermes -m 0750 ${guest_home_dir}
             install -d -o hermes -g hermes -m 2770 ${guest_workspace}
             install -o hermes -g hermes -m 0640 ${config_yaml} ${guest_hermes_home}/config.yaml
             rm -f ${guest_hermes_home}/.managed
