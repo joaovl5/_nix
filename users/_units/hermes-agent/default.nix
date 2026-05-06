@@ -147,12 +147,6 @@ in
               isReadOnly = false;
             };
           }
-          // optionalAttrs sops_environment_file.enable {
-            "${guest_hermes_home}/.env" = {
-              hostPath = s.secret_path sops_environment_file.name;
-              isReadOnly = true;
-            };
-          }
           // env_mounts;
         config = {
           lib,
@@ -194,6 +188,7 @@ in
             install -d -o hermes -g hermes -m 2770 ${guest_workspace}
             install -o hermes -g hermes -m 0640 ${config_yaml} ${guest_hermes_home}/config.yaml
             rm -f ${guest_hermes_home}/.managed
+            ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
 
           systemd.services.hermes-agent = {
