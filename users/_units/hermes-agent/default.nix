@@ -147,14 +147,19 @@ in
               isReadOnly = false;
             };
           }
+          // optionalAttrs sops_environment_file.enable {
+            "${guest_hermes_home}/.env" = {
+              hostPath = s.secret_path sops_environment_file.name;
+              isReadOnly = true;
+            };
+          }
           // env_mounts;
-
         config = {
           lib,
           pkgs,
           ...
         }: {
-          system.stateVersion = "25.11";
+          environment.systemPackages = [opts.package];
 
           networking = {
             useHostResolvConf = lib.mkForce false;
@@ -167,6 +172,7 @@ in
             isSystemUser = true;
             group = "hermes";
             home = guest_home_dir;
+            shell = pkgs.bashInteractive;
           };
 
           systemd.tmpfiles.rules = [

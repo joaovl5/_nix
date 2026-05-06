@@ -31,7 +31,7 @@
   - The unit exposes `hermes.sops_environment_file` for an encrypted multiline dotenv payload, defaulting to `${my.secrets.dir}/hermes-agent.yaml` key `env`.
   - The sops secret is auto-enabled only when that default private secret file exists; currently it is safe for this repo because the file is absent.
   - The unit still exposes `hermes.environment_files` for additional externally declared host paths/strings.
-  - All env files are bind-mounted read-only into the guest and passed as guest paths to the service.
+  - All env files are bind-mounted read-only into the guest.
   - Env-file contents and API keys must not appear in Nix expressions or the Nix store.
 - Hermes terminal backend is `local` inside the NixOS container.
 - No extra host mounts initially beyond Hermes state/workspace.
@@ -153,6 +153,7 @@ When `my."unit.hermes-agent".enable = true`, the host should:
 2. Declare `containers.${container.name}`.
 3. Bind-mount the host state root read-write into the guest at `/var/lib/hermes`.
 4. Bind-mount each configured host env file read-only into a stable guest path under `/run/hermes-agent/env/`.
+   - When `hermes.sops_environment_file.enable = true`, also bind-mount the decrypted sops env file read-only at `${guest_hermes_home}/.env` (`/var/lib/hermes/.hermes/.env`) because Hermes reads `~/.hermes/.env` directly for API keys, separate from the systemd `EnvironmentFile`.
 5. Configure private routed networking:
    - `privateNetwork = true`;
    - `hostAddress = opts.container.host_address`;
@@ -172,21 +173,22 @@ The container guest should:
 2. Use container DNS suitable for private-network containers:
    - `networking.useHostResolvConf = lib.mkForce false`;
    - `services.resolved.enable = true`.
-3. Create a `hermes` service user and group inside the guest.
-4. Create and own:
+3. Create a `hermes` service user and group inside the guest, with `shell = pkgs.bashInteractive;` so `sudo -u hermes -i` works.
+4. Add the Hermes package to `environment.systemPackages` so the `hermes` CLI is available in the container PATH, not just through the service `path`.
+5. Create and own:
    - `/var/lib/hermes/.hermes`;
    - `/var/lib/hermes/home`;
    - `/var/lib/hermes/workspace`.
-5. Render a non-secret `config.yaml` from `hermes.settings` into `/var/lib/hermes/.hermes/config.yaml`.
-6. Do not create `/var/lib/hermes/.hermes/.managed` (run unmanaged).
-7. Run a systemd service:
+6. Render a non-secret `config.yaml` from `hermes.settings` into `/var/lib/hermes/.hermes/config.yaml`.
+7. Do not create `/var/lib/hermes/.hermes/.managed` (run unmanaged).
+8. Run a systemd service:
    - `ExecStart = "${package}/bin/hermes gateway run"` plus optional extra args;
    - `HERMES_HOME = "/var/lib/hermes/.hermes"`;
    - `HOME = "/var/lib/hermes/home"`;
    - `MESSAGING_CWD = "/var/lib/hermes/workspace"`;
    - `EnvironmentFile =` guest env-file mount paths;
    - `Restart = "always"` or equivalent.
-8. Make default tool execution local to the guest by setting `terminal.backend = "local"` and `terminal.cwd = "/var/lib/hermes/workspace"`.
+9. Make default tool execution local to the guest by setting `terminal.backend = "local"` and `terminal.cwd = "/var/lib/hermes/workspace"`.
 
 ## `tyrant` host config
 
@@ -211,7 +213,7 @@ The unit provides a sops-nix env-file hook for the default private secret file `
 - No host Docker/Podman socket is mounted.
 - No host home or repo checkout is mounted.
 - The only unit-declared host mounts are the Hermes state bind mount and configured read-only env-file mounts. Native NixOS containers still get inherent `/nix` bind mounts from the container runtime.
-- Secrets are runtime files only, not Nix store values; when the sops env file is enabled, the guest receives only the `/run/secrets/hermes_agent_env` runtime file via a read-only bind mount.
+- Secrets are runtime files only, not Nix store values.
 - The explicit state directory is the backup/restore boundary.
 - `privateUsers = "identity"` is documented as a reliability tradeoff, not the final hardening target.
 

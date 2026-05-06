@@ -196,7 +196,7 @@ networking.nat = optionalAttrs opts.nat.enable ({
 
 - [ ] **Step 5: Add `containers.${container_name}` host config**
 
-Set:
+Inside `config`, add the guest PATH package, the `hermes` login shell, and the optional `.env` bind mount:
 
 ```nix
 containers.${container_name} = {
@@ -209,13 +209,20 @@ containers.${container_name} = {
   localAddress = local_address;
 
   bindMounts = {
-    ${guest_state_dir} = {
+    "${guest_state_dir}" = {
       hostPath = opts.state_dir;
       isReadOnly = false;
+    };
+  } // optionalAttrs sops_environment_file.enable {
+    "${guest_hermes_home}/.env" = {
+      hostPath = s.secret_path sops_environment_file.name;
+      isReadOnly = true;
     };
   } // env_mounts;
 
   config = { lib, pkgs, ... }: {
+    environment.systemPackages = [opts.package];
+
     system.stateVersion = "25.11";
 
     networking = {
@@ -229,6 +236,7 @@ containers.${container_name} = {
       isSystemUser = true;
       group = "hermes";
       home = guest_home_dir;
+      shell = pkgs.bashInteractive;
     };
 
     systemd.tmpfiles.rules = [
@@ -286,15 +294,8 @@ containers.${container_name} = {
     };
   };
 };
-````
-
-Use valid attr names in actual implementation: Nix identifiers cannot directly use `${guest_state_dir}` syntax inside attrsets unless quoted/interpolated correctly. Prefer:
-
-```nix
-bindMounts = {
-  "${guest_state_dir}" = { ...; };
-} // env_mounts;
 ```
+
 
 - [ ] **Step 6: Run a syntax/eval probe for the new module file**
 
@@ -441,4 +442,5 @@ Because Nix code changed, run `nix flake check --all-systems` only if appropriat
 - Do not create a generic container helper/framework.
 - Do not add ingress/vhosts/routes.
 - Do not add tests; the user selected targeted eval/build verification only.
-- Runtime secret material can be supplied by creating `${my.secrets.dir}/hermes-agent.yaml` with key `env` containing dotenv content; the unit then declares `sops.secrets.hermes_agent_env` and injects it after any extra `hermes.environment_files`.
+- Runtime secret material can be supplied by creating `${my.secrets.dir}/hermes-agent.yaml` with key `env` containing dotenv content; when the sops environment file is enabled, the unit creates the matching sops secret, bind-mounts it read-only at `${guest_hermes_home}/.env`, and injects it after any extra `hermes.environment_files`.
+````
