@@ -106,6 +106,10 @@ in rec {
         "unit.hermes-agent" = {
           enable = true;
           nat.external_interface = interface_name;
+          ingress = {
+            dashboard.enable = true;
+            api.enable = true;
+          };
           hermes.settings = {
             model = {
               default = "glm-5.1";

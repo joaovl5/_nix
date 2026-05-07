@@ -56,6 +56,21 @@ in
       extra_packages = opt "Extra packages added to the Hermes service PATH inside the guest." (t.listOf t.package) [];
       extra_args = opt "Extra arguments appended to `hermes gateway run`." (t.listOf t.str) [];
     };
+
+    ingress = {
+      dashboard = {
+        enable = toggle "Expose the Hermes web dashboard through the host reverse proxy." false;
+        port = opt "Hermes dashboard port inside the container." t.int 9119;
+        target = opt "Dashboard reverse-proxy subdomain prefix." t.str "hermes";
+        tui = toggle "Expose the dashboard in-browser Chat/TUI tab." true;
+      };
+      api = {
+        enable = toggle "Expose the Hermes OpenAI-compatible API through the host reverse proxy." false;
+        port = opt "Hermes API server port inside the container." t.int 8642;
+        target = opt "API reverse-proxy subdomain prefix." t.str "hermes-api";
+        cors_origins = opt "Browser origins allowed to call the Hermes API server directly." (t.listOf t.str) [];
+      };
+    };
   }) {} (opts:
     o.when opts.enable (let
       container_name = opts.container.name;
@@ -72,8 +87,15 @@ in
 
       guest_state_dir = "/var/lib/hermes";
       guest_hermes_home = "${guest_state_dir}/.hermes";
-      guest_home_dir = guest_state_dir;
+      guest_home_dir = "${guest_state_dir}/home";
       guest_workspace = "${guest_state_dir}/workspace";
+
+      inherit (opts.ingress) dashboard;
+      inherit (opts.ingress) api;
+      api_cors_origins =
+        if api.cors_origins != []
+        then api.cors_origins
+        else lib.optional dashboard.enable "https://${dashboard.target}.${config.my.dns.tld}";
 
       default_settings = {
         terminal = {
@@ -131,6 +153,20 @@ in
           externalInterface = lib.mkDefault opts.nat.external_interface;
         });
 
+      my.vhosts =
+        optionalAttrs dashboard.enable {
+          hermes-dashboard = {
+            inherit (dashboard) target;
+            sources = ["http://${local_address}:${toString dashboard.port}"];
+          };
+        }
+        // optionalAttrs api.enable {
+          hermes-api = {
+            inherit (api) target;
+            sources = ["http://${local_address}:${toString api.port}"];
+          };
+        };
+
       containers.${container_name} = {
         autoStart = opts.container.auto_start;
         privateNetwork = true;
@@ -153,6 +189,8 @@ in
           pkgs,
           ...
         }: {
+          system.stateVersion = "25.11";
+
           environment.systemPackages =
             [
               opts.package
@@ -164,6 +202,9 @@ in
           networking = {
             useHostResolvConf = lib.mkForce false;
             firewall.enable = true;
+            firewall.allowedTCPPorts =
+              lib.optionals dashboard.enable [dashboard.port]
+              ++ lib.optionals api.enable [api.port];
           };
           services.resolved.enable = true;
 
@@ -175,61 +216,122 @@ in
             shell = pkgs.bashInteractive;
           };
 
-          systemd.tmpfiles.rules = [
-            "d ${guest_state_dir} 0750 hermes hermes - -"
-            "d ${guest_hermes_home} 0750 hermes hermes - -"
-            "d ${guest_workspace} 2770 hermes hermes - -"
-            "d ${guest_env_dir} 0750 root root - -"
-          ];
-
           system.activationScripts.hermes_agent_setup = lib.stringAfter ["users"] ''
             install -d -o hermes -g hermes -m 0750 ${guest_state_dir}
             install -d -o hermes -g hermes -m 0750 ${guest_hermes_home}
+            install -d -o hermes -g hermes -m 0750 ${guest_home_dir}
             install -d -o hermes -g hermes -m 2770 ${guest_workspace}
             install -o hermes -g hermes -m 0640 ${config_yaml} ${guest_hermes_home}/config.yaml
             rm -f ${guest_hermes_home}/.managed
             ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
 
-          systemd.services.hermes-agent = {
-            description = "Hermes Agent Gateway";
-            wantedBy = ["multi-user.target"];
-            after = ["network-online.target"];
-            wants = ["network-online.target"];
-            path =
-              [
+          systemd = {
+            tmpfiles.rules = [
+              "d ${guest_state_dir} 0750 hermes hermes - -"
+              "d ${guest_hermes_home} 0750 hermes hermes - -"
+              "d ${guest_home_dir} 0750 hermes hermes - -"
+              "d ${guest_workspace} 2770 hermes hermes - -"
+              "d ${guest_env_dir} 0750 root root - -"
+            ];
+
+            services.hermes-agent = {
+              description = "Hermes Agent Gateway";
+              wantedBy = ["multi-user.target"];
+              after = ["network-online.target"];
+              wants = ["network-online.target"];
+              path =
+                [
+                  opts.package
+                  pkgs.bash
+                  pkgs.coreutils
+                  pkgs.git
+                  pkgs.curl
+                  pkgs.ripgrep
+                  pkgs.fd
+                  pkgs.jq
+                ]
+                ++ opts.hermes.extra_packages;
+              environment =
+                {
+                  HOME = guest_home_dir;
+                  HERMES_HOME = guest_hermes_home;
+                  MESSAGING_CWD = guest_workspace;
+                }
+                // optionalAttrs api.enable {
+                  API_SERVER_ENABLED = "true";
+                  API_SERVER_HOST = "0.0.0.0";
+                  API_SERVER_PORT = toString api.port;
+                  API_SERVER_CORS_ORIGINS = lib.concatStringsSep "," api_cors_origins;
+                };
+              serviceConfig =
+                {
+                  User = "hermes";
+                  Group = "hermes";
+                  WorkingDirectory = guest_workspace;
+                  ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
+                    exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run"] ++ opts.hermes.extra_args)}
+                  '';
+                  Restart = "always";
+                  RestartSec = "10s";
+                  UMask = "0007";
+                  NoNewPrivileges = true;
+                  PrivateTmp = true;
+                }
+                // optionalAttrs (guest_environment_files != []) {
+                  EnvironmentFile = guest_environment_files;
+                };
+            };
+
+            services.hermes-dashboard = o.when dashboard.enable {
+              description = "Hermes Agent Web Dashboard";
+              wantedBy = ["multi-user.target"];
+              after = ["network-online.target" "hermes-agent.service"];
+              wants = ["network-online.target" "hermes-agent.service"];
+              path = [
                 opts.package
                 pkgs.bash
                 pkgs.coreutils
                 pkgs.git
-                pkgs.curl
-                pkgs.ripgrep
-                pkgs.fd
-                pkgs.jq
-              ]
-              ++ opts.hermes.extra_packages;
-            environment = {
-              HOME = guest_home_dir;
-              HERMES_HOME = guest_hermes_home;
-              MESSAGING_CWD = guest_workspace;
+                pkgs.nodejs
+              ];
+              environment =
+                {
+                  HOME = guest_home_dir;
+                  HERMES_HOME = guest_hermes_home;
+                  MESSAGING_CWD = guest_workspace;
+                }
+                // optionalAttrs dashboard.tui {
+                  HERMES_DASHBOARD_TUI = "1";
+                };
+              serviceConfig =
+                {
+                  User = "hermes";
+                  Group = "hermes";
+                  WorkingDirectory = guest_workspace;
+                  ExecStart = pkgs.writeShellScript "hermes-dashboard-start" ''
+                    exec ${lib.escapeShellArgs ([
+                        "${opts.package}/bin/hermes"
+                        "dashboard"
+                        "--host"
+                        "0.0.0.0"
+                        "--port"
+                        (toString dashboard.port)
+                        "--no-open"
+                        "--insecure"
+                      ]
+                      ++ lib.optional dashboard.tui "--tui")}
+                  '';
+                  Restart = "always";
+                  RestartSec = "10s";
+                  UMask = "0007";
+                  NoNewPrivileges = true;
+                  PrivateTmp = true;
+                }
+                // optionalAttrs (guest_environment_files != []) {
+                  EnvironmentFile = guest_environment_files;
+                };
             };
-            serviceConfig =
-              {
-                User = "hermes";
-                Group = "hermes";
-                WorkingDirectory = guest_workspace;
-                ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
-                  exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run"] ++ opts.hermes.extra_args)}
-                '';
-                Restart = "always";
-                RestartSec = "10s";
-                UMask = "0007";
-                NoNewPrivileges = true;
-                PrivateTmp = true;
-              }
-              // optionalAttrs (guest_environment_files != []) {
-                EnvironmentFile = guest_environment_files;
-              };
           };
         };
       };
