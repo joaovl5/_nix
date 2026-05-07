@@ -1,7 +1,6 @@
 {
   mylib,
   config,
-  pkgs,
   lib,
   inputs,
   system,
@@ -72,6 +71,12 @@ in
         target = opt "API reverse-proxy subdomain prefix." t.str "hermes-api";
         cors_origins = opt "Browser origins allowed to call the Hermes API server directly." (t.listOf t.str) [];
       };
+      telegram_webhook = {
+        enable = toggle "Run Telegram through a public webhook instead of Bot API getUpdates polling." false;
+        port = opt "Hermes Telegram webhook listener port inside the container." t.int 8443;
+        target = opt "Telegram webhook reverse-proxy subdomain prefix." t.str "hermes-webhook";
+        path = opt "Telegram webhook HTTP path." t.str "/telegram";
+      };
     };
   }) {} (opts:
     o.when opts.enable (let
@@ -94,6 +99,8 @@ in
 
       inherit (opts.ingress) dashboard;
       inherit (opts.ingress) api;
+      inherit (opts.ingress) telegram_webhook;
+      telegram_webhook_url = "https://${telegram_webhook.target}.${config.my.dns.tld}${telegram_webhook.path}";
       api_cors_origins =
         if api.cors_origins != []
         then api.cors_origins
@@ -168,6 +175,12 @@ in
             inherit (api) target;
             sources = ["http://${local_address}:${toString api.port}"];
           };
+        }
+        // optionalAttrs telegram_webhook.enable {
+          hermes-telegram-webhook = {
+            inherit (telegram_webhook) target;
+            sources = ["http://${local_address}:${toString telegram_webhook.port}"];
+          };
         };
 
       containers.${container_name} = {
@@ -207,7 +220,8 @@ in
             firewall.enable = true;
             firewall.allowedTCPPorts =
               lib.optionals dashboard.enable [dashboard.port]
-              ++ lib.optionals api.enable [api.port];
+              ++ lib.optionals api.enable [api.port]
+              ++ lib.optionals telegram_webhook.enable [telegram_webhook.port];
           };
           services.resolved.enable = true;
 
@@ -238,104 +252,189 @@ in
               "d ${guest_env_dir} 0750 root root - -"
             ];
 
-            services.hermes-agent = {
-              description = "Hermes Agent Gateway";
-              wantedBy = ["multi-user.target"];
-              after = ["network-online.target"];
-              wants = ["network-online.target"];
-              path =
-                [
+            services = {
+              hermes-agent = {
+                description = "Hermes Agent Gateway";
+                wantedBy = ["multi-user.target"];
+                after = ["network-online.target"];
+                wants = ["network-online.target"];
+                path =
+                  [
+                    opts.package
+                    pkgs.bash
+                    pkgs.coreutils
+                    pkgs.git
+                    pkgs.curl
+                    pkgs.ripgrep
+                    pkgs.fd
+                    pkgs.jq
+                  ]
+                  ++ opts.hermes.extra_packages;
+                environment =
+                  {
+                    HOME = guest_home_dir;
+                    HERMES_HOME = guest_hermes_home;
+                    MESSAGING_CWD = guest_workspace;
+                  }
+                  // optionalAttrs api.enable {
+                    API_SERVER_ENABLED = "true";
+                    API_SERVER_HOST = "0.0.0.0";
+                    API_SERVER_PORT = toString api.port;
+                    API_SERVER_CORS_ORIGINS = lib.concatStringsSep "," api_cors_origins;
+                  }
+                  // optionalAttrs telegram_webhook.enable {
+                    TELEGRAM_WEBHOOK_URL = telegram_webhook_url;
+                    TELEGRAM_WEBHOOK_PORT = toString telegram_webhook.port;
+                  };
+                serviceConfig =
+                  {
+                    User = "hermes";
+                    Group = "hermes";
+                    WorkingDirectory = guest_workspace;
+                    ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
+                      ${lib.optionalString telegram_webhook.enable ''
+                        if [ -z "''${TELEGRAM_BOT_TOKEN:-}" ]; then
+                          echo "TELEGRAM_BOT_TOKEN is required when Telegram webhook mode is enabled" >&2
+                          exit 1
+                        fi
+                        export TELEGRAM_WEBHOOK_SECRET="$(printf '%s' "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -d' ' -f1)"
+                      ''}
+                      exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run" "--replace"] ++ opts.hermes.extra_args)}
+                    '';
+                    Restart = "always";
+                    RestartSec = "10s";
+                    UMask = "0007";
+                    NoNewPrivileges = true;
+                    PrivateTmp = true;
+                  }
+                  // optionalAttrs (guest_environment_files != []) {
+                    EnvironmentFile = guest_environment_files;
+                  };
+              };
+
+              hermes-telegram-webhook-ensure = lib.mkIf telegram_webhook.enable {
+                description = "Ensure Hermes Telegram webhook registration";
+                after = ["network-online.target" "hermes-agent.service"];
+                wants = ["network-online.target" "hermes-agent.service"];
+                path = [
+                  pkgs.bash
+                  pkgs.coreutils
+                  pkgs.curl
+                  pkgs.gnugrep
+                ];
+                serviceConfig = {
+                  Type = "oneshot";
+                  User = "hermes";
+                  Group = "hermes";
+                  EnvironmentFile = guest_environment_files;
+                  ExecStart = pkgs.writeShellScript "hermes-telegram-webhook-ensure" ''
+                    set -euo pipefail
+
+                    token="''${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}"
+                    webhook_url=${lib.escapeShellArg telegram_webhook_url}
+                    webhook_secret="$(printf '%s' "$token" | sha256sum | cut -d' ' -f1)"
+
+                    write_curl_config() {
+                      local method="$1"
+                      local api_method="$2"
+                      printf 'url = "https://api.telegram.org/bot%s/%s"\n' "$token" "$api_method"
+                      printf 'request = "%s"\n' "$method"
+                      printf 'connect-timeout = 10\nmax-time = 30\nfail\nsilent\nshow-error\n'
+                    }
+
+                    for attempt in $(seq 1 3); do
+                      if {
+                        write_curl_config POST setWebhook
+                        printf 'data-urlencode = "url=%s"\n' "$webhook_url"
+                        printf 'data-urlencode = "secret_token=%s"\n' "$webhook_secret"
+                        printf 'data-urlencode = "drop_pending_updates=false"\n'
+                      } | curl --config - >/dev/null; then
+                        break
+                      fi
+
+                      if [ "$attempt" -eq 3 ]; then
+                        echo "failed to register Telegram webhook $webhook_url" >&2
+                        exit 1
+                      fi
+                      sleep 5
+                    done
+
+                    info="$({ write_curl_config GET getWebhookInfo; } | curl --config -)"
+                    if printf '%s' "$info" | grep -F '"url":"'"$webhook_url"'"' >/dev/null; then
+                      echo "Telegram webhook registered for $webhook_url"
+                      exit 0
+                    fi
+
+                    echo "Telegram webhook registration did not stick for $webhook_url" >&2
+                    printf '%s\n' "$info" | sed -E 's/"last_error_message":"[^"]*"/"last_error_message":"<redacted>"/g' >&2
+                    exit 1
+                  '';
+                  NoNewPrivileges = true;
+                  PrivateTmp = true;
+                  TimeoutStartSec = "45s";
+                };
+              };
+
+              hermes-dashboard = o.when dashboard.enable {
+                description = "Hermes Agent Web Dashboard";
+                wantedBy = ["multi-user.target"];
+                after = ["network-online.target" "hermes-agent.service"];
+                wants = ["network-online.target" "hermes-agent.service"];
+                path = [
                   opts.package
                   pkgs.bash
                   pkgs.coreutils
                   pkgs.git
-                  pkgs.curl
-                  pkgs.ripgrep
-                  pkgs.fd
-                  pkgs.jq
-                ]
-                ++ opts.hermes.extra_packages;
-              environment =
-                {
-                  HOME = guest_home_dir;
-                  HERMES_HOME = guest_hermes_home;
-                  MESSAGING_CWD = guest_workspace;
-                }
-                // optionalAttrs api.enable {
-                  API_SERVER_ENABLED = "true";
-                  API_SERVER_HOST = "0.0.0.0";
-                  API_SERVER_PORT = toString api.port;
-                  API_SERVER_CORS_ORIGINS = lib.concatStringsSep "," api_cors_origins;
-                };
-              serviceConfig =
-                {
-                  User = "hermes";
-                  Group = "hermes";
-                  WorkingDirectory = guest_workspace;
-                  ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
-                    exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run" "--replace"] ++ opts.hermes.extra_args)}
-                  '';
-                  Restart = "always";
-                  RestartSec = "10s";
-                  UMask = "0007";
-                  NoNewPrivileges = true;
-                  PrivateTmp = true;
-                }
-                // optionalAttrs (guest_environment_files != []) {
-                  EnvironmentFile = guest_environment_files;
-                };
+                  pkgs.nodejs
+                ];
+                environment =
+                  {
+                    HOME = guest_home_dir;
+                    HERMES_HOME = guest_hermes_home;
+                    MESSAGING_CWD = guest_workspace;
+                    HERMES_WEB_DIST = dashboard_web_dist;
+                  }
+                  // optionalAttrs dashboard.tui {
+                    HERMES_DASHBOARD_TUI = "1";
+                  };
+                serviceConfig =
+                  {
+                    User = "hermes";
+                    Group = "hermes";
+                    WorkingDirectory = guest_workspace;
+                    ExecStart = pkgs.writeShellScript "hermes-dashboard-start" ''
+                      unset TELEGRAM_BOT_TOKEN TELEGRAM_WEBHOOK_URL TELEGRAM_WEBHOOK_SECRET TELEGRAM_WEBHOOK_PORT
+                      exec ${lib.escapeShellArgs ([
+                          "${opts.package}/bin/hermes"
+                          "dashboard"
+                          "--host"
+                          "0.0.0.0"
+                          "--port"
+                          (toString dashboard.port)
+                          "--no-open"
+                          "--insecure"
+                        ]
+                        ++ lib.optional dashboard.tui "--tui")}
+                    '';
+                    Restart = "always";
+                    RestartSec = "10s";
+                    UMask = "0007";
+                    NoNewPrivileges = true;
+                    PrivateTmp = true;
+                  }
+                  // optionalAttrs (guest_environment_files != []) {
+                    EnvironmentFile = guest_environment_files;
+                  };
+              };
             };
 
-            services.hermes-dashboard = o.when dashboard.enable {
-              description = "Hermes Agent Web Dashboard";
-              wantedBy = ["multi-user.target"];
-              after = ["network-online.target" "hermes-agent.service"];
-              wants = ["network-online.target" "hermes-agent.service"];
-              path = [
-                opts.package
-                pkgs.bash
-                pkgs.coreutils
-                pkgs.git
-                pkgs.nodejs
-              ];
-              environment =
-                {
-                  HOME = guest_home_dir;
-                  HERMES_HOME = guest_hermes_home;
-                  MESSAGING_CWD = guest_workspace;
-                  HERMES_WEB_DIST = dashboard_web_dist;
-                }
-                // optionalAttrs dashboard.tui {
-                  HERMES_DASHBOARD_TUI = "1";
-                };
-              serviceConfig =
-                {
-                  User = "hermes";
-                  Group = "hermes";
-                  WorkingDirectory = guest_workspace;
-                  ExecStart = pkgs.writeShellScript "hermes-dashboard-start" ''
-                    unset TELEGRAM_BOT_TOKEN TELEGRAM_WEBHOOK_URL TELEGRAM_WEBHOOK_SECRET TELEGRAM_WEBHOOK_PORT
-                    exec ${lib.escapeShellArgs ([
-                        "${opts.package}/bin/hermes"
-                        "dashboard"
-                        "--host"
-                        "0.0.0.0"
-                        "--port"
-                        (toString dashboard.port)
-                        "--no-open"
-                        "--insecure"
-                      ]
-                      ++ lib.optional dashboard.tui "--tui")}
-                  '';
-                  Restart = "always";
-                  RestartSec = "10s";
-                  UMask = "0007";
-                  NoNewPrivileges = true;
-                  PrivateTmp = true;
-                }
-                // optionalAttrs (guest_environment_files != []) {
-                  EnvironmentFile = guest_environment_files;
-                };
+            timers.hermes-telegram-webhook-ensure = lib.mkIf telegram_webhook.enable {
+              wantedBy = ["timers.target"];
+              timerConfig = {
+                OnBootSec = "2min";
+                OnUnitActiveSec = "2min";
+                Unit = "hermes-telegram-webhook-ensure.service";
+              };
             };
           };
         };

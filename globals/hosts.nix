@@ -109,6 +109,10 @@ in rec {
           ingress = {
             dashboard.enable = true;
             api.enable = true;
+            telegram_webhook = {
+              enable = true;
+              target = "hermes-telegram-webhook";
+            };
           };
           hermes.settings = {
             model = {
