@@ -1,5 +1,9 @@
 {
-  hm = {pkgs, ...}: {
-    home.packages = [pkgs.llm-agents.hermes-agent];
+  hm = {
+    inputs,
+    system,
+    ...
+  }: {
+    home.packages = [inputs.hermes-agent.packages.${system}.default];
   };
 }

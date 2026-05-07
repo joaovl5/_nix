@@ -98,6 +98,25 @@ in {
     flake-parts.follows = "flake-parts";
     bun2nix.follows = "bun2nix";
   };
+  hermes-agent.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    flake-parts.follows = "flake-parts";
+    pyproject-nix.follows = "pyproject-nix";
+    uv2nix.follows = "uv2nix";
+    pyproject-build-systems.follows = "pyproject-build-systems";
+    npm-lockfile-fix.follows = "npm-lockfile-fix";
+  };
+  npm-lockfile-fix.inputs.nixpkgs.follows = "nixpkgs";
+  pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+  uv2nix.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    pyproject-nix.follows = "pyproject-nix";
+  };
+  pyproject-build-systems.inputs = {
+    nixpkgs.follows = "nixpkgs";
+    pyproject-nix.follows = "pyproject-nix";
+    uv2nix.follows = "uv2nix";
+  };
 
   niri-stable = raw_source;
   niri-unstable = raw_source;

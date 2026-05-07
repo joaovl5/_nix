@@ -3,6 +3,8 @@
   config,
   pkgs,
   lib,
+  inputs,
+  system,
   ...
 }: let
   my = mylib.use config;
@@ -27,7 +29,7 @@
 in
   o.module "unit.hermes-agent" (with o; {
     enable = toggle "Enable Hermes Agent native-container service" false;
-    package = opt "Hermes Agent package." t.package pkgs.llm-agents.hermes-agent;
+    package = opt "Hermes Agent package." t.package inputs.hermes-agent.packages.${system}.default;
     state_dir = opt "Host directory for Hermes Agent container state." t.str "/var/lib/containers/hermes-agent/state";
 
     container = {
@@ -96,18 +98,7 @@ in
         if api.cors_origins != []
         then api.cors_origins
         else lib.optional dashboard.enable "https://${dashboard.target}.${config.my.dns.tld}";
-      dashboard_web_dist = pkgs.buildNpmPackage {
-        pname = "hermes-dashboard-web";
-        version = opts.package.version or "0.12.0";
-        src = opts.package.src + "/web";
-        npmDepsHash = "sha256-HWB1piIPglTXbzQHXFYHLgVZIbDb60esupXSQGa1+lI=";
-        installPhase = ''
-          runHook preInstall
-          mkdir -p "$out"
-          cp -r ../hermes_cli/web_dist/. "$out/"
-          runHook postInstall
-        '';
-      };
+      dashboard_web_dist = "${opts.package}/share/hermes-agent/web_dist";
 
       default_settings = {
         terminal = {

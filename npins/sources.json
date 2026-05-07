@@ -222,6 +222,18 @@
       "url": "https://github.com/hercules-ci/gitignore.nix/archive/637db329424fd7e46cf4185293b9cc8c88c95394.tar.gz",
       "hash": "sha256-HG2cCnktfHsKV0s4XW83gU3F57gaTljL9KNSuG6bnQs="
     },
+    "hermes-agent": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@git.trll.ing/lav/hermes-agent.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "04193cf71c2c208b747870f845c7c2539d50455f",
+      "url": null,
+      "hash": "sha256-A8GIBba3UJoYZpdmug3HUbb/rKKeFRw7erQXjvQzXNM="
+    },
     "hexecute": {
       "type": "Git",
       "repository": {
@@ -432,6 +444,19 @@
       "url": "https://github.com/Janik-Haag/nixos-dns/archive/04b00ea7423c8dbe6e0ea78e4eb96f874a04c543.tar.gz",
       "hash": "sha256-aTsLqhW9XD0O37BTJo0u5f0gkk/x4KnZ9sho9hSE6hE="
     },
+    "npm-lockfile-fix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "jeslie0",
+        "repo": "npm-lockfile-fix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "c6093acb0c0548e0f9b8b3d82918823721930fe8",
+      "url": "https://github.com/jeslie0/npm-lockfile-fix/archive/c6093acb0c0548e0f9b8b3d82918823721930fe8.tar.gz",
+      "hash": "sha256-2GV79U6iVH4gKAPWYrxUReB0S41ty/Y3dBLquU8AlaA="
+    },
     "nur": {
       "type": "Git",
       "repository": {
@@ -495,6 +520,32 @@
       "revision": "b68b780b69702a090c8bb1b973bab13756cc7a27",
       "url": "https://github.com/cachix/git-hooks.nix/archive/b68b780b69702a090c8bb1b973bab13756cc7a27.tar.gz",
       "hash": "sha256-t3T/xm8zstHRLx+pIHxVpQTiySbKqcQbK+r+01XVKc0="
+    },
+    "pyproject-build-systems": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "pyproject-nix",
+        "repo": "build-system-pkgs"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "c37f66a953535c394244888598947679af231863",
+      "url": "https://github.com/pyproject-nix/build-system-pkgs/archive/c37f66a953535c394244888598947679af231863.tar.gz",
+      "hash": "sha256-3BA3HnUvJSbHJAlJj6XSy0Jmu7RyP2gyB/0fL7XuEDo="
+    },
+    "pyproject-nix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "e537db02e72d553cea470976b9733581bcf5b3ed",
+      "url": "https://github.com/pyproject-nix/pyproject.nix/archive/e537db02e72d553cea470976b9733581bcf5b3ed.tar.gz",
+      "hash": "sha256-/ZTSg97aouL0SlPHaokA4r3iuH9QzHVuWPACD2CUCFY="
     },
     "rust-overlay": {
       "type": "Git",
@@ -585,6 +636,19 @@
       "revision": "8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5",
       "url": "https://github.com/NixOS/nixpkgs/archive/8b90d0d58fd7b993cb0aece9ba63b26c6d191bb5.tar.gz",
       "hash": "sha256-0u92BSnKt3simIZf6qDJ9kxu1eF3utdJdVM4uWItnTA="
+    },
+    "uv2nix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "pyproject-nix",
+        "repo": "uv2nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "b68be7cfeacbed9a3fa38a2b5adc0cfb81d9bb1f",
+      "url": "https://github.com/pyproject-nix/uv2nix/archive/b68be7cfeacbed9a3fa38a2b5adc0cfb81d9bb1f.tar.gz",
+      "hash": "sha256-+boo33KYkJDw9KItpeEXXv8+65f7hHv/earxpcyzQ0I="
     },
     "vpnconfinement": {
       "type": "Git",
