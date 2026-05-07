@@ -25,6 +25,7 @@
   };
 
   programs.fish.enable = true;
+  services.envfs.enable = true; # handle /usr/bin stuff
 
   environment.systemPackages = with pkgs; [
     bashInteractive
@@ -35,11 +36,9 @@
     gnugrep
     gnused
     less
-    llm-agents.code
     llm-agents.omp
     llm-agents.claude-code
     llm-agents.oh-my-claudecode
-    llm-agents.opencode
     nss_wrapper
     procps
     starship

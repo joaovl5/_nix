@@ -19,6 +19,10 @@
 
   # Services
   services = {
+    envfs = {
+      # fixes /usr/bin stuff
+      enable = true;
+    };
     udev.extraRules = ''
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="31e3", ATTRS{idProduct}=="1402", GROUP="plugdev", MODE="0660"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3710", ATTRS{idProduct}=="5406", GROUP="plugdev", MODE="0660"
