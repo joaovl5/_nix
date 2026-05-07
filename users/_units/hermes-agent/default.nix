@@ -273,7 +273,7 @@ in
                   Group = "hermes";
                   WorkingDirectory = guest_workspace;
                   ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
-                    exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run"] ++ opts.hermes.extra_args)}
+                    exec ${lib.escapeShellArgs (["${opts.package}/bin/hermes" "gateway" "run" "--replace"] ++ opts.hermes.extra_args)}
                   '';
                   Restart = "always";
                   RestartSec = "10s";
@@ -314,6 +314,7 @@ in
                   Group = "hermes";
                   WorkingDirectory = guest_workspace;
                   ExecStart = pkgs.writeShellScript "hermes-dashboard-start" ''
+                    unset TELEGRAM_BOT_TOKEN TELEGRAM_WEBHOOK_URL TELEGRAM_WEBHOOK_SECRET TELEGRAM_WEBHOOK_PORT
                     exec ${lib.escapeShellArgs ([
                         "${opts.package}/bin/hermes"
                         "dashboard"
