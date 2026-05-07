@@ -96,6 +96,18 @@ in
         if api.cors_origins != []
         then api.cors_origins
         else lib.optional dashboard.enable "https://${dashboard.target}.${config.my.dns.tld}";
+      dashboard_web_dist = pkgs.buildNpmPackage {
+        pname = "hermes-dashboard-web";
+        version = opts.package.version or "0.12.0";
+        src = opts.package.src + "/web";
+        npmDepsHash = "sha256-HWB1piIPglTXbzQHXFYHLgVZIbDb60esupXSQGa1+lI=";
+        installPhase = ''
+          runHook preInstall
+          mkdir -p "$out"
+          cp -r ../hermes_cli/web_dist/. "$out/"
+          runHook postInstall
+        '';
+      };
 
       default_settings = {
         terminal = {
@@ -300,6 +312,7 @@ in
                   HOME = guest_home_dir;
                   HERMES_HOME = guest_hermes_home;
                   MESSAGING_CWD = guest_workspace;
+                  HERMES_WEB_DIST = dashboard_web_dist;
                 }
                 // optionalAttrs dashboard.tui {
                   HERMES_DASHBOARD_TUI = "1";
