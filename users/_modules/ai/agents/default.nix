@@ -5,6 +5,7 @@ let
     (import ./code)
     (import ./omp)
     (import ./hermes)
+    (import ./jcode)
   ];
 in
   combine_modules modules

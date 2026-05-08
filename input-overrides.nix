@@ -98,6 +98,7 @@ in {
     flake-parts.follows = "flake-parts";
     bun2nix.follows = "bun2nix";
   };
+  jcode.inputs.nixpkgs.follows = "nixpkgs";
   hermes-agent.inputs = {
     nixpkgs.follows = "nixpkgs";
     flake-parts.follows = "flake-parts";
