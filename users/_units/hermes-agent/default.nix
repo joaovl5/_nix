@@ -9,7 +9,6 @@
   my = mylib.use config;
   o = my.options;
   s = my.secrets;
-  u = my.units;
   t = lib.types;
 
   inherit (lib) optionalAttrs;
@@ -46,7 +45,6 @@ in
     };
 
     hermes = {
-      settings = opt "Non-secret Hermes config rendered to config.yaml." t.attrs {};
       environment_files = opt "Host env files bind-mounted read-only into the guest." (t.listOf t.str) [];
       sops_environment_file = {
         enable = toggle "Declare a sops-nix Hermes environment file secret and inject it into the guest." (builtins.pathExists default_sops_environment_file);
@@ -106,15 +104,6 @@ in
         then api.cors_origins
         else lib.optional dashboard.enable "https://${dashboard.target}.${config.my.dns.tld}";
       dashboard_web_dist = "${opts.package}/share/hermes-agent/web_dist";
-
-      default_settings = {
-        terminal = {
-          backend = "local";
-          cwd = guest_workspace;
-        };
-      };
-      hermes_settings = lib.recursiveUpdate default_settings opts.hermes.settings;
-      config_yaml = u.write_yaml_from_attrset "hermes-agent-config.yaml" hermes_settings;
 
       guest_env_dir = "/run/hermes-agent/env";
       inherit (opts.hermes) sops_environment_file;
@@ -207,11 +196,13 @@ in
         }: {
           system.stateVersion = "25.11";
 
-          environment.systemPackages =
+          environment.systemPackages = with pkgs;
             [
               opts.package
-              pkgs.git
-              pkgs.ripgrep
+              git
+              ripgrep
+              chromium
+              agent-browser
             ]
             ++ opts.hermes.extra_packages;
 
@@ -238,7 +229,6 @@ in
             install -d -o hermes -g hermes -m 0750 ${guest_hermes_home}
             install -d -o hermes -g hermes -m 0750 ${guest_home_dir}
             install -d -o hermes -g hermes -m 2770 ${guest_workspace}
-            install -o hermes -g hermes -m 0640 ${config_yaml} ${guest_hermes_home}/config.yaml
             rm -f ${guest_hermes_home}/.managed
             ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
