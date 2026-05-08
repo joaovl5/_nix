@@ -107,6 +107,10 @@ in
         if shared_access.enable
         then shared_group
         else "hermes";
+      guest_workspace_owner =
+        if shared_access.enable
+        then "root"
+        else "hermes";
       shared_workspace_path = shared_access.path;
       shared_workspace_activation = lib.optionalString shared_access.enable (let
         source_dir = "${opts.state_dir}/workspace";
@@ -271,7 +275,7 @@ in
             install -d -o hermes -g hermes -m 0750 ${guest_state_dir}
             install -d -o hermes -g hermes -m 0750 ${guest_hermes_home}
             install -d -o hermes -g hermes -m 0750 ${guest_home_dir}
-            install -d -o hermes -g ${guest_workspace_group} -m 2770 ${guest_workspace}
+            install -d -o ${guest_workspace_owner} -g ${guest_workspace_group} -m 2770 ${guest_workspace}
             rm -f ${guest_hermes_home}/.managed
             ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
@@ -281,7 +285,7 @@ in
               "d ${guest_state_dir} 0750 hermes hermes - -"
               "d ${guest_hermes_home} 0750 hermes hermes - -"
               "d ${guest_home_dir} 0750 hermes hermes - -"
-              "d ${guest_workspace} 2770 hermes ${guest_workspace_group} - -"
+              "d ${guest_workspace} 2770 ${guest_workspace_owner} ${guest_workspace_group} - -"
               "d ${guest_env_dir} 0750 root root - -"
             ];
 
@@ -336,6 +340,7 @@ in
                     '';
                     Restart = "always";
                     RestartSec = "10s";
+                    TimeoutStopSec = "15s";
                     UMask = "0007";
                     NoNewPrivileges = true;
                     PrivateTmp = true;
@@ -451,6 +456,7 @@ in
                     '';
                     Restart = "always";
                     RestartSec = "10s";
+                    TimeoutStopSec = "15s";
                     UMask = "0007";
                     NoNewPrivileges = true;
                     PrivateTmp = true;
