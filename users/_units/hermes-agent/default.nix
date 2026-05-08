@@ -2,6 +2,7 @@
   mylib,
   config,
   lib,
+  pkgs,
   inputs,
   system,
   ...
@@ -29,6 +30,15 @@ in
     enable = toggle "Enable Hermes Agent native-container service" false;
     package = opt "Hermes Agent package." t.package inputs.hermes-agent.packages.${system}.default;
     state_dir = opt "Host directory for Hermes Agent container state." t.str "/var/lib/containers/hermes-agent/state";
+
+    shared_access = {
+      enable = toggle "Expose selected Hermes state subdirectories under shared NFS storage." false;
+      root = opt "Host path under shared storage where Hermes state subdirectories are exposed." t.str "/srv/shared/misc/hermes-agent";
+      directories = opt "Hermes state subdirectories to expose through shared storage. The .hermes directory is deliberately omitted because it can contain secrets." (t.listOf (t.enum [
+        "home"
+        "workspace"
+      ])) ["workspace"];
+    };
 
     container = {
       name = opt "NixOS container name." t.str "hermes-agent";
@@ -95,6 +105,52 @@ in
       guest_home_dir = "${guest_state_dir}/home";
       guest_workspace = "${guest_state_dir}/workspace";
 
+      inherit (opts) shared_access;
+      shared_group = "users";
+      exposes_home = shared_access.enable && lib.elem "home" shared_access.directories;
+      exposes_workspace = shared_access.enable && lib.elem "workspace" shared_access.directories;
+      guest_home_group =
+        if exposes_home
+        then shared_group
+        else "hermes";
+      guest_workspace_group =
+        if exposes_workspace
+        then shared_group
+        else "hermes";
+      shared_access_bind_mounts = lib.listToAttrs (map (dir: {
+          name = "${guest_state_dir}/${dir}";
+          value = {
+            hostPath = "${shared_access.root}/${dir}";
+            isReadOnly = false;
+          };
+        })
+        shared_access.directories);
+      shared_access_tmpfiles = lib.optionals shared_access.enable (
+        ["d ${shared_access.root} 2770 root ${shared_group} - -"]
+        ++ map (dir: "d ${shared_access.root}/${dir} 2770 root ${shared_group} - -") shared_access.directories
+      );
+      shared_access_activation = lib.optionalString shared_access.enable (lib.concatStringsSep "\n" (
+        [
+          ''
+            install -d -o root -g ${shared_group} -m 2770 ${lib.escapeShellArg shared_access.root}
+          ''
+        ]
+        ++ map (dir: let
+          source_dir = "${opts.state_dir}/${dir}";
+          shared_dir = "${shared_access.root}/${dir}";
+        in ''
+          install -d -o root -g ${shared_group} -m 2770 ${lib.escapeShellArg shared_dir}
+          if [ -d ${lib.escapeShellArg source_dir} ] && [ -z "$(${pkgs.findutils}/bin/find ${lib.escapeShellArg shared_dir} -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+            ${pkgs.rsync}/bin/rsync -a --ignore-existing ${lib.escapeShellArg "${source_dir}/"} ${lib.escapeShellArg "${shared_dir}/"}
+          fi
+          ${pkgs.coreutils}/bin/chgrp -R ${shared_group} ${lib.escapeShellArg shared_dir}
+          ${pkgs.coreutils}/bin/chmod -R g+rwX,o-rwx ${lib.escapeShellArg shared_dir}
+          ${pkgs.findutils}/bin/find ${lib.escapeShellArg shared_dir} -type d -exec ${pkgs.coreutils}/bin/chmod g+s {} +
+          ${pkgs.acl}/bin/setfacl -m g:${shared_group}:rwx,d:g:${shared_group}:rwx ${lib.escapeShellArg shared_dir} || true
+        '')
+        shared_access.directories
+      ));
+
       inherit (opts.ingress) dashboard;
       inherit (opts.ingress) api;
       inherit (opts.ingress) telegram_webhook;
@@ -128,20 +184,30 @@ in
           assertion = !opts.nat.enable || opts.nat.external_interface != null;
           message = "my.unit.hermes-agent.nat.external_interface must be set when NAT is enabled.";
         }
+        {
+          assertion = !shared_access.enable || config.my.storage.server.enable;
+          message = "my.unit.hermes-agent.shared_access.enable requires my.storage.server.enable so the exposed directories are actually shared over NFS.";
+        }
       ];
 
       sops.secrets = optionalAttrs sops_environment_file.enable {
         ${sops_environment_file.name} = s.mk_secret sops_environment_file.file sops_environment_file.key {};
       };
 
-      systemd.tmpfiles.rules = [
-        "d ${opts.state_dir} 0750 root root - -"
-      ];
+      systemd.tmpfiles.rules =
+        [
+          "d ${opts.state_dir} 0750 root root - -"
+        ]
+        ++ shared_access_tmpfiles;
+
+      system.activationScripts = optionalAttrs shared_access.enable {
+        hermes_agent_shared_access = lib.stringAfter ["users"] shared_access_activation;
+      };
 
       my."unit.hermes-agent".backup.items.state = {
         kind = "path";
         policy = "sensitive_data";
-        path.paths = [opts.state_dir];
+        path.paths = [opts.state_dir] ++ lib.optionals shared_access.enable (map (dir: "${shared_access.root}/${dir}") shared_access.directories);
       };
 
       networking.nat = optionalAttrs opts.nat.enable ({
@@ -188,6 +254,7 @@ in
               isReadOnly = false;
             };
           }
+          // optionalAttrs shared_access.enable shared_access_bind_mounts
           // env_mounts;
         config = {
           lib,
@@ -220,6 +287,7 @@ in
           users.users.hermes = {
             isSystemUser = true;
             group = "hermes";
+            extraGroups = lib.optional shared_access.enable shared_group;
             home = guest_home_dir;
             shell = pkgs.bashInteractive;
           };
@@ -227,8 +295,12 @@ in
           system.activationScripts.hermes_agent_setup = lib.stringAfter ["users"] ''
             install -d -o hermes -g hermes -m 0750 ${guest_state_dir}
             install -d -o hermes -g hermes -m 0750 ${guest_hermes_home}
-            install -d -o hermes -g hermes -m 0750 ${guest_home_dir}
-            install -d -o hermes -g hermes -m 2770 ${guest_workspace}
+            install -d -o hermes -g ${guest_home_group} -m ${
+              if exposes_home
+              then "2770"
+              else "0750"
+            } ${guest_home_dir}
+            install -d -o hermes -g ${guest_workspace_group} -m 2770 ${guest_workspace}
             rm -f ${guest_hermes_home}/.managed
             ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
@@ -237,8 +309,12 @@ in
             tmpfiles.rules = [
               "d ${guest_state_dir} 0750 hermes hermes - -"
               "d ${guest_hermes_home} 0750 hermes hermes - -"
-              "d ${guest_home_dir} 0750 hermes hermes - -"
-              "d ${guest_workspace} 2770 hermes hermes - -"
+              "d ${guest_home_dir} ${
+                if exposes_home
+                then "2770"
+                else "0750"
+              } hermes ${guest_home_group} - -"
+              "d ${guest_workspace} 2770 hermes ${guest_workspace_group} - -"
               "d ${guest_env_dir} 0750 root root - -"
             ];
 

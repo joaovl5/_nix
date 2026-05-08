@@ -106,6 +106,7 @@ in rec {
         "unit.hermes-agent" = {
           enable = true;
           nat.external_interface = interface_name;
+          shared_access.enable = true;
           ingress = {
             dashboard.enable = true;
             api.enable = true;
