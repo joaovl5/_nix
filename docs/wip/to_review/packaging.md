@@ -105,6 +105,40 @@ When upstream only ships a `bun.lockb` (binary Bun lockfile) but no `package-loc
 2. Commit the resulting `package-lock.json` alongside the derivation
 3. Patch `package.json` at build time to resolve `resolutions` into `overrides` if upstream uses non-standard fields
 
+## Rust packaging strategies
+
+### crate2nix workspace packaging
+
+For Cargo workspaces in this repo:
+
+- prefer `crate2nix generate` from the workspace root and commit the generated `Cargo.nix`
+- commit `crate-hashes.json` too when upstream has git dependencies
+- import the checked-in `./Cargo.nix` from `flake.nix` when you want evaluation without import-from-derivation surprises
+- export the intended workspace member explicitly (`cargoNix.workspaceMembers.<name>.build`) instead of assuming `rootCrate.build`
+- wire `packages.default`, `apps.default`, and `meta.mainProgram` to the real runtime binary
+- give `devShells.default` the Rust toolchain, `crate2nix`, and the native libraries/tools the workspace actually needs
+- regenerate `Cargo.nix` whenever upstream changes version, features, bins, or dependencies
+
+Jcode-specific pattern:
+
+- generate from the repo root so the root crate + workspace members resolve together
+- package `cargoNix.workspaceMembers.jcode.build`
+- expose `packages.jcode`, `packages.default`, `apps.jcode`, and `apps.default`
+- keep a dev shell with `cargo`, `rustc`, `rustfmt`, `clippy`, `crate2nix`, `git`, `pkg-config`, `openssl`, `python3`, `ffmpeg`, `librsvg`, and on Linux `clang` + `mold`
+
+### build.rs metadata and flake gotchas
+
+If upstream `build.rs` reads git state or synthesizes versions:
+
+- pass explicit env vars from the flake so the derivation does not need a live `.git` checkout
+- for jcode this meant `JCODE_RELEASE_BUILD`, `JCODE_BUILD_SEMVER`, `JCODE_BUILD_GIT_HASH`, `JCODE_BUILD_GIT_DATE`, `JCODE_BUILD_GIT_DIRTY`, `JCODE_BUILD_GIT_TAG`, and `JCODE_BUILD_CHANGELOG_RAW`
+- if the generated `Cargo.nix` and current `Cargo.toml` drift, regenerate immediately before trusting any package metadata or default-feature behavior
+
+When bootstrapping a new flake in a git repo:
+
+- `nix flake show` evaluates the git-tracked tree, not arbitrary untracked files
+- stage `flake.nix`, `flake.lock`, and generated Nix files with `git add` before expecting local flake evaluation to see them
+
 ## Runtime substitution rule
 
 If upstream rewrites built frontend assets at runtime:
@@ -300,3 +334,11 @@ Useful focused checks for packaging work:
 - The upstream project only ships `bun.lockb`; a `package-lock.json` must be generated and committed alongside the derivation.
 - `resolutions` in `package.json` must be patched into `overrides` at build time for npm compatibility.
 - `DEGOOG_PUBLIC_INSTANCE` must remain unset to keep the instance LAN-only.
+
+### jcode
+
+- the repo root is both `[package]` and `[workspace]`; package `workspaceMembers.jcode.build`, not the workspace-wide join
+- `Cargo.nix` and `crate-hashes.json` are committed artifacts, so any manifest/version/feature/bin/dependency change requires regenerating them
+- `build.rs` wants git-derived metadata and otherwise invents build-local version info; keep the `JCODE_BUILD_*` overrides in the flake
+- `embeddings` is intentionally opt-in in current `Cargo.toml`; a stale generated `Cargo.nix` can silently pull heavier feature sets back into the default build
+- runtime/helper paths shell out to tools like `git`, `cargo`, `ffmpeg`, and `rsvg-convert`; decide deliberately whether those belong only in the dev shell or also need runtime PATH wrapping
