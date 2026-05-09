@@ -34,6 +34,8 @@ in
     shared_access = {
       enable = toggle "Expose the Hermes state directory under shared NFS storage." false;
       path = opt "Host path under shared storage where the Hermes state directory is exposed." t.str "/srv/shared/misc/hermes";
+      uid = opt "Numeric UID that owns shared Hermes state. Keep this aligned with the NFS client user." t.int 1000;
+      gid = opt "Numeric GID that owns shared Hermes state. Keep this aligned with the shared NFS group." t.int 100;
     };
 
     container = {
@@ -107,9 +109,14 @@ in
         if shared_access.enable
         then shared_access.path
         else opts.state_dir;
+      guest_service_user = "hermes";
+      guest_service_group =
+        if shared_access.enable
+        then shared_group
+        else "hermes";
       guest_state_owner =
         if shared_access.enable
-        then "root"
+        then "hermes"
         else "hermes";
       guest_state_group =
         if shared_access.enable
@@ -134,6 +141,7 @@ in
         shared_dir=${lib.escapeShellArg shared_access.path}
         [ -d "$shared_dir" ] || exit 0
 
+        ${pkgs.coreutils}/bin/chown -R ${toString shared_access.uid}:${shared_group} "$shared_dir"
         ${pkgs.coreutils}/bin/chgrp -R ${shared_group} "$shared_dir"
         ${pkgs.coreutils}/bin/chmod -R g+rwX,o-rwx "$shared_dir"
         ${pkgs.findutils}/bin/find "$shared_dir" -type d -exec ${pkgs.coreutils}/bin/chmod g+s {} +
@@ -301,30 +309,93 @@ in
           };
           services.resolved.enable = true;
 
-          users.groups.hermes = {};
-          users.users.hermes = {
-            isSystemUser = true;
-            group = "hermes";
-            extraGroups = lib.optional shared_access.enable shared_group;
-            home = guest_home_dir;
-            shell = pkgs.bashInteractive;
+          users = {
+            # The Hermes container state is bind-mounted into the host's NFS
+            # export with identity UID mapping.  Make the guest hermes user
+            # match the NFS client UID so owner-only Hermes auth files remain
+            # usable both by the service and by the local user.
+            groups = {
+              hermes = lib.mkIf (!shared_access.enable) {};
+              ${shared_group} = lib.mkIf shared_access.enable {
+                inherit (shared_access) gid;
+              };
+            };
+            users.hermes = {
+              isSystemUser = true;
+              uid = lib.mkIf shared_access.enable shared_access.uid;
+              group = guest_service_group;
+              home = guest_home_dir;
+              shell = pkgs.bashInteractive;
+            };
           };
 
           system.activationScripts.hermes_agent_setup = lib.stringAfter ["users"] ''
+            ${lib.optionalString shared_access.enable ''
+              # Older container generations had a mutable normal user at UID ${toString shared_access.uid}.
+              # Rename that entry to hermes so systemd can resolve User=hermes while the
+              # bind-mounted files remain owned by the same UID as the NFS client.
+              old_uid_owner="$(${pkgs.gawk}/bin/awk -F: -v uid=${toString shared_access.uid} '$3 == uid { print $1; exit }' /etc/passwd 2>/dev/null || true)"
+              tmp_passwd="$(${pkgs.coreutils}/bin/mktemp)"
+              ${pkgs.gawk}/bin/awk -F: -v OFS=: \
+                -v old="$old_uid_owner" \
+                -v uid=${toString shared_access.uid} \
+                -v gid=${toString shared_access.gid} \
+                -v home=${lib.escapeShellArg guest_home_dir} \
+                -v shell=/run/current-system/sw/bin/bash '
+                  BEGIN { wrote = 0 }
+                  $1 == "hermes" {
+                    $3 = uid; $4 = gid; $6 = home; $7 = shell;
+                    wrote = 1; print; next
+                  }
+                  $1 == old || $3 == uid {
+                    if (!wrote) {
+                      $1 = "hermes"; $3 = uid; $4 = gid; $6 = home; $7 = shell;
+                      wrote = 1; print
+                    }
+                    next
+                  }
+                  { print }
+                  END { if (!wrote) print "hermes", "x", uid, gid, "", home, shell }
+                ' /etc/passwd > "$tmp_passwd"
+              ${pkgs.coreutils}/bin/cat "$tmp_passwd" > /etc/passwd
+              ${pkgs.coreutils}/bin/rm -f "$tmp_passwd"
+
+              if [ -e /etc/shadow ]; then
+                tmp_shadow="$(${pkgs.coreutils}/bin/mktemp)"
+                ${pkgs.gawk}/bin/awk -F: -v OFS=: -v old="$old_uid_owner" '
+                  BEGIN { wrote = 0 }
+                  $1 == "hermes" { wrote = 1; print; next }
+                  $1 == old {
+                    if (!wrote) { $1 = "hermes"; wrote = 1; print }
+                    next
+                  }
+                  { print }
+                  END { if (!wrote) print "hermes", "!", "1", "", "", "", "", "", "" }
+                ' /etc/shadow > "$tmp_shadow"
+                ${pkgs.coreutils}/bin/cat "$tmp_shadow" > /etc/shadow
+                ${pkgs.coreutils}/bin/rm -f "$tmp_shadow"
+              fi
+            ''}
             install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_state_dir}
-            install -d -o hermes -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}
-            install -d -o hermes -g ${guest_state_group} -m ${guest_state_mode} ${guest_home_dir}
-            install -d -o hermes -g ${guest_state_group} -m 2770 ${guest_workspace}
-            rm -f ${guest_hermes_home}/.managed
-            ${lib.optionalString sops_environment_file.enable "install -o hermes -g hermes -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}/cron
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}/sessions
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}/logs
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}/logs/curator
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_hermes_home}/memories
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m ${guest_state_mode} ${guest_home_dir}
+            install -d -o ${guest_state_owner} -g ${guest_state_group} -m 2770 ${guest_workspace}
+            install -o ${guest_state_owner} -g ${guest_state_group} -m 0640 /dev/null ${guest_hermes_home}/.managed
+            ${lib.optionalString shared_access.enable "chown -R ${guest_state_owner}:${guest_state_group} ${guest_state_dir}"}
+            ${lib.optionalString sops_environment_file.enable "install -o ${guest_state_owner} -g ${guest_state_group} -m 0640 ${builtins.head guest_environment_files} ${guest_hermes_home}/.env"}
           '';
 
           systemd = {
             tmpfiles.rules = [
               "d ${guest_state_dir} ${guest_state_mode} ${guest_state_owner} ${guest_state_group} - -"
-              "d ${guest_hermes_home} ${guest_state_mode} hermes ${guest_state_group} - -"
-              "d ${guest_home_dir} ${guest_state_mode} hermes ${guest_state_group} - -"
-              "d ${guest_workspace} 2770 hermes ${guest_state_group} - -"
+              "d ${guest_hermes_home} ${guest_state_mode} ${guest_state_owner} ${guest_state_group} - -"
+              "d ${guest_home_dir} ${guest_state_mode} ${guest_state_owner} ${guest_state_group} - -"
+              "d ${guest_workspace} 2770 ${guest_state_owner} ${guest_state_group} - -"
               "d ${guest_env_dir} 0750 root root - -"
             ];
 
@@ -350,6 +421,7 @@ in
                   {
                     HOME = guest_home_dir;
                     HERMES_HOME = guest_hermes_home;
+                    HERMES_MANAGED = "nixos";
                     MESSAGING_CWD = guest_workspace;
                   }
                   // optionalAttrs api.enable {
@@ -364,8 +436,8 @@ in
                   };
                 serviceConfig =
                   {
-                    User = "hermes";
-                    Group = "hermes";
+                    User = guest_service_user;
+                    Group = guest_service_group;
                     WorkingDirectory = guest_workspace;
                     ExecStart = pkgs.writeShellScript "hermes-agent-start" ''
                       ${lib.optionalString telegram_webhook.enable ''
@@ -401,8 +473,8 @@ in
                 ];
                 serviceConfig = {
                   Type = "oneshot";
-                  User = "hermes";
-                  Group = "hermes";
+                  User = guest_service_user;
+                  Group = guest_service_group;
                   EnvironmentFile = guest_environment_files;
                   ExecStart = pkgs.writeShellScript "hermes-telegram-webhook-ensure" ''
                     set -euo pipefail
@@ -468,6 +540,7 @@ in
                   {
                     HOME = guest_home_dir;
                     HERMES_HOME = guest_hermes_home;
+                    HERMES_MANAGED = "nixos";
                     MESSAGING_CWD = guest_workspace;
                     HERMES_WEB_DIST = dashboard_web_dist;
                   }
@@ -476,8 +549,8 @@ in
                   };
                 serviceConfig =
                   {
-                    User = "hermes";
-                    Group = "hermes";
+                    User = guest_service_user;
+                    Group = guest_service_group;
                     WorkingDirectory = guest_workspace;
                     ExecStart = pkgs.writeShellScript "hermes-dashboard-start" ''
                       unset TELEGRAM_BOT_TOKEN TELEGRAM_WEBHOOK_URL TELEGRAM_WEBHOOK_SECRET TELEGRAM_WEBHOOK_PORT
