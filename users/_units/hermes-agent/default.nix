@@ -127,14 +127,22 @@ in
         if [ -d ${lib.escapeShellArg source_dir} ] && [ -z "$(${pkgs.findutils}/bin/find ${lib.escapeShellArg shared_dir} -mindepth 1 -maxdepth 1 -print -quit)" ]; then
           ${pkgs.rsync}/bin/rsync -a --ignore-existing ${lib.escapeShellArg "${source_dir}/"} ${lib.escapeShellArg "${shared_dir}/"}
         fi
-        ${pkgs.coreutils}/bin/chgrp -R ${shared_group} ${lib.escapeShellArg shared_dir}
-        ${pkgs.coreutils}/bin/chmod -R g+rwX,o-rwx ${lib.escapeShellArg shared_dir}
-        ${pkgs.findutils}/bin/find ${lib.escapeShellArg shared_dir} -type d -exec ${pkgs.coreutils}/bin/chmod g+s {} +
-        ${pkgs.acl}/bin/setfacl -R -m g:${shared_group}:rwX ${lib.escapeShellArg shared_dir} || true
-        ${pkgs.findutils}/bin/find ${lib.escapeShellArg shared_dir} -type d -exec ${pkgs.acl}/bin/setfacl -m d:g:${shared_group}:rwx {} + || true
-        [ ! -e ${lib.escapeShellArg "${shared_dir}/.hermes/.env"} ] || ${pkgs.coreutils}/bin/chmod 0600 ${lib.escapeShellArg "${shared_dir}/.hermes/.env"}
-        [ ! -e ${lib.escapeShellArg "${shared_dir}/.hermes/auth.json"} ] || ${pkgs.coreutils}/bin/chmod 0600 ${lib.escapeShellArg "${shared_dir}/.hermes/auth.json"}
       '');
+      shared_state_permissions = pkgs.writeShellScript "hermes-agent-shared-access-permissions" ''
+        set -euo pipefail
+
+        shared_dir=${lib.escapeShellArg shared_access.path}
+        [ -d "$shared_dir" ] || exit 0
+
+        ${pkgs.coreutils}/bin/chgrp -R ${shared_group} "$shared_dir"
+        ${pkgs.coreutils}/bin/chmod -R g+rwX,o-rwx "$shared_dir"
+        ${pkgs.findutils}/bin/find "$shared_dir" -type d -exec ${pkgs.coreutils}/bin/chmod g+s {} +
+        ${pkgs.acl}/bin/setfacl -R -m g:${shared_group}:rwX "$shared_dir" || true
+        ${pkgs.findutils}/bin/find "$shared_dir" -type d -exec ${pkgs.acl}/bin/setfacl -m d:g:${shared_group}:rwx {} + || true
+
+        [ ! -e "$shared_dir/.hermes/.env" ] || ${pkgs.coreutils}/bin/chmod 0600 "$shared_dir/.hermes/.env"
+        [ ! -e "$shared_dir/.hermes/auth.json" ] || ${pkgs.coreutils}/bin/chmod 0600 "$shared_dir/.hermes/auth.json"
+      '';
 
       inherit (opts.ingress) dashboard;
       inherit (opts.ingress) api;
@@ -179,14 +187,40 @@ in
         ${sops_environment_file.name} = s.mk_secret sops_environment_file.file sops_environment_file.key {};
       };
 
-      systemd.tmpfiles.rules =
-        [
-          "d ${opts.state_dir} 0750 root root - -"
-        ]
-        ++ lib.optional shared_access.enable "d ${shared_access.path} 2770 root ${shared_group} - -";
+      systemd = {
+        tmpfiles.rules =
+          [
+            "d ${opts.state_dir} 0750 root root - -"
+          ]
+          ++ lib.optional shared_access.enable "d ${shared_access.path} 2770 root ${shared_group} - -";
+
+        services.hermes-agent-shared-access-permissions = lib.mkIf shared_access.enable {
+          description = "Repair shared Hermes state permissions after container startup";
+          wantedBy = ["multi-user.target"];
+          after = ["container@${container_name}.service"];
+          wants = ["container@${container_name}.service"];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStartPre = ["${pkgs.coreutils}/bin/sleep 5"];
+            ExecStart = shared_state_permissions;
+          };
+        };
+
+        timers.hermes-agent-shared-access-permissions = lib.mkIf shared_access.enable {
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnBootSec = "2min";
+            OnUnitActiveSec = "30min";
+            Unit = "hermes-agent-shared-access-permissions.service";
+          };
+        };
+      };
 
       system.activationScripts = optionalAttrs shared_access.enable {
-        hermes_agent_shared_access = lib.stringAfter ["users"] shared_state_activation;
+        hermes_agent_shared_access = lib.stringAfter ["users"] ''
+          ${shared_state_activation}
+          ${shared_state_permissions}
+        '';
       };
 
       my."unit.hermes-agent".backup.items.state = {
