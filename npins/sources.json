@@ -627,6 +627,19 @@
       "url": "https://github.com/obra/superpowers/archive/e7a2d16476bf042e9add4699c9d018a90f86e4a6.tar.gz",
       "hash": "sha256-8/M/S0BUYurZkFqe6LemVtBQnPSxBNfy1C7Q6f92hjE="
     },
+    "tree-sitter-kanata": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "postsolar",
+        "repo": "tree-sitter-kanata"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "af53b4c35d6faa3b4ba7c317fb795a6eb679b42a",
+      "url": "https://github.com/postsolar/tree-sitter-kanata/archive/af53b4c35d6faa3b4ba7c317fb795a6eb679b42a.tar.gz",
+      "hash": "sha256-+7EiIkcSe4raApw1H1iQJC2aILLdSrM7Y3tAswbCO1o="
+    },
     "treefmt-nix": {
       "type": "Git",
       "repository": {

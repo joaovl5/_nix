@@ -2,6 +2,8 @@
 
 (local n (require :lib/nvim))
 
+(vim.filetype.add {:extension {:kbd :kanata}})
+
 (local languages [:lua
                   :vimdoc
                   :markdown
@@ -11,12 +13,15 @@
                   :typescript
                   :tsx
                   :fennel
+                  :kanata
                   :html
                   :css
                   :scss])
 
 (let [ts (require :nvim-treesitter.config)]
   (ts.setup {:auto_install false}))
+
+(vim.treesitter.language.register :kanata :kanata)
 
 (let [filetypes (accumulate [res [] _ lang (ipairs languages)]
                   (vim.list_extend res
