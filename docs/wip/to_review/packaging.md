@@ -139,6 +139,28 @@ When bootstrapping a new flake in a git repo:
 - `nix flake show` evaluates the git-tracked tree, not arbitrary untracked files
 - stage `flake.nix`, `flake.lock`, and generated Nix files with `git add` before expecting local flake evaluation to see them
 
+## Go CLI packaging strategies
+
+### buildGoModule single-binary CLIs
+
+For Go CLI apps in this repo:
+
+- use `buildGoModule` with the upstream source pinned through `npins`
+- set `subPackages` to the command package that builds the desired binary
+- set upstream version metadata through `ldflags` when the app has a build-time `version` variable
+- keep optional companion tools as normal PATH dependencies instead of hard-wiring them into the package closure unless upstream cannot function without them
+
+Mardi Gras follows this pattern:
+
+- upstream repository: `quietpublish/mardi-gras`, but the Go module path is still `github.com/matt-wright86/mardi-gras`; do not patch the module path just because it differs from the GitHub owner
+- source pin: `mardi-gras-src` as a `GitRelease` at tag `v0.17.0`
+- package version: strip the leading `v` for the Nix `version`, but pass the full tag to `-X main.version=...` so `mg --version` prints the upstream tag
+- binary command package: `cmd/mg`, producing `bin/mg`
+- install upstream man pages when present; Mardi Gras ships `mg.1`, so copy it to `$out/share/man/man1/mg.1`
+- runtime is a local TUI/CLI only: no daemon, database, mutable config, or writable state is required by the package
+- first-class runtime integration is with Beads (`bd list --json` when `bd` is on PATH); JSONL mode can read `.beads/issues.jsonl` directly; Gas Town (`gt`) and tmux are optional integrations discovered from PATH
+- useful runtime flags/env: `--status`, `--path`, `--block-types` / `MG_BLOCK_TYPES`, `--no-animations` / `MG_NO_ANIMATIONS`, `--cmd-timeout` / `MG_CMD_TIMEOUT`, and `MG_DEBUG=1`
+
 ## Runtime substitution rule
 
 If upstream rewrites built frontend assets at runtime:
@@ -170,6 +192,13 @@ For Degoog this resulted in `.#degoog`, containing:
 
 - `bin/degoog` (wrapper around `bun run src/server/index.ts`)
 - `libexec/degoog/...` runtime tree with upstream source and node_modules
+
+For Mardi Gras this resulted in `.#mardi-gras`, containing:
+
+- `bin/mg` (Go TUI/CLI built from `cmd/mg`)
+- `share/man/man1/mg.1` from upstream `mg.1`
+
+When adding such a local package to a Home Manager module that otherwise uses an upstream package set like `pkgs.llm-agents`, import `../../../../../packages` (adjusted for the module path) with `pkgs` and `inputs`, then append the local package separately, e.g. `local_packages."mardi-gras"`.
 
 ## Unit module procedure in this repo
 
@@ -334,6 +363,12 @@ Useful focused checks for packaging work:
 - The upstream project only ships `bun.lockb`; a `package-lock.json` must be generated and committed alongside the derivation.
 - `resolutions` in `package.json` must be patched into `overrides` at build time for npm compatibility.
 - `DEGOOG_PUBLIC_INSTANCE` must remain unset to keep the instance LAN-only.
+
+### Mardi Gras
+
+- upstream moved under `quietpublish`, but `go.mod` intentionally uses `github.com/matt-wright86/mardi-gras`; leave it alone for module checksum compatibility
+- release tags are annotated; an `npins` `GitRelease` pin may record the tag object revision while fetching `refs/tags/v...`, which is fine
+- `mg` discovers `bd`, `gt`, and tmux from PATH; prefer installing those companion tools in the consuming Home Manager profile instead of wrapping them into the binary package by default
 
 ### jcode
 

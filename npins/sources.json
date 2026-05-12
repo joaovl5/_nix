@@ -290,13 +290,13 @@
       "type": "Git",
       "repository": {
         "type": "Git",
-        "url": "ssh://git@git.trll.ing/lav/jcode.git"
+        "url": "ssh://git@git.trll.ing/lav/jcode"
       },
       "branch": "master",
       "submodules": false,
-      "revision": "fd79085898dec6573965c49eeb363658acb08176",
+      "revision": "a8c772ca7b0a8085a5bc9eddba6561fb78e50b45",
       "url": null,
-      "hash": "sha256-UsnUwVIVjYB79wChrnrHMxVOt8ArWd7GWKPg43hXwIU="
+      "hash": "sha256-Y57eDjJSW+9t4SwZ01pK2Naaw8IqrfU4c63pYFObAsI="
     },
     "kaneo-src": {
       "type": "Git",
@@ -323,6 +323,22 @@
       "revision": "b5a2e39e6494c9139a600c6ffccb042099d864cd",
       "url": "https://github.com/numtide/llm-agents.nix/archive/b5a2e39e6494c9139a600c6ffccb042099d864cd.tar.gz",
       "hash": "sha256-dXUaa92UxZwcJKZETKOa/J6A95PnQFUBIkyL3y5FUDU="
+    },
+    "mardi-gras-src": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "quietpublish",
+        "repo": "mardi-gras"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.17.0",
+      "revision": "accf1328d5a9e6081fd8b646fdfd5fc909ed8e77",
+      "url": "https://api.github.com/repos/quietpublish/mardi-gras/tarball/refs/tags/v0.17.0",
+      "hash": "sha256-zBrUOVcuAOeVQsm3TdBREkJwJgd2BR/5pKXUROtDab0="
     },
     "microvm": {
       "type": "Git",

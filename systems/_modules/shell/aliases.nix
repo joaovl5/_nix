@@ -37,5 +37,10 @@ in
       ",ur" = "systemctl --user restart";
       ",uS" = "systemctl --user stop";
       ",uj" = "journalctl -fxe --user-unit";
+      ## zellij
+      "-" = "zellij";
+      "-a" = "zellij attach";
+      "-d" = "zellij delete-session --force";
+      "-D" = "zellij delete-all-sessions --force";
     };
   }))

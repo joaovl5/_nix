@@ -1,6 +1,22 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(local n (require :lib/nvim))
+
+(local js-ts-filetypes [:javascript
+                        :javascriptreact
+                        :javascript.jsx
+                        :typescript
+                        :typescriptreact
+                        :typescript.tsx])
 
 (plugin :pmizio/typescript-tools.nvim
         {:dependencies [:nvim-lua/plenary.nvim :neovim/nvim-lspconfig]
-         ; :ft [:typescriptreact :typescript]
-         :opts {:settings {:tsserver_path _G.tsserver_path}}})
+         :lazy true
+         :init #(n.autocmd :FileType
+                           {:pattern js-ts-filetypes
+                            :once true
+                            :callback (fn [ev]
+                                        (vim.api.nvim_buf_call ev.buf
+                                                               #(do-req :lazy
+                                                                        :load
+                                                                        {:plugins [:typescript-tools.nvim]})))})
+         :opts {}})

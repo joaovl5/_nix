@@ -110,6 +110,7 @@
         ]))
       ## js
       eslint_d
+      biome
       typescript-language-server
       typescript
       vscode-js-debug

@@ -4,8 +4,8 @@ let
     (import ./opencode)
     (import ./code)
     (import ./omp)
-    (import ./hermes)
     (import ./jcode)
+    (import ./misc)
   ];
 in
   combine_modules modules
