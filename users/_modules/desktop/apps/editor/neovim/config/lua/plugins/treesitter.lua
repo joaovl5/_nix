@@ -1,11 +1,26 @@
 -- [nfnl] fnl/plugins/treesitter.fnl
 local n = require("lib/nvim")
-local languages =
-	{ "lua", "vimdoc", "markdown", "python", "javascript", "jsx", "typescript", "tsx", "fennel", "html", "css", "scss" }
+vim.filetype.add({ extension = { kbd = "kanata" } })
+local languages = {
+	"lua",
+	"vimdoc",
+	"markdown",
+	"python",
+	"javascript",
+	"jsx",
+	"typescript",
+	"tsx",
+	"fennel",
+	"kanata",
+	"html",
+	"css",
+	"scss",
+}
 do
 	local ts = require("nvim-treesitter.config")
 	ts.setup({ auto_install = false })
 end
+vim.treesitter.language.register("kanata", "kanata")
 do
 	local filetypes
 	do

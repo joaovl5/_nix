@@ -7,8 +7,18 @@
   }: let
     treesitter = let
       nts = pkgs.vimPlugins.nvim-treesitter;
+      kanataGrammar = pkgs.tree-sitter.buildGrammar {
+        language = "kanata";
+        version = "0.1.0+${inputs.tree-sitter-kanata.shortRev}";
+        src = inputs.tree-sitter-kanata;
+        # Neovim evaluates #match? with Vim regex; escape literal @ in upstream query.
+        postPatch = ''
+          substituteInPlace queries/highlights.scm \
+            --replace-fail '"@.+"' '"\\@.+"'
+        '';
+      };
     in
-      nts.withPlugins (_: nts.allGrammars);
+      nts.withPlugins (_: nts.allGrammars ++ [kanataGrammar]);
 
     grammarsPath = pkgs.symlinkJoin {
       name = "nvim-treesitter-grammars";
@@ -30,13 +40,19 @@
           ;
       });
 
-    add_rtp_lines = lib.join "\n" (lib.mapAttrsToList (name: package: ''
+    add_rtp_lines = lib.join "\n" (
+      lib.mapAttrsToList
+      (name: package: ''
         vim.opt.runtimepath:append('${package}')
         _G.plugin_dirs['${name}'] = '${package}'
-      '') (plugins_set
+      '')
+      (
+        plugins_set
         // {
           inherit grammarsPath;
-        }));
+        }
+      )
+    );
   in {
     hybrid-links.links.neovim = {
       from = ./config;
@@ -73,14 +89,16 @@
           fennel
         ];
       extraPackages = with pkgs; [
-        (with fenix;
-          complete.withComponents [
-            "cargo"
-            "clippy"
-            "rust-src"
-            "rustc"
-            "rustfmt"
-          ])
+        (
+          with fenix;
+            complete.withComponents [
+              "cargo"
+              "clippy"
+              "rust-src"
+              "rustc"
+              "rustfmt"
+            ]
+        )
         rust-analyzer-nightly
         tree-sitter
         lua5_1
@@ -104,10 +122,12 @@
       ty
       basedpyright
       ruff
-      (python3.withPackages (ps:
-        with ps; [
-          debugpy
-        ]))
+      (python3.withPackages (
+        ps:
+          with ps; [
+            debugpy
+          ]
+      ))
       ## js
       eslint_d
       biome
