@@ -4,19 +4,22 @@
 
 (vim.filetype.add {:extension {:kbd :kanata}})
 
-(local languages [:lua
-                  :vimdoc
-                  :markdown
-                  :python
+; keep-sorted start
+(local languages [:css
+                  :fennel
+                  :html
                   :javascript
                   :jsx
-                  :typescript
-                  :tsx
-                  :fennel
                   :kanata
-                  :html
-                  :css
-                  :scss])
+                  :lua
+                  :markdown
+                  :python
+                  :scss
+                  :tsx
+                  :typescript
+                  :vimdoc])
+
+; keep-sorted end
 
 (let [ts (require :nvim-treesitter.config)]
   (ts.setup {:auto_install false}))
@@ -31,4 +34,4 @@
               :callback (fn [ev]
                           (vim.treesitter.start ev.buf))}))
 
-[]
+[(plugin :m-demare/hlargs.nvim {:event :VeryLazy :opts {}})]

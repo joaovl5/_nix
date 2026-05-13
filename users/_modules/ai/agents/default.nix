@@ -1,11 +1,13 @@
 let
   inherit (import ../../../../_lib/modules) combine_modules;
   modules = [
-    (import ./opencode)
+    # keep-sorted start
     (import ./code)
-    (import ./omp)
     (import ./jcode)
     (import ./misc)
+    (import ./omp)
+    (import ./opencode)
+    # keep-sorted end
   ];
 in
   combine_modules modules

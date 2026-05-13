@@ -1,26 +1,26 @@
 ;; get doom emacs theme pack!
 
 
-(fringe-mode -1)
-(menu-bar-mode -1)
-(tool-bar-mode -1)
+;; keep-sorted start
+
 (blink-cursor-mode -1)
-(line-number-mode t)
 (column-number-mode t)
-(size-indication-mode t)
-(setq use-dialog-box nil)
-(push '(tool-bar-lines . 0) default-frame-alist)
+(fringe-mode -1)
+(fset 'yes-or-no-p 'y-or-n-p) ;; enable y/n answers
+(line-number-mode t)
+(menu-bar-mode -1)
 (push '(menu-bar-lines . 0) default-frame-alist)
+(push '(tool-bar-lines . 0) default-frame-alist)
 (scroll-bar-mode -1)
-
-;; enable y/n answers
-(fset 'yes-or-no-p 'y-or-n-p)
-
-(setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
 (setq scroll-margin 0
       scroll-conservatively 100000
       scroll-preserve-screen-position 1)
+(setq use-dialog-box nil)
+(size-indication-mode t)
+(tool-bar-mode -1)
+;; keep-sorted end
 
 ;; handle margins
 (setq-default
@@ -66,31 +66,35 @@
 (defun handle-modeline ()
   (straight-use-package 'doom-modeline)
   (doom-modeline-mode t)
-  (setq doom-modeline-support-imenu t)
+  ;; keep-sorted start
+  (setq doom-modeline-buffer-modification-icon t)
+  (setq doom-modeline-buffer-name t)
+  (setq doom-modeline-buffer-state-icon t)
   (setq doom-modeline-height 25)
   (setq doom-modeline-hud nil)
-  (setq doom-modeline-project-detection 'auto)
   (setq doom-modeline-icon t)
-  (setq doom-modeline-major-mode-icon t)
-  (setq doom-modeline-major-mode-color-icon t)
-  (setq doom-modeline-buffer-state-icon t)
-  (setq doom-modeline-buffer-modification-icon t)
   (setq doom-modeline-lsp-icon t)
-  (setq doom-modeline-time-icon t)
-  (setq doom-modeline-time-live-icon t)
+  (setq doom-modeline-major-mode-color-icon t)
+  (setq doom-modeline-major-mode-icon t)
+  (setq doom-modeline-project-detection 'auto)
+  (setq doom-modeline-support-imenu t)
   (setq doom-modeline-time-analogue-clock t)
   (setq doom-modeline-time-clock-size 0.7)
-  (setq doom-modeline-unicode-number t)
-  (setq doom-modeline-buffer-name t))
+  (setq doom-modeline-time-icon t)
+  (setq doom-modeline-time-live-icon t)
+  (setq doom-modeline-unicode-number t))
+  ;; keep-sorted end
 
 ;; better help buffer
 (defun handle-helpful ()
   (straight-use-package 'helpful)
+  ;; keep-sorted start
   (global-set-key (kbd "C-c h f") #'helpful-callable)
-  (global-set-key (kbd "C-c h v") #'helpful-variable)
+  (global-set-key (kbd "C-c h h") #'helpful-at-point)
   (global-set-key (kbd "C-c h k") #'helpful-key)
-  (global-set-key (kbd "C-c h x") #'helpful-command)
-  (global-set-key (kbd "C-c h h") #'helpful-at-point))
+  (global-set-key (kbd "C-c h v") #'helpful-variable)
+  (global-set-key (kbd "C-c h x") #'helpful-command))
+  ;; keep-sorted end
 
 (defun handle-links ()
   (use hyperbole
@@ -110,13 +114,15 @@
   (pixel-scroll-precision-mode t))
 
 
+;; keep-sorted start
 (handle-fonts)
-(handle-theme)
-(handle-modeline)
 (handle-helpful)
 (handle-indents)
-(handle-scroll)
 (handle-links)
+(handle-modeline)
+(handle-scroll)
+(handle-theme)
+;; keep-sorted end
 
 ;; NOTE(@lerax): dom 01 jun 2025 12:42:24
 ;; helm-descbinds became incompatible with which-key-mode ins 202402XX version

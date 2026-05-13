@@ -73,6 +73,7 @@
 
     home.packages = with pkgs; [
       prek
+      worktrunk # worktree manager
       git-cliff # actual changelogs
       commitizen # only for generating commits
     ];

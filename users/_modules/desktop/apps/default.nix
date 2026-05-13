@@ -1,12 +1,14 @@
 let
   inherit (import ../../../../_lib/modules) combine_modules;
   modules = [
-    (import ./media)
+    # keep-sorted start
     (import ./browsing)
     (import ./discord)
-    (import ./gaming)
-    (import ./term)
     (import ./editor)
+    (import ./gaming)
+    (import ./media)
+    (import ./term)
+    # keep-sorted end
   ];
 in
   combine_modules modules

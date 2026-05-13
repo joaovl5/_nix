@@ -4,16 +4,18 @@
       font-manager
 
       # monospace
-      nerd-fonts.iosevka
-      nerd-fonts._0xproto
-      nerd-fonts.departure-mono
-      nerd-fonts.recursive-mono
-      nerd-fonts.bigblue-terminal
+      # keep-sorted start
+      anonymous-pro-fonts
       cozette
       kode-mono
-      vt323
       maple-mono.NF
-      anonymous-pro-fonts
+      nerd-fonts._0xproto
+      nerd-fonts.bigblue-terminal
+      nerd-fonts.departure-mono
+      nerd-fonts.iosevka
+      nerd-fonts.recursive-mono
+      vt323
+      # keep-sorted end
 
       # sans-serif
       inter-nerdfont

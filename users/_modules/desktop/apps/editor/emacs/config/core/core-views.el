@@ -12,17 +12,18 @@
 (defun handle-actions ()
   (use consult
        :ensure t
-       :bind (("C-c ." . consult-line)
+       :bind (;; keep-sorted start
+              ("C-c ." . consult-line)
+              ("C-c /" . consult-ripgrep)
+              ("C-c <spc>" . consult-find)
+              ("C-c <tab>" . consult-buffer)
+              ("C-c f M" . consult-global-mark)
+              ("C-c f d" . consult-flymake)
               ("C-c f h" . consult-history)
               ("C-c f m" . consult-man)
-              ("C-c f d" . consult-flymake)
-              ("C-c f o" . consult-outline)
               ("C-c f m" . consult-mark)
-              ("C-c f M" . consult-global-mark)
-              ("C-c /" . consult-ripgrep)
-              ("C-c <tab>" . consult-buffer)
-              ("C-c <spc>" . consult-find)
-              ("C-c f h" . consult-history))
+              ("C-c f o" . consult-outline))
+              ;; keep-sorted end
        :hook (completion-list-mode . consult-preview-at-point-mode)
        :custom
        (register-preview-delay 0.1)
@@ -36,10 +37,12 @@
        :ensure t
        :bind
        (:map corfu-map
+             ;; keep-sorted start
+             ("M-d" . corfu-next-page)
              ("M-j" . corfu-next)
              ("M-k" . corfu-previous)
-             ("M-d" . corfu-next-page)
              ("M-u" . corfu-previous-page))
+             ;; keep-sorted end
        :custom
        (corfu-auto t)
        (corfu-preselect t)
@@ -72,10 +75,12 @@
   (use vertico
      :bind
      (:map vertico-map
+           ;; keep-sorted start
+           ("M-d" . my-vertico-next-page)
            ("M-j" . vertico-next)
            ("M-k" . vertico-previous)
-           ("M-d" . my-vertico-next-page)
            ("M-u" . my-vertico-previous-page))
+           ;; keep-sorted end
      :custom
      (vertico-count 20)
      (vertico-cycle t)
@@ -127,21 +132,25 @@
                       (window-parameters (mode-line-format . none)))))
   ; (use embark-consult
   ;      :ensure t)
+  ;; keep-sorted start
   (global-set-key (kbd "C-c f b") #'list-bookmarks)
   (global-set-key (kbd "C-c f k") #'embark-bindings)
-  (global-set-key (kbd "C-c p p") #'projectile-switch-project)
-  (global-set-key (kbd "C-c p f") #'projectile-find-file)
-  (global-set-key (kbd "C-c p d") #'projectile-find-dir)
-  (global-set-key (kbd "C-c p r") #'projectile-recentf)
   (global-set-key (kbd "C-c p /") #'projectile-rg)
-  (global-set-key (kbd "C-c p F") #'projectile-find-file-in-known-projects))
+  (global-set-key (kbd "C-c p F") #'projectile-find-file-in-known-projects)
+  (global-set-key (kbd "C-c p d") #'projectile-find-dir)
+  (global-set-key (kbd "C-c p f") #'projectile-find-file)
+  (global-set-key (kbd "C-c p p") #'projectile-switch-project)
+  (global-set-key (kbd "C-c p r") #'projectile-recentf))
+  ;; keep-sorted end
 
 
 
-(handle-dired)
+;; keep-sorted start
 (handle-actions)
-(handle-projectile)
 (handle-completions)
+(handle-dired)
 (handle-minibuf)
+(handle-projectile)
+;; keep-sorted end
 
 (provide 'core-views)

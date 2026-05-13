@@ -117,6 +117,7 @@
 
       # language support
       gitleaks
+      keep-sorted
       prettierd
       ## python
       ty
@@ -139,14 +140,21 @@
       nixd
       nil
       statix
-      ## yaml
-      yaml-language-server
-      ## toml
+      ## toml and friends
       taplo
-      ## markdown
+      yaml-language-server
+      jsonfmt
+      yamlfmt
+      ## shell and friends
+      fish-lsp
+      shfmt
+      ## others
+      kulala-fmt
       marksman
-      ## dockerfile
-      hadolint
+      dockerfmt
+      kdlfmt
+      sqruff
+      rumdl
     ];
   };
 }

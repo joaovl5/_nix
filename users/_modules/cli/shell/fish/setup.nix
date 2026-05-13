@@ -21,14 +21,16 @@
 
     # enable fish integrations w/ other apps/services
     programs = {
-      zoxide.enableFishIntegration = true;
+      # keep-sorted start
       eza.enableFishIntegration = true;
       fzf.enableFishIntegration = true;
-      nix-index.enableFishIntegration = true;
-      starship.enableFishIntegration = true;
-      lazygit.enableFishIntegration = true;
       ghostty.enableFishIntegration = true;
       kitty.shellIntegration.enableFishIntegration = true;
+      lazygit.enableFishIntegration = true;
+      nix-index.enableFishIntegration = true;
+      starship.enableFishIntegration = true;
+      zoxide.enableFishIntegration = true;
+      # keep-sorted end
     };
   };
 }

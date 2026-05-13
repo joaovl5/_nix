@@ -1,0 +1,9 @@
+[formatting]
+  align_entries         = true
+  align_single_comments = true
+  align_comments        = true
+  array_auto_collapse   = false
+  compact_arrays        = true
+  indent_tables         = true
+  indent_entries        = true
+  column_width          = 120

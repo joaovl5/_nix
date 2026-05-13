@@ -13,29 +13,37 @@
                  :multi_server true
                  :max_width nil
                  :max_height nil}})
- ; 'dev' actions / provides actions for refactoring
- ; (plugin :yarospace/dev-tools.nvim
- ;         {:dependencies [(plugin :ThePrimeagen/refactoring.nvim
- ;                                 {:dependencies [:nvim-lua/plenary.nvim]})]
- ;          :event :VeryLazy
- ;          :opts {:ui {:override true :group_actions true}}})
  ; code actions
+ (plugin :kosayoda/nvim-lightbulb
+         {:event :LspAttach
+          :opts {:autocmd {:enabled true :updatetime 50}
+                 :hide_in_unfocused_buffer true
+                 :code_lenses true
+                 :sign {:enabled false}
+                 :float {:enabled true
+                         :text "󰌵"
+                         :lens_text "󰧶"
+                         :win_opts {:focusable false
+                                    :border false
+                                    :anchor_bias :below}}
+                 :line {:enabled true}
+                 :ignore {:actions_without_kind false
+                          :clients [:ruff
+                                    :dev-tools
+                                    :nil
+                                    :nixd
+                                    :fennel_ls
+                                    :typescript-tools
+                                    :marksman]}}})
  (plugin :rachartier/tiny-code-action.nvim
-         {:dependencies [:nvim-lua/plenary.nvim
-                         (plugin :kosayoda/nvim-lightbulb
-                                 {:opts {:autocmd {:enabled true}
-                                         :ignore {:clients [:ruff
-                                                            :dev-tools
-                                                            :nil
-                                                            :typescript-tools
-                                                            :marksman]}}})]
+         {:dependencies [:nvim-lua/plenary.nvim]
           :event :LspAttach
           :opts {:backend :delta
                  :picker :snacks
                  :resolve_timeout 100
                  :notify {:enabled true :on_empty true}
-                 :backend_opts {:header_lines_to_remove 4
-                                :args [:--line-numbers]}}})
+                 :backend_opts {:delta {:header_lines_to_remove 4
+                                        :args [:--line-numbers]}}}})
  ; trouble - see todo/errors/etc
  (plugin :folke/trouble.nvim
          {:cmd :Trouble

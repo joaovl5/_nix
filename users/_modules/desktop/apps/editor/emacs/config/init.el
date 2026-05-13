@@ -88,8 +88,10 @@
 
 (message "[!] loading modules...")
 
-(require 'mod-org)
+;; keep-sorted start
 (require 'mod-lisp)
+(require 'mod-org)
+;; keep-sorted end
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

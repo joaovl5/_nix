@@ -205,7 +205,7 @@ in {
   assert builtins.elemAt postgres_service.command 1 == "-u";
   assert builtins.elemAt postgres_service.command 2 == "postgres";
   assert builtins.elemAt postgres_service.command 3 == "--";
-  assert builtins.elemAt postgres_service.command 4 == builtins.toString (builtins.elemAt postgres_item.command 0);
+  assert builtins.elemAt postgres_service.command 4 == toString (builtins.elemAt postgres_item.command 0);
   assert synthetic_item_secrets ? mysql_password;
   assert !(synthetic_item_secrets ? backup_restic_password_A);
   assert synthetic_destination_secrets ? backup_restic_password_A;

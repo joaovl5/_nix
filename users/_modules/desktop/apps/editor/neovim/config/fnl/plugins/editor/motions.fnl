@@ -5,19 +5,18 @@
  ; flash
  (plugin :folke/flash.nvim
          {:event :BufEnter
-          :opts {:labels :fhdjskalgrueiwoqptvnmb
-                 :search {:multi_window false
-                          :forward true
-                          :wrap true
-                          :mode :exact}
-                 :jump {:nohlsearch true :autojump true}
-                 :label {:uppercase false
-                         :distance true
-                         :rainbow {:enabled true :shade 5}}
-                 :highlight {:backdrop true}
-                 :modes {:treesitter {:labels :fhdjskalgrueiwoqptvnmb
-                                      :highlight {:backdrop true
-                                                  :matches false}}}}})
+          :opts (let [keys :fhdjskalgrueiwoqptvnmb]
+                  {:labels keys
+                   :search {:multi_window false
+                            :forward true
+                            :wrap true
+                            :mode :fuzzy}
+                   :jump {:nohlsearch true :autojump true}
+                   :label {:uppercase false :distance true}
+                   :highlight {:backdrop true}
+                   :modes {:treesitter {:labels keys
+                                        :highlight {:backdrop true
+                                                    :matches false}}}})})
  ; spider (improved w,e,b motions)
  (plugin :chrisgrieser/nvim-spider {:opts true})
  ; monkey-like crazyness

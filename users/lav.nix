@@ -10,11 +10,13 @@
   local_packages = import ../packages {inherit pkgs inputs;};
 
   modules = [
+    # keep-sorted start
+    (import ./_modules/ai)
     (import ./_modules/assets)
     (import ./_modules/cli)
-    (import ./_modules/desktop)
     (import ./_modules/coding)
-    (import ./_modules/ai)
+    (import ./_modules/desktop)
+    # keep-sorted end
   ];
   module_imports = extract_imports modules;
 
@@ -220,6 +222,7 @@ in {
           virt-manager
 
           ## etc move later
+
           zrythm
           ardour
           wireguard-tools
@@ -235,19 +238,21 @@ in {
           rustdesk
 
           # dependencies
-          rsync
-          go-grip
-          pinentry-curses
+          # keep-sorted start
           bc
-          perl
-          runapp
-          libnotify
-          playerctl
-          wl-clipboard # wl-paste/...
           cliphist
-          xclip
-          unzip
+          go-grip
+          libnotify
           local_packages.frag
+          perl
+          pinentry-curses
+          playerctl
+          rsync
+          runapp
+          unzip
+          wl-clipboard # wl-paste/...
+          xclip
+          # keep-sorted end
         ];
       };
   };

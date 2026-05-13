@@ -5,25 +5,38 @@ copy_on_select true
 session_serialization false
 serialize_pane_viewport true
 osc8_hyperlinks true
-
-
 pane_frames false
 ui {
   pane_frames {
     rounded_corners false
   }
 }
-
 keybinds clear-defaults=true {
   normal {
-    bind "Alt z" { SwitchToMode "Locked"; }
-    bind "Alt q" { CloseFocus; }
-    bind "Alt Enter" { NewTab; }
-    bind "Alt h" { MoveFocusOrTab "Left"; }
-    bind "Alt u" { MoveFocus "Down"; }
-    bind "Alt i" { MoveFocus "Up"; }
-    bind "Alt l" { MoveFocusOrTab "Right"; }
-    bind "Alt ," { SwitchToMode "RenameTab"; }
+    bind "Alt z" {
+      SwitchToMode "Locked"
+    }
+    bind "Alt q" {
+      CloseFocus
+    }
+    bind "Alt Enter" {
+      NewTab
+    }
+    bind "Alt h" {
+      MoveFocusOrTab "Left"
+    }
+    bind "Alt u" {
+      MoveFocus "Down"
+    }
+    bind "Alt i" {
+      MoveFocus "Up"
+    }
+    bind "Alt l" {
+      MoveFocusOrTab "Right"
+    }
+    bind "Alt ," {
+      SwitchToMode "RenameTab"
+    }
     bind "Alt ." {
       LaunchOrFocusPlugin "session-manager" {
         floating true
@@ -31,32 +44,68 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-    bind "Alt f" { ToggleFocusFullscreen; }
+    bind "Alt f" {
+      ToggleFocusFullscreen
+    }
   }
-
   locked {
-    bind "Alt z" { SwitchToMode "Normal"; }
+    bind "Alt z" {
+      SwitchToMode "Normal"
+    }
   }
-
   tmux {
-    bind "[" { SwitchToMode "Scroll"; }
-    bind "Ctrl a" { SwitchToMode "Normal"; }
-    bind "|" { NewPane "Right"; SwitchToMode "Normal"; }
-    bind "-" { NewPane "Down"; SwitchToMode "Normal"; }
-    bind "," { SwitchToMode "RenameTab"; }
-    bind "d" { Detach; }
-    bind "H" { Resize "Left"; }
-    bind "J" { Resize "Down"; }
-    bind "K" { Resize "Up"; }
-    bind "L" { Resize "Right"; }
-    bind "p" { GoToPreviousTab; SwitchToMode "Normal"; }
-    bind "n" { GoToNextTab; SwitchToMode "Normal"; }
-    bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
-    bind "Esc" "Enter" { SwitchToMode "Normal"; }
+    bind "[" {
+      SwitchToMode "Scroll"
+    }
+    bind "Ctrl a" {
+      SwitchToMode "Normal"
+    }
+    bind "|" {
+      NewPane "Right"
+      SwitchToMode "Normal"
+    }
+    bind "-" {
+      NewPane "Down"
+      SwitchToMode "Normal"
+    }
+    bind "," {
+      SwitchToMode "RenameTab"
+    }
+    bind "d" {
+      Detach
+    }
+    bind "H" {
+      Resize "Left"
+    }
+    bind "J" {
+      Resize "Down"
+    }
+    bind "K" {
+      Resize "Up"
+    }
+    bind "L" {
+      Resize "Right"
+    }
+    bind "p" {
+      GoToPreviousTab
+      SwitchToMode "Normal"
+    }
+    bind "n" {
+      GoToNextTab
+      SwitchToMode "Normal"
+    }
+    bind "z" {
+      ToggleFocusFullscreen
+      SwitchToMode "Normal"
+    }
+    bind "Esc" "Enter" {
+      SwitchToMode "Normal"
+    }
   }
-
   session {
-    bind "Esc" "Enter" { SwitchToMode "Normal"; }
+    bind "Esc" "Enter" {
+      SwitchToMode "Normal"
+    }
     bind "w" {
       LaunchOrFocusPlugin "session-manager" {
         floating true
@@ -64,7 +113,6 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-
     bind "c" {
       LaunchOrFocusPlugin "configuration" {
         floating true
@@ -72,7 +120,6 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-
     bind "p" {
       LaunchOrFocusPlugin "plugin-manager" {
         floating true
@@ -80,7 +127,6 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-
     bind "s" {
       LaunchOrFocusPlugin "zellij:share" {
         floating true
@@ -88,7 +134,6 @@ keybinds clear-defaults=true {
       }
       SwitchToMode "Normal"
     }
-
     bind "l" {
       LaunchOrFocusPlugin "zellij:layout-manager" {
         floating true
@@ -97,28 +142,39 @@ keybinds clear-defaults=true {
       SwitchToMode "Normal"
     }
   }
-
   renametab {
-    bind "Enter" { SwitchToMode "Normal"; }
-    bind "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+    bind "Enter" {
+      SwitchToMode "Normal"
+    }
+    bind "Esc" {
+      UndoRenameTab
+      SwitchToMode "Normal"
+    }
   }
-
   shared_except "tmux" "locked" {
-    bind "Ctrl a" { SwitchToMode "Tmux"; }
-    bind "Ctrl x" { SwitchToMode "Session"; }
+    bind "Ctrl a" {
+      SwitchToMode "Tmux"
+    }
+    bind "Ctrl x" {
+      SwitchToMode "Session"
+    }
   }
 }
-
 plugins {
-  tab-bar { path "tab-bar"; }
-  status-bar { path "status-bar"; }
-  strider { path "strider"; }
-  compact-bar { path "compact-bar"; }
+  tab-bar {
+    path "tab-bar"
+  }
+  status-bar {
+    path "status-bar"
+  }
+  strider {
+    path "strider"
+  }
+  compact-bar {
+    path "compact-bar"
+  }
 }
-
 // simplified_ui true
-
-
 web_server_ip "0.0.0.0"
 web_server_cert "/home/lav/.certs/localhost+3.pem"
 web_server_key "/home/lav/.certs/localhost+3-key.pem"

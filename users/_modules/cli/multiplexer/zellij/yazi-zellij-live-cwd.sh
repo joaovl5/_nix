@@ -14,4 +14,5 @@ if [[ ! $fish_pid =~ ^[0-9]+$ ]]; then
 fi
 
 payload="$fish_pid"$'\t'"$(printf '%s' "$path" | base64 -w0)"
-fish -c "set -U __yazi_zellij_live_cwd \"\$argv[1]\"" -- "$payload"
+# shellcheck disable=SC2016 # $argv is expanded by fish, not bash.
+fish -c 'set -U __yazi_zellij_live_cwd "$argv[1]"' -- "$payload"

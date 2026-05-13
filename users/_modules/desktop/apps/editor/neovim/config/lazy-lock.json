@@ -55,9 +55,17 @@
     "branch": "master",
     "commit": "bf86d8b79dce808e65fdb6e9269d0b4ed6d2eefc"
   },
+  "graft.nvim": {
+    "branch": "main",
+    "commit": "f4654c8e1e56909ff2b41d774710e04b4d68c8eb"
+  },
   "grug-far.nvim": {
     "branch": "main",
     "commit": "21790e59dd0109a92a70cb874dd002af186314f5"
+  },
+  "hlargs.nvim": {
+    "branch": "main",
+    "commit": "0b29317c944fb1f76503ce4540d6dceffbb5ccd2"
   },
   "indent-blankline.nvim": {
     "branch": "master",
@@ -71,13 +79,17 @@
     "branch": "main",
     "commit": "ff2cbcba459b637ec3fd165a2be59b7bbaeedf0d"
   },
+  "log-highlight.nvim": {
+    "branch": "main",
+    "commit": "b2e00cfd41ca94338265a595f3f3f423d9f9322e"
+  },
   "lualine.nvim": {
     "branch": "master",
     "commit": "131a558e13f9f28b15cd235557150ccb23f89286"
   },
-  "markview.nvim": {
-    "branch": "main",
-    "commit": "8b82823bbe7b452c5920ab22947e186c6cb067b4"
+  "markdown.nvim": {
+    "branch": "master",
+    "commit": "093be911d90de03877f3009de36081c1a6242d51"
   },
   "mellow.nvim": {
     "branch": "main",
@@ -114,6 +126,10 @@
   "mini.misc": {
     "branch": "main",
     "commit": "97f62a3e2a159fba6fb29a60b7fe64c7ca9d4ece"
+  },
+  "mini.nvim": {
+    "branch": "main",
+    "commit": "17c448b0f3f29c0857a3436fc64e1d7cb9267ec3"
   },
   "mini.pairs": {
     "branch": "main",
@@ -227,6 +243,14 @@
     "branch": "main",
     "commit": "7a12a1677bbe96ca98f0c713448ac1f518ba09b7"
   },
+  "render-markdown.nvim": {
+    "branch": "main",
+    "commit": "629eb9533ec989d9d5c6cab8f3ad5372422c24e0"
+  },
+  "satellite.nvim": {
+    "branch": "main",
+    "commit": "87843c9c8f28b54332497302de380a6d94c9e82b"
+  },
   "schemastore.nvim": {
     "branch": "main",
     "commit": "6db1246640e9e1bdf8a1d1f6d27a940fc0a572d5"
@@ -262,6 +286,10 @@
   "tiny-code-action.nvim": {
     "branch": "main",
     "commit": "0d040ed81f7953118b81cd12681fcdfcac069803"
+  },
+  "tirenvi.nvim": {
+    "branch": "main",
+    "commit": "fbc7127f629aaafba227f3e00d896f88776f046c"
   },
   "todo-comments.nvim": {
     "branch": "main",

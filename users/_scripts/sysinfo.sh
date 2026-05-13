@@ -33,19 +33,19 @@ EOF
 # Parse options
 while getopts "crdvap:h" opt; do
   case $opt in
-    c) SHOW_CPU=true ;;
-    r) SHOW_RAM=true ;;
-    d) SHOW_DISK=true ;;
-    v) SHOW_VOL=true ;;
-    a)
-      SHOW_CPU=true
-      SHOW_RAM=true
-      SHOW_DISK=true
-      SHOW_VOL=true
-      ;;
-    p) PROGRESS_SCRIPT="$OPTARG" ;;
-    h) usage ;;
-    *) usage ;;
+  c) SHOW_CPU=true ;;
+  r) SHOW_RAM=true ;;
+  d) SHOW_DISK=true ;;
+  v) SHOW_VOL=true ;;
+  a)
+    SHOW_CPU=true
+    SHOW_RAM=true
+    SHOW_DISK=true
+    SHOW_VOL=true
+    ;;
+  p) PROGRESS_SCRIPT="$OPTARG" ;;
+  h) usage ;;
+  *) usage ;;
   esac
 done
 
@@ -113,4 +113,3 @@ if [ "$SHOW_VOL" = true ]; then
     echo "[wpctl not installed]"
   fi
 fi
-

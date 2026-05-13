@@ -1,23 +1,62 @@
 -- [nfnl] fnl/plugins/lsp/languages/markdown.fnl
-local filetypes = { "markdown", "codecompanion" }
-local function _1_()
-	local presets = require("markview.presets")
-	do
-		local name_2_auto = require("markview")
-		local fun_3_auto = name_2_auto.setup
-		fun_3_auto({ markdown = { headings = presets.headings.slanted, tables = presets.tables.rounded } })
-	end
-	local name_2_auto = require("markview")
-	local fun_3_auto = name_2_auto.setup
-	return fun_3_auto({
-		preview = { filetypes = filetypes, icon_provider = "mini", ignore_buftypes = { "nofile" } },
-		markdown = {
-			list_items = {
-				wrap = true,
-				shift_width = 2,
-				marker_minus = { text = "\226\137\149", wrap = true, add_padding = false },
-			},
-		},
-	})
-end
-return { "OXY2DEV/markview.nvim", config = _1_, lazy = false }
+local fts = { "markdown", "codecompanion" }
+return {
+  { "satozawa/graft.nvim", ft = fts, opts = {} },
+  { "kibi2/tirenvi.nvim", ft = fts, opts = {} },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-mini/mini.nvim",
+    },
+    ft = fts,
+    opts = {
+      completions = { lsp = { enabled = true } },
+      render_modes = { "n", "i", "c", "t" },
+      debounce = 50,
+      preset = "obsidian",
+      restart_highlighter = true,
+      code = { border = "hide", sign = false },
+      pipe_table = {
+        preset = "none",
+        cell = "trimmed",
+        padding = 0,
+        border_enabled = false,
+        enabled = false,
+      },
+      heading = {
+        setext = true,
+        atx = true,
+        border = true,
+        border_virtual = true,
+        above = "\226\150\129",
+        below = "\226\150\148",
+        border_prefix = true,
+        backgrounds = {
+          "RenderMarkdownH2Bg",
+          "RenderMarkdownH3Bg",
+          "RenderMarkdownH4Bg",
+          "RenderMarkdownH5Bg",
+          "RenderMarkdownH6Bg",
+        },
+      },
+      indent = { enabled = true, per_level = 2, skip_heading = false },
+    },
+  },
+  {
+    "tadmccorkle/markdown.nvim",
+    event = "VeryLazy",
+    opts = {
+      mappings = {
+        link_add = "-a",
+        link_follow = "-f",
+        inline_surround_toggle = "-s",
+        inline_surround_toggle_line = "-S",
+        go_curr_heading = "-k",
+        go_parent_heading = "-K",
+        go_next_heading = "-h",
+        go_prev_heading = "-l",
+      },
+    },
+  },
+}

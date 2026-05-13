@@ -1,11 +1,14 @@
 let
   inherit (import ../../../../_lib/modules) combine_modules;
   modules = [
-    (import ./js.nix)
-    (import ./python.nix)
+    # keep-sorted start
     (import ./fennel.nix)
+    (import ./js.nix)
     (import ./lua.nix)
     (import ./nix.nix)
+    (import ./python.nix)
+    (import ./sql.nix)
+    # keep-sorted end
   ];
 in
   combine_modules modules

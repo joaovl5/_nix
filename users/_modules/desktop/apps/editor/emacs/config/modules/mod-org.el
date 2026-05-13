@@ -10,21 +10,23 @@
 (require 'seq)
 
 (setq
+;; keep-sorted start
+ org-adapt-indentation t
+ org-agenda-tags-column 0
  org-auto-align-tags nil
  org-catch-invisible-edits 'show-and-error
- org-special-ctrl-a/e t
- org-insert-heading-respect-content t
- org-hide-emphasis-markers t
- org-pretty-entities t
- org-agenda-tags-column 0
+ org-edit-src-content-indentation 0
  org-ellipsis " · "
- org-adapt-indentation t
+ org-hide-emphasis-markers t
  org-hide-leading-stars t
+ org-insert-heading-respect-content t
  org-log-done t
- org-tags-column -80
+ org-pretty-entities t
+ org-special-ctrl-a/e t
  org-src-fontify-natively t
  org-src-tab-acts-natively t
- org-edit-src-content-indentation 0)
+ org-tags-column -80)
+;; keep-sorted end
 
 ;; Org face setup
 

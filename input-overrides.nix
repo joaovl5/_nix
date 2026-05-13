@@ -15,119 +15,91 @@ let
 in {
   nixpkgs.follows = "unstable";
 
+  # We quote some keys to avoid linters warnings of multiple key definitions
+  # keep-sorted start
+  "bun2nix".inputs.flake-parts.follows = "flake-parts";
+  "bun2nix".inputs.nixpkgs.follows = "nixpkgs";
+  "bun2nix".inputs.systems.follows = "all-systems";
+  "bun2nix".inputs.treefmt-nix.follows = "treefmt-nix";
+  "hermes-agent".inputs.flake-parts.follows = "flake-parts";
+  "hermes-agent".inputs.nixpkgs.follows = "nixpkgs";
+  "hermes-agent".inputs.npm-lockfile-fix.follows = "npm-lockfile-fix";
+  "hermes-agent".inputs.pyproject-build-systems.follows = "pyproject-build-systems";
+  "hermes-agent".inputs.pyproject-nix.follows = "pyproject-nix";
+  "hermes-agent".inputs.uv2nix.follows = "uv2nix";
+  "llm-agents".inputs.blueprint.follows = "blueprint";
+  "llm-agents".inputs.bun2nix.follows = "bun2nix";
+  "llm-agents".inputs.flake-parts.follows = "flake-parts";
+  "llm-agents".inputs.nixpkgs.follows = "nixpkgs";
+  "llm-agents".inputs.systems.follows = "all-systems";
+  "llm-agents".inputs.treefmt-nix.follows = "treefmt-nix";
+  "niri".inputs.niri-stable.follows = "niri-stable";
+  "niri".inputs.niri-unstable.follows = "niri-unstable";
+  "niri".inputs.nixpkgs-stable.follows = "nixpkgs";
+  "niri".inputs.nixpkgs.follows = "nixpkgs";
+  "niri".inputs.xwayland-satellite-stable.follows = "xwayland-satellite-stable";
+  "niri".inputs.xwayland-satellite-unstable.follows = "xwayland-satellite-unstable";
+  "nixarr".inputs.nixpkgs.follows = "nixpkgs";
+  "nixarr".inputs.treefmt-nix.follows = "treefmt-nix";
+  "nixarr".inputs.vpnconfinement.follows = "vpnconfinement";
+  "nixcord".inputs.flake-parts.follows = "flake-parts";
+  "nixcord".inputs.nixpkgs-nixcord.follows = "stable";
+  "nixcord".inputs.nixpkgs.follows = "nixpkgs";
+  "pyproject-build-systems".inputs.nixpkgs.follows = "nixpkgs";
+  "pyproject-build-systems".inputs.pyproject-nix.follows = "pyproject-nix";
+  "pyproject-build-systems".inputs.uv2nix.follows = "uv2nix";
+  "whisper-overlay".inputs.devshell.follows = "devshell";
+  "whisper-overlay".inputs.flake-parts.follows = "flake-parts";
+  "whisper-overlay".inputs.nixpkgs.follows = "nixpkgs";
+  "whisper-overlay".inputs.pre-commit-hooks.follows = "pre-commit-hooks";
+  "zjstatus".inputs.crane.follows = "crane";
+  "zjstatus".inputs.flake-utils.follows = "flake-utils";
+  "zjstatus".inputs.nixpkgs.follows = "nixpkgs";
+  "zjstatus".inputs.rust-overlay.follows = "rust-overlay";
+  anthropic-skills = raw_source;
+  atticd.inputs.flake-parts.follows = "flake-parts";
+  atticd.inputs.nixpkgs.follows = "nixpkgs";
+  blueprint.inputs.nixpkgs.follows = "nixpkgs";
+  blueprint.inputs.systems.follows = "all-systems";
+  degoog-src = raw_source;
+  deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
+  deploy-rs.inputs.utils.follows = "flake-utils";
+  devshell.inputs.nixpkgs.follows = "nixpkgs";
+  disko.inputs.nixpkgs.follows = "nixpkgs";
   emacs-bleeding-edge.inputs.nixpkgs.follows = "nixpkgs";
-  nur.inputs.nixpkgs.follows = "nixpkgs";
-  hm.inputs.nixpkgs.follows = "nixpkgs";
-  fup.inputs.flake-utils.follows = "flake-utils";
+  fenix.inputs.nixpkgs.follows = "nixpkgs";
   flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   flake-utils.inputs.systems.follows = "all-systems";
-  blueprint.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    systems.follows = "all-systems";
-  };
-  bun2nix.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    systems.follows = "all-systems";
-    flake-parts.follows = "flake-parts";
-    treefmt-nix.follows = "treefmt-nix";
-  };
-  devshell.inputs.nixpkgs.follows = "nixpkgs";
-  pre-commit-hooks.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    gitignore.follows = "gitignore";
-  };
+  fup.inputs.flake-utils.follows = "flake-utils";
   gitignore.inputs.nixpkgs.follows = "nixpkgs";
-  disko.inputs.nixpkgs.follows = "nixpkgs";
-  deploy-rs.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    utils.follows = "flake-utils";
-  };
-  sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-  microvm.inputs.nixpkgs.follows = "nixpkgs";
-  treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
-  optnix.inputs.nixpkgs.follows = "nixpkgs";
-  musnix.inputs.nixpkgs.follows = "nixpkgs";
-  rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
-  zjstatus.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    crane.follows = "crane";
-    flake-utils.follows = "flake-utils";
-    rust-overlay.follows = "rust-overlay";
-  };
-  nixcord.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    nixpkgs-nixcord.follows = "stable";
-    flake-parts.follows = "flake-parts";
-  };
-  hyprland-plugins.inputs.nixpkgs.follows = "nixpkgs";
-  niri.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    nixpkgs-stable.follows = "nixpkgs";
-    niri-stable.follows = "niri-stable";
-    niri-unstable.follows = "niri-unstable";
-    xwayland-satellite-stable.follows = "xwayland-satellite-stable";
-    xwayland-satellite-unstable.follows = "xwayland-satellite-unstable";
-  };
   hexecute.inputs.nixpkgs.follows = "nixpkgs";
-  whisper-overlay.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    devshell.follows = "devshell";
-    flake-parts.follows = "flake-parts";
-    pre-commit-hooks.follows = "pre-commit-hooks";
-  };
-  fenix.inputs.nixpkgs.follows = "nixpkgs";
-  nixos-dns.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    treefmt-nix.follows = "treefmt-nix";
-  };
   hister.inputs.nixpkgs.follows = "nixpkgs";
-  atticd.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    flake-parts.follows = "flake-parts";
-  };
-  nixarr.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    treefmt-nix.follows = "treefmt-nix";
-    vpnconfinement.follows = "vpnconfinement";
-  };
-  llm-agents.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    treefmt-nix.follows = "treefmt-nix";
-    systems.follows = "all-systems";
-    blueprint.follows = "blueprint";
-    flake-parts.follows = "flake-parts";
-    bun2nix.follows = "bun2nix";
-  };
+  hm.inputs.nixpkgs.follows = "nixpkgs";
+  hyprland-plugins.inputs.nixpkgs.follows = "nixpkgs";
   jcode.inputs.nixpkgs.follows = "nixpkgs";
-  hermes-agent.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    flake-parts.follows = "flake-parts";
-    pyproject-nix.follows = "pyproject-nix";
-    uv2nix.follows = "uv2nix";
-    pyproject-build-systems.follows = "pyproject-build-systems";
-    npm-lockfile-fix.follows = "npm-lockfile-fix";
-  };
-  npm-lockfile-fix.inputs.nixpkgs.follows = "nixpkgs";
-  pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
-  uv2nix.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    pyproject-nix.follows = "pyproject-nix";
-  };
-  pyproject-build-systems.inputs = {
-    nixpkgs.follows = "nixpkgs";
-    pyproject-nix.follows = "pyproject-nix";
-    uv2nix.follows = "uv2nix";
-  };
-
+  kaneo-src = raw_source;
+  microvm.inputs.nixpkgs.follows = "nixpkgs";
+  musnix.inputs.nixpkgs.follows = "nixpkgs";
+  mysecrets = raw_source;
   niri-stable = raw_source;
   niri-unstable = raw_source;
+  nixos-dns.inputs.nixpkgs.follows = "nixpkgs";
+  nixos-dns.inputs.treefmt-nix.follows = "treefmt-nix";
+  npm-lockfile-fix.inputs.nixpkgs.follows = "nixpkgs";
+  nur.inputs.nixpkgs.follows = "nixpkgs";
+  octodns-pihole-src = raw_source;
+  optnix.inputs.nixpkgs.follows = "nixpkgs";
+  pihole6api-src = raw_source;
+  pre-commit-hooks.inputs.gitignore.follows = "gitignore";
+  pre-commit-hooks.inputs.nixpkgs.follows = "nixpkgs";
+  pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+  rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+  sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+  superpowers = raw_source;
+  treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+  uv2nix.inputs.nixpkgs.follows = "nixpkgs";
+  uv2nix.inputs.pyproject-nix.follows = "pyproject-nix";
   xwayland-satellite-stable = raw_source;
   xwayland-satellite-unstable = raw_source;
-  mysecrets = raw_source;
-  octodns-pihole-src = raw_source;
-  pihole6api-src = raw_source;
-  kaneo-src = raw_source;
-  degoog-src = raw_source;
-  anthropic-skills = raw_source;
-  superpowers = raw_source;
+  # keep-sorted end
 }

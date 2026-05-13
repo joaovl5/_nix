@@ -13,12 +13,12 @@ emit_workspaces() {
 
 should_refresh_for_event() {
   case "$1" in
-    *'"WorkspacesChanged"'* | *'"WorkspaceActivated"'* | *'"WorkspaceActiveWindowChanged"'* | *'"WorkspaceUrgencyChanged"'* | *'"ConfigLoaded"'*)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
+  *'"WorkspacesChanged"'* | *'"WorkspaceActivated"'* | *'"WorkspaceActiveWindowChanged"'* | *'"WorkspaceUrgencyChanged"'* | *'"ConfigLoaded"'*)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
   esac
 }
 

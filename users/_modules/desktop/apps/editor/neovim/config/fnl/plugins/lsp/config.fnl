@@ -53,6 +53,8 @@
                                                                      :reportUnknownParameterType false
                                                                      :reportExplicitAny false}}}}
                  :ruff {:server_capabilities {:hoverProvider false}}
+                 :clangd {:cmd [:clangd :--background-index]}
+                 :biome {}
                  :lua_ls {:cmd [:lua-language-server]
                           :settings {:Lua {:completion {:callSnippet :Replace}}}}
                  :fennel_ls {:cmd [:fennel-ls]

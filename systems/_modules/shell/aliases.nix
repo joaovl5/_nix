@@ -38,9 +38,9 @@ in
       ",uS" = "systemctl --user stop";
       ",uj" = "journalctl -fxe --user-unit";
       ## zellij
-      "-" = "zellij";
-      "-a" = "zellij attach";
-      "-d" = "zellij delete-session --force";
-      "-D" = "zellij delete-all-sessions --force";
+      "j" = "zellij";
+      "ja" = "zellij attach";
+      "jd" = "zellij delete-session --force";
+      "jD" = "zellij delete-all-sessions --force";
     };
   }))

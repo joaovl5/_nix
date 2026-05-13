@@ -56,7 +56,7 @@ CURRENT="$1"
 TOTAL="$2"
 
 # Validate inputs are numbers
-if ! [[ "$CURRENT" =~ ^-?[0-9]+\.?[0-9]*$ ]] || ! [[ "$TOTAL" =~ ^-?[0-9]+\.?[0-9]*$ ]]; then
+if ! [[ $CURRENT =~ ^-?[0-9]+\.?[0-9]*$ ]] || ! [[ $TOTAL =~ ^-?[0-9]+\.?[0-9]*$ ]]; then
   echo "Error: Arguments must be numeric" >&2
   exit 1
 fi
@@ -68,7 +68,7 @@ if [ "$(echo "$TOTAL == 0" | bc -l 2>/dev/null || echo "1")" -eq 1 ]; then
 fi
 
 # Validate width is a positive integer
-if ! [[ "$WIDTH" =~ ^[0-9]+$ ]] || [ "$WIDTH" -le 0 ]; then
+if ! [[ $WIDTH =~ ^[0-9]+$ ]] || [ "$WIDTH" -le 0 ]; then
   echo "Error: Width must be a positive integer" >&2
   exit 1
 fi

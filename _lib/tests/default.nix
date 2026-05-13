@@ -3,11 +3,21 @@
   pkgs,
   lib,
 }: let
-  scripts_package = python_pkgs: import ../../tests/scripts {inherit python_pkgs inputs lib pkgs;};
+  scripts_package = python_pkgs:
+    import ../../tests/scripts {
+      inherit
+        python_pkgs
+        inputs
+        lib
+        pkgs
+        ;
+    };
 
   mk_test = args @ {
     python_module_name,
     extraPythonPackages ? (_: []),
+    # NixOS test drivers run mypy by default; this repo type-checks drivers separately.
+    skipTypeCheck ? true,
     ...
   }: let
     extra_python_packages = extraPythonPackages;
@@ -19,6 +29,7 @@
   in
     test_args
     // {
+      inherit skipTypeCheck;
       extraPythonPackages = python_pkgs: [(scripts_package python_pkgs)] ++ extra_python_packages python_pkgs;
       testScript = ''
         from my_nix_tests.${python_module_name} import run

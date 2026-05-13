@@ -3,24 +3,26 @@
   unit_global_cfg = globals.units;
 in {
   imports = [
-    ./backup
+    # keep-sorted start
     ./actual-budget
+    ./backup
+    ./degoog
     ./fail2ban
+    ./forgejo
+    ./fxsync
+    ./hermes-agent
+    ./hister
+    ./kaneo
+    ./network_namespaces
+    ./nixarr
+    ./octodns
     ./pihole
     ./postgres
-    ./kaneo
-    ./nixarr
-    ./reverse-proxy
-    ./octodns
-    ./fxsync
-    ./network_namespaces
-    ./wireguard
     ./qbittorrent
+    ./reverse-proxy
     ./syncthing
-    ./forgejo
-    ./hister
-    ./degoog
-    ./hermes-agent
+    ./wireguard
+    # keep-sorted end
     unit_global_cfg
   ];
 }

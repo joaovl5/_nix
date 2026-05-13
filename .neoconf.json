@@ -1,0 +1,15 @@
+{
+  "formatter": {
+    "filetypes": {
+      "typescript": [
+        "biome-check"
+      ],
+      "javascript": [
+        "biome-check"
+      ],
+      "typescriptreact": [
+        "biome-check"
+      ]
+    }
+  }
+}

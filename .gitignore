@@ -1,14 +1,12 @@
-result
-.venv
-.ruff-cache
-__pycache__
-.claude
-.deploy-gc
-
+# keep-sorted start
+*.egg-info
 *.qcow2
 *.qcow2.*
-
+.claude
+.deploy-gc
+.ruff-cache
+.venv
 __pycache__
-*.egg-info
-
 logs
+result
+# keep-sorted end
