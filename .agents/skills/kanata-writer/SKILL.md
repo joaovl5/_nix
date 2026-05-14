@@ -13,7 +13,7 @@ Use this skill for repo-managed Kanata config under `users/_modules/desktop/serv
 - **User service:** `kanata-internalKeyboard` runs Kanata with `--cfg %h/.config/kanata/config.kbd`
 - **Linux plumbing:** uinput module, udev rule, and `uinput` group live in `default.nix`
 
-## First moves
+## Rules
 
 - **Read current shape:** inspect `default.nix` and `config/config.kbd` before changing behavior
 - **Stay repo-local:** do not edit `~/.config/kanata`; edit the repo source and let hybrid-links project it
@@ -21,7 +21,7 @@ Use this skill for repo-managed Kanata config under `users/_modules/desktop/serv
 - **Verify semantics:** check the upstream Kanata config guide when action behavior or key names matter
 - **Ask for feel:** timing changes such as tap-hold thresholds are subjective; get user feedback when intent is unclear
 
-## Editing rules
+### Editing
 
 - **Layer alignment:** every `deflayer` position must line up with `defsrc`; use whitespace to keep columns readable
 - **Transparency:** use `_` when the lower layer should handle the key; use `XX` only for an intentional no-op
@@ -40,7 +40,12 @@ Load only when needed:
 
 - **Syntax confidence:** prefer an actual Kanata parser/run check over visual review when the binary is available
 - **Service proof:** for runtime behavior, inspect the user service and Kanata logs instead of assuming reload success
-- **Nix checks:** after Nix edits, follow repo `AGENTS.md`; plain `.kbd`/skill text edits do not require `flake check`
+- **Verification:**
+  - For kanata-facing changes, run:
+
+      ```sh
+      kanata --check --cfg <path_to_config>.kbd
+      ```
 
 ## Common mistakes
 

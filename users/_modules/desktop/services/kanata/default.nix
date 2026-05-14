@@ -1,9 +1,11 @@
 {
-  hm = _: {
+  hm = {pkgs, ...}: {
     hybrid-links.links.kanata = {
       from = ./config;
       to = "~/.config/kanata";
     };
+
+    home.packages = [pkgs.kanata];
   };
 
   nx = {

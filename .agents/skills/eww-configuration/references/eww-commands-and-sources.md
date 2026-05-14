@@ -46,27 +46,27 @@ eww inspector
 
 ### Official Eww docs
 
-- **Overview and run model:** https://elkowar.github.io/eww/eww.html
-- **Configuration and Yuck:** https://elkowar.github.io/eww/configuration.html
-- **First window:** https://elkowar.github.io/eww/configuration.html#creating-your-first-window
-- **Window properties:** https://elkowar.github.io/eww/configuration.html#defwindow-properties
-- **First widget:** https://elkowar.github.io/eww/configuration.html#your-first-widget
-- **Children:** https://elkowar.github.io/eww/configuration.html#rendering-children-in-your-widgets
-- **Variables:** https://elkowar.github.io/eww/configuration.html#adding-dynamic-content
-- **`literal`:** https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal
-- **Window IDs and args:** https://elkowar.github.io/eww/configuration.html#using-window-arguments-and-ids
-- **`for`:** https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for
-- **`include`:** https://elkowar.github.io/eww/configuration.html#using-include
-- **Expressions:** https://elkowar.github.io/eww/expression_language.html
-- **GTK theming:** https://elkowar.github.io/eww/working_with_gtk.html
-- **Magic vars:** https://elkowar.github.io/eww/magic-vars.html
-- **Widgets:** https://elkowar.github.io/eww/widgets.html
-- **Troubleshooting:** https://elkowar.github.io/eww/troubleshooting.html
+- **Overview and run model:** <https://elkowar.github.io/eww/eww.html>
+- **Configuration and Yuck:** <https://elkowar.github.io/eww/configuration.html>
+- **First window:** <https://elkowar.github.io/eww/configuration.html#creating-your-first-window>
+- **Window properties:** <https://elkowar.github.io/eww/configuration.html#defwindow-properties>
+- **First widget:** <https://elkowar.github.io/eww/configuration.html#your-first-widget>
+- **Children:** <https://elkowar.github.io/eww/configuration.html#rendering-children-in-your-widgets>
+- **Variables:** <https://elkowar.github.io/eww/configuration.html#adding-dynamic-content>
+- **`literal`:** <https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal>
+- **Window IDs and args:** <https://elkowar.github.io/eww/configuration.html#using-window-arguments-and-ids>
+- **`for`:** <https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for>
+- **`include`:** <https://elkowar.github.io/eww/configuration.html#using-include>
+- **Expressions:** <https://elkowar.github.io/eww/expression_language.html>
+- **GTK theming:** <https://elkowar.github.io/eww/working_with_gtk.html>
+- **Magic vars:** <https://elkowar.github.io/eww/magic-vars.html>
+- **Widgets:** <https://elkowar.github.io/eww/widgets.html>
+- **Troubleshooting:** <https://elkowar.github.io/eww/troubleshooting.html>
 
 ### External docs linked by Eww
 
-- **GTK CSS overview:** https://docs.gtk.org/gtk3/css-overview.html
-- **GTK CSS properties:** https://docs.gtk.org/gtk3/css-properties.html
+- **GTK CSS overview:** <https://docs.gtk.org/gtk3/css-overview.html>
+- **GTK CSS properties:** <https://docs.gtk.org/gtk3/css-properties.html>
 
 ### Current repo evidence
 

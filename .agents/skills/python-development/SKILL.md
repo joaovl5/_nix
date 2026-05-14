@@ -1,6 +1,6 @@
 ---
 name: python-development
-description: Use when editing/writing/debugging Python code
+description: Use when editing/writing/debugging Python code/files
 ---
 
 # Python Development
@@ -106,3 +106,27 @@ description: Use when editing/writing/debugging Python code
   - **Every** test function should have a docstring explaining their scope clearly.
   - **Every** non-trivial assertion should have a comment above it explaining what is being asserted
 - Tests **MUST** sit next to their modules, within a `tests/` folder and having a `*.test.py` format
+
+## Other Rules
+
+- When writing one-off scripts - if they're getting to large (>500 lines),
+  consider splitting it into a dedicated package - this decision should be
+  made by the user, but bring that up explicitly.
+- For writing one-off scripts, do not use a raw Python shebang - instead use
+  a uv script like the following:
+
+    ```python
+    #!/usr/bin/env -S uv run --script
+    # /// script
+    # requires-python = ">=3.13"
+    # dependencies = [
+    #     "cyclopts>=4.5.1",
+    # ]
+    # ///
+    ```
+
+- Use the following choices for picking libraries:
+  - `cyclopts` instead of argparse
+  - `rich` instead of print or pprint
+  - `loguru` instead of stdlib logging
+  - `textual` for interactive/non-trivial TUIs

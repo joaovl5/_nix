@@ -26,6 +26,12 @@
 
 ### SKILLS
 
+#### SPECIAL SKILLS
+
+- Some user skills have special directives that other skills won't
+  have - respect them! These special skills are:
+  - `quick-iteration` (this skill should be _manually_ called by user)
+
 #### USE SKILLS PROACTIVELY
 
 - Always know:

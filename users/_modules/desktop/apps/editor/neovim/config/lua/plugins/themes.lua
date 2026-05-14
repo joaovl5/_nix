@@ -6,9 +6,9 @@ local function _2_()
   return nil
 end
 local function _3_()
-  local name_2_auto = require("teide")
-  local fun_3_auto = name_2_auto.setup
-  return fun_3_auto({
+  local name_1_auto = require("teide")
+  local fun_2_auto = name_1_auto.setup
+  return fun_2_auto({
     style = "darker",
     transparent = true,
     dim_inactive = true,
@@ -16,11 +16,7 @@ local function _3_()
 end
 _G.Config.themes = {
   { source = "nyoom-engineering/oxocarbon.nvim", names = { "oxocarbon" } },
-  {
-    source = "mellow-theme/mellow.nvim",
-    names = { "mellow" },
-    post_add = _2_,
-  },
+  { source = "mellow-theme/mellow.nvim", names = { "mellow" }, post_add = _2_ },
   { source = "embark-theme/vim", names = { "embark" } },
   {
     source = "eldritch-theme/eldritch.nvim",
@@ -40,10 +36,7 @@ _G.Config.themes = {
     },
   },
   { source = "Aejkatappaja/sora", names = { "sora" } },
-  {
-    source = "everviolet/nvim",
-    names = { "evergarden", "evergarden-winter" },
-  },
+  { source = "everviolet/nvim", names = { "evergarden", "evergarden-winter" } },
   {
     source = "uhs-robert/oasis.nvim",
     names = {

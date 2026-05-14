@@ -126,12 +126,12 @@ EWW_CPU  = { cores: [{ core, freq, usage }], avg }
 
 ## Source anchors
 
-- **Configuration:** https://elkowar.github.io/eww/configuration.html
-- **Windows:** https://elkowar.github.io/eww/configuration.html#creating-your-first-window
-- **Widget definitions:** https://elkowar.github.io/eww/configuration.html#your-first-widget
-- **Variables:** https://elkowar.github.io/eww/configuration.html#adding-dynamic-content
-- **`for`:** https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for
-- **`literal`:** https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal
-- **Expressions:** https://elkowar.github.io/eww/expression_language.html
-- **Magic vars:** https://elkowar.github.io/eww/magic-vars.html
-- **Widgets:** https://elkowar.github.io/eww/widgets.html
+- **Configuration:** <https://elkowar.github.io/eww/configuration.html>
+- **Windows:** <https://elkowar.github.io/eww/configuration.html#creating-your-first-window>
+- **Widget definitions:** <https://elkowar.github.io/eww/configuration.html#your-first-widget>
+- **Variables:** <https://elkowar.github.io/eww/configuration.html#adding-dynamic-content>
+- **`for`:** <https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for>
+- **`literal`:** <https://elkowar.github.io/eww/configuration.html#dynamically-generated-widgets-with-literal>
+- **Expressions:** <https://elkowar.github.io/eww/expression_language.html>
+- **Magic vars:** <https://elkowar.github.io/eww/magic-vars.html>
+- **Widgets:** <https://elkowar.github.io/eww/widgets.html>

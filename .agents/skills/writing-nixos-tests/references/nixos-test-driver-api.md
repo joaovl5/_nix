@@ -4,9 +4,9 @@ Use this when writing Python drivers for this repo's NixOS VM tests. Recheck ups
 
 ## Primary sources
 
-- **Manual:** https://nixos.org/manual/nixos/stable/index.html#sec-nixos-tests
-- **Tutorial:** https://nix.dev/tutorials/nixos/integration-testing-using-virtual-machines
-- **Machine source:** https://github.com/NixOS/nixpkgs/blob/master/nixos/lib/test-driver/src/test_driver/machine/__init__.py
+- **Manual:** <https://nixos.org/manual/nixos/stable/index.html#sec-nixos-tests>
+- **Tutorial:** <https://nix.dev/tutorials/nixos/integration-testing-using-virtual-machines>
+- **Machine source:** <https://github.com/NixOS/nixpkgs/blob/master/nixos/lib/test-driver/src/test_driver/machine/__init__.py>
 
 ## Key facts from upstream docs and source
 

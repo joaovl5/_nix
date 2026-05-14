@@ -11,9 +11,9 @@ local js_ts_filetypes = {
 local function _1_()
   local function _2_(ev)
     local function _3_()
-      local name_2_auto = require("lazy")
-      local fun_3_auto = name_2_auto.load
-      return fun_3_auto({ plugins = { "typescript-tools.nvim" } })
+      local name_1_auto = require("lazy")
+      local fun_2_auto = name_1_auto.load
+      return fun_2_auto({ plugins = { "typescript-tools.nvim" } })
     end
     return vim.api.nvim_buf_call(ev.buf, _3_)
   end

@@ -3,31 +3,27 @@
   linux-continue-if-no-devs-found yes)
 
 (defsrc
-  caps         h    j    k    l
-  lctl
-  lmet
-  lalt
-  lsft
-  d    u
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
 )
 
 (deflayer default
-  @cap         _    _    _    _
-  @ctl
-  @met
-  @alt
-  @sft
-  _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  @cap _    _    _    _    _    _    _    _    _    _    _    _
+  @sft _    _    _    _    _    _    _    _    _    _    _
+  @ctl @met @alt           _              _    _    _
 )
 
 (deflayer arrows
-  _
-              left down up rght
-  _
-  _
-  _
-  _
-              (mwheel-down 50 120) (mwheel-up 50 120)
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    @wup _    _    _    _    _    _
+  _    _    _    @wdn _    _    left down up   rght _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
 )
 
 (defalias
@@ -36,4 +32,6 @@
   met (tap-hold 200 200 (one-shot 2000 lmet) lmet)
   alt (tap-dance 200 ((one-shot 2000 lalt) (layer-while-held arrows)))
   sft (tap-hold 200 200 (one-shot 2000 lsft) lsft)
+  wup (mwheel-up 50 120)
+  wdn (mwheel-down 50 120)
 )

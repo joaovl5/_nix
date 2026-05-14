@@ -1,8 +1,8 @@
 -- [nfnl] fnl/plugins/ui/statusline.fnl
 local function _1_()
-  local name_2_auto = require("lualine")
-  local fun_3_auto = name_2_auto.setup
-  return fun_3_auto({})
+  local name_1_auto = require("lualine")
+  local fun_2_auto = name_1_auto.setup
+  return fun_2_auto({})
 end
 local function _2_()
   local function _3_(input)

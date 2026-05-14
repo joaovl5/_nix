@@ -247,14 +247,14 @@ These are read-only checks you can run to confirm the current failure path:
 ## External references used for semantic validation
 
 - Syncthing ignore rules:
-  - https://docs.syncthing.net/users/ignoring.html
+  - <https://docs.syncthing.net/users/ignoring.html>
 - eza man page / option semantics:
-  - https://manpages.debian.org/testing/eza/eza.1.en.html
+  - <https://manpages.debian.org/testing/eza/eza.1.en.html>
   - local `eza --help` on this machine
 - NFSv4 pseudo-root / `fsid=0` references:
-  - https://www.rfc-editor.org/rfc/pdfrfc/rfc7530.txt.pdf
-  - https://docs.redhat.com/es/documentation/red_hat_enterprise_linux/5/html/deployment_guide/s1-nfs-server-config-exports
-  - https://www.ibm.com/support/pages/linux%C2%AE-and-aix%C2%AE-nfs-server-v4-configuration-tips
+  - <https://www.rfc-editor.org/rfc/pdfrfc/rfc7530.txt.pdf>
+  - <https://docs.redhat.com/es/documentation/red_hat_enterprise_linux/5/html/deployment_guide/s1-nfs-server-config-exports>
+  - <https://www.ibm.com/support/pages/linux%C2%AE-and-aix%C2%AE-nfs-server-v4-configuration-tips>
 
 ## Bottom line
 

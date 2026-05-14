@@ -30,6 +30,28 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **FLS metadata:** `config/flsproject.fnl` is the source of truth for project metadata
 - **Further FLS rules:** detailed `flsproject` and fennel-ls rules live in `fennel-development`
 
+## Plugin-local keybinds
+
+- **Preferred shape:** in plugin specs, prefer `(plugin! ...)` with `(keys (bind ...))`
+- **Command RHS:** wrap command strings with `(cmd "...")`, including commands with spaces
+- **Literal RHS:** plain strings stay literal RHS values
+- **Modes and groups:** use `(m mode lhs...)` for mode-specific or multiple lhs bindings
+
+```fennel
+(plugin! :foo/bar
+  (keys
+    (bind (l :xx)
+          (cmd "SomeCommand")
+          (desc "Do thing"))))
+```
+
+```fennel
+(bind [(m [:n :x :o] (l :xx) :\x)
+       (m :i (c :X))]
+      (cmd "SomeCommand with args")
+      (desc "Do thing"))
+```
+
 ## Recompile workflow
 
 - **Preferred wrapper:** from `.agents/skills/neovim-configuration`, run `uv run scripts/recompile-nfnl.py`

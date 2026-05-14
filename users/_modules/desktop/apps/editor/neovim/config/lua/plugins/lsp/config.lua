@@ -44,16 +44,21 @@ local function do_basedpyright_attach(client, bufnr)
   )
 end
 local function get_basedpyright_root_dir(bufnr, on_dir)
-  return on_dir(vim.fs.root(vim.api.nvim_buf_get_name(bufnr), {
-    "uv.lock",
-    "pyrightconfig.json",
-    "pyproject.toml",
-    "setup.py",
-    "setup.cfg",
-    "requirements.txt",
-    "Pipfile",
-    ".git",
-  }))
+  return on_dir(
+    vim.fs.root(
+      vim.api.nvim_buf_get_name(bufnr),
+      {
+        "uv.lock",
+        "pyrightconfig.json",
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt",
+        "Pipfile",
+        ".git",
+      }
+    )
+  )
 end
 local function get_fennel_root_dir(bufnr, on_dir)
   local fname = vim.api.nvim_buf_get_name(bufnr)

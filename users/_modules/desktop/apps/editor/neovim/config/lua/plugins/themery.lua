@@ -8,8 +8,8 @@ local function _1_()
     end
     theme_names = all_names
   end
-  local name_2_auto = require("themery")
-  local fun_3_auto = name_2_auto.setup
-  return fun_3_auto({ themes = theme_names, livePreview = true })
+  local name_1_auto = require("themery")
+  local fun_2_auto = name_1_auto.setup
+  return fun_2_auto({ themes = theme_names, livePreview = true })
 end
 return { "zaldih/themery.nvim", config = _1_, lazy = false }

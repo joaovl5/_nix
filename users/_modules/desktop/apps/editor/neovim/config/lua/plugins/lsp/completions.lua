@@ -51,9 +51,9 @@ local function setup_blink()
     local sources = { "lsp", "path", "snippets", "buffer" }
     local debug_sources = { "dap", "lsp", "path", "snippets", "buffer" }
     local function _11_()
-      local name_2_auto = require("cmp_dap")
-      local fun_3_auto = name_2_auto.is_dap_buffer
-      return fun_3_auto()
+      local name_1_auto = require("cmp_dap")
+      local fun_2_auto = name_1_auto.is_dap_buffer
+      return fun_2_auto()
     end
     _10_ = {
       default = sources,

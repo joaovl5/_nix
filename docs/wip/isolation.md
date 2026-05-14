@@ -585,48 +585,48 @@ There is currently **no** existing `dockerTools` usage in the repo, so this woul
 
 #### Native NixOS containers
 
-- NixOS manual, containers chapter: https://nixos.org/nixos/manual/#ch-containers
-- NixOS wiki: https://wiki.nixos.org/wiki/NixOS_Containers
-- `containers.<name>.config`: https://search.nixos.org/options?show=containers.%3Cname%3E.config
-- `containers.<name>.bindMounts`: https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts
-- `containers.<name>.forwardPorts`: https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts
-- `containers.<name>.privateUsers`: https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers
-- `containers.<name>.ephemeral`: https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral
-- `containers.<name>.flake`: https://search.nixos.org/options?show=containers.%3Cname%3E.flake
+- NixOS manual, containers chapter: <https://nixos.org/nixos/manual/#ch-containers>
+- NixOS wiki: <https://wiki.nixos.org/wiki/NixOS_Containers>
+- `containers.<name>.config`: <https://search.nixos.org/options?show=containers.%3Cname%3E.config>
+- `containers.<name>.bindMounts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts>
+- `containers.<name>.forwardPorts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts>
+- `containers.<name>.privateUsers`: <https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers>
+- `containers.<name>.ephemeral`: <https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral>
+- `containers.<name>.flake`: <https://search.nixos.org/options?show=containers.%3Cname%3E.flake>
 
 #### Docker rootless + runtime
 
-- Docker rootless mode: https://docs.docker.com/engine/security/rootless/
-- Docker rootless tips: https://docs.docker.com/engine/security/rootless/tips/
-- Docker rootless troubleshooting: https://docs.docker.com/engine/security/rootless/troubleshoot/
-- `docker run`: https://docs.docker.com/reference/cli/docker/container/run/
-- Docker bind mounts: https://docs.docker.com/engine/storage/bind-mounts/
-- Docker tmpfs mounts: https://docs.docker.com/engine/storage/tmpfs/
-- Docker volumes: https://docs.docker.com/storage/volumes/
-- `virtualisation.docker.rootless.enable`: https://search.nixos.org/options?show=virtualisation.docker.rootless.enable
-- `virtualisation.docker.rootless.setSocketVariable`: https://search.nixos.org/options?show=virtualisation.docker.rootless.setSocketVariable
+- Docker rootless mode: <https://docs.docker.com/engine/security/rootless/>
+- Docker rootless tips: <https://docs.docker.com/engine/security/rootless/tips/>
+- Docker rootless troubleshooting: <https://docs.docker.com/engine/security/rootless/troubleshoot/>
+- `docker run`: <https://docs.docker.com/reference/cli/docker/container/run/>
+- Docker bind mounts: <https://docs.docker.com/engine/storage/bind-mounts/>
+- Docker tmpfs mounts: <https://docs.docker.com/engine/storage/tmpfs/>
+- Docker volumes: <https://docs.docker.com/storage/volumes/>
+- `virtualisation.docker.rootless.enable`: <https://search.nixos.org/options?show=virtualisation.docker.rootless.enable>
+- `virtualisation.docker.rootless.setSocketVariable`: <https://search.nixos.org/options?show=virtualisation.docker.rootless.setSocketVariable>
 
 #### Nix-built Docker images
 
-- nix.dev tutorial: https://nix.dev/tutorials/nixos/building-and-running-docker-images
-- nixpkgs dockerTools docs: https://ryantm.github.io/nixpkgs/builders/images/dockertools/
-- NixOS wiki Docker page: https://nixos.wiki/wiki/Docker
-- nixpkgs docker examples: https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/examples.nix
+- nix.dev tutorial: <https://nix.dev/tutorials/nixos/building-and-running-docker-images>
+- nixpkgs dockerTools docs: <https://ryantm.github.io/nixpkgs/builders/images/dockertools/>
+- NixOS wiki Docker page: <https://nixos.wiki/wiki/Docker>
+- nixpkgs docker examples: <https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/examples.nix>
 
 #### Distrobox
 
-- `distrobox create`: https://distrobox.it/usage/distrobox-create/
-- `distrobox enter`: https://distrobox.it/usage/distrobox-enter/
-- `distrobox ephemeral`: https://distrobox.it/usage/distrobox-ephemeral/
-- `distrobox assemble`: https://distrobox.it/usage/distrobox-assemble/
+- `distrobox create`: <https://distrobox.it/usage/distrobox-create/>
+- `distrobox enter`: <https://distrobox.it/usage/distrobox-enter/>
+- `distrobox ephemeral`: <https://distrobox.it/usage/distrobox-ephemeral/>
+- `distrobox assemble`: <https://distrobox.it/usage/distrobox-assemble/>
 
 #### systemd-nspawn / machinectl
 
-- `systemd-nspawn(1)`: https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html
-- `machinectl(1)`: https://man7.org/linux/man-pages/man1/machinectl.1.html
+- `systemd-nspawn(1)`: <https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html>
+- `machinectl(1)`: <https://man7.org/linux/man-pages/man1/machinectl.1.html>
 
 #### Arion / compose2nix
 
-- Arion overview: https://docs.hercules-ci.com/arion/
-- Arion deployment on NixOS: https://docs.hercules-ci.com/arion/deployment/
-- compose2nix: https://github.com/aksiksi/compose2nix
+- Arion overview: <https://docs.hercules-ci.com/arion/>
+- Arion deployment on NixOS: <https://docs.hercules-ci.com/arion/deployment/>
+- compose2nix: <https://github.com/aksiksi/compose2nix>

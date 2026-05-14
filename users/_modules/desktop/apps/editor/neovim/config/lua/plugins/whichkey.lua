@@ -1,9 +1,9 @@
 -- [nfnl] fnl/plugins/whichkey.fnl
 local function _1_()
   do
-    local name_2_auto = require("which-key")
-    local fun_3_auto = name_2_auto.setup
-    fun_3_auto({
+    local name_1_auto = require("which-key")
+    local fun_2_auto = name_1_auto.setup
+    fun_2_auto({
       preset = "modern",
       plugins = { spelling = { enabled = false } },
       win = {

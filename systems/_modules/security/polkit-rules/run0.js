@@ -1,8 +1,11 @@
 /*
  * Maintain the session authenticated
  * */
-polkit.addRule((action, subject) => {
+
+function handleWheel(action, subject) {
 	if (subject.isInGroup("wheel")) {
 		return polkit.Result.YES;
 	}
-});
+}
+
+polkit.addRule(handleWheel);

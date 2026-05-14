@@ -1,8 +1,7 @@
-(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(import-macros {: plugin!} :./lib/init-macros)
 
-(plugin :linux-cultist/venv-selector.nvim
-        {:dependencies [(plugin :nvim-telescope/telescope.nvim {:version "*"})]
-         :ft :python
-         :keys [(key :<leader>cv :<cmd>VenvSelect<cr>
-                     {:desc "Pick virtual env"})]
-         :opts {}})
+(plugin! :linux-cultist/venv-selector.nvim
+         (dependencies [(plugin! :nvim-telescope/telescope.nvim (version "*"))])
+         (ft :python)
+         (keys (bind (l :cv) (cmd :VenvSelect) (desc "Pick virtual env")))
+         (opts {}))

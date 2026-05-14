@@ -6,9 +6,7 @@ return {
     opts = {
       enabled = true,
       languages = {
-        python = {
-          template = { annotation_convention = "google_docstrings" },
-        },
+        python = { template = { annotation_convention = "google_docstrings" } },
       },
     },
   },
@@ -94,11 +92,7 @@ return {
         "<cmd>Trouble loclist toggle<cr>",
         desc = "Trouble locations",
       },
-      {
-        "<leader>xl",
-        "<cmd>Trouble qflist toggle<cr>",
-        desc = "Quick fixes",
-      },
+      { "<leader>xl", "<cmd>Trouble qflist toggle<cr>", desc = "Quick fixes" },
     },
   },
   { "MagicDuck/grug-far.nvim", cmd = "GrugFar", opts = {} },

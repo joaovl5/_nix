@@ -28,9 +28,9 @@ local function _1_()
   return nil
 end
 local function _2_()
-  local name_2_auto = require("dap-python")
-  local fun_3_auto = name_2_auto.setup
-  return fun_3_auto("uv")
+  local name_1_auto = require("dap-python")
+  local fun_2_auto = name_1_auto.setup
+  return fun_2_auto("uv")
 end
 return {
   {

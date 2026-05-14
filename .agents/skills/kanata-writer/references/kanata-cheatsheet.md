@@ -6,8 +6,8 @@ Use this as a compact syntax aid after loading the Kanata skill. Verify details 
 
 - **Repo config:** `users/_modules/desktop/services/kanata/config/config.kbd`
 - **Repo service:** `users/_modules/desktop/services/kanata/default.nix`
-- **Upstream guide:** https://github.com/jtroo/kanata/blob/main/docs/config.adoc
-- **Upstream README:** https://github.com/jtroo/kanata/blob/main/README.md
+- **Upstream guide:** <https://github.com/jtroo/kanata/blob/main/docs/config.adoc>
+- **Upstream README:** <https://github.com/jtroo/kanata/blob/main/README.md>
 
 ## Syntax basics
 

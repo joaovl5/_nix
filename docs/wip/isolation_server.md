@@ -1612,42 +1612,42 @@ These are intentionally deferred because they are not blocking for the research 
 
 ### External references
 
-- NixOS manual, containers chapter: https://nixos.org/manual/nixos/stable/#ch-containers
-- NixOS wiki, NixOS Containers: https://wiki.nixos.org/wiki/NixOS_Containers
-- NixOS manual mirror, declarative containers: https://nlewo.github.io/nixos-manual-sphinx/administration/declarative-containers.xml.html
-- NixOS manual mirror, container networking: https://nlewo.github.io/nixos-manual-sphinx/administration/container-networking.xml.html
-- `containers.<name>.config`: https://search.nixos.org/options?show=containers.%3Cname%3E.config
-- `containers.<name>.bindMounts`: https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts
-- `containers.<name>.forwardPorts`: https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts
-- `containers.<name>.privateNetwork`: https://search.nixos.org/options?show=containers.%3Cname%3E.privateNetwork
-- `containers.<name>.hostAddress`: https://search.nixos.org/options?show=containers.%3Cname%3E.hostAddress
-- `containers.<name>.localAddress`: https://search.nixos.org/options?show=containers.%3Cname%3E.localAddress
-- `containers.<name>.autoStart`: https://search.nixos.org/options?show=containers.%3Cname%3E.autoStart
-- `containers.<name>.ephemeral`: https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral
-- `containers.<name>.privateUsers`: https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers
-- `containers.<name>.allowedDevices`: https://search.nixos.org/options?show=containers.%3Cname%3E.allowedDevices
-- `containers.<name>.additionalCapabilities`: https://search.nixos.org/options?show=containers.%3Cname%3E.additionalCapabilities
-- nixpkgs native container module: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix
-- systemd-nspawn man page: https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html
-- machinectl man page: https://man7.org/linux/man-pages/man1/machinectl.1.html
-- NixOS OCI containers options: https://search.nixos.org/options?query=virtualisation.oci-containers
-- Arion docs: https://docs.hercules-ci.com/arion/
-- microvm.nix README at pinned repo revision: https://raw.githubusercontent.com/microvm-nix/microvm.nix/2f2f62fdfdca2750e3399f66bd03986ab967e5ca/README.md
-- microvm.nix handbook intro: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/intro.md
-- microvm.nix declaring MicroVMs: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declaring.md
-- microvm.nix declarative MicroVMs: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declarative.md
-- microvm.nix host preparation: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host.md
-- microvm.nix host systemd services: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host-systemd.md
-- microvm.nix options overview: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/options.md
-- microvm.nix options source: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/microvm/options.nix
-- microvm.nix host options source: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/host/options.nix
-- microvm.nix network interfaces: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/interfaces.md
-- microvm.nix simple network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/simple-network.md
-- microvm.nix advanced network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/advanced-network.md
-- microvm.nix routed network setup: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/routed-network.md
-- microvm.nix shares: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/shares.md
-- microvm.nix device passthrough: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/devices.md
-- microvm.nix output options: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/output-options.md
-- microvm.nix command workflow: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/microvm-command.md
-- microvm.nix SSH deploy workflow: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/ssh-deploy.md
-- microvm.nix FAQ: https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/faq.md
+- NixOS manual, containers chapter: <https://nixos.org/manual/nixos/stable/#ch-containers>
+- NixOS wiki, NixOS Containers: <https://wiki.nixos.org/wiki/NixOS_Containers>
+- NixOS manual mirror, declarative containers: <https://nlewo.github.io/nixos-manual-sphinx/administration/declarative-containers.xml.html>
+- NixOS manual mirror, container networking: <https://nlewo.github.io/nixos-manual-sphinx/administration/container-networking.xml.html>
+- `containers.<name>.config`: <https://search.nixos.org/options?show=containers.%3Cname%3E.config>
+- `containers.<name>.bindMounts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts>
+- `containers.<name>.forwardPorts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts>
+- `containers.<name>.privateNetwork`: <https://search.nixos.org/options?show=containers.%3Cname%3E.privateNetwork>
+- `containers.<name>.hostAddress`: <https://search.nixos.org/options?show=containers.%3Cname%3E.hostAddress>
+- `containers.<name>.localAddress`: <https://search.nixos.org/options?show=containers.%3Cname%3E.localAddress>
+- `containers.<name>.autoStart`: <https://search.nixos.org/options?show=containers.%3Cname%3E.autoStart>
+- `containers.<name>.ephemeral`: <https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral>
+- `containers.<name>.privateUsers`: <https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers>
+- `containers.<name>.allowedDevices`: <https://search.nixos.org/options?show=containers.%3Cname%3E.allowedDevices>
+- `containers.<name>.additionalCapabilities`: <https://search.nixos.org/options?show=containers.%3Cname%3E.additionalCapabilities>
+- nixpkgs native container module: <https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix>
+- systemd-nspawn man page: <https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html>
+- machinectl man page: <https://man7.org/linux/man-pages/man1/machinectl.1.html>
+- NixOS OCI containers options: <https://search.nixos.org/options?query=virtualisation.oci-containers>
+- Arion docs: <https://docs.hercules-ci.com/arion/>
+- microvm.nix README at pinned repo revision: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/2f2f62fdfdca2750e3399f66bd03986ab967e5ca/README.md>
+- microvm.nix handbook intro: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/intro.md>
+- microvm.nix declaring MicroVMs: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declaring.md>
+- microvm.nix declarative MicroVMs: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declarative.md>
+- microvm.nix host preparation: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host.md>
+- microvm.nix host systemd services: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host-systemd.md>
+- microvm.nix options overview: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/options.md>
+- microvm.nix options source: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/microvm/options.nix>
+- microvm.nix host options source: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/host/options.nix>
+- microvm.nix network interfaces: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/interfaces.md>
+- microvm.nix simple network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/simple-network.md>
+- microvm.nix advanced network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/advanced-network.md>
+- microvm.nix routed network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/routed-network.md>
+- microvm.nix shares: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/shares.md>
+- microvm.nix device passthrough: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/devices.md>
+- microvm.nix output options: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/output-options.md>
+- microvm.nix command workflow: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/microvm-command.md>
+- microvm.nix SSH deploy workflow: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/ssh-deploy.md>
+- microvm.nix FAQ: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/faq.md>

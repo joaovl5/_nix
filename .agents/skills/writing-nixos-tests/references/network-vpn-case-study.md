@@ -47,9 +47,9 @@ This reference captures reusable lessons from this repo's WireGuard suite. Treat
 
 ## Useful source docs
 
-- **WireGuard netns pattern:** https://www.wireguard.com/netns/
-- **Network namespaces:** https://www.man7.org/linux/man-pages/man7/network_namespaces.7.html
-- **`ip-netns(8)`:** https://man7.org/linux/man-pages/man8/ip-netns.8.html
-- **`NetworkNamespacePath=`:** https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#NetworkNamespacePath=
-- **Containers module source:** https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix
-- **VPN-Confinement upstream:** https://github.com/Maroka-chan/VPN-Confinement
+- **WireGuard netns pattern:** <https://www.wireguard.com/netns/>
+- **Network namespaces:** <https://www.man7.org/linux/man-pages/man7/network_namespaces.7.html>
+- **`ip-netns(8)`:** <https://man7.org/linux/man-pages/man8/ip-netns.8.html>
+- **`NetworkNamespacePath=`:** <https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#NetworkNamespacePath=>
+- **Containers module source:** <https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix>
+- **VPN-Confinement upstream:** <https://github.com/Maroka-chan/VPN-Confinement>

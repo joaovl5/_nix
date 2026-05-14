@@ -476,7 +476,7 @@ Canonical lowering rule: `expose.<name>.target` is the host vhost target. Unit e
 !ANSWER Current repo: a unit directly declares `my.vhosts.foo = { target = ...; sources = ["http://localhost:port"]; }`. Proposed container shape: the unit only declares "I serve HTTP on port X"; the container owns host ingress and lowers `target = "actual"` into `my.vhosts.actual-budget = { target = "actual"; sources = ["http://actual-budget.containers:5006"]; }`. So `target` remains the DNS/vhost name, but it is owned by the container layer, not the guest unit.
 !NOTE This makes it clearer, then with that in mind we can have a slightly alterd shape, see below:
 
-```
+```text
 highest-level:
     unit: declares 'unit-scope endpoints' that are served (http/tcp/udp at port X)
     container (with helper): declares 'container-scope endpoints', processed from unit endpoints (container or unit-scope endpoints don't mean these declarations live inside the container, they're only conceptually designated to them, but will be acessible on host side)

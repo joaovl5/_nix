@@ -7,8 +7,8 @@ description: Use when building Python terminal user interfaces with the Textual 
 
 Textual is a Python framework for terminal user interfaces. Treat it as a retained-mode UI framework: build a widget tree, style it with Textual CSS, move data through reactive attributes, and communicate user intent with messages/actions.
 
-**Official docs:** https://textual.textualize.io/
-**Source:** https://github.com/Textualize/textual
+**Official docs:** <https://textual.textualize.io/>
+**Source:** <https://github.com/Textualize/textual>
 **Version note:** reference checked against current docs/source around Textual `v8.2.3`; verify exact signatures when version pinning matters.
 
 ## First Decision

@@ -19,16 +19,19 @@ local function _1_()
     return (data.cwd == vim.fn.getcwd())
   end
   local function _4_()
-    local name_2_auto = require("codecompanion.adapters")
-    local fun_3_auto = name_2_auto.extend
-    return fun_3_auto("openai_compatible", {
-      env = {
-        api_key = "OPENROUTER_API_KEY",
-        url = "https://openrouter.ai/api",
-      },
-      name = "openrouter",
-      formatted_name = "Openrouter API",
-    })
+    local name_1_auto = require("codecompanion.adapters")
+    local fun_2_auto = name_1_auto.extend
+    return fun_2_auto(
+      "openai_compatible",
+      {
+        env = {
+          api_key = "OPENROUTER_API_KEY",
+          url = "https://openrouter.ai/api",
+        },
+        name = "openrouter",
+        formatted_name = "Openrouter API",
+      }
+    )
   end
   return {
     interactions = _2_,

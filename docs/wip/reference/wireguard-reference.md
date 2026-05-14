@@ -259,13 +259,13 @@ Port range 25-20480 routes through relay; SSH (22) stays direct.
 
 NAT rule forwards client subnet through relay interface:
 
-```
+```text
 -A POSTROUTING -s 10.10.10.0/24 -d 0.0.0.0/0 -o vpn-relay -j MASQUERADE
 ```
 
 Plus FORWARD rules on relay interface:
 
-```
+```text
 iptables -A FORWARD -i vpn-relay -j ACCEPT
 iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -d 0.0.0.0/0 -o vpn-relay -j MASQUERADE
 ```
@@ -386,7 +386,7 @@ services.resolved.enable = true;
 
 **systemd-networkd cleans up custom ip rules:** Set in `/etc/systemd/networkd.conf`:
 
-```
+```text
 ManageForeignRoutes=No
 ManageForeignRoutingPolicyRules=No
 ```

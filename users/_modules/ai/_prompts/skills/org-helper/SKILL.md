@@ -155,22 +155,22 @@ description: ORG-Mode skill
 | C-c a   | Agenda           |
 | C-c /   | Sparse tree      |
 
-# Org-roam Cheat Sheet
+## Org-roam Cheat Sheet
 
-## Overview
+### Overview
 
 - Tool for networked thought in Emacs/Org-mode
 - Reproduces Roam Research features
 - Based on Zettelkasten (slip-box) method
 - Plain text + SQLite database cache
 
-## Terminology
+### Terminology
 
 - **Node**: Any headline or top-level file with an ID property
 - **Fleeting notes**: Quick capture, processed later
 - **Permanent notes**: Literature notes (annotations) or concept notes (detailed)
 
-## Core Commands
+### Core Commands
 
 | Command                      | Description             |
 | ---------------------------- | ----------------------- |
@@ -181,7 +181,7 @@ description: ORG-Mode skill
 | `M-x org-id-get-create`      | Add ID to headline/file |
 | `M-x org-roam-db-sync`       | Build cache manually    |
 
-## Installation
+### Installation
 
 ```elisp
 (require 'package)
@@ -191,7 +191,7 @@ M-x package-install RET org-roam RET
 
 **Dependencies**: org, emacsql, magit-section
 
-## Setup
+### Setup
 
 ```elisp
 (make-directory "~/org-roam")
@@ -199,7 +199,7 @@ M-x package-install RET org-roam RET
 (org-roam-db-autosync-mode)
 ```
 
-## Node Properties
+### Node Properties
 
 | Property           | Purpose                          |
 | ------------------ | -------------------------------- |
@@ -209,12 +209,12 @@ M-x package-install RET org-roam RET
 | `:ROAM_EXCLUDE: t` | Exclude from database            |
 | Tags               | Regular Org tags                 |
 
-## Links
+### Links
 
 - Use ID links: `[[id:FOO][Link Text]]`
 - Completion via `completion-at-point`
 
-## Templates
+### Templates
 
 ```elisp
 (setq org-roam-capture-templates
@@ -226,7 +226,7 @@ M-x package-install RET org-roam RET
 
 - Variables: `${title}`, `${slug}`, `${file}`, `${foo}` (custom accessors)
 
-## org-roam-dailies (Journaling)
+### org-roam-dailies (Journaling)
 
 ```elisp
 (setq org-roam-dailies-directory "daily/")
@@ -239,7 +239,7 @@ M-x package-install RET org-roam RET
 - `M-x org-roam-dailies-capture-today`
 - `M-x org-roam-dailies-goto-today`
 
-## org-roam-protocol (Browser capture)
+### org-roam-protocol (Browser capture)
 
 ```elisp
 (require 'org-roam-protocol)
@@ -248,14 +248,14 @@ M-x package-install RET org-roam RET
 - `org-protocol://roam-node?node=ID`
 - `org-protocol://roam-ref?ref=URL`
 
-## org-roam-graph
+### org-roam-graph
 
 ```elisp
 M-x org-roam-graph
 (setq org-roam-graph-executable "dot")
 ```
 
-## Buffer Display
+### Buffer Display
 
 ```elisp
 (add-to-list 'display-buffer-alist
@@ -265,20 +265,20 @@ M-x org-roam-graph
    (window-width . 0.33)))
 ```
 
-## Key Variables
+### Key Variables
 
 - `org-roam-directory`: Note storage location
 - `org-roam-node-display-template`: Node display format
 - `org-roam-db-update-on-save`: Auto-update cache
 - `org-roam-completion-everywhere`: Enable link completion everywhere
 
-## Performance
+### Performance
 
 ```elisp
 (setq org-roam-db-gc-threshold most-positive-fixnum)
 ```
 
-## Ecosytem Tools
+### Ecosytem Tools
 
 - **Deft**: Full-text search (`C-c n d`)
 - **org-ref**: Citations

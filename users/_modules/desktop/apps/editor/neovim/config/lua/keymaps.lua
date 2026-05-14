@@ -30,42 +30,42 @@ n.map({ "n" }, "N", "Nzzzv")
 n.map({ "x" }, ">", ">gv", { noremap = true })
 n.map({ "x" }, "<", "<gv", { noremap = true })
 local function _1_()
-  local name_2_auto = require("flash")
-  local fun_3_auto = name_2_auto.jump
-  return fun_3_auto()
+  local name_1_auto = require("flash")
+  local fun_2_auto = name_1_auto.jump
+  return fun_2_auto()
 end
 n.map({ "n", "x", "o" }, "s", _1_)
 local function _2_()
-  local name_2_auto = require("flash")
-  local fun_3_auto = name_2_auto.treesitter
-  return fun_3_auto()
+  local name_1_auto = require("flash")
+  local fun_2_auto = name_1_auto.treesitter
+  return fun_2_auto()
 end
 n.map({ "n", "x", "o" }, "S", _2_)
 local function _3_()
   do
-    local name_2_auto = require("flash")
-    local fun_3_auto = name_2_auto.remote
-    fun_3_auto()
+    local name_1_auto = require("flash")
+    local fun_2_auto = name_1_auto.remote
+    fun_2_auto()
   end
   return { desc = "Remote flash" }
 end
 n.map({ "o" }, "r", _3_)
 local function _4_()
-  local name_2_auto = require("spider")
-  local fun_3_auto = name_2_auto.motion
-  return fun_3_auto("w")
+  local name_1_auto = require("spider")
+  local fun_2_auto = name_1_auto.motion
+  return fun_2_auto("w")
 end
 n.map({ "n", "x", "o" }, "w", _4_)
 local function _5_()
-  local name_2_auto = require("spider")
-  local fun_3_auto = name_2_auto.motion
-  return fun_3_auto("e")
+  local name_1_auto = require("spider")
+  local fun_2_auto = name_1_auto.motion
+  return fun_2_auto("e")
 end
 n.map({ "n", "x", "o" }, "e", _5_)
 local function _6_()
-  local name_2_auto = require("spider")
-  local fun_3_auto = name_2_auto.motion
-  return fun_3_auto("b")
+  local name_1_auto = require("spider")
+  local fun_2_auto = name_1_auto.motion
+  return fun_2_auto("b")
 end
 n.map({ "n", "x", "o" }, "b", _6_)
 local function treewalker(subcommand)
@@ -131,9 +131,9 @@ wk.add({
   km("<leader>qd", { desc = "Close" }, "<cmd>tabclose<CR>"),
 })
 local function _17_()
-  local name_2_auto = require("zen-mode")
-  local fun_3_auto = name_2_auto.toggle
-  return fun_3_auto({})
+  local name_1_auto = require("zen-mode")
+  local fun_2_auto = name_1_auto.toggle
+  return fun_2_auto({})
 end
 wk.add({
   km("<leader>w", { group = "Window" }),
@@ -236,22 +236,22 @@ wk.add({
   km("<leader>gg", { desc = "Lazygit" }, _33_),
 })
 local function _34_()
-  local name_2_auto = require("tiny-code-action")
-  local fun_3_auto = name_2_auto.code_action
-  return fun_3_auto()
+  local name_1_auto = require("tiny-code-action")
+  local fun_2_auto = name_1_auto.code_action
+  return fun_2_auto()
 end
 local function _35_()
-  local name_2_auto = require("conform")
-  local fun_3_auto = name_2_auto.format
-  return fun_3_auto({ lsp_fallback = true })
+  local name_1_auto = require("conform")
+  local fun_2_auto = name_1_auto.format
+  return fun_2_auto({ lsp_fallback = true })
 end
 local function _36_()
   return vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end
 local function _37_()
-  local name_2_auto = require("pretty_hover")
-  local fun_3_auto = name_2_auto.hover
-  return fun_3_auto()
+  local name_1_auto = require("pretty_hover")
+  local fun_2_auto = name_1_auto.hover
+  return fun_2_auto()
 end
 wk.add({
   km("<leader>c", { group = "Code" }),
@@ -269,15 +269,15 @@ wk.add({
   km("gt", { desc = "Type Definitions" }, "<cmd>Glance type_definitions<CR>"),
 })
 local function _38_()
-  local name_2_auto = require("neogen")
-  local fun_3_auto = name_2_auto.jump_next
-  return fun_3_auto()
+  local name_1_auto = require("neogen")
+  local fun_2_auto = name_1_auto.jump_next
+  return fun_2_auto()
 end
 n.map({ "i" }, "<C-l>", _38_)
 local function _39_()
-  local name_2_auto = require("neogen")
-  local fun_3_auto = name_2_auto.jump_prev
-  return fun_3_auto()
+  local name_1_auto = require("neogen")
+  local fun_2_auto = name_1_auto.jump_prev
+  return fun_2_auto()
 end
 n.map({ "i" }, "<C-h>", _39_)
 wk.add({
@@ -306,22 +306,22 @@ wk.add({
   km("<leader>xp", { desc = "Populate diagnostics" }, _40_),
 })
 local function _41_()
-  local name_2_auto = require("dapui")
-  local fun_3_auto = name_2_auto.eval
-  return fun_3_auto()
+  local name_1_auto = require("dapui")
+  local fun_2_auto = name_1_auto.eval
+  return fun_2_auto()
 end
 local function _42_()
   local function _43_(input)
-    local name_2_auto = require("dapui")
-    local fun_3_auto = name_2_auto.eval
-    return fun_3_auto(input)
+    local name_1_auto = require("dapui")
+    local fun_2_auto = name_1_auto.eval
+    return fun_2_auto(input)
   end
   return vim.ui.input({ prompt = "Expression to evaluate" }, _43_)
 end
 local function _44_()
-  local name_2_auto = require("dapui")
-  local fun_3_auto = name_2_auto.toggle
-  return fun_3_auto()
+  local name_1_auto = require("dapui")
+  local fun_2_auto = name_1_auto.toggle
+  return fun_2_auto()
 end
 wk.add({
   km("<leader>d", { group = "Debug" }),

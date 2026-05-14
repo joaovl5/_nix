@@ -103,10 +103,10 @@ box.metric
 
 ## Source anchors
 
-- **Eww config styling notes:** https://elkowar.github.io/eww/configuration.html#writing-your-eww-configuration
-- **GTK theming:** https://elkowar.github.io/eww/working_with_gtk.html#gtk-theming
-- **GTK debugger:** https://elkowar.github.io/eww/working_with_gtk.html#gtk-debugger
-- **Widget global attrs:** https://elkowar.github.io/eww/widgets.html#widget
-- **`scale`:** https://elkowar.github.io/eww/widgets.html#scale
-- **GTK CSS overview:** https://docs.gtk.org/gtk3/css-overview.html
-- **GTK CSS properties:** https://docs.gtk.org/gtk3/css-properties.html
+- **Eww config styling notes:** <https://elkowar.github.io/eww/configuration.html#writing-your-eww-configuration>
+- **GTK theming:** <https://elkowar.github.io/eww/working_with_gtk.html#gtk-theming>
+- **GTK debugger:** <https://elkowar.github.io/eww/working_with_gtk.html#gtk-debugger>
+- **Widget global attrs:** <https://elkowar.github.io/eww/widgets.html#widget>
+- **`scale`:** <https://elkowar.github.io/eww/widgets.html#scale>
+- **GTK CSS overview:** <https://docs.gtk.org/gtk3/css-overview.html>
+- **GTK CSS properties:** <https://docs.gtk.org/gtk3/css-properties.html>

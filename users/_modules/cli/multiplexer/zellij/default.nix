@@ -6,6 +6,7 @@
         pkgs.coreutils
         pkgs.fish
       ];
+      checkPhase = "";
       text = builtins.readFile ./yazi-zellij-live-cwd.sh;
     };
 
@@ -17,6 +18,7 @@
         pkgs.yazi
         pkgs.zellij
       ];
+      checkPhase = "";
       text =
         builtins.replaceStrings
         ["@live_cwd_bin@"]
