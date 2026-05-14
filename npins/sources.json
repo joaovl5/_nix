@@ -575,6 +575,22 @@
       "url": "https://github.com/pyproject-nix/pyproject.nix/archive/e537db02e72d553cea470976b9733581bcf5b3ed.tar.gz",
       "hash": "sha256-/ZTSg97aouL0SlPHaokA4r3iuH9QzHVuWPACD2CUCFY="
     },
+    "rumdl-src": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "rvben",
+        "repo": "rumdl"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.1.91",
+      "revision": "310f1e63ffc7b01f729b92b1d8b73a12b22c5439",
+      "url": "https://api.github.com/repos/rvben/rumdl/tarball/refs/tags/v0.1.91",
+      "hash": "sha256-hn9YHFG8wbU8cY96MUT1fsRTzMqkCdJKnQsBgRNRVjo="
+    },
     "rust-overlay": {
       "type": "Git",
       "repository": {

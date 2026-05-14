@@ -93,6 +93,7 @@ in {
   pre-commit-hooks.inputs.gitignore.follows = "gitignore";
   pre-commit-hooks.inputs.nixpkgs.follows = "nixpkgs";
   pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+  rumdl-src = raw_source;
   rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
   sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   superpowers = raw_source;

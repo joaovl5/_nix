@@ -13,6 +13,7 @@
   octodns-pihole = pkgs.callPackage ./octodns-pihole {
     inherit inputs pihole6api;
   };
+  rumdl = pkgs.callPackage ./rumdl {inherit inputs;};
   vm_launcher = pkgs.callPackage ./vm-launcher {};
 in {
   inherit
@@ -24,6 +25,7 @@ in {
     mardi-gras
     pihole6api
     octodns-pihole
+    rumdl
     vm_launcher
     ;
 }

@@ -20,6 +20,7 @@ in {
         kaneo
         octodns-pihole
         pihole6api
+        rumdl
         vm_launcher
         ;
     }
