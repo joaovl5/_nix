@@ -1,6 +1,7 @@
 (defcfg
   process-unmapped-keys yes
-  linux-continue-if-no-devs-found yes)
+  linux-continue-if-no-devs-found yes
+  concurrent-tap-hold yes)
 
 (defsrc
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
@@ -13,9 +14,9 @@
 (deflayer default
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  @cap _    _    _    _    _    _    _    _    _    _    _    _
-  @sft _    _    _    _    _    _    _    _    _    _    _
-  @ctl @met @alt           _              _    _    _
+  @lc  _    _    _    _    _    _    _    _    _    _    _    _
+  @ls  _    _    _    _    _    _    _    _    _    _    @rs
+  caps @lm  @la             _             @ra  @rm  @rc
 )
 
 (deflayer arrows
@@ -26,12 +27,21 @@
   _    _    _              _              _    _    _
 )
 
+(defchordsv2
+  (f d) esc 50 all-released ()
+  (f k) @fkm 50 all-released ()
+)
+
 (defalias
-  cap (tap-hold 200 200 (one-shot 2000 lctl) lctl)
-  ctl caps
-  met (tap-hold 200 200 (one-shot 2000 lmet) lmet)
-  alt (tap-dance 200 ((one-shot 2000 lalt) (layer-while-held arrows)))
-  sft (tap-hold 200 200 (one-shot 2000 lsft) lsft)
+  lc (one-shot 2000 lctl)
+  lm (one-shot 2000 lmet)
+  la (tap-dance 200 ((one-shot 2000 lalt) (layer-while-held arrows)))
+  ls (one-shot 2000 lsft)
+  rc (one-shot 2000 rctl)
+  rm (one-shot 2000 rmet)
+  ra (one-shot 2000 ralt)
+  rs (one-shot 2000 rsft)
+  fkm (macro C-\ C-n C-w k)
   wup (mwheel-up 50 120)
   wdn (mwheel-down 50 120)
 )
