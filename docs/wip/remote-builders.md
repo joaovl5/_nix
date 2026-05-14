@@ -2,23 +2,28 @@
 
 ## Current problem summary
 
-`nix flake check --all-systems` is not workable on this host with the current published checks.
-The flake advertises checks for systems that this machine cannot build locally, and there are no
-remote builders configured to cover the missing platforms.
+`nix flake check --all-systems` is not workable on this host with the current
+published checks. The flake advertises checks for systems that this machine
+cannot build locally, and there are no remote builders configured to cover the
+missing platforms.
 
-The practical rule is simple: if a flake keeps a system in `checks`, `--all-systems` requires that
-system to be buildable somewhere. If even one published system lacks capability, the command fails.
+The practical rule is simple: if a flake keeps a system in `checks`,
+`--all-systems` requires that system to be buildable somewhere. If even one
+published system lacks capability, the command fails.
 
 ## Repo evidence
 
 - `outputs/default.nix` declares `supportedSystems = ["x86_64-linux"]`.
-- `outputs/checks/default.nix` originally fanned out checks over `import all-systems` via
-  `nixpkgs.legacyPackages.${system}`.
-- The published checks were therefore broader than the repo’s currently supported main architecture.
-- `tests/default.nix` gates NixOS tests only on `pkgs.stdenv.isLinux`, so Linux VM tests appear for
-  both `x86_64-linux` and `aarch64-linux` whenever those systems are published.
-- `systems/_modules/nix.nix` contains `boot.binfmt.emulatedSystems = ["aarch64-linux"]` on
-  x86_64-linux NixOS hosts, which is useful context but only a module-level intent, not current
+- `outputs/checks/default.nix` originally fanned out checks over
+  `import all-systems` via `nixpkgs.legacyPackages.${system}`.
+- The published checks were therefore broader than the repo’s currently
+  supported main architecture.
+- `tests/default.nix` gates NixOS tests only on `pkgs.stdenv.isLinux`, so
+  Linux VM tests appear for both `x86_64-linux` and `aarch64-linux` whenever
+  those systems are published.
+- `systems/_modules/nix.nix` contains
+  `boot.binfmt.emulatedSystems = ["aarch64-linux"]` on x86_64-linux NixOS
+  hosts, which is useful context but only a module-level intent, not current
   runtime state.
 
 ## Runtime evidence on this host
@@ -32,8 +37,8 @@ Observed on the current machine:
 
 Direct dry-run evidence collected during the investigation:
 
-- `nix build .#checks.aarch64-linux.backup_promotion --dry-run` fails because an
-  `aarch64-linux` builder is required.
+- `nix build .#checks.aarch64-linux.backup_promotion --dry-run` fails because
+  an `aarch64-linux` builder is required.
 - `nix build .#checks.aarch64-darwin.formatting --dry-run` fails because an
   `aarch64-darwin` builder is required.
 - `nix eval --json .#checks --apply builtins.attrNames` previously returned
@@ -41,17 +46,20 @@ Direct dry-run evidence collected during the investigation:
 
 ## Why `--all-systems` currently fails
 
-`--all-systems` does not magically make unsupported systems buildable. It asks Nix to evaluate and
-build every published system-specific check.
+`--all-systems` does not magically make unsupported systems buildable. It asks
+Nix to evaluate and build every published system-specific check.
 
 That means:
 
-- published Linux checks need either a native Linux builder or working emulation support
+- published Linux checks need either a native Linux builder or working
+  emulation support
 - published Darwin checks need Darwin-capable builders
-- if a system remains in `checks`, the build path for that system must exist somewhere
+- if a system remains in `checks`, the build path for that system must exist
+  somewhere
 
-On this host, that capability is missing for the non-local systems still present in the published
-checks. Local x86_64-linux builds are not enough to satisfy the full published matrix.
+On this host, that capability is missing for the non-local systems still
+present in the published checks. Local x86_64-linux builds are not enough to
+satisfy the full published matrix.
 
 ## Options considered
 
@@ -85,7 +93,8 @@ Cons:
 - not active on this host right now
 - does not solve Darwin at all
 - is not equivalent to a native remote builder
-- can only cover the emulated Linux architectures that are explicitly registered
+- can only cover the emulated Linux architectures that are explicitly
+  registered
 
 ### 3. Narrow or gate published checks
 
@@ -93,7 +102,8 @@ This is the safest immediate option and the one used here.
 
 Pros:
 
-- keeps published checks aligned with the repo’s currently supported main architecture
+- keeps published checks aligned with the repo’s currently supported main
+  architecture
 - avoids advertising systems that cannot be built on this host
 - preserves the existing x86_64-linux behavior
 
@@ -104,26 +114,32 @@ Cons:
 
 ## Recommendation for future implementation
 
-Keep the published `checks` narrowed to `x86_64-linux` until the builder story is real.
-When broader coverage is needed again, reintroduce it only together with actual capability for every
-non-local system that remains in `checks`.
+Keep the published `checks` narrowed to `x86_64-linux` until the builder story
+is real. When broader coverage is needed again, reintroduce it only together
+with actual capability for every non-local system that remains in `checks`.
 
 Recommended order of operations:
 
 1. Decide which systems should remain published in `checks`.
 2. Provision native remote builders for each non-local system in that set.
-3. Treat binfmt emulation as a helper for Linux-only coverage, not as a replacement for remote
-   builders.
-4. If Darwin checks stay published, add Darwin-capable builders; binfmt will not cover them.
+3. Treat binfmt emulation as a helper for Linux-only coverage, not as a
+   replacement for remote builders.
+4. If Darwin checks stay published, add Darwin-capable builders; binfmt will
+   not cover them.
 
-The key operational constraint is unchanged: full `nix flake check --all-systems` requires build
-capability for every non-local system that the flake continues to publish.
+The key operational constraint is unchanged: full
+`nix flake check --all-systems` requires build capability for every non-local
+system that the flake continues to publish.
 
 ## Official sources
 
-- Nix `flake check` manual: <https://nix.dev/manual/nix/latest/command-ref/new-cli/nix3-flake-check.html>
-- Nix distributed builds docs: <https://releases.nixos.org/nix/nix-2.22.2/manual/advanced-topics/distributed-builds.html>
-- NixOS `boot.binfmt.emulatedSystems` docs: <https://nixos.org/manual/nixos/stable/options.html#opt-boot.binfmt.emulatedSystems>
+- Nix `flake check` manual:
+  <https://nix.dev/manual/nix/latest/command-ref/new-cli/nix3-flake-check.html>
+- Nix distributed builds docs:
+  <https://releases.nixos.org/nix/nix-2.22.2/manual/advanced-topics/distributed-builds.html>
+- NixOS `boot.binfmt.emulatedSystems` docs:
+  <https://nixos.org/manual/nixos/stable/options.html#opt-boot.binfmt.emulatedSystems>
 
-These sources all point to the same conclusion: `--all-systems` is only practical when the flake’s
-published systems line up with actual builder availability.
+These sources all point to the same conclusion: `--all-systems` is only
+practical when the flake’s published systems line up with actual builder
+availability.

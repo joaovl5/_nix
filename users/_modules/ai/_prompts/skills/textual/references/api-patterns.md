@@ -1,6 +1,7 @@
 # Textual API Patterns
 
-This file focuses on behavior APIs: events/messages, reactives, workers, screens, bindings/actions, testing, and content.
+This file focuses on behavior APIs: events/messages, reactives, workers,
+screens, bindings/actions, testing, and content.
 
 ## App Lifecycle
 
@@ -34,11 +35,13 @@ Common app/screen/widget lifecycle hooks:
 | `on_screen_resume()` / `on_screen_suspend()` | Screen activated/deactivated |
 | `on_focus()` / `on_blur()`                   | Focus changes                |
 
-`App.run()` starts the app and returns the value passed to `exit(result)`. `self.exit(result=None, return_code=0, message=None)` exits.
+`App.run()` starts the app and returns the value passed to `exit(result)`.
+`self.exit(result=None, return_code=0, message=None)` exits.
 
 ## Events and Messages
 
-Low-level events come from `textual.events`; widget messages are nested classes on widgets.
+Low-level events come from `textual.events`; widget messages are nested
+classes on widgets.
 
 ### Input / Focus / Mouse Events
 
@@ -84,7 +87,8 @@ def handle_empty_search(self) -> None:
     ...
 ```
 
-Use `@on(message_type, selector=None, **field_filters)` for selective handlers and to avoid broad handler methods with manual branching.
+Use `@on(message_type, selector=None, **field_filters)` for selective handlers
+and to avoid broad handler methods with manual branching.
 
 ### Custom Messages
 
@@ -142,7 +146,9 @@ class WidgetState(Widget):
 | `bindings=True`          | Change refreshes binding display/enabled state |
 | `always_update=True`     | Watch even when old == new                     |
 
-Use `self.set_reactive(type(self).field, value)` in initialization when you need to avoid triggering watchers. Do not mutate mutable reactive values in place if the UI needs notification; assign a new value.
+Use `self.set_reactive(type(self).field, value)` in initialization when you
+need to avoid triggering watchers. Do not mutate mutable reactive values in
+place if the UI needs notification; assign a new value.
 
 ## Actions and Bindings
 
@@ -159,7 +165,8 @@ BINDINGS = [
 ]
 ```
 
-Binding fields: `key`, `action`, `description`, `show`, `priority`, `id`, `key_display`, `tooltip`, `system`, `group`.
+Binding fields: `key`, `action`, `description`, `show`, `priority`, `id`,
+`key_display`, `tooltip`, `system`, `group`.
 
 ### Action Methods
 
@@ -189,7 +196,8 @@ def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | No
     return True
 ```
 
-Call `refresh_bindings()` when enabling/disabling state changes, or make the state a reactive with `bindings=True`.
+Call `refresh_bindings()` when enabling/disabling state changes, or make the
+state a reactive with `bindings=True`.
 
 ## Workers
 
@@ -263,7 +271,8 @@ self.set_interval(1.0, self.tick, repeat=5)
 self.set_timer(5.0, self.done)         # one-shot
 ```
 
-Timers are message-pump helpers, not workers. Use for UI clocks/polling; avoid expensive callbacks.
+Timers are message-pump helpers, not workers. Use for UI clocks/polling; avoid
+expensive callbacks.
 
 ## Screens
 
@@ -304,7 +313,9 @@ class Parent(App):
         ...
 ```
 
-Use callbacks from normal event handlers. In current Textual, `push_screen(..., wait_for_dismiss=True)` / `push_screen_wait()` are worker-oriented; verify context before awaiting dialog results.
+Use callbacks from normal event handlers. In current Textual,
+`push_screen(..., wait_for_dismiss=True)` / `push_screen_wait()` are
+worker-oriented; verify context before awaiting dialog results.
 
 ### Modes
 
@@ -319,7 +330,8 @@ class MyApp(App):
         self.switch_mode("edit")
 ```
 
-Modes maintain separate screen stacks. Use for major app modes, not small dialogs.
+Modes maintain separate screen stacks. Use for major app modes, not small
+dialogs.
 
 ## Testing with Pilot
 
@@ -349,7 +361,8 @@ Pilot methods commonly used:
 | `resize_terminal(width, height)`                    | Test responsive layout                          |
 | `exit(result=None)`                                 | Exit app under test                             |
 
-Always `await pilot.pause()` after actions that trigger async messages, workers, timers, or deferred rendering.
+Always `await pilot.pause()` after actions that trigger async messages,
+workers, timers, or deferred rendering.
 
 ## Snapshot Testing
 
@@ -372,7 +385,8 @@ def test_with_pilot(snap_compare):
     assert snap_compare("app.py", run_before=setup)
 ```
 
-First run should fail until baseline exists. Update baselines with `pytest --snapshot-update`. Keep terminal size deterministic.
+First run should fail until baseline exists. Update baselines with
+`pytest --snapshot-update`. Keep terminal size deterministic.
 
 ## Animation
 
@@ -382,13 +396,15 @@ widget.styles.animate("offset", (10, 0), duration=0.4, easing="out_back")
 widget.styles.animate("opacity", 1.0, duration=0.2, delay=0.1, on_complete=self.done)
 ```
 
-Use `duration` or `speed`; `easing` defaults to a cubic ease. Tests should wait for animations.
+Use `duration` or `speed`; `easing` defaults to a cubic ease. Tests should
+wait for animations.
 
 ## Rich, Markup, and Content
 
 ### Rich Renderables
 
-Any Rich renderable can be returned from `render()` or passed to display widgets/logs: `Text`, `Table`, `Syntax`, `Tree`, `Markdown`, `Panel`, etc.
+Any Rich renderable can be returned from `render()` or passed to display
+widgets/logs: `Text`, `Table`, `Syntax`, `Tree`, `Markdown`, `Panel`, etc.
 
 ### Markup
 
@@ -397,7 +413,8 @@ Static("[b]bold[/] [#ff0000]red[/] [$accent]accent[/]", markup=True)
 Static(user_text, markup=False)
 ```
 
-Common tags: `[b]`, `[i]`, `[u]`, `[dim]`, `[s]`, `[r]`, foreground colors, `[on blue]`, theme variables. Actions and links:
+Common tags: `[b]`, `[i]`, `[u]`, `[dim]`, `[s]`, `[r]`, foreground colors,
+`[on blue]`, theme variables. Actions and links:
 
 ```python
 Static("[@click=app.bell]click[/]")
@@ -413,7 +430,8 @@ content = Content.from_markup("Hello [b]$name[/b]", name=user_input)
 content = content.stylize(0, 5, "italic")
 ```
 
-Use `Content.from_markup(..., name=value)` to safely escape interpolated values.
+Use `Content.from_markup(..., name=value)` to safely escape interpolated
+values.
 
 ## Notifications
 
@@ -422,20 +440,25 @@ self.notify("Saved")
 self.notify("Failed", severity="error", timeout=5)
 ```
 
-Use notifications for transient feedback rather than manually mounting `Toast` widgets.
+Use notifications for transient feedback rather than manually mounting `Toast`
+widgets.
 
 ## Debugging and Devtools
 
 - Install `textual-dev` for the `textual` CLI/devtools package.
-- Run with `textual run --dev app.py` for development support and live CSS reload where supported.
+- Run with `textual run --dev app.py` for development support and live CSS
+  reload where supported.
 - Use `textual console` for the dev console.
 - Use stable IDs/classes to make CSS and tests easier to inspect.
-- If a click test fails, remember hit-testing is real: an overlaying widget may receive the click instead.
+- If a click test fails, remember hit-testing is real: an overlaying widget
+  may receive the click instead.
 
 ## Version-Sensitive Caveats
 
-- Current Textual docs/source around v8.2.3 use `Select.NULL`; older examples may mention `Select.BLANK`.
+- Current Textual docs/source around v8.2.3 use `Select.NULL`; older examples
+  may mention `Select.BLANK`.
 - Python 3.8 support was dropped in Textual 6.3.0.
-- Devtools were split into the separate `textual-dev` package in older 0.x releases; current CLI availability depends on installed packages.
+- Devtools were split into the separate `textual-dev` package in older 0.x
+  releases; current CLI availability depends on installed packages.
 - Threaded `@work` functions require `thread=True`.
 - Screen CSS applies app-wide while the screen is active.

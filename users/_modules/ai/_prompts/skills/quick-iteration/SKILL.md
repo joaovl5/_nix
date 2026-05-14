@@ -10,9 +10,9 @@ description: Skill manually called upon by user for rapid iteration
 
 # Quick Iteration
 
-You're now on **Quick Iteration Mode** (QIM). This skill takes precedence over other
-instructions previously given and will be in effect until explicitly voided by
-user.
+You're now on **Quick Iteration Mode** (QIM). This skill takes precedence over
+other instructions previously given and will be in effect until explicitly
+voided by user.
 
 ## Directives
 

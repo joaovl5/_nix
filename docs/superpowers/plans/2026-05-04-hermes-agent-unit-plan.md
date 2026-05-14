@@ -1,12 +1,24 @@
 # Hermes Agent Unit Implementation Plan
 
-> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking. Do not create git commits; the repository instructions prohibit commits without explicit permission.
+> **For agentic workers:** REQUIRED: Use
+> superpowers:subagent-driven-development (if subagents available) or
+> superpowers:executing-plans to implement this plan. Steps use checkbox
+> (`- [ ]`) syntax for tracking. Do not create git commits; the repository
+> instructions prohibit commits without explicit permission.
 
-**Goal:** Add and enable a Hermes Agent NixOS unit on `tyrant`, running 24/7 inside a unit-owned native NixOS container.
+**Goal:** Add and enable a Hermes Agent NixOS unit on `tyrant`, running 24/7
+inside a unit-owned native NixOS container.
 
-**Architecture:** Implement a Hermes-scoped `my."unit.hermes-agent"` module that directly emits `containers.hermes-agent`, host NAT, host-visible state backup, a sops-nix dotenv secret hook, and a guest systemd service running `${pkgs.llm-agents.hermes-agent}/bin/hermes gateway run`. Use explicit host state bind mounts with `privateUsers = "identity"`, no ingress, read-only env-file mounts, and local terminal execution inside the container.
+**Architecture:** Implement a Hermes-scoped `my."unit.hermes-agent"` module
+that directly emits `containers.hermes-agent`, host NAT, host-visible state
+backup, a sops-nix dotenv secret hook, and a guest systemd service running
+`${pkgs.llm-agents.hermes-agent}/bin/hermes gateway run`. Use explicit host
+state bind mounts with `privateUsers = "identity"`, no ingress, read-only
+env-file mounts, and local terminal execution inside the container.
 
-**Tech Stack:** NixOS module system, repo `o.module` helpers, native `containers.<name>`, systemd, existing `pkgs.llm-agents.hermes-agent`, host NAT, sops-nix secret env files, restic backup item conventions.
+**Tech Stack:** NixOS module system, repo `o.module` helpers, native
+`containers.<name>`, systemd, existing `pkgs.llm-agents.hermes-agent`, host
+NAT, sops-nix secret env files, restic backup item conventions.
 
 **Spec:** `docs/superpowers/specs/2026-05-04-hermes-agent-unit-design.md`
 
@@ -16,14 +28,17 @@
 
 - Create `users/_units/hermes-agent/default.nix`
   - Defines `my."unit.hermes-agent"` options.
-  - Emits host tmpfiles, NAT, `containers.hermes-agent`, backup item, and assertions.
+  - Emits host tmpfiles, NAT, `containers.hermes-agent`, backup item, and
+    assertions.
   - Defines the guest NixOS config inline in `containers.${name}.config`.
 - Modify `users/_units/default.nix`
   - Import `./hermes-agent`.
 - Modify `globals/hosts.nix`
   - Enable `my."unit.hermes-agent"` on `tyrant`.
   - Set `nat.external_interface = "enp3s0f1"`.
-  - Leave `hermes.environment_files = []`; the unit auto-enables its default sops env-file secret only after `${my.secrets.dir}/hermes-agent.yaml` exists.
+  - Leave `hermes.environment_files = []`; the unit auto-enables its default
+    sops env-file secret only after `${my.secrets.dir}/hermes-agent.yaml`
+    exists.
 - Create this plan document and the design spec under `docs/superpowers/`.
 
 No `npins/`, `inputs.nix`, or `input-overrides.nix` changes are planned.
@@ -37,7 +52,6 @@ No `npins/`, `inputs.nix`, or `input-overrides.nix` changes are planned.
 **Files:**
 
 - Create: `users/_units/hermes-agent/default.nix`
-
 - [ ] **Step 1: Add module header and option types**
 
 Use the existing unit style:
@@ -149,7 +163,9 @@ env_mounts = lib.listToAttrs (lib.imap0 (index: host_path: {
 }) host_environment_files);
 ```
 
-Keep `guest_environment_files` as the ordered list derived directly from `host_environment_files`; do not derive it from `lib.attrNames env_mounts`, because attr names are sorted and can reorder env-file precedence.
+Keep `guest_environment_files` as the ordered list derived directly from
+`host_environment_files`; do not derive it from `lib.attrNames env_mounts`,
+because attr names are sorted and can reorder env-file precedence.
 
 - [ ] **Step 3: Add host assertions and state/backup declarations**
 

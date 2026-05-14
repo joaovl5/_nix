@@ -33,6 +33,7 @@ description: Condenses/compresses text for later reference.
 
 - Anything that adds info towards the _subject_ of the text
 - therefore anything that is 'filler', or related to the text itself (such as
-  a table-of-contents) is NOT part of the core contents and should be excluded.
+  a table-of-contents) is NOT part of the core contents and should be
+  excluded.
 - Principles, rules, nuances, all form the core of the subject, the message.
   The way the input text presents such message is what can be compacted.

@@ -168,7 +168,8 @@ description: ORG-Mode skill
 
 - **Node**: Any headline or top-level file with an ID property
 - **Fleeting notes**: Quick capture, processed later
-- **Permanent notes**: Literature notes (annotations) or concept notes (detailed)
+- **Permanent notes**: Literature notes (annotations) or concept notes
+  (detailed)
 
 ### Core Commands
 

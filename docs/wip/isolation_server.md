@@ -6,18 +6,24 @@ Companion to: `docs/wip/isolation.md`
 
 ## Goal
 
-Research server-side service isolation for this repo using declarative NixOS containers.
+Research server-side service isolation for this repo using declarative NixOS
+containers.
 
 Desired properties:
 
 1. Declare isolated services as NixOS configurations.
-2. Expose selected container ports to the host so the existing reverse proxy can consume them.
-3. Use the repo's `mylib` helpers to reduce repeated endpoint, mount, route, and container boilerplate.
+2. Expose selected container ports to the host so the existing reverse proxy
+   can consume them.
+3. Use the repo's `mylib` helpers to reduce repeated endpoint, mount, route,
+   and container boilerplate.
 4. Explore alternatives and trade-offs.
 
-Initial hard constraint for the first pass: **do not use MicroVMs**. Appendix A reopens that constraint and researches MicroVMs as a stronger-isolation alternative.
+Initial hard constraint for the first pass: **do not use MicroVMs**. Appendix
+A reopens that constraint and researches MicroVMs as a stronger-isolation
+alternative.
 
-This document is a research snapshot only. No implementation decisions are locked in yet.
+This document is a research snapshot only. No implementation decisions are
+locked in yet.
 
 ## Short conclusion
 
@@ -28,12 +34,17 @@ The strongest server-side direction is now:
 - keep units as the smallest runnable service modules
 - let containers declare which unit modules they contain
 - make the primary helper path optimize for one container containing one unit
-- still let the underlying container schema support multiple units per container
+- still let the underlying container schema support multiple units per
+  container
 - default to routed private networking with stable per-container address pairs
-- have host Traefik consume container HTTP endpoints through normal `my.vhosts.*.sources`
-- keep raw TCP/UDP exposure in `my.tcp_routes` / `my.udp_routes`, not `my.vhosts`
+- have host Traefik consume container HTTP endpoints through normal
+  `my.vhosts.*.sources`
+- keep raw TCP/UDP exposure in `my.tcp_routes` / `my.udp_routes`, not
+  `my.vhosts`
 
-The main reason is fit: native NixOS containers let each isolated service run as a real NixOS system, while `my.containers.<name>` can keep host integration, persistence, and cross-service access explicit.
+The main reason is fit: native NixOS containers let each isolated service run
+as a real NixOS system, while `my.containers.<name>` can keep host
+integration, persistence, and cross-service access explicit.
 
 ## Current repo evidence
 
@@ -48,9 +59,12 @@ virtualisation = o.def {
 };
 ```
 
-The original `docs/wip/isolation.md` also recorded that native NixOS containers are the best server-side fit, but that the repo did not yet have a framework using `containers.<name>`.
+The original `docs/wip/isolation.md` also recorded that native NixOS
+containers are the best server-side fit, but that the repo did not yet have a
+framework using `containers.<name>`.
 
-Current search confirms there is still no established native-container pattern in repo Nix code:
+Current search confirms there is still no established native-container pattern
+in repo Nix code:
 
 - no `containers.<name>` service framework
 - no current `forwardPorts` / `hostAddress` / `localAddress` callsites
@@ -60,11 +74,13 @@ Current search confirms there is still no established native-container pattern i
 The existing container-ish helper is Docker Compose oriented:
 
 - `_lib/units/default.nix` exposes `make_docker_unit`
-- `users/_units/fxsync/default.nix` uses Docker Compose for a database helper unit
+- `users/_units/fxsync/default.nix` uses Docker Compose for a database helper
+  unit
 
 ### Server reverse proxy model
 
-The server host to anchor this design is currently `tyrant` in `globals/hosts.nix`; it enables `unit.traefik` and several long-running units.
+The server host to anchor this design is currently `tyrant` in
+`globals/hosts.nix`; it enables `unit.traefik` and several long-running units.
 
 The repo already has a useful ingress split:
 
@@ -80,12 +96,18 @@ The repo already has a useful ingress split:
    - raw UDP Traefik route declarations
    - fields include `listen`, `upstreams`
 
-This matches the memory note from `memory://root/memory_summary.md` to keep `my.vhosts` HTTP-only and add separate TCP/UDP routing if needed. Current repo evidence supports it:
+This matches the memory note from `memory://root/memory_summary.md` to keep
+`my.vhosts` HTTP-only and add separate TCP/UDP routing if needed. Current repo
+evidence supports it:
 
-- `users/_units/reverse-proxy/default.nix` defines separate schemas for `my.vhosts`, `my.tcp_routes`, and `my.udp_routes`
-- `users/_units/reverse-proxy/traefik/default.nix` renders HTTP backends from `my.vhosts.*.sources` as URL load balancer servers
-- the same Traefik module renders TCP/UDP routes separately using raw upstream addresses
-- `systems/_modules/dns/default.nix` derives DNS subdomains from `my.vhosts`, not from TCP/UDP routes
+- `users/_units/reverse-proxy/default.nix` defines separate schemas for
+  `my.vhosts`, `my.tcp_routes`, and `my.udp_routes`
+- `users/_units/reverse-proxy/traefik/default.nix` renders HTTP backends from
+  `my.vhosts.*.sources` as URL load balancer servers
+- the same Traefik module renders TCP/UDP routes separately using raw upstream
+  addresses
+- `systems/_modules/dns/default.nix` derives DNS subdomains from `my.vhosts`,
+  not from TCP/UDP routes
 
 So container support should preserve this split.
 
@@ -112,7 +134,10 @@ The default source is currently:
 ["http://localhost:${toString port}"]
 ```
 
-That is correct for host-local services, but wrong for a private-network container unless the service is deliberately forwarded back to a host port. A container helper should therefore override or derive `sources` for the chosen networking pattern.
+That is correct for host-local services, but wrong for a private-network
+container unless the service is deliberately forwarded back to a host port. A
+container helper should therefore override or derive `sources` for the chosen
+networking pattern.
 
 ### Non-HTTP precedent
 
@@ -120,7 +145,8 @@ Forgejo already exposes both HTTP and raw TCP:
 
 - `my.vhosts.forgejo` for web
 - `my.tcp_routes.forgejo_ssh` for SSH
-- Forgejo's built-in SSH backend currently binds `127.0.0.1:4220`, and Traefik routes TCP port 22 to that upstream
+- Forgejo's built-in SSH backend currently binds `127.0.0.1:4220`, and Traefik
+  routes TCP port 22 to that upstream
 
 That is a good model for future containerized services with more than HTTP.
 
@@ -162,19 +188,28 @@ Useful options:
 - `containers.<name>.ephemeral`
   - empty root filesystem on each boot/shutdown cycle
 
-Important implementation detail from the nixpkgs module: `forwardPorts` is emitted only in the `privateNetwork` branch. Treat it as a private-network feature.
+Important implementation detail from the nixpkgs module: `forwardPorts` is
+emitted only in the `privateNetwork` branch. Treat it as a private-network
+feature.
 
 Other useful behavior:
 
-- the host gets generated names like `<name>.containers` when `localAddress` is set
+- the host gets generated names like `<name>.containers` when `localAddress`
+  is set
 - container names must not contain underscores
-- on older kernels, private-network container names had stricter length concerns because interface names derive from container names
-- private-network containers need host NAT if they need outbound Internet access
-- NetworkManager should not manage `ve-*` / `vb-*` container interfaces; nixpkgs has handling for this
+- on older kernels, private-network container names had stricter length
+  concerns because interface names derive from container names
+- private-network containers need host NAT if they need outbound Internet
+  access
+- NetworkManager should not manage `ve-*` / `vb-*` container interfaces;
+  nixpkgs has handling for this
 
 Security caveat:
 
-Native NixOS containers are shared-kernel containers, not VM isolation. The NixOS manual warns they are not perfectly isolated from the host. This makes them good for service compartmentalization, not for hostile multi-tenant workloads.
+Native NixOS containers are shared-kernel containers, not VM isolation. The
+NixOS manual warns they are not perfectly isolated from the host. This makes
+them good for service compartmentalization, not for hostile multi-tenant
+workloads.
 
 ## Networking approaches
 
@@ -214,13 +249,16 @@ Pros:
 - avoids allocating high host ports for every service
 - keeps service ports inside the container network namespace
 - preserves `my.vhosts` unchanged
-- makes TCP/UDP route upstreams straightforward: `actual.containers:<port>` or `<localAddress>:<port>`
+- makes TCP/UDP route upstreams straightforward: `actual.containers:<port>` or
+  `<localAddress>:<port>`
 
 Cons:
 
 - requires stable container IP allocation
-- requires each containerized service to bind to the container interface, not only `127.0.0.1`
-- requires thinking about container outbound NAT if the service needs Internet access
+- requires each containerized service to bind to the container interface, not
+  only `127.0.0.1`
+- requires thinking about container outbound NAT if the service needs Internet
+  access
 - debugging requires checking both host and guest firewalls
 
 Best fit:
@@ -264,8 +302,10 @@ Pros:
 Cons:
 
 - consumes host port namespace
-- address/bind behavior for forwarded ports needs verification before relying on loopback-only semantics
-- easier to accidentally create direct non-Traefik access if firewall assumptions are wrong
+- address/bind behavior for forwarded ports needs verification before relying
+  on loopback-only semantics
+- easier to accidentally create direct non-Traefik access if firewall
+  assumptions are wrong
 - still requires `privateNetwork = true`
 
 Best fit:
@@ -292,7 +332,8 @@ containers.actual = {
 Pros:
 
 - smallest networking diff from current host services
-- `u.endpoint`'s default `localhost` source can remain valid if the guest service binds the expected host-visible socket
+- `u.endpoint`'s default `localhost` source can remain valid if the guest
+  service binds the expected host-visible socket
 - fewer moving parts for first experiments
 
 Cons:
@@ -353,7 +394,8 @@ Pros:
 Cons:
 
 - more IPs and containers
-- shared infrastructure such as Postgres still crosses boundaries unless also moved
+- shared infrastructure such as Postgres still crosses boundaries unless also
+  moved
 
 Best default for this repo.
 
@@ -377,7 +419,8 @@ Good for apps whose database is truly app-private.
 
 ### Shared infra container plus app containers
 
-One or more infrastructure containers provide Postgres, Redis, etc.; app containers consume them over private container networking.
+One or more infrastructure containers provide Postgres, Redis, etc.; app
+containers consume them over private container networking.
 
 Pros:
 
@@ -394,7 +437,8 @@ Probably a later step, not the first prototype.
 
 ## Container / unit contract direction
 
-The current design direction is no longer "units decide whether they run on the host or in a container". The cleaner contract is:
+The current design direction is no longer "units decide whether they run on
+the host or in a container". The cleaner contract is:
 
 ```text
 unit      = smallest runnable service module
@@ -402,7 +446,9 @@ container = composer/deployer of one or more units
 host      = owner of ingress, persistence, backups, shared providers
 ```
 
-A unit should not know whether it is running directly on the host or inside a native NixOS container. It should only know how to configure its local service inside a NixOS system.
+A unit should not know whether it is running directly on the host or inside a
+native NixOS container. It should only know how to configure its local service
+inside a NixOS system.
 
 A container should decide:
 
@@ -415,7 +461,8 @@ A container should decide:
 
 ### Primary external shape
 
-The preferred public API should be concise for the common case: one container, one unit.
+The preferred public API should be concise for the common case: one container,
+one unit.
 
 Example shape:
 
@@ -461,11 +508,13 @@ my.containers.kaneo = u.container.unit.kaneo {
 };
 ```
 
-The helper is optimized for the one-unit case, but it should expand into a general `my.containers.<name>` schema rather than bypassing it.
+The helper is optimized for the one-unit case, but it should expand into a
+general `my.containers.<name>` schema rather than bypassing it.
 
 ### Underlying multi-unit container shape
 
-The underlying container schema should still support multiple units per container. This keeps app stacks possible without changing the model later.
+The underlying container schema should still support multiple units per
+container. This keeps app stacks possible without changing the model later.
 
 Conceptual expanded shape:
 
@@ -492,11 +541,13 @@ my.containers.some-stack = {
 };
 ```
 
-This more explicit form is not the primary ergonomics target. It exists so the model can handle multi-process stacks when needed.
+This more explicit form is not the primary ergonomics target. It exists so the
+model can handle multi-process stacks when needed.
 
 ### Minimal unit contract
 
-A unit module should be the smallest thing that can run locally in a NixOS system.
+A unit module should be the smallest thing that can run locally in a NixOS
+system.
 
 It may define options such as:
 
@@ -648,9 +699,11 @@ users/_units/actual-budget/
 
 `unit.nix` is the only file imported into a container guest.
 
-`default.nix` keeps the current host usage working and may internally reuse `unit.nix`.
+`default.nix` keeps the current host usage working and may internally reuse
+`unit.nix`.
 
-`meta.nix` can provide defaults for helpers without forcing the unit itself to know about containers.
+`meta.nix` can provide defaults for helpers without forcing the unit itself to
+know about containers.
 
 ### Explicit non-goals
 
@@ -663,7 +716,8 @@ Avoid these shapes for the first implementation:
 - automatic route generation from inside unit modules
 - moving Postgres into many per-app containers
 
-OCI/Arion remain secondary for OCI-native or Compose-native workloads. They do not satisfy the primary goal as directly as native NixOS container guests.
+OCI/Arion remain secondary for OCI-native or Compose-native workloads. They do
+not satisfy the primary goal as directly as native NixOS container guests.
 
 ## Proposed default container contract
 
@@ -706,14 +760,17 @@ Guest baseline should include:
 Current default decisions:
 
 - derive one routed host/container address pair per container ID
-- prefer `<name>.containers` for HTTP upstreams when generated host entries work
+- prefer `<name>.containers` for HTTP upstreams when generated host entries
+  work
 - keep host-owned integration out of guest unit modules
 - pass only the minimum required helper context into guest evaluation
 
 Still-open implementation details:
 
-- Should container outbound Internet access use host NAT by default or be opt-in?
-- Should guests receive `mylib` through `specialArgs`, or should the generated guest config re-import the minimal helpers it needs?
+- Should container outbound Internet access use host NAT by default or be
+  opt-in?
+- Should guests receive `mylib` through `specialArgs`, or should the generated
+  guest config re-import the minimal helpers it needs?
 - What exact private subnet should be reserved for routed containers?
 
 ## IP allocation options
@@ -743,7 +800,8 @@ hostAddress = "10.88.${toString id}.1";
 localAddress = "10.88.${toString id}.2";
 ```
 
-This avoids assuming that duplicate host-side addresses across multiple veth pairs are safe before testing.
+This avoids assuming that duplicate host-side addresses across multiple veth
+pairs are safe before testing.
 
 Pros:
 
@@ -777,9 +835,11 @@ Useful fallback, not the default.
 
 ## Cross-container and host-provider communication
 
-Cross-container and container-to-host communication should be designed from the start, even if the first prototype only exposes one HTTP app.
+Cross-container and container-to-host communication should be designed from
+the start, even if the first prototype only exposes one HTTP app.
 
-The selected network model is **routed per-container links**, not a shared bridge. Each container gets a unique routed pair derived from its numeric ID:
+The selected network model is **routed per-container links**, not a shared
+bridge. Each container gets a unique routed pair derived from its numeric ID:
 
 ```nix
 id = 12;
@@ -787,11 +847,13 @@ hostAddress = "10.88.12.1";
 localAddress = "10.88.12.2";
 ```
 
-The host is the router between containers. That keeps the model stricter than a shared L2 bridge and gives a natural place to generate allow rules.
+The host is the router between containers. That keeps the model stricter than
+a shared L2 bridge and gives a natural place to generate allow rules.
 
 ### Declared consume/provide edges
 
-Containers should not get arbitrary peer access by default. Instead, access should come from declared edges.
+Containers should not get arbitrary peer access by default. Instead, access
+should come from declared edges.
 
 Example future shape:
 
@@ -816,11 +878,15 @@ The host layer can derive:
 allow 10.88.12.2 -> 10.88.13.2:6379
 ```
 
-No declared edge means no intended peer access. The first implementation does not need perfect firewall generation, but the schema should be shaped so firewall assertions and rules can be added without redesigning consumers.
+No declared edge means no intended peer access. The first implementation does
+not need perfect firewall generation, but the schema should be shaped so
+firewall assertions and rules can be added without redesigning consumers.
 
 ### Host providers
 
-Some shared services should remain host-owned for now. Postgres is the important example: we do not want every app container to carry its own database, and we do not need to migrate Postgres into a container on day one.
+Some shared services should remain host-owned for now. Postgres is the
+important example: we do not want every app container to carry its own
+database, and we do not need to migrate Postgres into a container on day one.
 
 Model those as host providers.
 
@@ -855,23 +921,30 @@ my."unit.kaneo".database = {
 };
 ```
 
-The host can bind or firewall Postgres for declared container clients only. This is less isolated than moving Postgres into its own container, because an RCE in an app container can still try the declared host provider path. That trade-off is acceptable for the first phase because it avoids duplicating databases and keeps migration smaller.
+The host can bind or firewall Postgres for declared container clients only.
+This is less isolated than moving Postgres into its own container, because an
+RCE in an app container can still try the declared host provider path. That
+trade-off is acceptable for the first phase because it avoids duplicating
+databases and keeps migration smaller.
 
 ### Host access should still be explicit
 
-Do not give containers blanket access to every host-local service. Prefer named provider grants such as:
+Do not give containers blanket access to every host-local service. Prefer
+named provider grants such as:
 
 ```nix
 consumes.host.postgres = true;
 ```
 
-Each provider can decide how it exposes itself to the routed container network.
+Each provider can decide how it exposes itself to the routed container
+network.
 
 ## State, secrets, and backups
 
 ### State
 
-For persistent services, avoid relying on the container root filesystem as the only copy of important data.
+For persistent services, avoid relying on the container root filesystem as the
+only copy of important data.
 
 Preferred pattern:
 
@@ -889,7 +962,8 @@ bindMounts."/var/lib/actual" = {
 };
 ```
 
-For stateful services, `ephemeral = true` is only safe if all meaningful state is bind-mounted or externalized.
+For stateful services, `ephemeral = true` is only safe if all meaningful state
+is bind-mounted or externalized.
 
 ### Secrets
 
@@ -904,20 +978,28 @@ Two possible patterns:
    - cleaner isolation story eventually
    - needs explicit key and identity handling
 
-First prototype should probably use host-managed read-only secret binds unless a service specifically benefits from guest-managed secrets.
+First prototype should probably use host-managed read-only secret binds unless
+a service specifically benefits from guest-managed secrets.
 
 ### Backups
 
-Current `o.module` automatically adds `backup.items` under every unit option tree. For host-run units that remains fine. For containerized units, backup declarations should be rendered by the host-side container composer, not by the guest unit module.
+Current `o.module` automatically adds `backup.items` under every unit option
+tree. For host-run units that remains fine. For containerized units, backup
+declarations should be rendered by the host-side container composer, not by
+the guest unit module.
 
 Containerized units should keep backup declarations host-side:
 
 - path backups target host bind-mount paths
-- host-provider databases such as Postgres use the provider's dump/backup model
-- database dumps for future containerized databases should connect through declared provider edges or write dump artifacts to host-mounted state
-- avoid requiring the backup system to inspect container root filesystems directly
+- host-provider databases such as Postgres use the provider's dump/backup
+  model
+- database dumps for future containerized databases should connect through
+  declared provider edges or write dump artifacts to host-mounted state
+- avoid requiring the backup system to inspect container root filesystems
+  directly
 
-If a full app stack moves its database inside the container, the dump helpers may need a container-aware host/port option.
+If a full app stack moves its database inside the container, the dump helpers
+may need a container-aware host/port option.
 
 ## Service migration notes
 
@@ -932,11 +1014,15 @@ Good first candidate:
 
 Things to prove:
 
-- split a minimal `users/_units/actual-budget/unit.nix` from the current host wrapper
-- keep current host-run `users/_units/actual-budget/default.nix` behavior working
-- add a concise `u.container.unit.actual-budget { id = 11; target = "actual"; }` helper
+- split a minimal `users/_units/actual-budget/unit.nix` from the current host
+  wrapper
+- keep current host-run `users/_units/actual-budget/default.nix` behavior
+  working
+- add a concise
+  `u.container.unit.actual-budget { id = 11; target = "actual"; }` helper
 - generate state bind mount and host-side backup from unit metadata
-- expose `http://actual-budget.containers:5006` through `my.vhosts.actual-budget`
+- expose `http://actual-budget.containers:5006` through
+  `my.vhosts.actual-budget`
 
 ### Kaneo
 
@@ -946,7 +1032,8 @@ Why:
 
 - exercises multiple HTTP endpoints
 - already depends on shared `unit.postgres`
-- can prove container-to-host Postgres access without moving Postgres into a container
+- can prove container-to-host Postgres access without moving Postgres into a
+  container
 
 Things to prove:
 
@@ -962,7 +1049,8 @@ Useful later because it exercises HTTP + TCP.
 Things to check:
 
 - web HTTP source can become container HTTP source
-- SSH route should remain `my.tcp_routes`, with upstream changed to container address
+- SSH route should remain `my.tcp_routes`, with upstream changed to container
+  address
 - built-in SSH listener must bind inside guest in a way Traefik can reach
 
 ### Pi-hole
@@ -987,20 +1075,28 @@ Reasons:
 
 ## Recommended next implementation path
 
-1. Define the `my.containers.<name>` option schema and a small `u.container` helper namespace.
-2. Keep the underlying schema multi-unit, but make the first helper path `u.container.unit.<unit-name>` for one container containing one unit.
-3. Refactor Actual Budget into a minimal `unit.nix` plus compatibility `default.nix`.
-4. Add `meta.nix` or equivalent unit metadata for Actual Budget defaults: endpoint, state path, backup policy.
-5. Implement `my.containers.actual-budget = u.container.unit.actual-budget { id = 11; target = "actual"; }`.
+1. Define the `my.containers.<name>` option schema and a small `u.container`
+   helper namespace.
+2. Keep the underlying schema multi-unit, but make the first helper path
+   `u.container.unit.<unit-name>` for one container containing one unit.
+3. Refactor Actual Budget into a minimal `unit.nix` plus compatibility
+   `default.nix`.
+4. Add `meta.nix` or equivalent unit metadata for Actual Budget defaults:
+   endpoint, state path, backup policy.
+5. Implement `my.containers.actual-budget` using
+   `u.container.unit.actual-budget`.
+   Pass `id = 11` and `target = "actual"`.
 6. Use routed per-container addressing derived from `id`.
-7. Generate host-owned `my.vhosts`, bind mounts, and backup declarations from the container composer.
+7. Generate host-owned `my.vhosts`, bind mounts, and backup declarations from
+   the container composer.
 8. Add assertions early for:
    - duplicate container IDs/IPs
    - underscores or invalid characters in container names
    - duplicate host-side HTTP targets
    - undeclared expose references to missing units/endpoints
    - host-provider clients without matching provider support
-9. After Actual Budget works, prototype Kaneo or another Postgres-backed app to prove host-provider communication.
+9. After Actual Budget works, prototype Kaneo or another Postgres-backed app
+   to prove host-provider communication.
 
 Verification for future implementation should follow repo procedure:
 
@@ -1008,17 +1104,21 @@ Verification for future implementation should follow repo procedure:
 - stage changed files before `prek`
 - `prek`
 - targeted `nix eval` / host toplevel build
-- `nix flake check --all-systems` only when appropriate for Nix code changes and when the broader check cost is acceptable
+- `nix flake check --all-systems` only when appropriate for Nix code changes
+  and when the broader check cost is acceptable
 
 ## Appendix A: MicroVMs as a server isolation backend
 
 Date: 2026-05-03
 
-This appendix reconsiders the original no-MicroVM constraint. It does not replace the native-container research above; it asks whether MicroVMs can be a clean repo-supported server isolation tier and what decisions are still open.
+This appendix reconsiders the original no-MicroVM constraint. It does not
+replace the native-container research above; it asks whether MicroVMs can be a
+clean repo-supported server isolation tier and what decisions are still open.
 
 ### Short answer
 
-Yes, MicroVMs can be used cleanly in this repo, but not as a drop-in replacement for the native `containers.<name>` plan.
+Yes, MicroVMs can be used cleanly in this repo, but not as a drop-in
+replacement for the native `containers.<name>` plan.
 
 They become clean if the repo gives them a dedicated contract:
 
@@ -1030,9 +1130,14 @@ They become clean if the repo gives them a dedicated contract:
 - secrets and logs handled deliberately
 - host-side backup declarations that understand where state lives
 
-They are not clean if the repo only copies the current `microvms/postgres/default.nix` sample. That sample proves the input works, but it does not define networking, persistence, firewall rules, ingress, backups, or secrets.
+They are not clean if the repo only copies the current
+`microvms/postgres/default.nix` sample. That sample proves the input works,
+but it does not define networking, persistence, firewall rules, ingress,
+backups, or secrets.
 
-The practical conclusion is: keep native NixOS containers as the simpler default, and treat MicroVMs as a stronger-isolation tier for selected services where the extra operational cost is justified.
+The practical conclusion is: keep native NixOS containers as the simpler
+default, and treat MicroVMs as a stronger-isolation tier for selected services
+where the extra operational cost is justified.
 
 ### What MicroVMs add over NixOS containers
 
@@ -1046,7 +1151,9 @@ The practical conclusion is: keep native NixOS containers as the simpler default
 | State model            | Bind mounts, tmpfs, container root                               | Read-only root plus volumes or host shares                                               |
 | Best use               | Normal trusted service compartmentalization                      | Higher-risk/high-value services or stronger fault/security boundary                      |
 
-MicroVMs reduce the shared-kernel attack surface that native containers retain. The trade-off is more lifecycle, networking, storage, and resource management.
+MicroVMs reduce the shared-kernel attack surface that native containers
+retain. The trade-off is more lifecycle, networking, storage, and resource
+management.
 
 ### Current repo MicroVM state
 
@@ -1055,12 +1162,20 @@ The repo already has MicroVM capability, but not yet a server framework.
 Verified repo facts:
 
 - `flake.nix` declares the `microvm` input and makes it follow repo `nixpkgs`.
-- `flake.lock` pins `microvm-nix/microvm.nix` at revision `2f2f62fdfdca2750e3399f66bd03986ab967e5ca`.
-- `outputs/hosts/default.nix` imports `microvm.nixosModules.host` through `HYPERVISOR_HOST_MODULES`. This is included for `lavpc`, `tyrant`, and `temperance`; `iso` does not receive it.
-- `_modules/vm.nix` is a generic `virtualisation.vmVariant` profile. It is not the MicroVM server framework.
-- `microvms/postgres/default.nix` is the only guest sample. It hardcodes `microvm.hypervisor = "cloud-hypervisor"`, shares `/nix/store` read-only through `virtiofs`, and enables PostgreSQL. It does not declare guest networking, state, firewall, ingress, secrets, or backups.
+- `flake.lock` pins `microvm-nix/microvm.nix` at revision
+  `2f2f62fdfdca2750e3399f66bd03986ab967e5ca`.
+- `outputs/hosts/default.nix` imports `microvm.nixosModules.host` through
+  `HYPERVISOR_HOST_MODULES`. This is included for `lavpc`, `tyrant`, and
+  `temperance`; `iso` does not receive it.
+- `_modules/vm.nix` is a generic `virtualisation.vmVariant` profile. It is not
+  the MicroVM server framework.
+- `microvms/postgres/default.nix` is the only guest sample. It hardcodes
+  `microvm.hypervisor = "cloud-hypervisor"`, shares `/nix/store` read-only
+  through `virtiofs`, and enables PostgreSQL. It does not declare guest
+  networking, state, firewall, ingress, secrets, or backups.
 
-So the repo is one layer ahead of zero: host capability exists, but clean service isolation would still need a repo API.
+So the repo is one layer ahead of zero: host capability exists, but clean
+service isolation would still need a repo API.
 
 ### microvm.nix facts relevant here
 
@@ -1070,8 +1185,10 @@ So the repo is one layer ahead of zero: host capability exists, but clean servic
    - host declares `microvm.vms.<name>.config`
    - the MicroVM is built with the host NixOS configuration
    - this is closest to `containers.<name>.config`
-   - default for `microvm.vms.<name>.restartIfChanged` is true when `config` is used
-   - downside: host rebuilds become larger/slower because VM systems are included
+   - default for `microvm.vms.<name>.restartIfChanged` is true when `config`
+     is used
+   - downside: host rebuilds become larger/slower because VM systems are
+     included
 2. **Declarative deployment / imperative update**
    - host declares `microvm.vms.<name>.flake` and optional `updateFlake`
    - initial deployment is host-declarative under `/var/lib/microvms`
@@ -1086,7 +1203,8 @@ The host module provides:
 - TAP/MACVTAP setup services
 - `microvm-virtiofsd@.service` for `virtiofs` shares
 - PCI prep services for passthrough
-- `microvm.vms`, `microvm.autostart`, `microvm.stateDir`, and host timeout/readiness options
+- `microvm.vms`, `microvm.autostart`, `microvm.stateDir`, and host
+  timeout/readiness options
 
 Guest-level options important for server services include:
 
@@ -1105,7 +1223,9 @@ Guest-level options important for server services include:
 
 ### Hypervisor choice
 
-`microvm.nix` supports several hypervisors. For this repo, the meaningful first choices are probably `qemu`, `cloud-hypervisor`, and maybe `firecracker` later.
+`microvm.nix` supports several hypervisors. For this repo, the meaningful
+first choices are probably `qemu`, `cloud-hypervisor`, and maybe `firecracker`
+later.
 
 | Hypervisor                          | Why consider it                                                                                 | Caveats                                                                                                          | Fit here                                                                                    |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
@@ -1115,7 +1235,9 @@ Guest-level options important for server services include:
 | `kvmtool` / `stratovirt` / `alioth` | Lightweight alternatives                                                                        | No virtiofs and/or no control socket according to upstream table                                                 | Not first choices                                                                           |
 | `vfkit`                             | macOS support                                                                                   | macOS-only and no TAP/bridge networking                                                                          | Not relevant for `tyrant` server path                                                       |
 
-Recommended first decision: use `qemu` for the first server prototype, even if the desired long-term hypervisor is `cloud-hypervisor` or `firecracker`. QEMU gives the most escape hatches while the repo API is still unsettled.
+Recommended first decision: use `qemu` for the first server prototype, even if
+the desired long-term hypervisor is `cloud-hypervisor` or `firecracker`. QEMU
+gives the most escape hatches while the repo API is still unsettled.
 
 ### Networking options for MicroVM services
 
@@ -1125,11 +1247,13 @@ The reverse proxy contract should stay the same as the main document:
 - raw TCP uses `my.tcp_routes`
 - raw UDP uses `my.udp_routes`
 
-This keeps the memory/repo rule intact: `my.vhosts` remains HTTP-only, and protocol routing remains explicit.
+This keeps the memory/repo rule intact: `my.vhosts` remains HTTP-only, and
+protocol routing remains explicit.
 
 #### Option A: routed TAP per MicroVM
 
-Each MicroVM gets a TAP interface and a stable host-routed address. Traefik on the host points directly at the guest IP.
+Each MicroVM gets a TAP interface and a stable host-routed address. Traefik on
+the host points directly at the guest IP.
 
 Example shape:
 
@@ -1193,7 +1317,8 @@ my.vhosts.actual-budget = {
 };
 ```
 
-The guest-side network shape is shown here; a real implementation must also generate matching host-side route/interface config for `vm-actual`.
+The guest-side network shape is shown here; a real implementation must also
+generate matching host-side route/interface config for `vm-actual`.
 
 Pros:
 
@@ -1210,11 +1335,13 @@ Cons:
 - requires a central IP/MAC/TAP allocation convention
 - guest services must bind to reachable guest interfaces, not only loopback
 
-This is the recommended MicroVM networking model if MicroVMs become a real server tier.
+This is the recommended MicroVM networking model if MicroVMs become a real
+server tier.
 
 #### Option B: host-internal bridge + NAT
 
-The host creates an internal bridge, MicroVM TAP interfaces attach to it, and guests use static IPs or DHCP. Host NAT provides outbound connectivity.
+The host creates an internal bridge, MicroVM TAP interfaces attach to it, and
+guests use static IPs or DHCP. Host NAT provides outbound connectivity.
 
 Pros:
 
@@ -1226,14 +1353,16 @@ Pros:
 Cons:
 
 - shared L2 segment between VMs
-- compromised guests can attempt ARP/NDP/DHCP/link-local mischief unless filtered
+- compromised guests can attempt ARP/NDP/DHCP/link-local mischief unless
+  filtered
 - still needs bridge and address management
 
 Good fallback if routed TAP is too much for the first implementation.
 
 #### Option C: QEMU user networking + `microvm.forwardPorts`
 
-The MicroVM uses hypervisor user networking and forwards a host port to the guest service.
+The MicroVM uses hypervisor user networking and forwards a host port to the
+guest service.
 
 Example shape:
 
@@ -1277,7 +1406,8 @@ This is a prototype fallback, not the clean server architecture.
 
 #### Option D: LAN bridge / macvtap
 
-The MicroVM becomes a peer on the LAN, either through a bridge attached to the physical NIC or MACVTAP.
+The MicroVM becomes a peer on the LAN, either through a bridge attached to the
+physical NIC or MACVTAP.
 
 Pros:
 
@@ -1294,7 +1424,8 @@ Keep this for exceptional services, not default web apps.
 
 ### State model
 
-MicroVM roots are intended to be read-only, with persistent state externalized. This is good for clarity but forces an early storage decision.
+MicroVM roots are intended to be read-only, with persistent state
+externalized. This is good for clarity but forces an early storage decision.
 
 Main choices:
 
@@ -1302,11 +1433,13 @@ Main choices:
    - `microvm.shares` mounts a host directory through 9p or virtiofs
    - easiest for host-side backups and inspection
    - `virtiofs` is usually preferred over 9p for performance
-   - hypervisor support matters: for example, `firecracker` lacks 9p/virtiofs support
+   - hypervisor support matters: for example, `firecracker` lacks 9p/virtiofs
+     support
 2. **Block volumes**
    - `microvm.volumes` attaches image files as disks
    - better fit for databases or filesystems needing normal block semantics
-   - less transparent to host backup tooling unless backed up as an image or dumped from inside the guest
+   - less transparent to host backup tooling unless backed up as an image or
+     dumped from inside the guest
 3. **Guest-managed remote state**
    - app stores data in a DB or remote service outside the MicroVM
    - can simplify VM replacement
@@ -1314,14 +1447,19 @@ Main choices:
 
 Recommended first-pass policy:
 
-- use a read-only `/nix/store` share for build/closure efficiency when the chosen hypervisor supports it
-- use explicit host shares for simple app state that the existing backup system should see
-- use volumes for databases only when the backup story is a service-level dump, not raw file backup
-- avoid `microvm.writableStoreOverlay` for normal server services unless the guest must build Nix derivations at runtime
+- use a read-only `/nix/store` share for build/closure efficiency when the
+  chosen hypervisor supports it
+- use explicit host shares for simple app state that the existing backup
+  system should see
+- use volumes for databases only when the backup story is a service-level
+  dump, not raw file backup
+- avoid `microvm.writableStoreOverlay` for normal server services unless the
+  guest must build Nix derivations at runtime
 
 ### Secrets model
 
-MicroVM secrets need a more deliberate answer than native containers because the guest has its own boot/lifecycle.
+MicroVM secrets need a more deliberate answer than native containers because
+the guest has its own boot/lifecycle.
 
 Possible approaches:
 
@@ -1329,30 +1467,40 @@ Possible approaches:
    - host decrypts secrets as today
    - only selected files are shared into the guest
    - easiest first implementation
-   - caveat: upstream FAQ notes that virtiofs-shared sops-nix `/run/secrets` can disappear on host update unless mitigated, and updated secrets still require guest restart/reload
+   - caveat: upstream FAQ notes that virtiofs-shared sops-nix `/run/secrets`
+     can disappear on host update unless mitigated, and updated secrets still
+     require guest restart/reload
 2. **Guest-managed sops-nix**
    - the MicroVM imports the secrets module and decrypts inside the guest
    - cleaner VM autonomy
    - requires deciding the guest's age/GPG key story and where keys live
 3. **Service-specific secret injection**
-   - systemd credentials, env files, or app-specific config material generated at boot
+   - systemd credentials, env files, or app-specific config material generated
+     at boot
    - can be clean, but needs per-service conventions
 
-Recommended first prototype: host-managed read-only secret shares for non-critical secrets, with the limitation documented. Do not silently share the whole host secret tree.
+Recommended first prototype: host-managed read-only secret shares for
+non-critical secrets, with the limitation documented. Do not silently share
+the whole host secret tree.
 
 ### Backups
 
-Current repo backup conventions are host-oriented. MicroVMs can preserve that, but only if state placement is explicit.
+Current repo backup conventions are host-oriented. MicroVMs can preserve that,
+but only if state placement is explicit.
 
 Recommended backup contract:
 
 - host backup declarations remain under the owning unit
 - host shares are backed up by their host paths
-- volume-backed databases must define a dump job, not rely on raw image backup by default
-- guest-only state is not acceptable unless the backup module has a VM-aware collection path
-- if logs matter, share guest journals intentionally rather than expecting host journald to include them automatically
+- volume-backed databases must define a dump job, not rely on raw image backup
+  by default
+- guest-only state is not acceptable unless the backup module has a VM-aware
+  collection path
+- if logs matter, share guest journals intentionally rather than expecting
+  host journald to include them automatically
 
-For database services, a dump over guest IP or a guest-side timer that writes to a host share is cleaner than backing up live disk images.
+For database services, a dump over guest IP or a guest-side timer that writes
+to a host share is cleaner than backing up live disk images.
 
 ### Logging and operations
 
@@ -1360,19 +1508,24 @@ Useful upstream features:
 
 - `microvm.machineId` can make guest journald identity stable
 - guest `/var/log/journal` can be shared to the host through `virtiofs`
-- `microvm.registerWithMachined` can expose VMs through `machinectl` for supported operations
-- `microvm.deploy.installOnHost`, `sshSwitch`, and `rebuild` exist for SSH-oriented deployment workflows
+- `microvm.registerWithMachined` can expose VMs through `machinectl` for
+  supported operations
+- `microvm.deploy.installOnHost`, `sshSwitch`, and `rebuild` exist for
+  SSH-oriented deployment workflows
 
 Repo implications:
 
 - first implementation should define how to inspect guest logs from the host
 - health checks should test the guest service over the same path Traefik uses
-- updates need a clear rule: host rebuild restarts guest, or VM update is managed separately
-- resource budgets should be explicit: `microvm.mem` and `microvm.vcpu` are part of the service contract
+- updates need a clear rule: host rebuild restarts guest, or VM update is
+  managed separately
+- resource budgets should be explicit: `microvm.mem` and `microvm.vcpu` are
+  part of the service contract
 
 ### Suggested repo API shape
 
-MicroVM helpers should mirror the native-container helper direction but stay separate to avoid mixing semantics.
+MicroVM helpers should mirror the native-container helper direction but stay
+separate to avoid mixing semantics.
 
 Possible helper namespace:
 
@@ -1395,7 +1548,9 @@ my.vhosts.actual-budget = cfg.endpoint;
 my.tcp_routes.forgejo_ssh = { ... };
 ```
 
-Avoid a first version that auto-emits `my.vhosts` from `u.microvm.mk_vm`. Hidden route emission would make it too easy to blur the existing HTTP/TCP/UDP split.
+Avoid a first version that auto-emits `my.vhosts` from `u.microvm.mk_vm`.
+Hidden route emission would make it too easy to blur the existing HTTP/TCP/UDP
+split.
 
 A later full module could be:
 
@@ -1471,7 +1626,8 @@ Risks:
 
 #### PostgreSQL
 
-The repo already has a skeletal sample, but it is not a good first production candidate by itself.
+The repo already has a skeletal sample, but it is not a good first production
+candidate by itself.
 
 Why:
 
@@ -1479,7 +1635,8 @@ Why:
 - direct Traefik ingress is irrelevant
 - service consumers would need network/secrets changes
 
-It is useful as a build/evaluation example, not as a service-isolation template yet.
+It is useful as a build/evaluation example, not as a service-isolation
+template yet.
 
 #### Pi-hole / DNS services
 
@@ -1496,16 +1653,21 @@ Why:
 If MicroVMs are selected for a prototype, use this path:
 
 1. Keep the native-container recommendation intact as the simple default.
-2. Add MicroVM helpers separately under `mylib.units.microvm` or `mylib.units.vm` after naming is decided.
+2. Add MicroVM helpers separately under `mylib.units.microvm` or
+   `mylib.units.vm` after naming is decided.
 3. Start with one HTTP-only service, probably Actual Budget.
 4. Use fully declarative `microvm.vms.<name>.config` for the prototype.
 5. Use `qemu` first for flexibility.
-6. Use TAP networking with either routed /32 addresses or an internal host bridge.
+6. Use TAP networking with either routed /32 addresses or an internal host
+   bridge.
 7. Point `my.vhosts.*.sources` at the guest IP and service port.
-8. Put all state in a declared host share or declared volume with a backup plan.
-9. Use host-managed read-only secret shares only for explicitly selected files.
+8. Put all state in a declared host share or declared volume with a backup
+   plan.
+9. Use host-managed read-only secret shares only for explicitly selected
+   files.
 10. Add logs/health checks to the acceptance criteria.
-11. Only after the prototype works, decide whether to move to `cloud-hypervisor` or a stricter hypervisor.
+11. Only after the prototype works, decide whether to move to
+    `cloud-hypervisor` or a stricter hypervisor.
 
 Prototype acceptance criteria:
 
@@ -1568,16 +1730,26 @@ Prototype acceptance criteria:
 
 ### Deferred questions for review
 
-These are intentionally deferred because they are not blocking for the research appendix.
+These are intentionally deferred because they are not blocking for the
+research appendix.
 
-1. Should MicroVMs become the preferred server isolation path, or only a stronger-isolation tier for selected services?
-2. Which service should be the first MicroVM prototype: Actual Budget, Forgejo, PostgreSQL, or something else?
-3. For `tyrant`, are you comfortable introducing host-routed TAP/systemd-networkd-style VM networking, or should the first prototype use an internal bridge?
-4. Do you prefer `qemu` first for flexibility, or `cloud-hypervisor` first because the repo sample already uses it?
-5. Should persistent state favor host-visible shares for backup simplicity, or block volumes for stronger VM filesystem separation?
-6. Should secrets be host-decrypted and shared read-only first, or should MicroVM guests get their own sops-nix key story from day one?
-7. Should MicroVM updates be tied to host rebuilds, or should guests have a separate `microvm -u` / SSH deploy lifecycle?
-8. Do you want the eventual helper to stay explicit (`u.microvm.*`) or grow into a central `my.microvms.<name>` option module with assertions?
+1. Should MicroVMs become the preferred server isolation path, or only a
+   stronger-isolation tier for selected services?
+2. Which service should be the first MicroVM prototype: Actual Budget,
+   Forgejo, PostgreSQL, or something else?
+3. For `tyrant`, are you comfortable introducing host-routed
+   TAP/systemd-networkd-style VM networking, or should the first prototype use
+   an internal bridge?
+4. Do you prefer `qemu` first for flexibility, or `cloud-hypervisor` first
+   because the repo sample already uses it?
+5. Should persistent state favor host-visible shares for backup simplicity, or
+   block volumes for stronger VM filesystem separation?
+6. Should secrets be host-decrypted and shared read-only first, or should
+   MicroVM guests get their own sops-nix key story from day one?
+7. Should MicroVM updates be tied to host rebuilds, or should guests have a
+   separate `microvm -u` / SSH deploy lifecycle?
+8. Do you want the eventual helper to stay explicit (`u.microvm.*`) or grow
+   into a central `my.microvms.<name>` option module with assertions?
 
 ## Source index
 
@@ -1612,42 +1784,79 @@ These are intentionally deferred because they are not blocking for the research 
 
 ### External references
 
-- NixOS manual, containers chapter: <https://nixos.org/manual/nixos/stable/#ch-containers>
+- NixOS manual, containers chapter:
+  <https://nixos.org/manual/nixos/stable/#ch-containers>
 - NixOS wiki, NixOS Containers: <https://wiki.nixos.org/wiki/NixOS_Containers>
-- NixOS manual mirror, declarative containers: <https://nlewo.github.io/nixos-manual-sphinx/administration/declarative-containers.xml.html>
-- NixOS manual mirror, container networking: <https://nlewo.github.io/nixos-manual-sphinx/administration/container-networking.xml.html>
-- `containers.<name>.config`: <https://search.nixos.org/options?show=containers.%3Cname%3E.config>
-- `containers.<name>.bindMounts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts>
-- `containers.<name>.forwardPorts`: <https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts>
-- `containers.<name>.privateNetwork`: <https://search.nixos.org/options?show=containers.%3Cname%3E.privateNetwork>
-- `containers.<name>.hostAddress`: <https://search.nixos.org/options?show=containers.%3Cname%3E.hostAddress>
-- `containers.<name>.localAddress`: <https://search.nixos.org/options?show=containers.%3Cname%3E.localAddress>
-- `containers.<name>.autoStart`: <https://search.nixos.org/options?show=containers.%3Cname%3E.autoStart>
-- `containers.<name>.ephemeral`: <https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral>
-- `containers.<name>.privateUsers`: <https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers>
-- `containers.<name>.allowedDevices`: <https://search.nixos.org/options?show=containers.%3Cname%3E.allowedDevices>
-- `containers.<name>.additionalCapabilities`: <https://search.nixos.org/options?show=containers.%3Cname%3E.additionalCapabilities>
-- nixpkgs native container module: <https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix>
-- systemd-nspawn man page: <https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html>
-- machinectl man page: <https://man7.org/linux/man-pages/man1/machinectl.1.html>
-- NixOS OCI containers options: <https://search.nixos.org/options?query=virtualisation.oci-containers>
+- NixOS manual mirror, declarative containers:
+  <https://nlewo.github.io/nixos-manual-sphinx/administration/declarative-containers.xml.html>
+- NixOS manual mirror, container networking:
+  <https://nlewo.github.io/nixos-manual-sphinx/administration/container-networking.xml.html>
+- `containers.<name>.config`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.config>
+- `containers.<name>.bindMounts`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.bindMounts>
+- `containers.<name>.forwardPorts`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.forwardPorts>
+- `containers.<name>.privateNetwork`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.privateNetwork>
+- `containers.<name>.hostAddress`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.hostAddress>
+- `containers.<name>.localAddress`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.localAddress>
+- `containers.<name>.autoStart`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.autoStart>
+- `containers.<name>.ephemeral`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.ephemeral>
+- `containers.<name>.privateUsers`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.privateUsers>
+- `containers.<name>.allowedDevices`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.allowedDevices>
+- `containers.<name>.additionalCapabilities`:
+  <https://search.nixos.org/options?show=containers.%3Cname%3E.additionalCapabilities>
+- nixpkgs native container module:
+  <https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/nixos-containers.nix>
+- systemd-nspawn man page:
+  <https://man7.org/linux/man-pages/man1/systemd-nspawn.1.html>
+- machinectl man page:
+  <https://man7.org/linux/man-pages/man1/machinectl.1.html>
+- NixOS OCI containers options:
+  <https://search.nixos.org/options?query=virtualisation.oci-containers>
 - Arion docs: <https://docs.hercules-ci.com/arion/>
-- microvm.nix README at pinned repo revision: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/2f2f62fdfdca2750e3399f66bd03986ab967e5ca/README.md>
-- microvm.nix handbook intro: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/intro.md>
-- microvm.nix declaring MicroVMs: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declaring.md>
-- microvm.nix declarative MicroVMs: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declarative.md>
-- microvm.nix host preparation: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host.md>
-- microvm.nix host systemd services: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host-systemd.md>
-- microvm.nix options overview: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/options.md>
-- microvm.nix options source: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/microvm/options.nix>
-- microvm.nix host options source: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/host/options.nix>
-- microvm.nix network interfaces: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/interfaces.md>
-- microvm.nix simple network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/simple-network.md>
-- microvm.nix advanced network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/advanced-network.md>
-- microvm.nix routed network setup: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/routed-network.md>
-- microvm.nix shares: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/shares.md>
-- microvm.nix device passthrough: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/devices.md>
-- microvm.nix output options: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/output-options.md>
-- microvm.nix command workflow: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/microvm-command.md>
-- microvm.nix SSH deploy workflow: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/ssh-deploy.md>
-- microvm.nix FAQ: <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/faq.md>
+- microvm.nix README at pinned repo revision:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/2f2f62fdfdca2750e3399f66bd03986ab967e5ca/README.md>
+- microvm.nix handbook intro:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/intro.md>
+- microvm.nix declaring MicroVMs:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declaring.md>
+- microvm.nix declarative MicroVMs:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/declarative.md>
+- microvm.nix host preparation:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host.md>
+- microvm.nix host systemd services:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/host-systemd.md>
+- microvm.nix options overview:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/options.md>
+- microvm.nix options source:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/microvm/options.nix>
+- microvm.nix host options source:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/nixos-modules/host/options.nix>
+- microvm.nix network interfaces:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/interfaces.md>
+- microvm.nix simple network setup:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/simple-network.md>
+- microvm.nix advanced network setup:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/advanced-network.md>
+- microvm.nix routed network setup:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/routed-network.md>
+- microvm.nix shares:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/shares.md>
+- microvm.nix device passthrough:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/devices.md>
+- microvm.nix output options:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/output-options.md>
+- microvm.nix command workflow:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/microvm-command.md>
+- microvm.nix SSH deploy workflow:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/ssh-deploy.md>
+- microvm.nix FAQ:
+  <https://raw.githubusercontent.com/microvm-nix/microvm.nix/master/doc/src/faq.md>

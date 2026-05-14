@@ -11,7 +11,9 @@
 ```
 
 - **Commands:** add `(interactive ...)` only when the function is a command
-- **Interactive codes:** `"*"` errors on read-only buffers, `"r"` passes region bounds, `"s"` reads a string, `"n"` reads a number, and `"d"` passes point
+- **Interactive codes:** `"*"` errors on read-only buffers, `"r"` passes
+  region bounds, `"s"` reads a string, `"n"` reads a number, and `"d"` passes
+  point
 
 ```elisp
 (defun greet-user ()
@@ -34,11 +36,13 @@
 (defvar-local my-buffer-flag nil "Buffer-local state.")
 ```
 
-- **`defvar`:** declares a special dynamically scoped variable and skips re-evaluation when already bound
+- **`defvar`:** declares a special dynamically scoped variable and skips
+  re-evaluation when already bound
 - **`defcustom`:** integrates with Customize
 - **`defconst`:** signals intent that the value should not change
 - **`defvar-local`:** combines `defvar` with buffer-local behavior
-- **`let` vs `let*`:** `let` evaluates init forms in the outer scope, `let*` does it sequentially
+- **`let` vs `let*`:** `let` evaluates init forms in the outer scope, `let*`
+  does it sequentially
 - **`setq-local`:** creates or sets a buffer-local binding
 - **`setq-default`:** sets the default value for a buffer-local variable
 
@@ -49,7 +53,8 @@
 - **Plists:** `(:key value ...)`; use `plist-get` and `plist-member`
 - **Vectors:** fixed-length and O(1) for indexed access
 - **Records:** vectors with a type symbol in slot 0; use `cl-defstruct`
-- **Hash tables:** support `eq`, `eql`, or `equal` tests; use `equal` for string keys
+- **Hash tables:** support `eq`, `eql`, or `equal` tests; use `equal` for
+  string keys
 
 ## Control flow and cleanup
 
@@ -89,7 +94,8 @@
   (release-resource))
 ```
 
-- **Ignored failures:** use `ignore-errors` only when discarding failures is intentional
+- **Ignored failures:** use `ignore-errors` only when discarding failures is
+  intentional
 
 ## Iteration
 
@@ -105,18 +111,24 @@
          collect (* x x))
 ```
 
-- **Side effects:** prefer `mapc` over `mapcar` when you do not need the returned list
-- **Mixed sequences:** prefer `seq-*` helpers when the input may be a list, vector, or string
+- **Side effects:** prefer `mapc` over `mapcar` when you do not need the
+  returned list
+- **Mixed sequences:** prefer `seq-*` helpers when the input may be a list,
+  vector, or string
 
 ## Strings and regex
 
 - **Grouping:** use `\(` and `\)`, not plain `(` and `)`
 - **Alternation:** use `\|`
-- **Quantifiers:** `+` and `?` are postfix operators; interval repetition uses `\{n,m\}`
+- **Quantifiers:** `+` and `?` are postfix operators; interval repetition uses
+  `\{n,m\}`
 - **Backreferences:** use `\1`
-- **Classes:** prefer POSIX classes like `[[:alpha:]]`; `\w` and `\d` are not portable here
-- **Escaping:** in Lisp strings, double-escape backslashes so regexp `\(` becomes string `"\\("`
-- **Useful APIs:** `string-match-p`, `looking-at-p`, `re-search-forward`, `replace-regexp-in-string`, `replace-match`
+- **Classes:** prefer POSIX classes like `[[:alpha:]]`; `\w` and `\d` are not
+  portable here
+- **Escaping:** in Lisp strings, double-escape backslashes so regexp `\(`
+  becomes string `"\\("`
+- **Useful APIs:** `string-match-p`, `looking-at-p`, `re-search-forward`,
+  `replace-regexp-in-string`, `replace-match`
 
 ## Buffers, hooks, and advice
 
@@ -140,7 +152,8 @@
 (remove-hook 'prog-mode-hook #'my-prog-mode-setup)
 ```
 
-- **Buffer-local hooks:** pass `t` as the fourth arg to `add-hook` or `remove-hook`
+- **Buffer-local hooks:** pass `t` as the fourth arg to `add-hook` or
+  `remove-hook`
 - **Advice kinds:** use `:before`, `:after`, `:around`, or `:override`
 
 ```elisp

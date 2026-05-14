@@ -8,7 +8,10 @@ Sister document to: `docs/wip/isolation_server.md`
 
 Define the first implementable contract for repo-native NixOS containers.
 
-This is not AI-specific. The same container system should support ordinary server services, shared infrastructure clients, and future always-on agents such as a 24/7 `hermes`-style agent. AI services are likely an early candidate, but the abstraction should be generic server infrastructure.
+This is not AI-specific. The same container system should support ordinary
+server services, shared infrastructure clients, and future always-on agents
+such as a 24/7 `hermes`-style agent. AI services are likely an early
+candidate, but the abstraction should be generic server infrastructure.
 
 ## Goals
 
@@ -17,9 +20,11 @@ This is not AI-specific. The same container system should support ordinary serve
 3. Keep units as the smallest runnable service modules.
 4. Let containers declare one or more units inside the guest.
 5. Optimize helpers for the primary case: one container containing one unit.
-6. Preserve host-owned ingress, persistence, backups, secrets, and shared providers.
+6. Preserve host-owned ingress, persistence, backups, secrets, and shared
+   providers.
 7. Support cross-container and container-to-host communication from the start.
-8. Keep `my.vhosts` HTTP-only; keep raw TCP/UDP in `my.tcp_routes` / `my.udp_routes`.
+8. Keep `my.vhosts` HTTP-only; keep raw TCP/UDP in `my.tcp_routes` /
+   `my.udp_routes`.
 
 ## Non-goals
 
@@ -27,7 +32,8 @@ This is not AI-specific. The same container system should support ordinary serve
 - Do not make units decide whether they run on host or in a container.
 - Do not add per-unit `isolation.backend` toggles.
 - Do not import all of `users/_units/default.nix` into container guests.
-- Do not emit `my.vhosts`, `my.tcp_routes`, or `my.udp_routes` from inside guest units.
+- Do not emit `my.vhosts`, `my.tcp_routes`, or `my.udp_routes` from inside
+  guest units.
 - Do not create one Postgres instance per app container.
 - Do not make this AI-only or agent-only.
 
@@ -41,7 +47,8 @@ host      = owner of ingress, persistence, backups, secrets, and shared provider
 
 A unit configures a local service inside a NixOS system.
 
-A container decides where that unit runs, how state is mounted, how the host reaches it, and which host/peer services it may consume.
+A container decides where that unit runs, how state is mounted, how the host
+reaches it, and which host/peer services it may consume.
 
 ## Public API shape
 
@@ -57,7 +64,13 @@ my.containers.actual-budget = u.container.unit.actual-budget {
 ```
 
 - !NOTE I'd prefer something like this shape:
-- !ANSWER Agreed on the `c` namespace; `u` should stay for units. I also agree the unit identity should be explicit instead of derived from the container attr name. I would phrase the helper as `my.containers.actual-budget = c.unit "unit.actual-budget" { ... };`, where the first argument is the unit key/module identity and the attr name remains the container name. The HTTP vhost target can stay in options or come from unit metadata; I would not overload the first argument with vhost target.
+- !ANSWER Agreed on the `c` namespace; `u` should stay for units. I also agree
+  the unit identity should be explicit instead of derived from the container
+  attr name. I would phrase the helper as
+  `my.containers.actual-budget = c.unit "unit.actual-budget" { ... };`, where
+  the first argument is the unit key/module identity and the attr name remains
+  the container name. The HTTP vhost target can stay in options or come from
+  unit metadata; I would not overload the first argument with vhost target.
 
   ```nix
   /*
@@ -81,7 +94,8 @@ my.containers.actual-budget = u.container.unit.actual-budget {
 - enable the unit with its conventional defaults
 - derive routed networking from `id = 11`
 - mount persistent state from a host-owned path
-- expose the default HTTP endpoint through host-owned `my.vhosts.actual-budget`
+- expose the default HTTP endpoint through host-owned
+  `my.vhosts.actual-budget`
 - register host-side backups for mounted state
 
 Narrow overrides should stay possible:
@@ -115,13 +129,16 @@ my.containers.kaneo = u.container.unit.kaneo {
 };
 ```
 
-The helper expands into container config, guest unit options, host-side Postgres grants, projected secrets, vhosts, bind mounts, and backups.
+The helper expands into container config, guest unit options, host-side
+Postgres grants, projected secrets, vhosts, bind mounts, and backups.
 
-`postgres.enable = true` is helper sugar. The normalized container record should lower it to `consumes.host.postgres`.
+`postgres.enable = true` is helper sugar. The normalized container record
+should lower it to `consumes.host.postgres`.
 
 ### Underlying multi-unit schema
 
-The underlying schema must support multiple units per container even though helpers optimize for one unit.
+The underlying schema must support multiple units per container even though
+helpers optimize for one unit.
 
 ```nix
 my.containers.some-stack = {
@@ -149,7 +166,8 @@ my.containers.some-stack = {
 };
 ```
 
-This explicit form is for app stacks and unusual services. It should not be required for normal one-service containers.
+This explicit form is for app stacks and unusual services. It should not be
+required for normal one-service containers.
 
 ## Option schema sketch
 
@@ -196,7 +214,8 @@ Derived fields:
 
 ### Unit entries inside a container
 
-A container unit entry should hold only guest-local unit options plus metadata needed by the composer.
+A container unit entry should hold only guest-local unit options plus metadata
+needed by the composer.
 
 Conceptual shape:
 
@@ -231,7 +250,8 @@ units.actual-budget = {
 };
 ```
 
-The public helper should construct this shape; users should rarely need to write it manually.
+The public helper should construct this shape; users should rarely need to
+write it manually.
 
 ## Minimal unit contract
 
@@ -246,10 +266,21 @@ users/_units/<unit>/
 
 ### `unit.nix`
 
-!NOTE There seems to be the implication that we'd want a major refactor for all units to support such a shape. Is this needed for this? Still thinking about it.
-!ANSWER No, a major refactor of all units is not needed. Only units we choose to containerize need a minimal guest-local module. The host `default.nix` can remain as compatibility wrapper. First target should be Actual Budget only; other units can stay unchanged until migrated.
-!ASK Than it's fine, given we have to expose some stuff potentially as separate metadata files, though couldn't we have `unit.nix` just be `default.nix`, with `meta.nix` as-is?
-!ANSWER We can make that work for new/container-first units, but it is not safe as a blanket rule for existing units because today `default.nix` is often the host integration wrapper. Importing it into a guest may bring `my.vhosts`, host backups, or host-local assumptions. The `unit.nix` split is a migration boundary, not a sacred filename. If we later change convention so `default.nix` is always the minimal unit and host integration moves elsewhere, then yes, `unit.nix` can disappear.
+!NOTE There seems to be the implication that we'd want a major refactor for
+all units to support such a shape. Is this needed for this? Still thinking
+about it. !ANSWER No, a major refactor of all units is not needed. Only units
+we choose to containerize need a minimal guest-local module. The host
+`default.nix` can remain as compatibility wrapper. First target should be
+Actual Budget only; other units can stay unchanged until migrated. !ASK Than
+it's fine, given we have to expose some stuff potentially as separate metadata
+files, though couldn't we have `unit.nix` just be `default.nix`, with
+`meta.nix` as-is? !ANSWER We can make that work for new/container-first units,
+but it is not safe as a blanket rule for existing units because today
+`default.nix` is often the host integration wrapper. Importing it into a guest
+may bring `my.vhosts`, host backups, or host-local assumptions. The `unit.nix`
+split is a migration boundary, not a sacred filename. If we later change
+convention so `default.nix` is always the minimal unit and host integration
+moves elsewhere, then yes, `unit.nix` can disappear.
 
 `unit.nix` is the only unit file imported into a container guest.
 
@@ -319,13 +350,15 @@ Example:
 }
 ```
 
-`meta.nix` should not emit NixOS config by itself. It is data consumed by helpers.
+`meta.nix` should not emit NixOS config by itself. It is data consumed by
+helpers.
 
 ### `default.nix`
 
 `default.nix` keeps current host-run unit behavior working.
 
-It may reuse `unit.nix`, but it remains responsible for host-run integration such as current `my.vhosts` declarations and host-local service assumptions.
+It may reuse `unit.nix`, but it remains responsible for host-run integration
+such as current `my.vhosts` declarations and host-local service assumptions.
 
 ## Container generation contract
 
@@ -399,7 +432,8 @@ The generated guest config should include a baseline module with:
 }
 ```
 
-For routed containers, the generated guest baseline also defines the host-gateway alias used by provider configs:
+For routed containers, the generated guest baseline also defines the
+host-gateway alias used by provider configs:
 
 ```nix
 networking.hosts."10.88.11.1" = ["host.containers"];
@@ -409,15 +443,23 @@ Each unit opens only the guest firewall ports it serves.
 
 ## User namespaces and writable state
 
-`privateUsers = "pick"` is safer for user namespace isolation, but it complicates writable host bind mounts. The current NixOS container module idmaps its internal `/nix` bind mounts for user namespaces, but ordinary `bindMounts` are emitted as plain `--bind` / `--bind-ro`. That means a writable host state bind may not be writable from a namespaced guest without a separate ownership/idmap strategy.
+`privateUsers = "pick"` is safer for user namespace isolation, but it
+complicates writable host bind mounts. The current NixOS container module
+idmaps its internal `/nix` bind mounts for user namespaces, but ordinary
+`bindMounts` are emitted as plain `--bind` / `--bind-ro`. That means a
+writable host state bind may not be writable from a namespaced guest without a
+separate ownership/idmap strategy.
 
 First implementation rule:
 
 - containers with writable host bind-mounted state use `privateUsers = false`
-- containers with only read-only binds or fully externalized state may opt into `privateUsers = "pick"`
+- containers with only read-only binds or fully externalized state may opt
+  into `privateUsers = "pick"`
 - idmapped writable state mounts remain a future hardening task
 
-This is a conscious isolation trade-off for the first Actual Budget milestone. It keeps the state model simple and implementable while preserving network/process/service isolation from native containers.
+This is a conscious isolation trade-off for the first Actual Budget milestone.
+It keeps the state model simple and implementable while preserving
+network/process/service isolation from native containers.
 
 ## Networking contract
 
@@ -432,15 +474,19 @@ localAddress = "10.88.11.2";
 
 Rules:
 
-- reserve `10.88.0.0/16` for first-implementation routed containers unless host networking conflicts before rollout
+- reserve `10.88.0.0/16` for first-implementation routed containers unless
+  host networking conflicts before rollout
 - every container receives a unique numeric `id` in the range `1..254`
 - the host side of the veth pair is `10.88.<id>.1`
 - the container side is `10.88.<id>.2`
 - container names must not contain underscores
 - generated HTTP sources prefer `http://<container>.containers:<port>`
-- literal `localAddress` sources are allowed as fallback if generated host entries do not work as expected
-- `forwardPorts` is not the default; keep it as a fallback for host-port consumers
-- each guest gets `host.containers` mapped to its own `hostAddress` for host-provider access
+- literal `localAddress` sources are allowed as fallback if generated host
+  entries do not work as expected
+- `forwardPorts` is not the default; keep it as a fallback for host-port
+  consumers
+- each guest gets `host.containers` mapped to its own `hostAddress` for
+  host-provider access
 - outbound Internet/NAT is opt-in per container
 
 ## Ingress contract
@@ -468,13 +514,24 @@ my.tcp_routes.forgejo_ssh = {
 
 UDP follows `my.udp_routes`.
 
-Do not add TCP/UDP semantics to `my.vhosts`. DNS derivation remains based on `my.vhosts` only.
+Do not add TCP/UDP semantics to `my.vhosts`. DNS derivation remains based on
+`my.vhosts` only.
 
-Canonical lowering rule: `expose.<name>.target` is the host vhost target. Unit endpoint metadata may provide a default target, and one-unit helpers may accept `target = "..."` as sugar, but the normalized container record should lower that into `expose.<name>.target`.
+Canonical lowering rule: `expose.<name>.target` is the host vhost target. Unit
+endpoint metadata may provide a default target, and one-unit helpers may
+accept `target = "..."` as sugar, but the normalized container record should
+lower that into `expose.<name>.target`.
 
-!ASK This is not clear to me, can you try explaining this in a more concise and intentional manner, with a quick comparison to how things are currently in repo to how things would be?
-!ANSWER Current repo: a unit directly declares `my.vhosts.foo = { target = ...; sources = ["http://localhost:port"]; }`. Proposed container shape: the unit only declares "I serve HTTP on port X"; the container owns host ingress and lowers `target = "actual"` into `my.vhosts.actual-budget = { target = "actual"; sources = ["http://actual-budget.containers:5006"]; }`. So `target` remains the DNS/vhost name, but it is owned by the container layer, not the guest unit.
-!NOTE This makes it clearer, then with that in mind we can have a slightly alterd shape, see below:
+!ASK This is not clear to me, can you try explaining this in a more concise
+and intentional manner, with a quick comparison to how things are currently in
+repo to how things would be? !ANSWER Current repo: a unit directly declares
+`my.vhosts.foo = { target = ...; sources = ["http://localhost:port"]; }`.
+Proposed container shape: the unit only declares "I serve HTTP on port X"; the
+container owns host ingress. It lowers `my.vhosts.actual-budget` with
+`target = "actual"` and source `http://actual-budget.containers:5006`.
+So `target` remains the DNS/vhost name, but it is owned by the container
+layer, not the guest unit. !NOTE This makes it clearer, then with that in mind
+we can have a slightly alterd shape, see below:
 
 ```text
 highest-level:
@@ -498,12 +555,20 @@ lower-level something like:
         }
 ```
 
-!ANSWER This shape is closer. The important distinction is: unit-scope endpoint = "this service can listen on protocol/port X"; container-scope exposure = "the host should publish that endpoint as target Y". I also like `o.unit` carrying read-only metadata if it keeps service options and metadata together. I would not try to derive everything from options automatically yet: port/bind can come from endpoint option defaults, but host exposure/target should remain container-owned.
+!ANSWER This shape is closer. The important distinction is: unit-scope
+endpoint = "this service can listen on protocol/port X"; container-scope
+exposure = "the host should publish that endpoint as target Y". I also like
+`o.unit` carrying read-only metadata if it keeps service options and metadata
+together. I would not try to derive everything from options automatically yet:
+port/bind can come from endpoint option defaults, but host exposure/target
+should remain container-owned.
 
 ## Cross-container communication
 
 !NOTE As aforementioned, this is not needed now (not a priority, nice to have)
-!ANSWER Agreed. This should be demoted to a future iteration note. It is useful to keep the vocabulary in mind, but it should not drive the first implementation.
+!ANSWER Agreed. This should be demoted to a future iteration note. It is
+useful to keep the vocabulary in mind, but it should not drive the first
+implementation.
 
 The schema should support declared consume/provide edges from the start.
 
@@ -536,12 +601,18 @@ allow 10.88.12.2 -> 10.88.13.2:6379
 
 No declared edge means no intended peer access.
 
-The first implementation may only validate the shape and generate addresses. It should not require perfect firewall enforcement on day one, but the data model must make enforcement possible later. !NOTE agreed on that, though impl. should make it clear (through comments and etc) enforcement is still to be made
-!ANSWER Agreed. If this remains in the spec as future work, implementation comments/assertions should explicitly say declared edges are documentation/validation only until firewall enforcement lands.
+The first implementation may only validate the shape and generate addresses.
+It should not require perfect firewall enforcement on day one, but the data
+model must make enforcement possible later. !NOTE agreed on that, though impl.
+should make it clear (through comments and etc) enforcement is still to be
+made !ANSWER Agreed. If this remains in the spec as future work,
+implementation comments/assertions should explicitly say declared edges are
+documentation/validation only until firewall enforcement lands.
 
 ## Host providers
 
-Some providers remain on the host for now. Postgres is the first important provider.
+Some providers remain on the host for now. Postgres is the first important
+provider.
 
 Rationale:
 
@@ -565,7 +636,10 @@ my.containers.kaneo = u.container.unit.kaneo {
 };
 ```
 
-Unit-specific helpers may expose shorter sugar such as `postgres.enable = true`, but that sugar should lower to `consumes.host.postgres` before the container module emits host or guest config.
+Unit-specific helpers may expose shorter sugar such as
+`postgres.enable = true`, but that sugar should lower to
+`consumes.host.postgres` before the container module emits host or guest
+config.
 
 Host-side expansion:
 
@@ -592,10 +666,12 @@ Postgres provider requirements:
 
 - listen on a host address reachable from routed containers
 - generate `pg_hba` entries for declared container clients only
-- create or reuse database/user declarations through existing `unit.postgres` patterns
+- create or reuse database/user declarations through existing `unit.postgres`
+  patterns
 - expose only the required secret file to the guest
 
-Generic host access should remain explicit and should use the same normalized provider edge shape:
+Generic host access should remain explicit and should use the same normalized
+provider edge shape:
 
 ```nix
 consumes.host.postgres = {
@@ -627,14 +703,34 @@ bindMounts."/var/lib/actual" = {
 };
 ```
 
-`ephemeral = true` is only safe when all meaningful state is externalized through mounts or providers.
+`ephemeral = true` is only safe when all meaningful state is externalized
+through mounts or providers.
 
 ### Secrets
 
-!NOTE Require more thought - sops-nix requires a SOPS key, so that has to be mounted as well, and I think there's an easier way of making container-wide secrets than relying on mounting a key to an isolated host: perhaps we could have secrets as envvars in the container-side instead of mounting the actual secret files themselves. Tell me what do you think.
-!ANSWER I agree that mounting a SOPS key into the guest is the wrong default. Environment variables are simpler but weaker: they can leak through process environments, service introspection, logs, or accidental dumps. A better first shape is host-decrypted, container-specific secret material projected as files or systemd credentials (`LoadCredential`-style), without giving the guest the SOPS key and without mounting the whole secret tree. Container-wide secret projection can be a host-owned `/run/container-secrets/<container>/...` interface.
-!NOTE envvars may leak for the same reasons your proposed alternative would also leak. if a process can attain read access to envvars, they will also get read access elsewhere inside the container
-!ANSWER True for a full container compromise: any secret made available to that container is reachable. My concern is accidental/broader exposure before full compromise. Envvars are inherited by child processes and are easier to leak through service status, process inspection, crash dumps, debug logs, or wrappers. Files/systemd credentials can be scoped per service user, not inherited by unrelated processes, and rotated independently. For container-wide secrets the difference is smaller, but I would still default to file/credential projection and allow envvar sugar only when a unit explicitly needs it.
+!NOTE Require more thought - sops-nix requires a SOPS key, so that has to be
+mounted as well, and I think there's an easier way of making container-wide
+secrets than relying on mounting a key to an isolated host: perhaps we could
+have secrets as envvars in the container-side instead of mounting the actual
+secret files themselves. Tell me what do you think. !ANSWER I agree that
+mounting a SOPS key into the guest is the wrong default. Environment variables
+are simpler but weaker: they can leak through process environments, service
+introspection, logs, or accidental dumps. A better first shape is
+host-decrypted, container-specific secret material projected as files or
+systemd credentials (`LoadCredential`-style), without giving the guest the
+SOPS key and without mounting the whole secret tree. Container-wide secret
+projection can be a host-owned `/run/container-secrets/<container>/...`
+interface. !NOTE envvars may leak for the same reasons your proposed
+alternative would also leak. if a process can attain read access to envvars,
+they will also get read access elsewhere inside the container !ANSWER True for
+a full container compromise: any secret made available to that container is
+reachable. My concern is accidental/broader exposure before full compromise.
+Envvars are inherited by child processes and are easier to leak through
+service status, process inspection, crash dumps, debug logs, or wrappers.
+Files/systemd credentials can be scoped per service user, not inherited by
+unrelated processes, and rotated independently. For container-wide secrets the
+difference is smaller, but I would still default to file/credential projection
+and allow envvar sugar only when a unit explicitly needs it.
 
 First-pass model: host-managed read-only secret bind mounts.
 
@@ -652,21 +748,29 @@ Example guest path:
 
 ### Backups
 
-Backups for containerized units are host-owned. !ASK to make sure I got this right: `my.containers` derives declared backups into host-scoped config, through the mapped filesystem of the container?
-!ANSWER Yes. `my.containers` should lower backup declarations into host-scoped backup config that points at the host path backing the bind mount. Example: guest sees `/var/lib/actual`, host backs it with `/var/lib/containers/actual-budget/actual-budget/data`, and backup targets the host path.
+Backups for containerized units are host-owned. !ASK to make sure I got this
+right: `my.containers` derives declared backups into host-scoped config,
+through the mapped filesystem of the container? !ANSWER Yes. `my.containers`
+should lower backup declarations into host-scoped backup config that points at
+the host path backing the bind mount. Example: guest sees `/var/lib/actual`,
+host backs it with `/var/lib/containers/actual-budget/actual-budget/data`, and
+backup targets the host path.
 
 Rules:
 
 - path backups target host bind-mount paths
 - host-provider databases use the provider backup/dump model
-- future containerized databases should write dumps to host-mounted state or expose a declared dump path
+- future containerized databases should write dumps to host-mounted state or
+  expose a declared dump path
 - backup tooling should not inspect container root filesystems directly
 
 ## AI / agent services
 
-The container system must remain generic, but always-on agents are expected users.
+The container system must remain generic, but always-on agents are expected
+users.
 
-A future `hermes`-style 24/7 agent should be modeled as a normal unit/container pair:
+A future `hermes`-style 24/7 agent should be modeled as a normal
+unit/container pair:
 
 ```nix
 my.containers.hermes = u.container.unit.hermes {
@@ -680,7 +784,8 @@ my.containers.hermes = u.container.unit.hermes {
 };
 ```
 
-Agent-specific concerns should be unit metadata or unit options, not special container concepts:
+Agent-specific concerns should be unit metadata or unit options, not special
+container concepts:
 
 - work directories
 - prompt/config mounts
@@ -690,7 +795,8 @@ Agent-specific concerns should be unit metadata or unit options, not special con
 - optional web control endpoint
 - resource limits
 
-The container layer should only care that Hermes is a unit with endpoints, state, secrets, and provider edges.
+The container layer should only care that Hermes is a unit with endpoints,
+state, secrets, and provider edges.
 
 ## Helper namespace
 
@@ -762,7 +868,10 @@ Acceptance criteria:
 ## Open decisions
 
 - Exact names for helper namespace and generic/multi-unit helper constructors.
-- Whether `meta.nix` should be pure data or a function receiving `pkgs`, `lib`, and `mylib`.
+- Whether `meta.nix` should be pure data or a function receiving `pkgs`,
+  `lib`, and `mylib`.
 - Exact provider schema for Postgres and future host providers.
-- Whether the first implementation should generate firewall rules or only validate declared communication edges.
-- Longer-term strategy for idmapped writable bind mounts with `privateUsers = "pick"`.
+- Whether the first implementation should generate firewall rules or only
+  validate declared communication edges.
+- Longer-term strategy for idmapped writable bind mounts with
+  `privateUsers = "pick"`.

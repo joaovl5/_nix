@@ -1,19 +1,23 @@
 # Kanata Cheatsheet
 
-Use this as a compact syntax aid after loading the Kanata skill. Verify details against the pinned Kanata version when behavior matters.
+Use this as a compact syntax aid after loading the Kanata skill. Verify
+details against the pinned Kanata version when behavior matters.
 
 ## Sources
 
 - **Repo config:** `users/_modules/desktop/services/kanata/config/config.kbd`
 - **Repo service:** `users/_modules/desktop/services/kanata/default.nix`
-- **Upstream guide:** <https://github.com/jtroo/kanata/blob/main/docs/config.adoc>
+- **Upstream guide:**
+  <https://github.com/jtroo/kanata/blob/main/docs/config.adoc>
 - **Upstream README:** <https://github.com/jtroo/kanata/blob/main/README.md>
 
 ## Syntax basics
 
 - **S-expression:** `(defsrc key1 key2 ...)` lists forms in parentheses
-- **String:** bare words like `backspace` or quoted strings like `"string with spaces"`
-- **Whitespace:** spaces, tabs, and newlines are flexible; use them for layer alignment
+- **String:** bare words like `backspace` or quoted strings like
+  `"string with spaces"`
+- **Whitespace:** spaces, tabs, and newlines are flexible; use them for layer
+  alignment
 - **Comments:** `;; single line` and `#| multi-line |#`
 
 ## Minimal structure
@@ -32,9 +36,12 @@ Use this as a compact syntax aid after loading the Kanata skill. Verify details 
   cap (tap-hold 200 200 caps lctl))
 ```
 
-- **Required forms:** one `defsrc` and at least one `deflayer` or `deflayermap`
-- **Layer shape:** each `deflayer` action aligns to the corresponding `defsrc` key
-- **Alternative shape:** `deflayermap` uses input-output pairs instead of full layer rows
+- **Required forms:** one `defsrc` and at least one `deflayer` or
+  `deflayermap`
+- **Layer shape:** each `deflayer` action aligns to the corresponding `defsrc`
+  key
+- **Alternative shape:** `deflayermap` uses input-output pairs instead of full
+  layer rows
 
 ## Emergency stop and reload
 
@@ -101,7 +108,8 @@ Examples: `C-c`, `S-1`, `M-tab`
 - **Release variant:** hold activates after another key press and release
 - **Tap keys variant:** early tap only for specified keys
 - **Opposite hand:** pair with `defhands` for hand-aware behavior
-- **HACK:** for Linux repeat quirks, some configs wrap tap-hold in `(multi f24 ...)`; verify before using
+- **HACK:** for Linux repeat quirks, some configs wrap tap-hold in
+  `(multi f24 ...)`; verify before using
 
 ## defhands
 
@@ -269,7 +277,8 @@ windows-interception-keyboard-hwids (...)
 
 ## Key names
 
-- **Modifiers:** `lctl`, `rctl`, `lsft`, `rsft`, `lalt`, `ralt`, `lmet`, `rmet`
+- **Modifiers:** `lctl`, `rctl`, `lsft`, `rsft`, `lalt`, `ralt`, `lmet`,
+  `rmet`
 - **Special:** `spc`, `ret`, `tab`, `esc`, `bspc`, `del`
 - **Arrows:** `left`, `rght`, `up`, `down`
 - **Navigation:** `home`, `end`, `pgup`, `pgdn`

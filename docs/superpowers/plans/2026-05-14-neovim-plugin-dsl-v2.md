@@ -1,32 +1,50 @@
 # Neovim Plugin DSL v2 Implementation Plan
 
-> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED: Use
+> superpowers:subagent-driven-development (if subagents available) or
+> superpowers:executing-plans to implement this plan. Steps use checkbox
+> (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a clearer Fennel DSL for Neovim Lazy.nvim plugin specs and plugin-local keybinds, centered on `plugin!`, `lib.plugins`, and `lib.keys`.
+**Goal:** Add a clearer Fennel DSL for Neovim Lazy.nvim plugin specs and
+plugin-local keybinds, centered on `plugin!`, `lib.plugins`, and `lib.keys`.
 
-**Architecture:** Keep generated Lua untouched and make Fennel source the source of truth. Add small runtime helper modules for composable plugin/key constructors, then add a thin macro that rewrites unqualified DSL helper forms inside `(plugin! ...)` into qualified `p.*`/`k.*` helper calls. Keep the existing `plugin` and `key` macros available unless a later migration explicitly removes them.
+**Architecture:** Keep generated Lua untouched and make Fennel source the
+source of truth. Add small runtime helper modules for composable plugin/key
+constructors, then add a thin macro that rewrites unqualified DSL helper forms
+inside `(plugin! ...)` into qualified `p.*`/`k.*` helper calls. Keep the
+existing `plugin` and `key` macros available unless a later migration
+explicitly removes them.
 
-**Tech Stack:** Fennel, nfnl, Neovim Lazy.nvim plugin specs, repo-local skills under `.agents/skills`.
+**Tech Stack:** Fennel, nfnl, Neovim Lazy.nvim plugin specs, repo-local skills
+under `.agents/skills`.
 
 ---
 
 ## File Structure
 
-- Modify: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
+- Modify:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
   - Keep `;; fennel-ls: macro-file` as line 1
   - Add `plugin!` macro
   - Export `plugin!` beside existing `plugin` and `key`
 - Create: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/keys.fnl`
-  - Runtime helpers for key strings and Lazy.nvim key specs: `l`, `c`, `a`, `cmd`, `desc`, `m`, `bind`
-- Create: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/plugins.fnl`
-  - Runtime helpers for Lazy.nvim plugin spec fields: `event`, `ft`, `keys`, `opts`, `dependencies`, `version`, `cmd`, plus a raw merge helper if useful
-- Modify initially as the first real call-site: `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/lsp/languages/python.fnl`
+  - Runtime helpers for key strings and Lazy.nvim key specs: `l`, `c`, `a`,
+    `cmd`, `desc`, `m`, `bind`
+- Create:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/plugins.fnl`
+  - Runtime helpers for Lazy.nvim plugin spec fields: `event`, `ft`, `keys`,
+    `opts`, `dependencies`, `version`, `cmd`, plus a raw merge helper if
+    useful
+- Modify initially as the first real call-site:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/lsp/languages/python.fnl`
   - Use `(plugin! ...)`, `(keys (bind ...))`, `(cmd ...)`, `(desc ...)`
   - Import runtime modules as `k` and `p` if explicit usage is needed
-- Modify later, after first call-site passes: other plugin specs under `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/**`
+- Modify later, after first call-site passes: other plugin specs under
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/**`
   - Migrate only files intentionally selected by the implementer or requester
 - Modify: `.agents/skills/neovim-configuration/SKILL.md`
-  - Document that plugin-local binds should prefer the new `(keys (bind ...))` path
+  - Document that plugin-local binds should prefer the new `(keys (bind ...))`
+    path
   - Keep the skill concise per `.agents/skills/skill-authoring/SKILL.md`
 
 ---
@@ -38,7 +56,6 @@
 **Files:**
 
 - Create: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/keys.fnl`
-
 - [ ] **Step 1: Implement small key constructors**
 
 Create helpers with docstrings where behavior could be surprising:
@@ -77,7 +94,8 @@ Create helpers with docstrings where behavior could be surprising:
    :lhs [...]})
 ```
 
-Use the correct Fennel vararg handling rather than assuming `...` is already a table. Keep the marker field internal and unlikely to collide.
+Use the correct Fennel vararg handling rather than assuming `...` is already a
+table. Keep the marker field internal and unlikely to collide.
 
 - [ ] **Step 3: Implement key spec normalizer**
 
@@ -95,7 +113,9 @@ Where `lhs` is either:
  (m :i (c :X))]
 ```
 
-The result should be a vector of Lazy.nvim key spec tables, even for one lhs. Each emitted spec should set positional fields `1` and `2`, merge option tables from `opts...`, and add `:mode` for mode groups.
+The result should be a vector of Lazy.nvim key spec tables, even for one lhs.
+Each emitted spec should set positional fields `1` and `2`, merge option
+tables from `opts...`, and add `:mode` for mode groups.
 
 Example expected result shape:
 
@@ -132,11 +152,13 @@ Export:
 
 **Files:**
 
-- Create: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/plugins.fnl`
+- Create:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/plugins.fnl`
 
 - [ ] **Step 1: Implement field constructors**
 
-Each helper should return a small table ready to merge into a Lazy.nvim plugin spec:
+Each helper should return a small table ready to merge into a Lazy.nvim plugin
+spec:
 
 ```fennel
 (fn event [value] {:event value})
@@ -165,7 +187,8 @@ and this also works:
 
 - [ ] **Step 2: Add table merge helper if needed**
 
-If repeated merging is needed, either use `lib.utils.merge` or add a tiny local helper. Avoid broad utility refactors.
+If repeated merging is needed, either use `lib.utils.merge` or add a tiny
+local helper. Avoid broad utility refactors.
 
 - [ ] **Step 3: Export helper table**
 
@@ -183,15 +206,18 @@ Export at least:
 
 **Files:**
 
-- Modify: `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
+- Modify:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
 
 - [ ] **Step 1: Preserve existing macro API**
 
-Do not remove or rename existing `plugin` or `key` yet. The first change should be additive.
+Do not remove or rename existing `plugin` or `key` yet. The first change
+should be additive.
 
 - [ ] **Step 2: Add shorthand rewriting rules**
 
-Inside `(plugin! id forms...)`, support unqualified helper heads by rewriting them to runtime helper modules:
+Inside `(plugin! id forms...)`, support unqualified helper heads by rewriting
+them to runtime helper modules:
 
 Plugin-level forms:
 
@@ -217,11 +243,17 @@ Key-level forms nested under `(keys ...)`:
 (cmd x)    ; k.cmd inside bind/key context
 ```
 
-Do not recursively rewrite arbitrary forms under `(keys ...)`. Bound rewriting to the DSL grammar: `(keys ...)` may rewrite direct `(bind ...)` children; `(bind lhs rhs opts...)` may rewrite lhs helper forms, recognized RHS helper forms such as `(cmd ...)`, and option helper forms such as `(desc ...)`; RHS functions, quoted forms, arbitrary tables, literal strings, and unknown calls are opaque.
+Do not recursively rewrite arbitrary forms under `(keys ...)`. Bound rewriting
+to the DSL grammar: `(keys ...)` may rewrite direct `(bind ...)` children;
+`(bind lhs rhs opts...)` may rewrite lhs helper forms, recognized RHS helper
+forms such as `(cmd ...)`, and option helper forms such as `(desc ...)`; RHS
+functions, quoted forms, arbitrary tables, literal strings, and unknown calls
+are opaque.
 
 - [ ] **Step 3: Emit required runtime imports inside expansion**
 
-`plugin!` should expand to a `let` that binds module tables locally, avoiding per-plugin-file import noise:
+`plugin!` should expand to a `let` that binds module tables locally, avoiding
+per-plugin-file import noise:
 
 ```fennel
 (let [p# (require :lib.plugins)
@@ -229,18 +261,23 @@ Do not recursively rewrite arbitrary forms under `(keys ...)`. Bound rewriting t
   ...)
 ```
 
-Use gensyms (`#`) for introduced locals. Rewritten helper calls should refer to those gensym locals, not global `p` or `k` names.
+Use gensyms (`#`) for introduced locals. Rewritten helper calls should refer
+to those gensym locals, not global `p` or `k` names.
 
 - [ ] **Step 4: Merge helper result tables and fallback opts**
 
-`plugin!` should return one Lazy.nvim plugin spec table with positional field `1` set to the plugin identifier.
+`plugin!` should return one Lazy.nvim plugin spec table with positional field
+`1` set to the plugin identifier.
 
 It should merge:
 
 1. helper result tables from forms like `(event :VeryLazy)`
-2. any literal table forms supplied as fallback opts, preferably as the last argument
+2. any literal table forms supplied as fallback opts, preferably as the last
+   argument
 
-Do not make raw `:keys value` keyword-pair syntax the documented path. If keyword-pair fallback is implemented, keep it secondary and document table fallback first.
+Do not make raw `:keys value` keyword-pair syntax the documented path. If
+keyword-pair fallback is implemented, keep it secondary and document table
+fallback first.
 
 - [ ] **Step 5: Export macro**
 
@@ -258,11 +295,13 @@ Update final export table to include `plugin!`:
 
 **Files:**
 
-- Modify: `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/lsp/languages/python.fnl`
+- Modify:
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/lsp/languages/python.fnl`
 
 - [ ] **Step 1: Update macro import**
 
-Change the import to include `plugin!`. Keep existing imports only if still used:
+Change the import to include `plugin!`. Keep existing imports only if still
+used:
 
 ```fennel
 (import-macros {: plugin!} :./lib/init-macros)
@@ -284,9 +323,12 @@ Target shape:
   (opts {}))
 ```
 
-If `version` should preserve the old keyword value style, use `(version :*)` only if Lazy.nvim receives the same value as before. Otherwise keep string `"*"`.
+If `version` should preserve the old keyword value style, use `(version :*)`
+only if Lazy.nvim receives the same value as before. Otherwise keep string
+`"*"`.
 
-- [ ] **Step 3: Verify generated shape by compiling and asserting runtime shape**
+- [ ] **Step 3: Verify generated shape by compiling and asserting runtime
+      shape**
 
 Run the Neovim nfnl wrapper from repo root:
 
@@ -294,18 +336,28 @@ Run the Neovim nfnl wrapper from repo root:
 uv run .agents/skills/neovim-configuration/scripts/recompile-nfnl.py
 ```
 
-Expected: command exits 0 and reports successful compile. If generated Lua changes, inspect only enough to confirm the Lazy spec shape; do not hand-edit generated Lua.
+Expected: command exits 0 and reports successful compile. If generated Lua
+changes, inspect only enough to confirm the Lazy spec shape; do not hand-edit
+generated Lua.
 
 - [ ] **Step 4: Run focused runtime shape assertions**
 
-Add or run a one-off headless Neovim/Lua assertion that requires the compiled helper modules and the migrated Python plugin module, then checks exact table shape. The assertion must prove:
+Add or run a one-off headless Neovim/Lua assertion that requires the compiled
+helper modules and the migrated Python plugin module, then checks exact table
+shape. The assertion must prove:
 
 - `lib.keys.bind` returns a one-level vector of key specs
 - `lib.plugins.keys` flattens multiple `bind` results into one `:keys` vector
-- `plugins.lsp.languages.python` exports the expected Lazy spec with plugin id, dependency id/version, `:ft :python`, and key spec `{1 "<leader>cv" 2 "<cmd>VenvSelect<cr>" :desc "Pick virtual env"}`
-- the advanced `(m mode lhs...)` contract emits exactly three one-level specs for the documented example, with correct `:mode`, lhs, rhs, and `:desc` fields
+- `plugins.lsp.languages.python` exports the expected Lazy spec with plugin
+  id, dependency id/version, `:ft :python`, and key spec
+  `{1 "<leader>cv" 2 "<cmd>VenvSelect<cr>" :desc "Pick virtual env"}`
+- the advanced `(m mode lhs...)` contract emits exactly three one-level specs
+  for the documented example, with correct `:mode`, lhs, rhs, and `:desc`
+  fields
 
-Prefer a short repo-local command or temporary script that can be removed after validation. Do not rely on generated Lua inspection alone; compile success does not execute runtime helper behavior.
+Prefer a short repo-local command or temporary script that can be removed
+after validation. Do not rely on generated Lua inspection alone; compile
+success does not execute runtime helper behavior.
 
 ---
 
@@ -316,10 +368,10 @@ Prefer a short repo-local command or temporary script that can be removed after 
 **Files:**
 
 - Modify: `.agents/skills/neovim-configuration/SKILL.md`
-
 - [ ] **Step 1: Follow repo-local skill-authoring guidance**
 
-Before editing, read `.agents/skills/skill-authoring/SKILL.md`. Keep the change concise and operational.
+Before editing, read `.agents/skills/skill-authoring/SKILL.md`. Keep the
+change concise and operational.
 
 - [ ] **Step 2: Add a short plugin keybind rule**
 
@@ -342,7 +394,8 @@ Mention advanced mode/lhs grouping:
       (desc "Do thing"))
 ```
 
-Keep examples short; if this section grows, move examples into a skill-relative reference file.
+Keep examples short; if this section grows, move examples into a
+skill-relative reference file.
 
 ---
 
@@ -354,7 +407,6 @@ Keep examples short; if this section grows, move examples into a skill-relative 
 
 - Relevant changed Fennel source files
 - `.agents/skills/neovim-configuration/SKILL.md`
-
 - [ ] **Step 1: Recompile Neovim Fennel**
 
 Run:
@@ -377,7 +429,9 @@ Expected: exits 0.
 
 - [ ] **Step 3: Stage exact intended files for `prek`**
 
-Run `git status --short`, then stage only intended files. Include generated Lua files produced by the recompile wrapper because they are tracked runtime outputs, but never hand-edit them. Example:
+Run `git status --short`, then stage only intended files. Include generated
+Lua files produced by the recompile wrapper because they are tracked runtime
+outputs, but never hand-edit them. Example:
 
 ```bash
 git add \
@@ -405,33 +459,47 @@ Expected: exits 0. `prek` only checks staged files.
 
 - [ ] **Step 5: Decide whether `nix flake check --all-systems` is needed**
 
-No Nix files are planned to change, so do not run `nix flake check --all-systems` unless implementation unexpectedly touches Nix code.
+No Nix files are planned to change, so do not run
+`nix flake check --all-systems` unless implementation unexpectedly touches Nix
+code.
 
 ### Task 7: Optional broader migration
 
 **Files:**
 
-- Only plugin files explicitly selected under `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/**`
+- Only plugin files explicitly selected under
+  `users/_modules/desktop/apps/editor/neovim/config/fnl/plugins/**`
 
 - [ ] **Step 1: Search current key macro call-sites**
 
-Use repository search for `(key` and inspect matches. Do not migrate everything automatically unless requested.
+Use repository search for `(key` and inspect matches. Do not migrate
+everything automatically unless requested.
 
 - [ ] **Step 2: Migrate one small cluster at a time**
 
-For each selected plugin file, replace plugin-local key specs with `(keys (bind ...))`. Keep global keymap code out of scope unless specifically requested.
+For each selected plugin file, replace plugin-local key specs with
+`(keys (bind ...))`. Keep global keymap code out of scope unless specifically
+requested.
 
 - [ ] **Step 3: Recompile after each cluster**
 
-Run the nfnl recompile wrapper after each cluster to catch macro expansion issues early.
+Run the nfnl recompile wrapper after each cluster to catch macro expansion
+issues early.
 
 ---
 
 ## Notes and Risks
 
-- The new DSL intentionally favors helper forms over deriving behavior from keywords or strings.
-- `(cmd "...")` is required for command rhs values, including commands with spaces.
+- The new DSL intentionally favors helper forms over deriving behavior from
+  keywords or strings.
+- `(cmd "...")` is required for command rhs values, including commands with
+  spaces.
 - Plain strings remain literal rhs values.
-- The `plugin!` macro should be additive first; removing old `plugin`/`key` can be a separate cleanup after call-sites migrate.
-- If shorthand rewriting inside `plugin!` becomes too complex, fall back to explicit module calls like `(p.keys (k.bind ...))`; this is less ergonomic but keeps behavior simple and testable.
-- Generated Lua under `users/_modules/desktop/apps/editor/neovim/config/lua/**` must never be edited by hand.
+- The `plugin!` macro should be additive first; removing old `plugin`/`key`
+  can be a separate cleanup after call-sites migrate.
+- If shorthand rewriting inside `plugin!` becomes too complex, fall back to
+  explicit module calls like `(p.keys (k.bind ...))`; this is less ergonomic
+  but keeps behavior simple and testable.
+- Generated Lua under
+  `users/_modules/desktop/apps/editor/neovim/config/lua/**` must never be
+  edited by hand.

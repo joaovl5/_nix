@@ -1,16 +1,20 @@
 # Repo NixOS test framework reference
 
-Use this for repo wiring facts. Load other references for driver API semantics or assertion patterns
+Use this for repo wiring facts. Load other references for driver API semantics
+or assertion patterns
 
 ## Files involved
 
 - **Flake entrypoint:** `tests/default.nix` exposes suites as flake checks
-- **Wrapper definition:** `_lib/tests/default.nix` defines `mylib.tests.mk_test`
+- **Wrapper definition:** `_lib/tests/default.nix` defines
+  `mylib.tests.mk_test`
 - **Suite file:** `tests/<suite>/default.nix` calls `mylib.tests.mk_test`
 - **Fixture nodes:** `tests/<suite>/*.nix` holds substantial node setup
 - **Python package:** `tests/scripts/` builds the `my-nix-tests` package
-- **Driver module:** `tests/scripts/src/my_nix_tests/<suite>.py` contains orchestration
-- **Import checks:** `tests/scripts/default.nix` registers modules through `pythonImportsCheck`
+- **Driver module:** `tests/scripts/src/my_nix_tests/<suite>.py` contains
+  orchestration
+- **Import checks:** `tests/scripts/default.nix` registers modules through
+  `pythonImportsCheck`
 
 ## `mylib.tests.mk_test` contract
 
@@ -24,7 +28,8 @@ mylib.tests.mk_test {
 }
 ```
 
-The wrapper adds the repo Python package to `extraPythonPackages` and generates:
+The wrapper adds the repo Python package to `extraPythonPackages` and
+generates:
 
 ```python
 from my_nix_tests.<python_module_name> import run
@@ -33,22 +38,32 @@ run(globals())
 
 Keep these facts true:
 
-- **Driver function:** the Python file defines `run(driver_globals: dict[str, object]) -> None` or an equivalent signature
-- **Module contract:** `python_module_name = "example"` means `from my_nix_tests.example import run`
-- **Per-suite module:** each suite needs its own module unless `python_module_name` intentionally reuses one
-- **Named nodes:** read named NixOS nodes from `driver_globals`, for example `driver_globals["relay"]`
-- **Import registration:** add new Python modules to `tests/scripts/default.nix` `pythonImportsCheck`
+- **Driver function:** the Python file defines
+  `run(driver_globals: dict[str, object]) -> None` or an equivalent signature
+- **Module contract:** `python_module_name = "example"` means
+  `from my_nix_tests.example import run`
+- **Per-suite module:** each suite needs its own module unless
+  `python_module_name` intentionally reuses one
+- **Named nodes:** read named NixOS nodes from `driver_globals`, for example
+  `driver_globals["relay"]`
+- **Import registration:** add new Python modules to
+  `tests/scripts/default.nix` `pythonImportsCheck`
 
 ## New-suite checklist
 
 - **Suite file:** create `tests/<suite>/default.nix`
 - **Fixture files:** add `tests/<suite>/*.nix` when setup is substantial
-- **Driver module:** add `tests/scripts/src/my_nix_tests/<suite>.py` defining `run(...)`
+- **Driver module:** add `tests/scripts/src/my_nix_tests/<suite>.py` defining
+  `run(...)`
 - **Import check:** register the Python import in `tests/scripts/default.nix`
-- **Deterministic inputs:** materialize generated files or secrets inside the VM and keep them deterministic
-- **Syntax check:** run `uv run python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py`
-- **Flake visibility:** stage new suite files before flake-backed `nix eval` or `nix build`
-- **Targeted build:** run `nix build .#checks.x86_64-linux.<test_name>` for the suite you changed
+- **Deterministic inputs:** materialize generated files or secrets inside the
+  VM and keep them deterministic
+- **Syntax check:** run
+  `uv run python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py`
+- **Flake visibility:** stage new suite files before flake-backed `nix eval`
+  or `nix build`
+- **Targeted build:** run `nix build .#checks.x86_64-linux.<test_name>` for
+  the suite you changed
 
 ## Minimal complex-suite template
 
@@ -144,6 +159,8 @@ def run(driver_globals: dict[str, object]) -> None:
 
 ## Comment expectations
 
-- **Nix fixtures:** explain non-obvious topology, secrets, addresses, firewall or NAT rules, and fixture-service purpose
-- **Python drivers:** explain scenario phases, control paths for negative assertions, and known limitations
+- **Nix fixtures:** explain non-obvious topology, secrets, addresses, firewall
+  or NAT rules, and fixture-service purpose
+- **Python drivers:** explain scenario phases, control paths for negative
+  assertions, and known limitations
 - **Placement:** keep comments close to the code that needs them

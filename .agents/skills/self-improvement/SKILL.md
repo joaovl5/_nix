@@ -29,12 +29,14 @@ if (non-trivial reusable wisdom) ->
 ## Shared principles
 
 - **Scope:** prefer the smallest structural update that fits the new knowledge
-- **Concision:** keep skill and doc updates short, logs may stay detailed when detail helps
+- **Concision:** keep skill and doc updates short, logs may stay detailed when
+  detail helps
 - **Skill support:** use supporting skills when relevant
 
 ## Procedures
 
-- **(A) Updating skills:** when new wisdom fits a skill, extend it instead of creating a near-duplicate
+- **(A) Updating skills:** when new wisdom fits a skill, extend it instead of
+  creating a near-duplicate
 - **(B) Updating docs:** use when an existing doc is the best long-term home
 - **(C) Adding skills:** only when
   - **Gap:** no current skill covers the subject
@@ -42,11 +44,14 @@ if (non-trivial reusable wisdom) ->
 - **(D) Adding docs:** only when
   - **No fit:** no current page can absorb it, even after restructuring
   - **Shared value:** it matters to agents and developers
-- **(E) Logging ephemeral knowledge:** use for debugging logs, research notes, incident reports, and other situation-specific material worth keeping
+- **(E) Logging ephemeral knowledge:** use for debugging logs, research notes,
+  incident reports, and other situation-specific material worth keeping
   - **Location:** `./docs/logs`
   - **Adding a log:** bootstrap it with the helper
-    - **Command:** `uv run scripts/add_log.py --short-title "..." --report-brief "..."`
-    - **Auto-filled:** `timestamp`, `date_slug`, and slugified `short_title_slug`
+    - **Command:**
+      `uv run scripts/add_log.py --short-title "..." --report-brief "..."`
+    - **Auto-filled:** `timestamp`, `date_slug`, and slugified
+      `short_title_slug`
     - **Validated:**
       - `short_title` must be 10-96 chars and single-line
       - `report_brief` must be 30-280 chars and single-line

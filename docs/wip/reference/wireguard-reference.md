@@ -8,7 +8,8 @@ wg genkey > privatekey
 wg pubkey < privatekey > publickey
 ```
 
-Each peer needs a unique keypair. Store private keys with correct permissions (not world-readable). Use `privateKeyFile` over inline `privateKey`.
+Each peer needs a unique keypair. Store private keys with correct permissions
+(not world-readable). Use `privateKeyFile` over inline `privateKey`.
 
 With agenix:
 
@@ -21,7 +22,8 @@ age.secrets.wg-key = {
 };
 ```
 
-Auto-generate option: `networking.wireguard.interfaces.[name].generatePrivateKeyFile`
+Auto-generate option:
+`networking.wireguard.interfaces.[name].generatePrivateKeyFile`
 
 ## AllowedIPs
 
@@ -36,7 +38,8 @@ Auto-generate option: `networking.wireguard.interfaces.[name].generatePrivateKey
 
 ### 1. `networking.wireguard.interfaces`
 
-Does NOT auto-configure routes. Manual `ip route add` or postSetup scripts needed.
+Does NOT auto-configure routes. Manual `ip route add` or postSetup scripts
+needed.
 
 **Peer:**
 
@@ -81,7 +84,8 @@ Does NOT auto-configure routes. Manual `ip route add` or postSetup scripts neede
 }
 ```
 
-**Proxy client:** Set `allowedIPs = [ "0.0.0.0/0" "::/0" ]` and specify endpoint.
+**Proxy client:** Set `allowedIPs = [ "0.0.0.0/0" "::/0" ]` and specify
+endpoint.
 
 ### 2. `networking.wg-quick.interfaces`
 
@@ -106,9 +110,11 @@ Higher-level, uses `wg-quick` tool. Manages routes automatically.
 }
 ```
 
-**Proxy server** additions: Same NAT + iptables as above, using `postUp`/`preDown` instead of `postSetup`/`postShutdown`.
+**Proxy server** additions: Same NAT + iptables as above, using
+`postUp`/`preDown` instead of `postSetup`/`postShutdown`.
 
-**Reuse existing config:** `networking.wg-quick.interfaces.wg0.configFile = "/path/to/wg0.conf";`
+**Reuse existing config:**
+`networking.wg-quick.interfaces.wg0.configFile = "/path/to/wg0.conf";`
 
 **Systemd unit:** `wg-quick-wg0.service` (start/stop via systemctl)
 
@@ -221,7 +227,8 @@ routingPolicyRules = [
 
 ### 4. NetworkManager
 
-Client-only. Import wg-quick config: `nmcli connection import type wireguard file wg0.conf`
+Client-only. Import wg-quick config:
+`nmcli connection import type wireguard file wg0.conf`
 
 ## Traffic Relay (CGNAT Bypass)
 
@@ -294,18 +301,25 @@ Architecture: 3 systemd services + Prometheus smokeping probers.
 
 **Components:**
 
-1. `wg-select` - picks initial server (from state file or random), runs before wg.service
-2. `wg-failover` - queries Prometheus for packet loss per server, switches to lowest-loss alternative
-3. `wg-health-check` - timer (1min), checks tunnel quality, triggers failover after 3 consecutive failures >15% loss
+1. `wg-select` - picks initial server (from state file or random), runs before
+   wg.service
+2. `wg-failover` - queries Prometheus for packet loss per server, switches to
+   lowest-loss alternative
+3. `wg-health-check` - timer (1min), checks tunnel quality, triggers failover
+   after 3 consecutive failures >15% loss
 
 **Two probers:**
 
-- External (on hypervisor): pings all VPN server endpoints directly - measures reachability of servers you're NOT connected to
-- Internal (in VPN namespace): pings root DNS through active tunnel - measures actual tunnel quality
+- External (on hypervisor): pings all VPN server endpoints directly - measures
+  reachability of servers you're NOT connected to
+- Internal (in VPN namespace): pings root DNS through active tunnel - measures
+  actual tunnel quality
 
-**Failover trigger:** wg.service `OnFailure = "wg-failover.service"` + health check timer.
+**Failover trigger:** wg.service `OnFailure = "wg-failover.service"` + health
+check timer.
 
-Config symlink pattern: `/run/wg-active.conf` -> `/run/secrets/wireguard/$SERVER`
+Config symlink pattern: `/run/wg-active.conf` ->
+`/run/secrets/wireguard/$SERVER`
 
 ## DNS Options
 
@@ -338,11 +352,13 @@ systemd.network.networks."50-wg0" = {
 };
 ```
 
-Warning: `Domains=~.` prevents DNS resolution of WireGuard endpoints. Use IP addresses for endpoints, not domains.
+Warning: `Domains=~.` prevents DNS resolution of WireGuard endpoints. Use IP
+addresses for endpoints, not domains.
 
 ## rpfilter (Reverse Path Filtering)
 
-NixOS firewall blocks wg traffic when routing all traffic through tunnel. Solutions (pick one):
+NixOS firewall blocks wg traffic when routing all traffic through tunnel.
+Solutions (pick one):
 
 1. `networking.firewall.checkReversePath = "loose";` (recommended)
 2. `networking.firewall.checkReversePath = false;`
@@ -364,14 +380,16 @@ networking.firewall = {
 
 ## Troubleshooting
 
-**persistentKeepalive not working with privateKeyFile:** PostUp sets private key after config, breaking auto-connect. Workaround:
+**persistentKeepalive not working with privateKeyFile:** PostUp sets private
+key after config, breaking auto-connect. Workaround:
 
 ```nix
 postUp = [ "wg set wg0 peer ${publicKey} persistent-keepalive 25" ];
 # Don't set persistentKeepalive in peers
 ```
 
-**Some services fail but ping works:** MTU too large. Default is 1420 (1500 - 80 wg overhead). Lower it:
+**Some services fail but ping works:** MTU too large. Default is 1420 (1500 -
+80 wg overhead). Lower it:
 
 ```nix
 networking.wireguard.interfaces.wg0.mtu = 1000;  # tune upward from here
@@ -384,14 +402,16 @@ networking.networkmanager.dns = "systemd-resolved";
 services.resolved.enable = true;
 ```
 
-**systemd-networkd cleans up custom ip rules:** Set in `/etc/systemd/networkd.conf`:
+**systemd-networkd cleans up custom ip rules:** Set in
+`/etc/systemd/networkd.conf`:
 
 ```text
 ManageForeignRoutes=No
 ManageForeignRoutingPolicyRules=No
 ```
 
-Or define rules in `.network` files (preferred on NixOS via `routingPolicyRules`).
+Or define rules in `.network` files (preferred on NixOS via
+`routingPolicyRules`).
 
 ## Testing
 
