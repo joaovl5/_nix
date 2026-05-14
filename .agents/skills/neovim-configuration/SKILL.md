@@ -18,8 +18,11 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Plugin behavior:** `config/fnl/**` is the source of truth for Neovim behavior
 - **Plugin specs:** most plugin specs live in `config/fnl/plugins/**`
 - **Core settings:** core options usually live in `config/fnl/options.fnl` and `config/fnl/keymaps.fnl`
-- **Bootstrap:** `config/local.lua` is the real runtime bootstrap for lazy.nvim and nfnl
-- **Plugin discovery:** the bootstrap scans `config/fnl/plugins` to depth `3`
+- **Bootstrap:** `config/local.lua` is a thin runtime shim; edit `config/fnl/bootstrap.fnl`, then recompile
+- **Plugin discovery:** `config/fnl/lib/plugin-loader.fnl` recursively scans `config/fnl/plugins`
+  - skips `_`-prefixed files/dirs and `index.fnl`
+  - accepts single lazy specs or vectors of lazy specs
+  - ignores nil/false/true/empty exports for helper or side-effect modules
 - **nfnl trust boundary:** `config/.nfnl.fnl` is a direct-edit project root file; trust it once in interactive Neovim before using the wrapper
 - **Nix wiring:** `default.nix` controls packages, runtimepath setup, and `_G.plugin_dirs`
 - **Tree-sitter queries:** `config/queries/**` and `config/after/queries/**` are direct-edit `.scm` files
@@ -36,25 +39,25 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Compile action:** it opens a Fennel buffer, calls `nfnl.api.compile-all-files`, prints status counts/errors, and exits non-zero on compile failures
 - **Orphan handling:** after successful compile, it scans or deletes generated Lua orphans directly; `--keep-orphans` only lists them
 - **When to recompile:** recompile after Fennel edits, especially after macro changes, renames, deletes, or `config/flsproject.fnl` edits
+- **Bootstrap creation:** `config/local.lua` needs generated `config/lua/bootstrap.lua`; compile it before switching the shim on a clean tree
 
 ## Common maintenance tasks
 
 - **Change plugin behavior:** edit `config/fnl/plugins/**`, then recompile through the wrapper
 - **Change core options or keymaps:** edit `config/fnl/options.fnl` or `config/fnl/keymaps.fnl`, then recompile
-- **Change bootstrap or plugin discovery:** edit `config/local.lua`
+- **Change bootstrap or plugin discovery:** edit `config/fnl/bootstrap.fnl` or `config/fnl/lib/plugin-loader.fnl`, then recompile
 - **Change Nix-managed packages or plugin wiring:** edit `default.nix`
 - **Change tree-sitter query behavior:** edit the relevant `.scm` file directly
 - **Rename or delete Fennel files:** recompile through the wrapper after the change
 - **Orphan review:** use `--keep-orphans` first if you want to inspect before deletion
-- **Discovery limit:** keep plugin files within discovery depth `3`
 - **Change FLS or project metadata:** edit `config/flsproject.fnl`, then recompile
 
 ## Repo quirks
 
-- **Tracked bootstrap:** `config/local.lua` is tracked bootstrap code, not a disposable local override
+- **Tracked bootstrap shim:** `config/local.lua` is tracked and should stay a small `require("bootstrap")` shim
 - **Static plugin dirs:** plugin specs may rely on `_G.plugin_dirs` from `default.nix`
 - **Why it matters:** that is how this repo threads Nix-provided paths into dynamic behavior
-- **Discovery depth:** plugin discovery only walks depth `3`; deeper plugin files are ignored
+- **Plugin helper files:** use `_`-prefixed files/dirs for sibling helpers that should not be auto-required
 - **Runtimepath reset:** `performance.rtp.reset = false` is deliberate
 
 ## Quick checklist
@@ -70,6 +73,6 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 
 - **Generated Lua edits:** do not edit `config/lua/**` or `config/flsproject.lua`
 - **Local override assumption:** `config/local.lua` is tracked bootstrap code
-- **Deep plugin files:** discovery only walks depth `3`
+- **Helper auto-load surprises:** non-underscore `.fnl` files under `config/fnl/plugins` are required during discovery
 - **Missed recompiles:** macro changes, renames, and deletes affect more than one generated file
 - **nfnl on queries:** `.scm` query files bypass nfnl

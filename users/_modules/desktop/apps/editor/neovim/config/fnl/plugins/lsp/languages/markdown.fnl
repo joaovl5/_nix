@@ -2,7 +2,6 @@
 
 (let [fts [:markdown :codecompanion]]
   [(plugin :satozawa/graft.nvim {:ft fts :opts {}})
-   (plugin :kibi2/tirenvi.nvim {:ft fts :opts {}})
    (plugin :MeanderingProgrammer/render-markdown.nvim
            {:dependencies [:nvim-treesitter/nvim-treesitter
                            :nvim-mini/mini.nvim]

@@ -2,7 +2,6 @@
 local fts = { "markdown", "codecompanion" }
 return {
   { "satozawa/graft.nvim", ft = fts, opts = {} },
-  { "kibi2/tirenvi.nvim", ft = fts, opts = {} },
   {
     "MeanderingProgrammer/render-markdown.nvim",
     dependencies = {

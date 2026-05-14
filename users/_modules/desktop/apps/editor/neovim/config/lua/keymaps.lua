@@ -16,7 +16,6 @@ n.map(
   "<cmd>nohlsearch<CR>",
   { desc = "Clear Search Highlights" }
 )
-n.map({ "t" }, "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 n.map(
   { "n" },
   "<Esc>",
@@ -360,39 +359,11 @@ wk.add({
     ":CodeCompanion<CR>"
   ),
 })
-wk.add({
-  km("<leader>n", { group = "Notes" }),
-  km("<leader>na", { desc = "Add note" }, ":Obsidian new<CR>"),
-  km("<leader>nn", { desc = "Quick switch" }, ":Obsidian quick_switch<CR>"),
-  km("<leader>n/", { desc = "Grep notes" }, ":Obsidian search<CR>"),
-  km("<leader>nt", { desc = "Grep tags" }, ":Obsidian tags<CR>"),
-  km("<leader>nr", { desc = "Rename" }, ":Obsidian rename<CR>"),
-  km("<leader>nf", { desc = "Follow link" }, ":Obsidian follow_link<CR>"),
-  km("<leader>nb", { desc = "Backlinks" }, ":Obsidian backlinks<CR>"),
-  km("<leader>nl", { desc = "Links" }, ":Obsidian links<CR>"),
-  km("<leader>nt", { desc = "Table of contents" }, ":Obsidian toc<CR>"),
-  km("<leader>nP", { desc = "Paste image" }, ":Obsidian paste_img<CR>"),
-  km(
-    "<leader>nx",
-    { desc = "Extract into note", mode = { "v" } },
-    ":Obsidian extract_note<CR>"
-  ),
-  km(
-    "<leader>na",
-    { desc = "Link new note", mode = { "v" } },
-    ":Obsidian link_new<CR>"
-  ),
-  km(
-    "<leader>nl",
-    { desc = "Link a note", mode = { "v" } },
-    ":Obsidian link<CR>"
-  ),
-})
-n.map({ "n", "i" }, "<A-;>", ":Obsidian toggle_checkbox<CR>")
 local function _45_()
   return Snacks.terminal.toggle()
 end
 n.map({ "n", "t" }, "<A-/>", _45_, { desc = "Toggle Terminal" })
+n.map({ "t" }, "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 local function _46_()
   return Snacks.terminal.toggle()
 end
