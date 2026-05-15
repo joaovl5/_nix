@@ -1,13 +1,37 @@
-check:
-    just fmt
-    ruff check . --quiet --no-cache
-    basedpyright
-    statix check -o errfmt -i **/emacs/config/**.nix
-    nix flake check --quiet --log-format raw
+nix_raw := "nix --quiet --log-format raw"
+rumdl := nix_raw + " run '.#rumdl' --"
 
+ruff := "ruff --quiet"
+
+basedpyright := "basedpyright --warnings"
+
+# exclude emacs straight.el pkgs that have .nix files
+emacs_vendored_nix := "**/emacs/config/**.nix"
+
+check: fmt
+    statix check \
+        -o errfmt \
+        -i {{ emacs_vendored_nix }}
+    {{ rumdl }} check \
+        --no-cache \
+        --silent \
+        --fail-on warning \
+        --output-format concise
+    {{ ruff }} check \
+        --no-cache
+    {{ basedpyright }}
+    {{ nix_raw }} flake check
+
+[script("fish")]
 fmt:
-    nix fmt --quiet --log-format raw -- --no-cache
-    deadnix -_ -L --edit --exclude **/emacs/config/**.nix
-
-ci:
-    nix fmt --quiet --log-format raw -- --ci
+    {{ nix_raw }} fmt -- \
+        --no-cache
+    {{ rumdl }} fmt \
+        --no-cache \
+        --silent
+    just --fmt
+    deadnix \
+        -_ \
+        -L \
+        --edit \
+        --exclude {{ emacs_vendored_nix }}

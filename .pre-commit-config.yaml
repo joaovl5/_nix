@@ -13,26 +13,10 @@ repos:
       # Checks if configs parse
       - id: check-toml
       - id: check-yaml
-
-  - repo: local
-    hooks:
-      - id: statix
-        name: statix
-        language: system
-        pass_filenames: false
-        entry: statix check -o errfmt -i **/emacs/config/**.nix
-      - id: deadnix
-        name: deadnix
-        language: system
-        pass_filenames: false
-        entry: deadnix
-      # - id: nix_check
-      #   name: nix_check
-      #   language: system
-      #   pass_filenames: false
-      #   entry: nix flake check
-      - id: treefmt
-        name: treefmt
-        language: system
-        pass_filenames: false
-        entry: nix fmt
+# - repo: local
+#   hooks:
+#     - id: format
+#       name: format
+#       language: system
+#       pass_filenames: false
+#       entry: just fmt
