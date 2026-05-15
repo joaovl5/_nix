@@ -21,6 +21,7 @@ in {
         octodns-pihole
         pihole6api
         rumdl
+        sane_fnlfmt
         vm_launcher
         ;
     }

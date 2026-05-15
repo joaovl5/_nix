@@ -14,6 +14,7 @@
     inherit inputs pihole6api;
   };
   rumdl = pkgs.callPackage ./rumdl {inherit inputs;};
+  sane_fnlfmt = pkgs.callPackage ./sane_fnlfmt {inherit inputs;};
   vm_launcher = pkgs.callPackage ./vm-launcher {};
 in {
   inherit
@@ -26,6 +27,7 @@ in {
     pihole6api
     octodns-pihole
     rumdl
+    sane_fnlfmt
     vm_launcher
     ;
 }

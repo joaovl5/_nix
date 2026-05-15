@@ -604,6 +604,18 @@
       "url": "https://github.com/oxalica/rust-overlay/archive/8087ff1f47fff983a1fba70fa88b759f2fd8ae97.tar.gz",
       "hash": "sha256-Mi1uF5f2FsdBIvy+v7MtsqxD3Xjhd0ARJdwoqqqPtJo="
     },
+    "sane-fnlfmt-src": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@git.trll.ing/lav/sane_fnlfmt.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "0617c9ee52dfe46eb9cf1474dc9bba617b7d0a34",
+      "url": null,
+      "hash": "sha256-7kMQLoDtGyI1lzCSeN8Rm3eTuBYty+VFCXkCsfl+Jbc="
+    },
     "sops-nix": {
       "type": "Git",
       "repository": {

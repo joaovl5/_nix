@@ -2,11 +2,11 @@
 
 (local formatters {; keep-sorted start
                    :alejandra {:command :alejandra}
-                   :fnlfmt {:command :fnlfmt}
                    :kdlfmt {:command :kdlfmt
                             :args [:format :--kdl-version :v1 :--stdin]}
                    :nix_fmt {:command :nix :args [:fmt]}
-                   :prettierd {:command :prettierd}})
+                   :prettierd {:command :prettierd}
+                   :sane_fnlfmt {:command :fnlfmt}})
 
 ; keep-sorted end
 
@@ -15,7 +15,7 @@
         :* [:keep-sorted]
         :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
         :dockerfile [:dockerfmt]
-        :fennel [:fnlfmt]
+        :fennel [:sane_fnlfmt]
         :fish [:fish_indent]
         :handlebars [:prettierd]
         :javascript [:prettierd]
