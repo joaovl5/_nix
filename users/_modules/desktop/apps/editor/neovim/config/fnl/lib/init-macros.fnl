@@ -16,12 +16,12 @@
 
 ; Lazy.nvim specific
 
-(lambda plugin [identifier ?attrs]
+(λ plugin [identifier ?attrs]
   "Makes a Lazy.nvim plugin spec."
   (let [attrs (or ?attrs {})]
     (doto attrs (tset 1 identifier))))
 
-(lambda key [lhs rhs ?attrs]
+(λ key [lhs rhs ?attrs]
   "Makes a Lazy.nvim keybind spec."
   (let [attrs (or ?attrs {})]
     (doto attrs
@@ -60,7 +60,8 @@
       (call-with k :a (tail lhs))
       (call? lhs :m)
       (let [args (tail lhs)]
-        (call-with k :m
+        (call-with k
+                   :m
                    (icollect [i arg (ipairs args)]
                      (if (= i 1) arg (rewrite-lhs arg k)))))
       (and (= :table (type lhs)) (not (= nil (. lhs 1))))
@@ -125,7 +126,7 @@
       (call? form :cmd) (call-with p :cmd (tail form))
       form))
 
-(lambda p! [identifier ...]
+(λ p! [identifier ...]
   "Makes a Lazy.nvim plugin spec from bounded DSL forms.
   Example:
   `(p! :foo/bar

@@ -7,5 +7,6 @@
                           (accumulate [all_names [] _ theme (ipairs (or _G.Config.themes
                                                                         []))]
                             (vim.list_extend all_names theme.names)))
-                   (do-req :themery :setup
+                   (do-req :themery
+                           :setup
                            {:themes theme_names :livePreview true}))})

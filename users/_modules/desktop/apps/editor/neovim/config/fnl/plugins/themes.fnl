@@ -11,7 +11,8 @@
                         :names [:eldritch :eldritch-dark :eldritch-minimal]}
                        {:source :serhez/teide.nvim
                         :post_add (fn []
-                                    (do-req :teide :setup
+                                    (do-req :teide
+                                            :setup
                                             {:style :darker
                                              :transparent true
                                              :dim_inactive true}))

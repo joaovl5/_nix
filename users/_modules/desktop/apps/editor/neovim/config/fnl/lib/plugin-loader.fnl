@@ -57,7 +57,9 @@
       (lazy-spec-list? exported)
       (each [_ spec (ipairs exported)]
         (table.insert plugins spec))
-      (or (= nil exported) (= false exported) (= true exported)
+      (or (= nil exported)
+          (= false exported)
+          (= true exported)
           (empty-table? exported))
       nil
       (vim.notify (.. "Ignoring non-plugin module " module-name)

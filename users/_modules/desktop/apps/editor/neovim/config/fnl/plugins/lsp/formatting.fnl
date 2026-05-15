@@ -1,12 +1,12 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(local formatters {; keep-sorted start
-                   :alejandra {:command :alejandra}
-                   :kdlfmt {:command :kdlfmt
-                            :args [:format :--kdl-version :v1 :--stdin]}
-                   :nix_fmt {:command :nix :args [:fmt]}
-                   :prettierd {:command :prettierd}
-                   :sane_fnlfmt {:command :fnlfmt}})
+(local formatters
+       {; keep-sorted start
+        :alejandra {:command :alejandra}
+        :kdlfmt {:command :kdlfmt :args [:format :--kdl-version :v1 :--stdin]}
+        :nix_fmt {:command :nix :args [:fmt]}
+        :prettierd {:command :prettierd}
+        :sane_fnlfmt {:command :fnlfmt :args [:-]}})
 
 ; keep-sorted end
 
@@ -37,9 +37,11 @@
 ; keep-sorted end
 
 (fn get_project_formatters_by_ft [bufnr]
-  (let [(ok neoconf) (pcall require :neoconf)]
+  (let [(ok neoconf)
+        (pcall require :neoconf)]
     (if ok
-        (neoconf.get :formatter.filetypes {}
+        (neoconf.get :formatter.filetypes
+                     {}
                      {:buffer bufnr :local true :global false})
         {})))
 

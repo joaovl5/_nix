@@ -612,9 +612,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "0617c9ee52dfe46eb9cf1474dc9bba617b7d0a34",
+      "revision": "87b02d05d870c66730f9dd39f3af26a1b46f1172",
       "url": null,
-      "hash": "sha256-7kMQLoDtGyI1lzCSeN8Rm3eTuBYty+VFCXkCsfl+Jbc="
+      "hash": "sha256-BTHttm/PmXdA/Lvg5io90ucqi73GFeIdEBnXHam+0wI="
     },
     "sops-nix": {
       "type": "Git",

@@ -12,10 +12,6 @@
                                     {:chat {:adapter :openrouter
                                             :model base_model
                                             :tools {:opts {:auto_submit_errors true}}}
-                                     ; :roles {:llm (fn [adapter]
-                                     ;                (.. "󰚩 "
-                                     ;                    adapter.formatted_name))
-                                     ;         :user (fn [_] " User")}}
                                      :inline adap_cfg
                                      :cmd adap_cfg
                                      :background adap_cfg})

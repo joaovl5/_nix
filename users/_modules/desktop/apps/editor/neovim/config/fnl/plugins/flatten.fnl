@@ -13,7 +13,8 @@
 
 (fn snacks_terminal_state [terminal]
   (when (and terminal terminal.buf (vim.api.nvim_buf_is_valid terminal.buf))
-    (let [(ok state) (pcall vim.api.nvim_buf_get_var terminal.buf
+    (let [(ok state) (pcall vim.api.nvim_buf_get_var
+                            terminal.buf
                             :snacks_terminal)]
       (when ok state))))
 

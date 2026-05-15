@@ -6,8 +6,10 @@
     (if (= 0 res.code)
         (vim.notify "Building Parinfer done" vim.log.levels.INFO)
         (res.code)
-        (vim.notify (.. "Building Parinfer failed\n\nSTDOUT: " res.stdout
-                        "\n\nSTDERR: " res.stderr)
+        (vim.notify (.. "Building Parinfer failed\n\nSTDOUT: "
+                        res.stdout
+                        "\n\nSTDERR: "
+                        res.stderr)
                     vim.log.levels.ERROR))))
 
 [(plugin :eraserhd/parinfer-rust {:build build_parinfer :ft [:fennel]})]

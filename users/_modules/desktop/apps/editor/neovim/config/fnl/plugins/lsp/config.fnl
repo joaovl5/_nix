@@ -8,19 +8,25 @@
     (each [_ client (ipairs clients)]
       (if (not= nil client.settings)
           (set client.settings.python
-               (vim.tbl_deep_extend :force (or client.settings.python {})
+               (vim.tbl_deep_extend :force
+                                    (or client.settings.python {})
                                     {:pythonPath path}))
           (set client.config.settings
-               (vim.tbl_deep_extend :force (or client.config.settings {})
+               (vim.tbl_deep_extend :force
+                                    (or client.config.settings {})
                                     {:python {:pythonPath path}})))
       (client.notify :workspace/didChangeConfiguration {:settings nil}))))
 
 (fn do_basedpyright_attach [client bufnr]
-  (n.usercmd bufnr :LspPyrightOrganizeImports {:desc "Organize Imports"}
+  (n.usercmd bufnr
+             :LspPyrightOrganizeImports
+             {:desc "Organize Imports"}
              #(client:exec_cmd {:command :basedpyright.organizeimports
                                 :arguments {vim.uri_from_bufnr bufnr}}))
-  (n.usercmd bufnr :LspPyrightSetPythonPath
-             {:desc "Set Python Path" :nargs 1 :complete :file} set_python_path))
+  (n.usercmd bufnr
+             :LspPyrightSetPythonPath
+             {:desc "Set Python Path" :nargs 1 :complete :file}
+             set_python_path))
 
 (fn get_basedpyright_root_dir [bufnr on_dir]
   (on_dir (vim.fs.root (vim.api.nvim_buf_get_name bufnr)

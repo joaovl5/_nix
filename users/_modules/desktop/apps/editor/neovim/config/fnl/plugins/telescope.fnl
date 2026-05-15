@@ -4,7 +4,8 @@
                       (vim.cmd.cd sel.path)
                       (MiniFiles.open sel.path))
       zox_ev_after_action (fn [sel]
-                            (vim.notify (.. "Directory changed to `" sel.path
+                            (vim.notify (.. "Directory changed to `"
+                                            sel.path
                                             "`")))
       zoxide_cfg {:prompt_title "∟ Zoxide Pick ⯾"
                   :mappings {:default {:action zox_ev_action

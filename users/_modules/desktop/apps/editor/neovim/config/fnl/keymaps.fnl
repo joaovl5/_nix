@@ -43,7 +43,8 @@
       (if (and (= :string (type err))
                (string.find err
                             "Treewalker: Treesitter node not found under cursor"
-                            1 true))
+                            1
+                            true))
           (vim.notify "Treewalker: no Treesitter node under cursor"
                       vim.log.levels.WARN)
           (error err)))))
@@ -70,9 +71,11 @@
 
 ; ## Window
 (wk.add [(km :<leader>w {:group :Window})
-         (km :<leader>wr {:desc "Resize to default!!"}
+         (km :<leader>wr
+             {:desc "Resize to default!!"}
              "<Cmd>lua MiniMisc.resize_window()<CR>")
-         (km :<leader>wz {:desc "Zen mode"}
+         (km :<leader>wz
+             {:desc "Zen mode"}
              (fn []
                (do-req :zen-mode :toggle {})))
          (km :<leader>wd {:desc "Quit window"} :<Cmd>quit<CR>)
@@ -85,12 +88,14 @@
 (wk.add [(km :<leader>b {:group :Buffer})
          (km :<leader>bb {:desc "Toggle scratch"} #(Snacks.scratch))
          (km :<leader>bB {:desc "Pick scratch"} #(Snacks.scratch.select))
-         (km :<leader>bd {:desc "Delete buffer"}
+         (km :<leader>bd
+             {:desc "Delete buffer"}
              "<cmd>lua MiniBufremove.delete()<CR>")])
 
 ; ## Fuzzy stuff
 (wk.add [(km :<leader>f {:group :Fuzzy})
-         (km "<leader>f:" {:desc "':' history"}
+         (km "<leader>f:"
+             {:desc "':' history"}
              #(Snacks.picker.command_history))
          (km :<leader>fb {:desc :Buffers} #(Snacks.picker.buffers))
          (km :<leader>fr {:desc :Recent} #(Snacks.picker.recent))
@@ -99,12 +104,15 @@
          (km :<leader>fh {:desc "Help Tags"} #(Snacks.picker.help))
          (km :<leader>fm {:desc "Man pages"} #(Snacks.picker.man))
          (km :<leader>fH {:desc :Highlights} #(Snacks.picker.highlights))
-         (km :<leader>fs {:desc :Symbols}
+         (km :<leader>fs
+             {:desc :Symbols}
              #(Snacks.picker.lsp_workspace_symbols))
-         (km :<leader>fS {:desc "Symbols (buffer)"}
+         (km :<leader>fS
+             {:desc "Symbols (buffer)"}
              #(Snacks.picker.lsp_symbols))
          (km :<leader><leader> {:desc "Fuzzy Files"} #(Snacks.picker.smart))
-         (km :<leader>. {:desc "Fuzzy Files (buffer dir)"}
+         (km :<leader>.
+             {:desc "Fuzzy Files (buffer dir)"}
              (fn []
                (let [buf_name (vim.api.nvim_buf_get_name 0)
                      buf_dir (vim.fs.dirname buf_name)]
@@ -121,18 +129,23 @@
 
 ; ## Git
 (wk.add [(km :<leader>g {:group :Git})
-         (km :<leader>go {:desc "Toggle Overlay"}
+         (km :<leader>go
+             {:desc "Toggle Overlay"}
              "<cmd>lua MiniDiff.toggle_overlay()<CR>")
-         (km :<leader>gg {:desc :Lazygit}
+         (km :<leader>gg
+             {:desc :Lazygit}
              (fn [] (toggle_term :lazygit :lazygit)))])
 
 ; ## Code
 (wk.add [(km :<leader>c {:group :Code})
-         (km :<leader>ca {:desc :Actions}
+         (km :<leader>ca
+             {:desc :Actions}
              (fn [] (do-req :tiny-code-action :code_action)))
-         (km :<leader>cf {:desc :Format}
+         (km :<leader>cf
+             {:desc :Format}
              (fn [] (do-req :conform :format {:lsp_fallback true})))
-         (km :<leader>cH {:desc "Toggle inlay hints"}
+         (km :<leader>cH
+             {:desc "Toggle inlay hints"}
              (fn []
                (vim.lsp.inlay_hint.enable (not (vim.lsp.inlay_hint.is_enabled)))))
          (km :<leader>cr {:desc :Rename} vim.lsp.buf.rename)
@@ -164,7 +177,8 @@
 (wk.add [(km :<leader>x {:group :Diagnostics})
          (km :<leader>xm {:desc "Messages (noice)"} :<cmd>NoiceAll<CR>)
          (km :<leader>xM {:desc :Messages} :<cmd>messages<CR>)
-         (km :<leader>xp {:desc "Populate diagnostics"}
+         (km :<leader>xp
+             {:desc "Populate diagnostics"}
              (fn []
                (each [_ client (ipairs (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)}))]
                  (let [worksp (require :workspace-diagnostics)]
@@ -179,9 +193,11 @@
          (km :<leader>dj {:desc "Step over"} ":DapStepOver<CR>")
          (km :<leader>dl {:desc "Step into"} ":DapStepInto<CR>")
          (km :<leader>dr {:desc :Repl} ":DapToggleRepl<CR>")
-         (km :<leader>de {:desc "Eval under cursor"}
+         (km :<leader>de
+             {:desc "Eval under cursor"}
              (fn [] (do-req :dapui :eval)))
-         (km :<leader>dx {:desc "Eval expression"}
+         (km :<leader>dx
+             {:desc "Eval expression"}
              (fn []
                (vim.ui.input {:prompt "Expression to evaluate"}
                              (fn [input] (do-req :dapui :eval input)))))
@@ -189,13 +205,17 @@
 
 ; ## AI
 (wk.add [(km :<leader>a {:group :CodeCompanion})
-         (km :<leader>aa {:desc :Actions :mode [:n :v]}
+         (km :<leader>aa
+             {:desc :Actions :mode [:n :v]}
              ":CodeCompanionActions<CR>")
-         (km :<leader>ac {:desc :Chat :mode [:n :v]}
+         (km :<leader>ac
+             {:desc :Chat :mode [:n :v]}
              ":CodeCompanionChat Toggle<CR>")
-         (km :<leader>ar {:desc "Run command" :mode [:n :v]}
+         (km :<leader>ar
+             {:desc "Run command" :mode [:n :v]}
              ":CodeCompanionCmd<CR>")
-         (km :<leader>al {:desc "Inline Assist" :mode [:n :v]}
+         (km :<leader>al
+             {:desc "Inline Assist" :mode [:n :v]}
              ":CodeCompanion<CR>")])
 
 ; ## Terminal
@@ -205,10 +225,12 @@
 (n.map [:n :t] :<C-/> #(Snacks.terminal.toggle) {:desc "Toggle Terminal"})
 
 ; ## Explorer
-(wk.add [(km :<leader>E {:desc "Explore root"}
+(wk.add [(km :<leader>E
+             {:desc "Explore root"}
              (fn []
                (MiniFiles.open)))
-         (km :<leader>e {:desc "Explore at file"}
+         (km :<leader>e
+             {:desc "Explore at file"}
              (fn []
                (MiniFiles.open (vim.api.nvim_buf_get_name 0))))])
 
@@ -229,7 +251,8 @@
 (var show_dotfiles false)
 
 (fn minifiles_filter [f]
-  (or show_dotfiles (vim.endswith f.name :.env)
+  (or show_dotfiles
+      (vim.endswith f.name :.env)
       (not (vim.startswith f.name "."))))
 
 (fn toggle_hidden []

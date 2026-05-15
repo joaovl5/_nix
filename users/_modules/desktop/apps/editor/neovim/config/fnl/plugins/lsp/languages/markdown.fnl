@@ -1,6 +1,7 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(let [fts [:markdown :codecompanion]]
+(let [fts [:markdown
+           :codecompanion]]
   [(plugin :satozawa/graft.nvim {:ft fts :opts {}})
    (plugin :MeanderingProgrammer/render-markdown.nvim
            {:dependencies [:nvim-treesitter/nvim-treesitter
@@ -11,7 +12,8 @@
                    :debounce 50
                    :preset :obsidian
                    :restart_highlighter true
-                   :code {:sign false :border :hide}
+                   :code {:sign false
+                          :border :hide}
                    :pipe_table {:enabled false
                                 :preset :none
                                 :cell :trimmed
@@ -29,7 +31,9 @@
                                            :RenderMarkdownH4Bg
                                            :RenderMarkdownH5Bg
                                            :RenderMarkdownH6Bg]}
-                   :indent {:enabled true :per_level 2 :skip_heading false}}})
+                   :indent {:enabled true
+                            :per_level 2
+                            :skip_heading false}}})
    (plugin :tadmccorkle/markdown.nvim
            {:event :VeryLazy
             :opts {:mappings {:link_add :-a

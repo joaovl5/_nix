@@ -5,7 +5,8 @@
          ; :keys [(key :<leader>? #(do-req :which-key :show {:global false})
          ;             {:desc "List buffer-local keymaps"})]
          :config (fn []
-                   (do-req :which-key :setup
+                   (do-req :which-key
+                           :setup
                            {:preset :modern
                             :plugins {:spelling {:enabled false}}
                             :win {:title false
