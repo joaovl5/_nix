@@ -8,22 +8,6 @@ local function _1_()
     config.title_pos = "center"
     return vim.api.nvim_win_set_config(win_id, config)
   end
-  return n.autocmd(
-    "User",
-    { pattern = "MiniFilesWindowOpen", callback = _2_ }
-  )
+  return n.autocmd("User", {pattern = "MiniFilesWindowOpen", callback = _2_})
 end
-return {
-  "nvim-mini/mini.files",
-  version = "*",
-  opts = {
-    windows = {
-      preview = true,
-      width_focus = 40,
-      width_nofocus = 30,
-      max_number = 3,
-    },
-  },
-  mappings = _G.MiniFilesMappings,
-  init = _1_,
-}
+return {"nvim-mini/mini.files", version = "*", opts = {windows = {preview = true, width_focus = 40, width_nofocus = 30, max_number = 3}}, mappings = _G.MiniFilesMappings, init = _1_}

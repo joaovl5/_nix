@@ -8,4 +8,4 @@ local function _1_()
   MiniMisc.setup_restore_cursor()
   return MiniMisc.setup_termbg_sync()
 end
-return { "nvim-mini/mini.misc", version = "*", config = _1_ }
+return {"nvim-mini/mini.misc", version = "*", config = _1_}

@@ -10,6 +10,6 @@ local function _1_()
   end
   local name_1_auto = require("themery")
   local fun_2_auto = name_1_auto.setup
-  return fun_2_auto({ themes = theme_names, livePreview = true })
+  return fun_2_auto({themes = theme_names, livePreview = true})
 end
-return { "zaldih/themery.nvim", config = _1_, lazy = false }
+return {"zaldih/themery.nvim", config = _1_, lazy = false}

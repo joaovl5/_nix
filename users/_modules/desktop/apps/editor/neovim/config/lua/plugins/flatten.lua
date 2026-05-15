@@ -4,11 +4,11 @@ local function current_snacks_terminal()
   local list_terminals
   do
     local t_1_ = Snacks
-    if nil ~= t_1_ then
+    if (nil ~= t_1_) then
       t_1_ = t_1_.terminal
     else
     end
-    if nil ~= t_1_ then
+    if (nil ~= t_1_) then
       t_1_ = t_1_.list
     else
     end
@@ -18,7 +18,7 @@ local function current_snacks_terminal()
     local bufnr = vim.api.nvim_get_current_buf()
     local current = nil
     for _, terminal in ipairs(list_terminals()) do
-      if not current and (terminal.buf == bufnr) then
+      if (not current and (terminal.buf == bufnr)) then
         current = terminal
       else
       end
@@ -29,13 +29,8 @@ local function current_snacks_terminal()
   end
 end
 local function snacks_terminal_state(terminal)
-  if
-    terminal
-    and terminal.buf
-    and vim.api.nvim_buf_is_valid(terminal.buf)
-  then
-    local ok, state =
-      pcall(vim.api.nvim_buf_get_var, terminal.buf, "snacks_terminal")
+  if (terminal and terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf)) then
+    local ok, state = pcall(vim.api.nvim_buf_get_var, terminal.buf, "snacks_terminal")
     if ok then
       return state
     else
@@ -50,7 +45,7 @@ local function lazygit_terminal_3f(terminal)
   return (state and ((state.cmd == "lazygit") or (state.id == "lazygit")))
 end
 local function hide_terminal(terminal, winnr)
-  if terminal and (terminal.win ~= winnr) and terminal:valid() then
+  if (terminal and (terminal.win ~= winnr) and terminal:valid()) then
     return terminal:hide()
   else
     return nil
@@ -65,10 +60,7 @@ local function register_autocmd(bufnr)
     return vim.api.nvim_buf_delete(bufnr)
   end
   callback = _9_
-  return nvim.autocmd(
-    "BufWritePost",
-    { buffer = bufnr, once = true, callback = vim.schedule_wrap(callback) }
-  )
+  return nvim.autocmd("BufWritePost", {buffer = bufnr, once = true, callback = vim.schedule_wrap(callback)})
 end
 local function flatten_setup()
   local saved_terminal = nil
@@ -87,13 +79,13 @@ local function flatten_setup()
         hide_terminal(saved_terminal, winnr)
       else
       end
-      if winnr and vim.api.nvim_win_is_valid(winnr) then
+      if (winnr and vim.api.nvim_win_is_valid(winnr)) then
         vim.api.nvim_set_current_win(winnr)
       else
       end
       saved_terminal = nil
     end
-    if (ft == "gitcommit") or (ft == "gitrebase") then
+    if ((ft == "gitcommit") or (ft == "gitrebase")) then
       return register_autocmd(bufnr)
     else
       return nil
@@ -116,23 +108,6 @@ local function flatten_setup()
     cb = _14_
     return vim.schedule(cb)
   end
-  return {
-    nest_if_no_args = true,
-    nest_if_cmds = true,
-    window = { open = "alternate", diff = "split", focus = "first" },
-    hooks = {
-      should_block = handle_should_block,
-      pre_open = handle_pre_open,
-      post_open = handle_post_open,
-      block_end = handle_block_end,
-    },
-  }
+  return {nest_if_no_args = true, nest_if_cmds = true, window = {open = "alternate", diff = "split", focus = "first"}, hooks = {should_block = handle_should_block, pre_open = handle_pre_open, post_open = handle_post_open, block_end = handle_block_end}}
 end
-return {
-  {
-    "willothy/flatten.nvim",
-    opts = flatten_setup,
-    priority = 1001,
-    lazy = false,
-  },
-}
+return {{"willothy/flatten.nvim", opts = flatten_setup, priority = 1001, lazy = false}}

@@ -33,14 +33,4 @@ local function merge(a, b)
   end
   return nil
 end
-return {
-  ["nil?"] = nil_3f,
-  ["str?"] = str_3f,
-  ["num?"] = num_3f,
-  ["bool?"] = bool_3f,
-  ["fn?"] = fn_3f,
-  ["tbl?"] = tbl_3f,
-  ["->str"] = __3estr,
-  ["->bool"] = __3ebool,
-  merge = merge,
-}
+return {["nil?"] = nil_3f, ["str?"] = str_3f, ["num?"] = num_3f, ["bool?"] = bool_3f, ["fn?"] = fn_3f, ["tbl?"] = tbl_3f, ["->str"] = __3estr, ["->bool"] = __3ebool, merge = merge}

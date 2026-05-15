@@ -19,8 +19,6 @@
     # fish and sh
     fish_indent.enable = true;
     shfmt.enable = true;
-    # lua
-    stylua.enable = true;
     # toml and friends
     taplo.enable = true;
     jsonfmt.enable = true;

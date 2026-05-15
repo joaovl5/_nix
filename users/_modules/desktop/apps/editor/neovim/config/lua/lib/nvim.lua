@@ -8,4 +8,4 @@ end
 local function usercmd(bufnr, name, opts, handle)
   return vim.api.nvim_buf_create_user_command(bufnr, name, handle, opts)
 end
-return { autocmd = autocmd, map = map, usercmd = usercmd }
+return {autocmd = autocmd, map = map, usercmd = usercmd}
