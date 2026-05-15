@@ -124,6 +124,29 @@ When upstream only ships a `bun.lockb` (binary Bun lockfile) but no
 3. Patch `package.json` at build time to resolve `resolutions` into
    `overrides` if upstream uses non-standard fields
 
+## Fennel/Lua packaging strategies
+
+### Makefile-based Fennel CLIs
+
+For small Fennel CLIs that compile to Lua:
+
+- start from the upstream `Makefile`; fnlfmt builds by compiling `cli.fnl` to
+  an executable script and compiling `fnlfmt.fnl` to `fnlfmt.lua`
+- mirror nixpkgs when available; upstream nixpkgs packages fnlfmt with
+  `stdenv.mkDerivation`, `luaPackages.fennel` in `nativeBuildInputs`, `lua` in
+  `buildInputs`, and `makeFlags` setting `PREFIX=$(out)` plus the Fennel
+  compiler path
+- keep `meta.mainProgram` pointed at the generated executable, usually
+  `fnlfmt`, even if the fork package name differs
+- if adding a flake to an existing git checkout, stage `flake.nix` before
+  `nix flake lock` or `nix build`; Nix evaluates the git-tracked source tree
+- when GitHub API rate limits block `github:` flake inputs, pin nixpkgs
+  through a direct archive URL temporarily or permanently
+
+Sane fnlfmt follows this pattern as a fork-local flake: `packages.default`
+builds the Makefile package, `apps.default` runs `$out/bin/fnlfmt`, and the
+dev shell exposes `lua`, `fennel`, and `fennel-ls`.
+
 ## Rust packaging strategies
 
 ### crate2nix workspace packaging
