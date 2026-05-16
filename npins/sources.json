@@ -286,6 +286,22 @@
       "url": "https://github.com/hyprwm/hyprland-plugins/archive/473804b3594dd829295484f1f479a560b8114f2d.tar.gz",
       "hash": "sha256-iTtzJsp4hXp7/Y+2kVaosPPNBeUJbFiqQcZVRUtC+dM="
     },
+    "janet-nix": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "turnerdev",
+        "repo": "janet-nix"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.2.1",
+      "revision": "a2329660ee80f09d5a95491bfd4d98e988b32319",
+      "url": "https://api.github.com/repos/turnerdev/janet-nix/tarball/refs/tags/v0.2.1",
+      "hash": "sha256-17D5xeTKJpv14qyrT8dssdD5Q3jw+UODBFNp2C50big="
+    },
     "jcode": {
       "type": "Git",
       "repository": {

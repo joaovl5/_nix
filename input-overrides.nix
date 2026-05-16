@@ -76,6 +76,7 @@ in {
   hister.inputs.nixpkgs.follows = "nixpkgs";
   hm.inputs.nixpkgs.follows = "nixpkgs";
   hyprland-plugins.inputs.nixpkgs.follows = "nixpkgs";
+  janet-nix.inputs.nixpkgs.follows = "nixpkgs";
   jcode.inputs.nixpkgs.follows = "nixpkgs";
   kaneo-src = raw_source;
   microvm.inputs.nixpkgs.follows = "nixpkgs";

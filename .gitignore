@@ -4,6 +4,8 @@
 *.qcow2.*
 .claude
 .deploy-gc
+.direnv
+.jpm
 .ruff-cache
 .venv
 __pycache__

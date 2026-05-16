@@ -29,6 +29,10 @@ in
   # ---------------
   // (import ./apps context)
   # ---------------
+  # Development shells
+  # ---------------
+  // (import ./dev_shells context)
+  # ---------------
   # Deployment
   # ---------------
   // (import ./deploy context)

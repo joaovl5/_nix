@@ -1,13 +1,11 @@
 -- [nfnl] fnl/plugins/lsp/languages/fennel.fnl
-local function build_parinfer(params)
-  vim.notify("Building Parinfer", vim.log.levels.INFO)
-  local res = vim.system({"cargo", "build", "--release"}, {cwd = params.path}):wait()
-  if (0 == res.code) then
-    return vim.notify("Building Parinfer done", vim.log.levels.INFO)
-  elseif res.code() then
-    return vim.notify(("Building Parinfer failed\n\nSTDOUT: " .. res.stdout .. "\n\nSTDERR: " .. res.stderr), vim.log.levels.ERROR)
-  else
-    return nil
+local _1_ = require("lib.plugins")
+local _2_ = require("lib.keys")
+local spec_23_auto = {}
+for __24_auto, attrs_25_auto in ipairs({}) do
+  for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
+    spec_23_auto[key_26_auto] = value_27_auto
   end
 end
-return {{"eraserhd/parinfer-rust", build = build_parinfer, ft = {"fennel"}}}
+spec_23_auto[1] = "bakpakin/janet.vim"
+return spec_23_auto

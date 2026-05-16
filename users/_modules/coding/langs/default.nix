@@ -3,6 +3,7 @@ let
   modules = [
     # keep-sorted start
     (import ./fennel.nix)
+    (import ./janet.nix)
     (import ./js.nix)
     (import ./lua.nix)
     (import ./nix.nix)
