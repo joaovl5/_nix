@@ -75,7 +75,8 @@
       prek
       worktrunk # worktree manager
       git-cliff # actual changelogs
-      commitizen # only for generating commits
+      difftastic
+      gh
     ];
   };
 }

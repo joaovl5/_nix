@@ -14,27 +14,6 @@
                  :max_width nil
                  :max_height nil}})
  ; code actions
- (plugin :kosayoda/nvim-lightbulb
-         {:event :LspAttach
-          :opts {:autocmd {:enabled true :updatetime 50}
-                 :hide_in_unfocused_buffer true
-                 :code_lenses true
-                 :sign {:enabled false}
-                 :float {:enabled true
-                         :text "󰌵"
-                         :lens_text "󰧶"
-                         :win_opts {:focusable false
-                                    :border false
-                                    :anchor_bias :below}}
-                 :line {:enabled true}
-                 :ignore {:actions_without_kind false
-                          :clients [:ruff
-                                    :dev-tools
-                                    :nil
-                                    :nixd
-                                    :fennel_ls
-                                    :typescript-tools
-                                    :marksman]}}})
  (plugin :rachartier/tiny-code-action.nvim
          {:dependencies [:nvim-lua/plenary.nvim]
           :event :LspAttach

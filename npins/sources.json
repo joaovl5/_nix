@@ -286,6 +286,32 @@
       "url": "https://github.com/hyprwm/hyprland-plugins/archive/473804b3594dd829295484f1f479a560b8114f2d.tar.gz",
       "hash": "sha256-iTtzJsp4hXp7/Y+2kVaosPPNBeUJbFiqQcZVRUtC+dM="
     },
+    "jandent-src": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "sogaiu",
+        "repo": "jandent"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "1943b1b9d8862f52f68ba63350f40a122b291eb4",
+      "url": "https://github.com/sogaiu/jandent/archive/1943b1b9d8862f52f68ba63350f40a122b291eb4.tar.gz",
+      "hash": "sha256-E1AtLmkMwkcYTO9zJNlbkl7muIM9F5a9Y9gr1HmxJZo="
+    },
+    "janet-lsp-src": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Blue-Berry",
+        "repo": "janet-lsp.nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "b8334a469d38f191198a20a75a6c470c2ea588d2",
+      "url": "https://github.com/Blue-Berry/janet-lsp.nix/archive/b8334a469d38f191198a20a75a6c470c2ea588d2.tar.gz",
+      "hash": "sha256-XcIUAmfzBNcsln/XZu9dZoTCTyxoCjNeg//6IK35INs="
+    },
     "janet-nix": {
       "type": "GitRelease",
       "repository": {

@@ -64,6 +64,10 @@ if with_files '*.toml'
     taplo format $files
 end
 
+if with_files '*.yaml' "*.yml"
+    yamlfmt $files
+end
+
 if with_files '*.json'
     jsonfmt -w $files
 end

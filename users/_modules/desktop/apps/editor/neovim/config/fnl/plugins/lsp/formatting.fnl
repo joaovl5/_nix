@@ -3,6 +3,7 @@
 (local formatters
        {; keep-sorted start
         :alejandra {:command :alejandra}
+        :jandent {:command :jindt :stdin true}
         :kdlfmt {:command :kdlfmt :args [:format :--kdl-version :v1 :--stdin]}
         :nix_fmt {:command :nix :args [:fmt]}
         :prettierd {:command :prettierd}
@@ -18,6 +19,7 @@
         :fennel [:sane_fnlfmt]
         :fish [:fish_indent]
         :handlebars [:prettierd]
+        :janet [:jandent :squeeze_blanks]
         :javascript [:prettierd]
         :json [:jsonfmt]
         :kdl [:kdlfmt]
