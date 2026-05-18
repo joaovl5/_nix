@@ -1,7 +1,9 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(local {: v/$} (require :lib/nvim))
+
 
 (let [zox_ev_action (fn [sel]
-                      (vim.cmd.cd sel.path)
+                      (v/$.cd sel.path)
                       (MiniFiles.open sel.path))
       zox_ev_after_action (fn [sel]
                             (vim.notify (.. "Directory changed to `"

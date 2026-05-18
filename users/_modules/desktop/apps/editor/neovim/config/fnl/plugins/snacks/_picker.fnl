@@ -1,0 +1,54 @@
+(fn k [rhs]
+  {1 rhs :mode [:i :n]})
+
+(local keyset {:/ :toggle_focus
+               :<A-j> (k :list_down)
+               :<A-k> (k :list_up)
+               :<CR> (k :confirm)
+               :<A-S-k> (k :toggle_hidden)
+               :<A-S-l> (k :toggle_ignored)
+               :<C-h> (k :history_back)
+               :<C-l> (k :history_forward)
+               :<A-w> (k :cycle_win)
+               :<A-a> (k :select_all)
+               :<c-w>G (k :list_bottom)
+               :<c-w>gg (k :list_top)
+               :<c-w>h (k :layout_left)
+               :<c-w>j (k :layout_bottom)
+               :<c-w>k (k :layout_top)
+               :<c-w>l (k :layout_right)})
+
+{:prompt "> "
+ :show_delay 100
+ :layout {:preset :vscode
+          :layout {:width 0.7
+                   :row 10
+                   :border :none}}
+ :sources (let [filter {:filter
+                        (fn [x _]
+                          (not (vim.endswith (or (?. x :file)
+                                                 "")
+                                             :.lua)))}
+                exc {:hidden true
+                     :include [:.env]
+                     :exclude [:*.lua]
+                     : filter}]
+            {:files exc
+             :grep exc
+             :explorer exc
+             :recent {: filter}})
+ :matcher {:fuzzy true
+           :smartcase true
+           :cwd_bonus true
+           :frecency true
+           :history_bonus true}
+ :ui_select :true
+ :win {:input {:keys keyset}
+       :list {:keys keyset}
+       :preview {:keys keyset}}
+ :previewers {:diff {:style :fancy
+                     :cmd [:delta]
+                     :wo {:breakindent true
+                          :wrap true
+                          :linebreak true
+                          :showbreak ""}}}}

@@ -1,0 +1,77 @@
+(import-macros {: do-req : let-req : keys!} :./lib/init-macros)
+
+(local {: v/map} (require :lib/nvim))
+
+; # GENERAL
+(v/map [:n] :<Esc> :<cmd>nohlsearch<CR> {:desc "Clear Search Highlights"})
+(v/map [:n] :<Esc> :<cmd>nohlsearch<CR> {:desc "Clear Search Highlights"})
+; disable pasting in visual selection replacing original copied value
+(v/map [:x] :p "\"_dP")
+; improve scrolling and autocenter cursor on some actions
+(v/map [:n] :<C-d> :<C-d>zz)
+(v/map [:n] :<C-u> :<C-u>zz)
+(v/map [:n] :n :nzzzv)
+(v/map [:n] :N :Nzzzv)
+; improve visual mode indents
+(v/map [:x] ">" :>gv {:noremap true})
+(v/map [:x] "<" :<gv {:noremap true})
+
+; # LEADER
+; ## Tabs
+(keys!
+  (group :tab
+         (bind :c (cmd :tabnew) (desc "Create"))
+         (bind :l (cmd :tabnext) (desc "Next"))
+         (bind :h (cmd :tabprev) (desc "Prev"))
+         (bind :d (cmd :tabclose) (desc "Close"))))
+
+; ## Window
+(keys!
+  (group :window
+         (bind :d (cmd :quit) (desc "Quit window"))
+         (bind :D (cmd :quitall) (desc "Quit all windows"))
+         (bind :w (cmd :b#) (desc "Alternate window buffers"))))
+
+(keys!
+  (bind "<leader>|" (cmd :vsplit) (desc "Split Vertical"))
+  (bind "<leader>-" (cmd :split) (desc "Split Horizontal")))
+
+; ## Buffer
+(keys!
+  (group :buffer))
+
+; ## Fuzzy stuff
+(keys!
+  (group :fuzzy))
+
+; ## Git
+(keys!
+  (group :git))
+
+; ## Code
+(keys!
+  (group
+    :code
+    (bind :H
+          (fn []
+            (vim.lsp.inlay_hint.enable (not (vim.lsp.inlay_hint.is_enabled))))
+          (desc "Toggle inlay hints"))
+    (bind :r vim.lsp.buf.rename (desc "Rename"))
+    (bind :d vim.diagnostic.open_float (desc "Diagnostic"))))
+
+; ## Diagnostics
+; (more on plugins/editor/actions.fnl)
+(keys!
+  (group :diagnostics))
+
+; ## Debugging
+(keys!
+  (group :debug))
+
+; ## AI
+(keys!
+  (group :ai))
+
+; ## Terminal
+
+(v/map [:t] :<Esc><Esc> "<C-\\><C-n>" {:desc "Exit terminal mode"})

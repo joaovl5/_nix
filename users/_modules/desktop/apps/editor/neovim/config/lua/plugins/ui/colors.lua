@@ -1,5 +1,6 @@
 -- [nfnl] fnl/plugins/ui/colors.fnl
-local n = require("lib/nvim")
+local _local_1_ = require("lib/nvim")
+local v_2fautocmd = _local_1_["v/autocmd"]
 local semantic_token_links = {["@variable.typescript"] = "Identifier", ["@lsp.type.variable.typescript"] = "Identifier", ["@lsp.typemod.variable.declaration.typescript"] = "Identifier", ["@lsp.typemod.variable.local.typescript"] = "Identifier", ["@lsp.typemod.variable.readonly.typescript"] = "Identifier", ["@lsp.type.variable"] = "@variable", ["@lsp.type.member"] = "@variable.member", ["@lsp.typemod.variable.declaration"] = "@lsp.type.variable", ["@lsp.typemod.variable.local"] = "@lsp.type.variable", ["@lsp.typemod.variable.readonly"] = "@lsp.type.variable", ["@lsp.typemod.function.declaration"] = "@lsp.type.function", ["@lsp.typemod.parameter.declaration"] = "@lsp.type.parameter", ["@lsp.typemod.member.defaultLibrary"] = "@lsp.type.member", ["@lsp.typemod.property.declaration"] = "@lsp.type.property"}
 local function apply_semantic_token_links()
   for group, target in pairs(semantic_token_links) do
@@ -7,8 +8,8 @@ local function apply_semantic_token_links()
   end
   return nil
 end
-local function _1_()
+local function _2_()
   apply_semantic_token_links()
-  return n.autocmd("ColorScheme", {callback = apply_semantic_token_links})
+  return v_2fautocmd("ColorScheme", {callback = apply_semantic_token_links})
 end
-return {"rasulomaroff/reactive.nvim", builtin = {cursorline = true, cursor = true, modemsg = true}, config = _1_}
+return {"rasulomaroff/reactive.nvim", builtin = {cursorline = true, cursor = true, modemsg = true}, config = _2_}

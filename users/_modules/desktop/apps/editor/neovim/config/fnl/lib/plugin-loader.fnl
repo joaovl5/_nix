@@ -1,4 +1,6 @@
 (local M {})
+(local {: v/fs-stat : v/stdpath} (require :lib/nvim))
+
 
 (fn table? [value]
   (= (type value) :table))
@@ -68,10 +70,9 @@
 (fn M.load [?opts]
   (let [opts (or ?opts {})
         root (or opts.root
-                 (vim.fs.joinpath (vim.fn.stdpath :config) :fnl :plugins))
-        uv (or vim.uv vim.loop)
+                 (vim.fs.joinpath (v/stdpath :config) :fnl :plugins))
         plugins []]
-    (when (uv.fs_stat root)
+    (when (v/fs-stat root)
       (each [_ relpath (ipairs (collect-plugin-files root))]
         (let [module (module-name relpath)
               exported (require module)]

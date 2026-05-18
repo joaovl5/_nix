@@ -1,4 +1,4 @@
-(local nvim (require :lib/nvim))
+(local {: v/$ : v/autocmd : v/later} (require :lib/nvim))
 
 (local opts [[:mouse :a]
              [:mousescroll "ver:15,hor:6"]
@@ -84,12 +84,12 @@
     (set-opt opt val)))
 
 ; clipboard os sync
-(vim.schedule (fn [] (set vim.o.clipboard :unnamedplus)))
+(v/later (fn [] (set vim.o.clipboard :unnamedplus)))
 
 ; filetype plugins and syntax enable (faster startup)
-(vim.cmd "filetype plugin indent on")
+(v/$ "filetype plugin indent on")
 (when (not= 1 (vim.fn.exists :syntax_on))
-  (vim.cmd "syntax enable"))
+  (v/$ "syntax enable"))
 
 ; setup diagnostics
 
@@ -114,12 +114,12 @@
                                        :severity [:ERROR]}
                         :update_in_insert false})
 
-(vim.schedule (fn []
+(v/later (fn []
                 (vim.diagnostic.config diagnostic_opts)))
 
 ; formatoptions autocmd
 
-(nvim.autocmd :FileType
+(v/autocmd :FileType
               {:desc "Proper 'formatoptions'"
                :callback (fn []
-                           (vim.cmd "setlocal formatoptions-=c formatoptions-=o"))})
+                           (v/$ "setlocal formatoptions-=c formatoptions-=o"))})

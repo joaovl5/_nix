@@ -1,9 +1,9 @@
 -- [nfnl] fnl/lib/plugins.fnl
-local function event(value)
-  return {event = value}
-end
-local function ft(value)
-  return {ft = value}
+local function opt(key)
+  local function _1_(value)
+    return {[key] = value}
+  end
+  return _1_
 end
 local function keys(...)
   local specs = {}
@@ -18,16 +18,4 @@ local function keys(...)
   end
   return {keys = specs}
 end
-local function opts(value)
-  return {opts = value}
-end
-local function dependencies(value)
-  return {dependencies = value}
-end
-local function version(value)
-  return {version = value}
-end
-local function cmd(value)
-  return {cmd = value}
-end
-return {event = event, ft = ft, keys = keys, opts = opts, dependencies = dependencies, version = version, cmd = cmd}
+return {event = opt("event"), ft = opt("ft"), keys = keys, opts = opt("opts"), deps = opt("dependencies"), prio = opt("priority"), priority = opt("priority"), version = opt("version"), cmd = opt("cmd"), lazy = opt("lazy"), config = opt("config"), init = opt("init"), builtin = opt("builtin"), main = opt("main")}

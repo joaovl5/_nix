@@ -1,4 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(local {: v/$} (require :lib/nvim))
+
 
 [; status bar
  (plugin :nvim-lualine/lualine.nvim
@@ -13,7 +15,7 @@
                         (vim.ui.input {:prompt "Enter name for tab: "}
                                       (fn [input]
                                         (when (not= nil input)
-                                          (vim.cmd (.. "Tabby rename_tab "
+                                          (v/$ (.. "Tabby rename_tab "
                                                        input))))))
                       {:desc :Rename})
                  (key :<leader>qw "<cmd>Tabby pick_window<cr>"

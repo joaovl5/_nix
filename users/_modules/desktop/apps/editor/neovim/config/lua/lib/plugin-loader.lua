@@ -1,5 +1,8 @@
 -- [nfnl] fnl/lib/plugin-loader.fnl
 local M = {}
+local _local_1_ = require("lib/nvim")
+local v_2ffs_stat = _local_1_["v/fs-stat"]
+local v_2fstdpath = _local_1_["v/stdpath"]
 local function table_3f(value)
   return (type(value) == "table")
 end
@@ -81,10 +84,9 @@ local function add_plugin_module(plugins, module_name0, exported)
 end
 M.load = function(_3fopts)
   local opts = (_3fopts or {})
-  local root = (opts.root or vim.fs.joinpath(vim.fn.stdpath("config"), "fnl", "plugins"))
-  local uv = (vim.uv or vim.loop)
+  local root = (opts.root or vim.fs.joinpath(v_2fstdpath("config"), "fnl", "plugins"))
   local plugins = {}
-  if uv.fs_stat(root) then
+  if v_2ffs_stat(root) then
     for _, relpath in ipairs(collect_plugin_files(root)) do
       local module = module_name(relpath)
       local exported = require(module)

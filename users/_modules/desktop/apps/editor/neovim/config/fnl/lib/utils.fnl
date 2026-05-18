@@ -1,28 +1,33 @@
-(fn nil? [x]
+(local M {})
+
+(fn M.nil? [x]
   (= nil x))
 
-(fn str? [x]
+(fn M.str? [x]
   (= :string (type x)))
 
-(fn num? [x]
+(fn M.num? [x]
   (= :number (type x)))
 
-(fn bool? [x]
+(fn M.bool? [x]
   (= :boolean (type x)))
 
-(fn fn? [x]
+(fn M.fn? [x]
   (= :function (type x)))
 
-(fn tbl? [x]
+(fn M.tbl? [x]
   (= :table (type x)))
 
-(fn ->str [x]
+(fn M.->str [x]
   (tostring x))
 
-(fn ->bool [x]
+(fn M.->lower [x]
+  (string.lower (M.->str x)))
+
+(fn M.->bool [x]
   (if x true false))
 
-(fn merge [a b]
+(fn M.merge [a b]
   (each [k v (pairs b)] (tset a k v)))
 
-{: nil? : str? : num? : bool? : fn? : tbl? : ->str : ->bool : merge}
+M

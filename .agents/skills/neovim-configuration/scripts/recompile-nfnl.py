@@ -6,8 +6,7 @@
 # ]
 # ///
 
-from __future__ import annotations
-
+import os
 import subprocess
 import tempfile
 import textwrap
@@ -62,6 +61,10 @@ def _path_for_nvim(path: Path, base: Path) -> str:
     return str(path.relative_to(base))
   except ValueError:
     return str(path)
+
+
+def _default_nfnl_rtp() -> Path:
+  return Path.home() / ".local/share/nvim/lazy/nfnl"
 
 
 def _nfnl_lua_script(keep_orphans: bool) -> str:
@@ -174,11 +177,18 @@ def main(
   anchor: Path = DEFAULT_ANCHOR,
   nvim_bin: str = "nvim",
   keep_orphans: bool = False,
+  nfnl_rtp: Path | None = None,
 ) -> int:
   """Recompile the repo's Neovim Fennel tree and optionally delete orphaned Lua."""
   resolved_anchor = _resolve_repo_path(anchor)
+  resolved_nfnl_rtp = (nfnl_rtp or _default_nfnl_rtp()).expanduser()
   if not resolved_anchor.is_file():
     print(f"Anchor Fennel file not found: {resolved_anchor}")
+    return 1
+
+  if not resolved_nfnl_rtp.is_dir():
+    print(f"nfnl runtimepath not found: {resolved_nfnl_rtp}")
+    print("Hint: pass --nfnl-rtp PATH if nfnl is installed elsewhere.")
     return 1
 
   try:
@@ -196,22 +206,30 @@ def main(
   command = [
     nvim_bin,
     "--headless",
+    "-u",
+    "NONE",
+    "--cmd",
+    f"set rtp^={resolved_nfnl_rtp}",
     f"+edit {_path_for_nvim(resolved_anchor, project_root)}",
     f"+luafile {lua_script}",
     "+qa",
   ]
 
-  print(f"$ {_format_command(command)}")
-  try:
-    completed = subprocess.run(
-      command,
-      cwd=project_root,
-      text=True,
-      capture_output=True,
-      check=False,
-    )
-  finally:
-    lua_script.unlink(missing_ok=True)
+  with tempfile.TemporaryDirectory(prefix="nfnl-config-home-") as config_home:
+    print(f"$ XDG_CONFIG_HOME={config_home} {_format_command(command)}")
+    env = os.environ.copy()
+    env["XDG_CONFIG_HOME"] = config_home
+    try:
+      completed = subprocess.run(
+        command,
+        cwd=project_root,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+      )
+    finally:
+      lua_script.unlink(missing_ok=True)
 
   if completed.stdout:
     print(completed.stdout, end="")

@@ -1,5 +1,5 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
-(local nvim (require :lib/nvim))
+(local {: v/autocmd : v/contains? : v/later} (require :lib/nvim))
 
 (fn current-snacks-terminal []
   (let [list-terminals (?. Snacks :terminal :list)]
@@ -27,12 +27,12 @@
     (terminal:hide)))
 
 (fn handle_should_block [argv]
-  (vim.tbl_contains argv :-b))
+  (v/contains? argv :-b))
 
 (fn register_autocmd [bufnr]
   (let [callback (fn []
                    (vim.api.nvim_buf_delete bufnr))]
-    (nvim.autocmd :BufWritePost
+    (v/autocmd :BufWritePost
                   {:buffer bufnr
                    :once true
                    :callback (vim.schedule_wrap callback)})))
@@ -64,7 +64,7 @@
                  (when (saved-terminal:buf_valid)
                    (saved-terminal:show))
                  (set saved-terminal nil)))]
-      (vim.schedule cb)))
+      (v/later cb)))
 
   {:nest_if_no_args true
    :nest_if_cmds true

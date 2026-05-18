@@ -35,4 +35,18 @@ do
   end
   formatters_by_ft = tbl_21_
 end
-return {"stevearc/conform.nvim", dependencies = {"folke/neoconf.nvim"}, opts = {formatters = formatters, formatters_by_ft = formatters_by_ft, format_on_save = {timeout_ms = 3000, lsp_format = "fallback"}}}
+local _5_ = require("lib.plugins")
+local _6_ = require("lib.keys")
+local spec_21_auto = {}
+local function _7_()
+  local name_1_auto = require("conform")
+  local fun_2_auto = name_1_auto.format
+  return fun_2_auto()
+end
+for __22_auto, attrs_23_auto in ipairs({_5_.deps({"folke/neoconf.nvim"}), _5_.event("BufEnter"), _5_.keys(_6_.group("code", _6_.bind("f", _7_, _6_.desc("Format")))), _5_.opts({formatters = formatters, formatters_by_ft = formatters_by_ft, format_on_save = {timeout_ms = 3000, lsp_format = "fallback"}})}) do
+  for key_24_auto, value_25_auto in pairs(attrs_23_auto) do
+    spec_21_auto[key_24_auto] = value_25_auto
+  end
+end
+spec_21_auto[1] = "stevearc/conform.nvim"
+return spec_21_auto

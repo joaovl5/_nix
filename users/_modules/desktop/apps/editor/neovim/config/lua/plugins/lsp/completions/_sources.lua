@@ -13,7 +13,14 @@ local function transform_items(k_icon, k_name)
   return _1_
 end
 local sources = {"conv_commit", "lsp", "path", "git", "snippets", "buffer", "env", "grep"}
-local debug_sources = {"dap", "lsp", "path", "snippets", "buffer"}
+local debug_sources
+do
+  local result = {"dap"}
+  for _, source in ipairs(sources) do
+    table.insert(result, source)
+  end
+  debug_sources = result
+end
 local function _2_()
   local name_1_auto = require("cmp_dap")
   local fun_2_auto = name_1_auto.is_dap_buffer

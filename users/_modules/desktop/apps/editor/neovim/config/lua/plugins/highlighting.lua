@@ -1,5 +1,7 @@
 -- [nfnl] fnl/plugins/highlighting.fnl
-local n = require("lib/nvim")
+local _local_1_ = require("lib/nvim")
+local v_2fautocmd = _local_1_["v/autocmd"]
+local v_2fextend = _local_1_["v/extend"]
 vim.filetype.add({extension = {kbd = "kanata"}})
 local languages = {"css", "fennel", "html", "javascript", "jsx", "kanata", "lua", "markdown", "python", "scss", "tsx", "typescript", "vimdoc"}
 do
@@ -12,13 +14,13 @@ do
   do
     local res = {}
     for _, lang in ipairs(languages) do
-      res = vim.list_extend(res, vim.treesitter.language.get_filetypes(lang))
+      res = v_2fextend(res, vim.treesitter.language.get_filetypes(lang))
     end
     filetypes = res
   end
-  local function _1_(ev)
+  local function _2_(ev)
     return vim.treesitter.start(ev.buf)
   end
-  n.autocmd("FileType", {pattern = filetypes, callback = _1_})
+  v_2fautocmd("FileType", {pattern = filetypes, callback = _2_})
 end
 return {{"m-demare/hlargs.nvim", event = "VeryLazy", opts = {}}}

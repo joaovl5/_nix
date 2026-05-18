@@ -1,55 +1,110 @@
-(fn l [lhs]
+(local M {})
+
+(fn M.l [lhs]
   "Prefix lhs with <leader>."
   (.. :<leader> lhs))
 
-(fn c [key]
+(fn M.c [key]
   "Wrap key in <C-...>."
   (.. :<C- key ">"))
 
-(fn a [key]
+(fn M.a [key]
   "Wrap key in <A-...>."
   (.. :<A- key ">"))
 
-(fn cmd [command]
+(fn M.cmd [command]
   "Wrap command as a Vim command rhs."
   (.. :<cmd> command :<cr>))
 
-(fn desc [text]
+(fn M.desc [text]
   "Return a key spec description option."
   {:desc text})
 
-(fn m [mode ...]
-  "Group one or more lhs values under mode."
-  {:__keys-kind :mode-group : mode :lhs [...]})
+(fn M.m [...]
+  "Return a key spec mode option."
+  {:mode [...]})
+
+(set _G.kgroups (or _G.kgroups {}))
 
 (fn merge! [target source]
   (each [key value (pairs source)]
     (tset target key value))
   target)
 
-(fn grouped? [lhs]
-  (and (= (type lhs) :table) (= lhs.__keys-kind :mode-group)))
+(fn key-option? [value]
+  (and (= (type value) :table)
+       (= nil (. value 1))))
 
-(fn key-spec [lhs rhs opts ?mode]
-  (let [spec (merge! {1 lhs 2 rhs} opts)]
-    (when ?mode
-      (tset spec :mode ?mode))
+(fn key-spec [lhs rhs opts]
+  (let [spec (merge! {1 lhs} opts)]
+    (when rhs
+      (tset spec 2 rhs))
     spec))
 
-(fn bind [lhs rhs ...]
-  "Return Lazy key specs, expanding mode groups."
-  (let [opts {}
-        specs []]
+(fn M.bind [lhs ?rhs ...]
+  "Return Lazy key specs."
+  (let [opts {}]
+    (when (key-option? ?rhs)
+      (merge! opts ?rhs))
     (each [_ opt (ipairs [...])]
       (merge! opts opt))
-    (if (grouped? lhs)
-        (each [_ grouped-lhs (ipairs lhs.lhs)]
-          (table.insert specs (key-spec grouped-lhs rhs opts lhs.mode)))
-        (and (= (type lhs) :table) (grouped? (. lhs 1)))
-        (each [_ group (ipairs lhs)]
-          (each [_ grouped-lhs (ipairs group.lhs)]
-            (table.insert specs (key-spec grouped-lhs rhs opts group.mode))))
-        (table.insert specs (key-spec lhs rhs opts)))
+    [(key-spec lhs (if (key-option? ?rhs) nil ?rhs) opts)]))
+
+(fn spec-list? [item]
+  (and (= (type item) :table)
+       (= (type (. item 1)) :table)))
+
+(fn copy-spec [spec]
+  (let [copied {}]
+    (merge! copied spec)))
+
+(fn prepend-spec [prefix spec]
+  (let [prefixed (copy-spec spec)]
+    (tset prefixed 1 (.. prefix (. spec 1)))
+    prefixed))
+
+(fn add-prefixed! [specs prefix item]
+  (if (spec-list? item)
+      (each [_ spec (ipairs item)]
+        (table.insert specs (prepend-spec prefix spec)))
+      (table.insert specs (prepend-spec prefix item)))
+  specs)
+
+(fn M.specs [...]
+  "Return flattened key specs."
+  (let [items []]
+    (each [_ item (ipairs [...])]
+      (if (spec-list? item)
+          (each [_ spec (ipairs item)]
+            (table.insert items spec))
+          (table.insert items item)))
+    items))
+
+(fn M.register-group! [id name prefix]
+  "Register a which-key group."
+  (tset _G.kgroups id {:name name :prefix prefix}))
+
+
+(fn M.kgroup [id name prefix ...]
+  "Register a which-key group and return its prefixed specs."
+  (M.register-group! id name prefix)
+  (let [specs [{1 prefix :group name}]]
+    (each [_ item (ipairs [...])]
+      (add-prefixed! specs prefix item))
     specs))
 
-{: l : c : a : cmd : desc : m : bind}
+(fn M.group [id ...]
+  "Prefix key specs with a registered key group."
+  (let [registered (. _G.kgroups id)]
+    (when (not registered)
+      (error (..
+               "Unknown key group: "
+               id
+               "\nAvailable groups: "
+               (_G.vim.inspect _G.kgroups))))
+    (let [specs [{1 registered.prefix :group registered.name}]]
+      (each [_ item (ipairs [...])]
+        (add-prefixed! specs registered.prefix item))
+      specs)))
+
+M

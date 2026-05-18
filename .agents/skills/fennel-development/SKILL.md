@@ -22,6 +22,16 @@ Use this for Fennel language work and repo Fennel tooling such as
 - **`include`:** pulls another module in at compile time and still emits
   runtime loading for that module
 
+## Module export pattern
+
+- **Export table:** prefer `(local M {})`, define public API as
+  `(fn M.name [...])` or `(λ M.name [...])`, and leave `M` as the final form
+- **Punctuation keys:** `M.nil?`, `M.->str`, and `M.v/stdpath` are valid field
+  names; use that style instead of building a large final literal table
+- **Private helpers:** keep implementation helpers as plain locals and only
+  attach intentionally public names to `M`
+
+
 ## Macros
 
 - **When to use:** use macros for compile-time transformation; prefer

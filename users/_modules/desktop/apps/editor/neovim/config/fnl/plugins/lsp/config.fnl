@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(local n (require :lib/nvim))
+(local {: v/fs-stat : v/usercmd} (require :lib/nvim))
 
 (fn set_python_path [path]
   (let [clients (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)
@@ -18,12 +18,12 @@
       (client.notify :workspace/didChangeConfiguration {:settings nil}))))
 
 (fn do_basedpyright_attach [client bufnr]
-  (n.usercmd bufnr
+  (v/usercmd bufnr
              :LspPyrightOrganizeImports
              {:desc "Organize Imports"}
              #(client:exec_cmd {:command :basedpyright.organizeimports
                                 :arguments {vim.uri_from_bufnr bufnr}}))
-  (n.usercmd bufnr
+  (v/usercmd bufnr
              :LspPyrightSetPythonPath
              {:desc "Set Python Path" :nargs 1 :complete :file}
              set_python_path))
@@ -41,7 +41,7 @@
 
 (fn get_fennel_root_dir [bufnr on_dir]
   (let [fname (vim.api.nvim_buf_get_name bufnr)
-        has_fls_cfg #(= :file (. (or (vim.uv.fs_stat (vim.fs.joinpath $1
+        has_fls_cfg #(= :file (. (or (v/fs-stat (vim.fs.joinpath $1
                                                                       :flsproject.fnl))
                                      {}) :type))]
     (on_dir (or (: (vim.iter (vim.fs.parents fname)) :find has_fls_cfg)

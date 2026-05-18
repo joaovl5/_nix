@@ -41,35 +41,40 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Further FLS rules:** detailed `flsproject` and fennel-ls rules live in
   `fennel-development`
 
-## Plugin-local keybinds
+## Lib helpers and plugin DSL
 
-- **Preferred shape:** in plugin specs, prefer `(plugin! ...)` with
-  `(keys (bind ...))`
-- **Command RHS:** wrap command strings with `(cmd "...")`, including commands
-  with spaces
-- **Literal RHS:** plain strings stay literal RHS values
-- **Modes and groups:** use `(m mode lhs...)` for mode-specific or multiple
-  lhs bindings
-
-```fennel
-(plugin! :foo/bar
-  (keys
-    (bind (l :xx)
-          (cmd "SomeCommand")
-          (desc "Do thing"))))
-```
+- **Lib module shape:** under `config/fnl/lib/`, export public API through
+  `(local M {})`, `(fn M.name [...])` or `(λ M.name [...])`, and final `M`
+- **No large export tables:** avoid returning a big final literal table or
+  populating exports with `tset`; attach public names directly to `M`
+- **Neovim wrappers:** prefer `lib/nvim` helpers over raw Vim API calls when a
+  wrapper exists, e.g. `v/stdpath`, `v/fs-stat`, `v/autocmd`, `v/extend`,
+  `v/contains?`, `v/env`, `v/echo`, `v/has?`
+- **Plugin specs:** prefer `(p! ...)` and helpers from `lib/plugins`:
+  `event`, `ft`, `keys`, `opts`, `deps`, `version`, `cmd`, `lazy`,
+  `config`, `builtin`, and `main`
+- **Key specs:** inside `(keys ...)`, prefer `lib/keys` helpers through the
+  macros: `bind`, `l`, `c`, `a`, `cmd`, `desc`, `m`, `group`; use
+  `kgroup!`/`keys!` for direct which-key registration
 
 ```fennel
-(bind [(m [:n :x :o] (l :xx) :\x)
-       (m :i (c :X))]
-      (cmd "SomeCommand with args")
-      (desc "Do thing"))
+(p! :foo/bar
+    (event :VeryLazy)
+    (keys
+      (bind (l :xx)
+            (cmd "SomeCommand")
+            (desc "Do thing")
+            (m :n :x)))
+    (opts {}))
 ```
 
 ## Recompile workflow
 
 - **Preferred wrapper:** from `.agents/skills/neovim-configuration`, run
   `uv run scripts/recompile-nfnl.py`
+- **Startup isolation:** the wrapper uses a temporary `XDG_CONFIG_HOME`, `-u NONE`,
+  and an explicit nfnl runtimepath so stale generated Lua cannot load before
+  recompilation
 - **Repo root:** the helper is skill-local and finds the repo root by
   searching upward for `flake.nix`, so caller cwd does not matter
 - **Project anchor:** the default anchor is
@@ -86,6 +91,15 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Bootstrap creation:** `config/local.lua` needs generated
   `config/lua/bootstrap.lua`; compile it before switching the shim on a clean
   tree
+
+## Quick Neovim checks
+
+- **Compile first:** after Fennel edits, run
+  `uv run skill://neovim-configuration/scripts/recompile-nfnl.py` from the repo
+- **Startup smoke:** run `nvim --headless +qa` for a fast config load check
+- **Eager smoke:** when lazy/eager loading changes, run
+  `NVIM_EAGER_PLUGINS=1 nvim --headless "+lua local s=require('lazy').stats(); if s.loaded ~= s.count then error(('lazy loaded %d/%d plugins'):format(s.loaded, s.count)) end; print(('lazy loaded %d/%d plugins'):format(s.loaded, s.count))" +qa`
+
 
 ## Common maintenance tasks
 

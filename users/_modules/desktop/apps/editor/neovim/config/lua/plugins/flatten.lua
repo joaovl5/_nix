@@ -1,18 +1,21 @@
 -- [nfnl] fnl/plugins/flatten.fnl
-local nvim = require("lib/nvim")
+local _local_1_ = require("lib/nvim")
+local v_2fautocmd = _local_1_["v/autocmd"]
+local v_2fcontains_3f = _local_1_["v/contains?"]
+local v_2flater = _local_1_["v/later"]
 local function current_snacks_terminal()
   local list_terminals
   do
-    local t_1_ = Snacks
-    if (nil ~= t_1_) then
-      t_1_ = t_1_.terminal
+    local t_2_ = Snacks
+    if (nil ~= t_2_) then
+      t_2_ = t_2_.terminal
     else
     end
-    if (nil ~= t_1_) then
-      t_1_ = t_1_.list
+    if (nil ~= t_2_) then
+      t_2_ = t_2_.list
     else
     end
-    list_terminals = t_1_
+    list_terminals = t_2_
   end
   if list_terminals then
     local bufnr = vim.api.nvim_get_current_buf()
@@ -52,15 +55,15 @@ local function hide_terminal(terminal, winnr)
   end
 end
 local function handle_should_block(argv)
-  return vim.tbl_contains(argv, "-b")
+  return v_2fcontains_3f(argv, "-b")
 end
 local function register_autocmd(bufnr)
   local callback
-  local function _9_()
+  local function _10_()
     return vim.api.nvim_buf_delete(bufnr)
   end
-  callback = _9_
-  return nvim.autocmd("BufWritePost", {buffer = bufnr, once = true, callback = vim.schedule_wrap(callback)})
+  callback = _10_
+  return v_2fautocmd("BufWritePost", {buffer = bufnr, once = true, callback = vim.schedule_wrap(callback)})
 end
 local function flatten_setup()
   local saved_terminal = nil
@@ -93,7 +96,7 @@ local function flatten_setup()
   end
   local function handle_block_end(_opts)
     local cb
-    local function _14_()
+    local function _15_()
       if saved_terminal then
         if saved_terminal:buf_valid() then
           saved_terminal:show()
@@ -105,8 +108,8 @@ local function flatten_setup()
         return nil
       end
     end
-    cb = _14_
-    return vim.schedule(cb)
+    cb = _15_
+    return v_2flater(cb)
   end
   return {nest_if_no_args = true, nest_if_cmds = true, window = {open = "alternate", diff = "split", focus = "first"}, hooks = {should_block = handle_should_block, pre_open = handle_pre_open, post_open = handle_post_open, block_end = handle_block_end}}
 end

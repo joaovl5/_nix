@@ -1,4 +1,4 @@
-(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(import-macros {: do-req : let-req : p! : key} :./lib/init-macros)
 
 (local formatters
        {; keep-sorted start
@@ -59,8 +59,15 @@
          (collect [_ ft (ipairs ft-keys)]
            (values ft #(resolve_formatters_for_ft $1 ft)))))
 
-(plugin :stevearc/conform.nvim
-        {:dependencies [:folke/neoconf.nvim]
-         :opts {: formatters
-                : formatters_by_ft
-                :format_on_save {:timeout_ms 3000 :lsp_format :fallback}}})
+(p! :stevearc/conform.nvim
+    (deps [:folke/neoconf.nvim])
+    (event :BufEnter)
+    (keys
+      (group
+        :code
+        (bind :f
+              #(do-req :conform :format)
+              (desc "Format"))))
+    (opts {: formatters
+           : formatters_by_ft
+           :format_on_save {:timeout_ms 3000 :lsp_format :fallback}}))

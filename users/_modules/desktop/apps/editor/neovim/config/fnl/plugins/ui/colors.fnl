@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(local n (require :lib/nvim))
+(local {: v/autocmd} (require :lib/nvim))
 
 (local semantic-token-links
        {"@variable.typescript" :Identifier
@@ -26,5 +26,5 @@
         {:builtin {:cursorline true :cursor true :modemsg true}
          :config (fn []
                    (apply-semantic-token-links)
-                   (n.autocmd :ColorScheme
+                   (v/autocmd :ColorScheme
                               {:callback apply-semantic-token-links}))})

@@ -1,10 +1,6 @@
-(fn event [value]
-  "Return an event plugin option."
-  {:event value})
-
-(fn ft [value]
-  "Return a filetype plugin option."
-  {:ft value})
+(fn opt [key]
+  (fn [value]
+    {key value}))
 
 (fn keys [...]
   "Return flattened Lazy key specs."
@@ -16,20 +12,17 @@
           (table.insert specs item)))
     {:keys specs}))
 
-(fn opts [value]
-  "Return plugin opts."
-  {:opts value})
-
-(fn dependencies [value]
-  "Return plugin dependencies."
-  {:dependencies value})
-
-(fn version [value]
-  "Return a plugin version constraint."
-  {:version value})
-
-(fn cmd [value]
-  "Return a plugin command trigger."
-  {:cmd value})
-
-{: event : ft : keys : opts : dependencies : version : cmd}
+{:event (opt :event)
+ :ft (opt :ft)
+ :keys keys
+ :opts (opt :opts)
+ :deps (opt :dependencies)
+ :prio (opt :priority)
+ :priority (opt :priority)
+ :version (opt :version)
+ :cmd (opt :cmd)
+ :lazy (opt :lazy)
+ :config (opt :config)
+ :init (opt :init)
+ :builtin (opt :builtin)
+ :main (opt :main)}

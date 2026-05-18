@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(local n (require :lib/nvim))
+(local {: v/autocmd : v/extend} (require :lib/nvim))
 
 (vim.filetype.add {:extension {:kbd :kanata}})
 
@@ -27,9 +27,9 @@
 (vim.treesitter.language.register :kanata :kanata)
 
 (let [filetypes (accumulate [res [] _ lang (ipairs languages)]
-                  (vim.list_extend res
+                  (v/extend res
                                    (vim.treesitter.language.get_filetypes lang)))]
-  (n.autocmd :FileType
+  (v/autocmd :FileType
              {:pattern filetypes
               :callback (fn [ev]
                           (vim.treesitter.start ev.buf))}))
