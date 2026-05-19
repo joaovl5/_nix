@@ -1,6 +1,8 @@
 -- [nfnl] fnl/plugins/keys/_keymap.fnl
 local _local_1_ = require("lib/nvim")
 local v_2fmap = _local_1_["v/map"]
+local v_2f_24 = _local_1_["v/$"]
+local v_2fn = _local_1_["v/n"]
 v_2fmap({"n"}, "<Esc>", "<cmd>nohlsearch<CR>", {desc = "Clear Search Highlights"})
 v_2fmap({"n"}, "<Esc>", "<cmd>nohlsearch<CR>", {desc = "Clear Search Highlights"})
 v_2fmap({"x"}, "p", "\"_dP")
@@ -46,7 +48,7 @@ do
   local function _16_()
     return vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
   end
-  _15_.add(_14_.specs(_14_.group("code", _14_.bind("H", _16_, _14_.desc("Toggle inlay hints")), _14_.bind("r", vim.lsp.buf.rename, _14_.desc("Rename")), _14_.bind("d", vim.diagnostic.open_float, _14_.desc("Diagnostic")))))
+  _15_.add(_14_.specs(_14_.group("code", _14_.bind("h", _16_, _14_.desc("Toggle inlay hints")), _14_.bind("r", vim.lsp.buf.rename, _14_.desc("Rename")), _14_.bind("d", vim.diagnostic.open_float, _14_.desc("Diagnostic")))))
 end
 do
   local _17_ = require("lib.keys")
@@ -62,5 +64,21 @@ do
   local _21_ = require("lib.keys")
   local _22_ = require("which-key")
   _22_.add(_21_.specs(_21_.group("ai")))
+end
+do
+  local _23_ = require("lib.keys")
+  local _24_ = require("which-key")
+  _24_.add(_23_.specs(_23_.group("repl")))
+end
+do
+  local _25_ = require("lib.keys")
+  local _26_ = require("which-key")
+  local function _27_()
+    local cfg = "~/.config/nvim/.nfnl.fnl"
+    v_2f_24(("NfnlCompileAllFiles " .. cfg))
+    v_2f_24(("NfnlDeleteOrphans " .. cfg))
+    return v_2fn("Done compiled all files and deleted orphans")
+  end
+  _26_.add(_25_.specs(_25_.group("meta", _25_.bind("n", _27_, _25_.desc("Nfnl Refresh")))))
 end
 return v_2fmap({"t"}, "<Esc><Esc>", "<C-\\><C-n>", {desc = "Exit terminal mode"})

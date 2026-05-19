@@ -1,7 +1,12 @@
 -- [nfnl] fnl/lib/nvim.fnl
 local M = {}
 M["v/uv"] = (vim.uv or vim.loop)
-M["v/$"] = vim.cmd
+M["v/$"] = function(...)
+  return vim.cmd(...)
+end
+M["v/n"] = function(...)
+  return vim.notify(...)
+end
 M["v/contains?"] = function(xs, x)
   return vim.tbl_contains(xs, x)
 end

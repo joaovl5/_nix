@@ -41,7 +41,8 @@
           :jump {:nohlsearch true :autojump true}
           :label {:uppercase false :distance true}
           :highlight {:backdrop true}
-          :modes {:treesitter {:labels keys
+          :modes {:char {:enabled false}
+                  :treesitter {:labels keys
                                :highlight {:backdrop true
                                            :matches false}}}})))
  ; spider (improved w,e,b motions)

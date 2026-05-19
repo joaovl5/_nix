@@ -10,13 +10,24 @@
 (p! :folke/snacks.nvim
     (lazy false)
     (keys
-      (bind (a "/") #(Snacks.terminal.toggle) (desc "Terminal") (m :n :t))
-      (bind (l "<leader>") #(pick :files) (desc "Fuzzy Files"))
+      (bind (a "/")
+            #(Snacks.terminal.toggle)
+            (desc "Terminal")
+            (m :n :t))
+      (bind (l "<leader>")
+            #(pick :files)
+            (desc "Fuzzy Files")
+            (icon " " :yellow))
+      (bind (l "/")
+            #(pick :grep)
+            (desc "Grep")
+            (icon "󰓹 " :yellow))
       (bind (l ".")
             #(let [buf_name (vim.api.nvim_buf_get_name 0)
                    buf_dir (vim.fs.dirname buf_name)]
                (pick :files {:cwd buf_dir}))
-            (desc "Fuzzy Files (buffer)"))
+            (desc "Fuzzy Files (buffer)")
+            (icon " " :orange))
       (group
         :git
         (bind :g #(toggle_term :lazygit :lazygit) (desc "Lazygit")))

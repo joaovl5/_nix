@@ -1,8 +1,11 @@
 {:preset :modern
  :plugins {:spelling {:enabled false}}
- :win {:title false
-       :padding [1 1]
+ :win {:title true
+       :no_overlap false
+       :padding [0 0]
        :border :none
-       :width {:max 80}}
- :layout {:spacing 5 :width {:min 30}}
- :delay 50}
+       :width {:max 50}}
+ :layout {:spacing 2 :width {:min 50}}
+ :sort [:group :local :order :mod :alphanum :case]
+ :delay 0
+ :icons {:group "◦"}}

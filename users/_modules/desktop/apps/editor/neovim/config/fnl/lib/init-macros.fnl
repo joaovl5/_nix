@@ -87,6 +87,12 @@
 (fn rewrite-key-item [form k]
   (if (call? form :bind)
       (rewrite-bind form k)
+      (call? form "with-mode")
+      (let [args [(. form 2)]]
+        (each [i value (ipairs form)]
+          (when (< 2 i)
+            (table.insert args (rewrite-key-item value k))))
+        (call-with k "with-mode" args))
       (call? form :group)
       (let [args []]
         (each [i value (ipairs form)]
@@ -129,14 +135,21 @@
            ,wk (require :which-key)]
        ,(call-with wk :add [(call-with k :specs args)]))))
 
+(λ M.ft-keys! [filetypes ...]
+  "Add rewritten key binds through which-key for matching filetypes only."
+  (let [k (gensym)
+        args []]
+    (each [_ form (ipairs [...])]
+      (table.insert args (rewrite-key-item form k)))
+    `(let [,k (require :lib.keys)]
+       ,(call-with k :ft-keys [filetypes (call-with k :specs args)]))))
+
 (fn rewrite-plugin-form [form p k]
   "Rewrite plugin-level DSL forms to lib.plugins calls.
   Examples: `(event :VeryLazy)` becomes `(p.event :VeryLazy)`,
   `(opts {})` becomes `(p.opts {})`, and `(keys ...)` is delegated to key rewriting."
-  (if (call? form :keys)
-      (rewrite-keys form p k)
-      (form-in? plugin-forms form)
-      (call-with p (call-name form) (tail form))
+  (if (call? form :keys) (rewrite-keys form p k)
+      (form-in? plugin-forms form) (call-with p (call-name form) (tail form))
       form))
 
 (λ M.p! [identifier ...]

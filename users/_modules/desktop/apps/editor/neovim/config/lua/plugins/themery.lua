@@ -1,17 +1,25 @@
 -- [nfnl] fnl/plugins/themery.fnl
 local _local_1_ = require("lib/nvim")
 local v_2fextend = _local_1_["v/extend"]
-local function _2_()
-  local theme_names
+local function setup_themery()
+  local global_themes = (_G.Config.themes or {})
+  local themes
   do
-    local all_names = {}
-    for _, theme in ipairs((_G.Config.themes or {})) do
-      all_names = v_2fextend(all_names, theme.names)
+    local names = {}
+    for _, theme in ipairs(global_themes) do
+      names = v_2fextend(names, theme.names)
     end
-    theme_names = all_names
+    themes = names
   end
-  local name_1_auto = require("themery")
-  local fun_2_auto = name_1_auto.setup
-  return fun_2_auto({themes = theme_names, livePreview = true})
+  return {themes = themes, livePreview = true}
 end
-return {"zaldih/themery.nvim", config = _2_, lazy = false}
+local _2_ = require("lib.plugins")
+local _3_ = require("lib.keys")
+local spec_23_auto = {}
+for __24_auto, attrs_25_auto in ipairs({_2_.lazy(false), _2_.keys(_3_.group("meta", _3_.bind("t", _3_.cmd("Themery"), _3_.desc("Themery")))), _2_.opts(setup_themery)}) do
+  for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
+    spec_23_auto[key_26_auto] = value_27_auto
+  end
+end
+spec_23_auto[1] = "zaldih/themery.nvim"
+return spec_23_auto

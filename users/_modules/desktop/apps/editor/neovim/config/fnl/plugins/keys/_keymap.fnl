@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : keys!} :./lib/init-macros)
 
-(local {: v/map} (require :lib/nvim))
+(local {: v/map : v/$ : v/n} (require :lib/nvim))
 
 ; # GENERAL
 (v/map [:n] :<Esc> :<cmd>nohlsearch<CR> {:desc "Clear Search Highlights"})
@@ -52,7 +52,7 @@
 (keys!
   (group
     :code
-    (bind :H
+    (bind :h
           (fn []
             (vim.lsp.inlay_hint.enable (not (vim.lsp.inlay_hint.is_enabled))))
           (desc "Toggle inlay hints"))
@@ -68,9 +68,23 @@
 (keys!
   (group :debug))
 
-; ## AI
 (keys!
   (group :ai))
+
+(keys!
+  (group :repl))
+
+(keys!
+  (group
+    :meta
+    (bind
+      :n
+      (fn []
+        (local cfg "~/.config/nvim/.nfnl.fnl")
+        (v/$ (.. "NfnlCompileAllFiles " cfg))
+        (v/$ (.. "NfnlDeleteOrphans " cfg))
+        (v/n "Done compiled all files and deleted orphans"))
+      (desc "Nfnl Refresh"))))
 
 ; ## Terminal
 

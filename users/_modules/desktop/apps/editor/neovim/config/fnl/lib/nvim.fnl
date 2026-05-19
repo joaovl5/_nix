@@ -1,7 +1,11 @@
 (local M {})
 
 (set M.v/uv (or vim.uv vim.loop))
-(set M.v/$ vim.cmd)
+(fn M.v/$ [...]
+  (vim.cmd ...))
+
+(fn M.v/n [...]
+  (vim.notify ...))
 
 (fn M.v/contains? [xs x]
   (vim.tbl_contains xs x))

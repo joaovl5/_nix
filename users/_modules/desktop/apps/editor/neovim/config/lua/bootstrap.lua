@@ -91,14 +91,14 @@ do
   local function _13_(...)
     local _11_ = require("lib.plugins")
     local _12_ = require("lib.keys")
-    local spec_21_auto = {}
-    for __22_auto, attrs_23_auto in ipairs({_11_.lazy(false), {priority = 1000}}) do
-      for key_24_auto, value_25_auto in pairs(attrs_23_auto) do
-        spec_21_auto[key_24_auto] = value_25_auto
+    local spec_23_auto = {}
+    for __24_auto, attrs_25_auto in ipairs({_11_.lazy(false), {priority = 1000}}) do
+      for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
+        spec_23_auto[key_26_auto] = value_27_auto
       end
     end
-    spec_21_auto[1] = "Olical/nfnl"
-    return spec_21_auto
+    spec_23_auto[1] = "Olical/nfnl"
+    return spec_23_auto
   end
   plugins = {_13_(...)}
   v_2fextend(plugins, plugin_loader.load())

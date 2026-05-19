@@ -12,10 +12,10 @@
 (let [sources [:conv_commit
                :lsp
                :path
-               :git
                :snippets
                :buffer
                :env
+               :git
                :grep]
       debug_sources (let [result [:dap]]
                       (each [_ source (ipairs sources)]

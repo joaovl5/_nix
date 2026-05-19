@@ -45,7 +45,7 @@
      (deps [(plugin :folke/todo-comments.nvim
                     {:cmd :TodoTrouble :opts {}})])
      (opts {})
-     (keys (group :trouble
+     (keys (group :diagnostics
                   (bind :x
                         (cmd "Trouble diagnostics toggle")
                         (desc "Trouble"))

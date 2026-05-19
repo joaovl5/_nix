@@ -1,2 +1,2 @@
 -- [nfnl] fnl/plugins/keys/_whichkey.fnl
-return {preset = "modern", plugins = {spelling = {enabled = false}}, win = {padding = {1, 1}, border = "none", width = {max = 80}, title = false}, layout = {spacing = 5, width = {min = 30}}, delay = 50}
+return {preset = "modern", plugins = {spelling = {enabled = false}}, win = {title = true, padding = {0, 0}, border = "none", width = {max = 50}, no_overlap = false}, layout = {spacing = 2, width = {min = 50}}, sort = {"group", "local", "order", "mod", "alphanum", "case"}, delay = 0, icons = {group = "\226\151\166"}}
