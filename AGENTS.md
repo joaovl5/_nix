@@ -6,14 +6,14 @@
 
 ## Special Instructions
 
-- **npins:**
-  - Dependency pins are managed in `npins/sources.json`
-  - `flake.nix` is a thin tooling shim over `default.nix`, not the pin source
+- **flake-file/unflake:**
+  - Direct inputs are declared in `flake-file.nix`.
+  - `unflake.nix` is generated from those declarations with:
+    `nix-shell . -A flake-file.sh --run 'write-unflake --backend nix'`.
+  - `flake.nix` is a thin tooling shim over `default.nix`, not the input source
     of truth.
-- `globals/` is repo infra-level data. Changing it does not require a pin or
-  lock update.
-- `mysecrets` updates use `npins update mysecrets` and should stage
-  `npins/sources.json`.
+  - `mysecrets` updates should update the `mysecrets` entry in `flake-file.nix`
+    and regenerate/stage `unflake.nix`.
 - When creating or maintaining repo-local skills under `.agents/skills/`, use
   `.agents/skills/skill-authoring/SKILL.md` as the authoritative workflow.
   Prefer it over generic skill-writing guidance when they conflict.
@@ -38,8 +38,7 @@
 
 In this order:
 
-- `npins verify` when `npins/`, `inputs.nix`, or `input-overrides.nix`
-  changes.
+- Regenerate `unflake.nix` when `flake-file.nix` inputs change.
 - `nix fmt` - basic formatting, runs `treefmt` through the thin flake shim.
 - `prek` - precommit hook has linters included.
   - `prek` only operates on git staged files, so stage the exact intended

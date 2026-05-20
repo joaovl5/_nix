@@ -283,7 +283,7 @@ class TestUpdateSecretsPin:
     ctx = _make_context(auto_commit=True, auto_push=False)
     assert UpdateSecretsPin().should_skip(ctx) is True
 
-  def test_updates_npins_and_stages_sources_json(self):
+  def test_updates_unflake_and_stages_generated_lock(self):
     ctx = _make_context(auto_commit=True, auto_push=True)
     cli = _mock_cli()
     UpdateSecretsPin().execute(ctx, cli)
@@ -295,7 +295,7 @@ class TestUpdateSecretsPin:
     assert update_cmd.build() == [
       "sh",
       "-c",
-      "cd /tmp/test/flake && npins update mysecrets",
+      "cd /tmp/test/flake && nix-shell . -A flake-file.sh --run 'write-unflake --backend nix --update mysecrets'",
     ]
 
     stage_cmd = _get_command(cli, 1)
@@ -308,7 +308,7 @@ class TestUpdateSecretsPin:
       "-C",
       "/tmp/test/flake",
       "add",
-      "npins/sources.json",
+      "unflake.nix",
     ]
 
   def test_installer_skip_message_mentions_manual_push(self):
@@ -319,7 +319,7 @@ class TestUpdateSecretsPin:
     installer.run()
 
     cli.info.assert_any_call(
-      "Skipping: Updating secrets pin with npins; push secrets first, then rerun the pin update"
+      "Skipping: Updating secrets pin with unflake; push secrets first, then rerun the pin update"
     )
 
 
