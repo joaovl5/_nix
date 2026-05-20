@@ -1,6 +1,15 @@
 ;; fennel-ls: macro-file
 ;; [nfnl-macro]
 (local M {})
+(fn module-forms [mod]
+  "Return exported helper names from a module as a lookup table."
+  (let [forms {}]
+    (each [name _ (pairs (require mod))]
+      (tset forms (tostring name) true))
+    forms))
+
+(local plugin-forms (module-forms :lib.plugins))
+(local key-forms (module-forms :lib.keys))
 
 (fn M.do-req [mod key ...]
   "Require a module and immediately call a function from it.
@@ -39,16 +48,6 @@
   Example: in `(event :VeryLazy)`, the head symbol is `event`, so
   `(call? form :event)` returns true."
   (= name (call-name form)))
-
-(fn module-forms [mod]
-  "Return exported helper names from a module as a lookup table."
-  (let [forms {}]
-    (each [name _ (pairs (require mod))]
-      (tset forms (tostring name) true))
-    forms))
-
-(local plugin-forms (module-forms :lib.plugins))
-(local key-forms (module-forms :lib.keys))
 
 (fn tail [form]
   "Return call args after the head symbol as a dense vector.
@@ -151,6 +150,24 @@
   (if (call? form :keys) (rewrite-keys form p k)
       (form-in? plugin-forms form) (call-with p (call-name form) (tail form))
       form))
+
+(fn M.i! [...]
+  "Prints and auto-concats stuff into `vim.notify`."
+  (let [n (gensym)
+        parts []]
+    (each [_ form (ipairs [...])]
+      (table.insert parts `(tostring ,form)))
+    (let [message
+          (if (= (length parts) 0)
+              ""
+              (= (length parts) 1)
+              (. parts 1)
+              (let [expr (list (sym :..))]
+                (each [_ part (ipairs parts)]
+                  (table.insert expr part))
+                expr))]
+      `(let [,n (require :lib/nvim)]
+         ((. ,n :v/n) ,message)))))
 
 (λ M.p! [identifier ...]
   "Makes a Lazy.nvim plugin spec from bounded DSL forms.

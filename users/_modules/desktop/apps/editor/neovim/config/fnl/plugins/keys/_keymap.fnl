@@ -16,14 +16,29 @@
 (v/map [:x] ">" :>gv {:noremap true})
 (v/map [:x] "<" :<gv {:noremap true})
 
+; Window manipulation
+(keys!
+  (group
+    :action_1
+    (bind :h (cmd "wincmd H") (desc "Move left"))
+    (bind :j (cmd "wincmd J") (desc "Move down"))
+    (bind :k (cmd "wincmd K") (desc "Move up"))
+    (bind :l (cmd "wincmd L") (desc "Move right"))
+    (bind :x (cmd "wincmd x") (desc "Swap current/next"))
+    (bind :t (cmd "wincmd t") (desc "Break to tab"))))
+
+(keys!
+  (group
+    :action_2
+    (bind :c (cmd :tabnew) (desc "Create"))
+    (bind :l (cmd :tabnext) (desc "Next"))
+    (bind :h (cmd :tabprev) (desc "Prev"))
+    (bind :d (cmd :tabclose) (desc "Close"))))
+
 ; # LEADER
 ; ## Tabs
 (keys!
-  (group :tab
-         (bind :c (cmd :tabnew) (desc "Create"))
-         (bind :l (cmd :tabnext) (desc "Next"))
-         (bind :h (cmd :tabprev) (desc "Prev"))
-         (bind :d (cmd :tabclose) (desc "Close"))))
+  (group :tab))
 
 ; ## Window
 (keys!
@@ -73,6 +88,9 @@
 
 (keys!
   (group :repl))
+
+(keys!
+  (group :merge))
 
 (keys!
   (group

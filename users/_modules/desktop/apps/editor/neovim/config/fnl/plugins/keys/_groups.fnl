@@ -11,5 +11,9 @@
 (k.register-group! :repl "REPL" (k.l :r) (k.icon "󰵉 " :green))
 (k.register-group! :ai "AI" (k.l :a) (k.icon " " :purple))
 (k.register-group! :meta "Meta" (k.l :_) (k.icon " " :grey))
+(k.register-group! :merge "Merge" (k.l :u) (k.icon "X " :grey))
+(k.register-group! :stats "Stats" (k.l :t) (k.icon "X " :grey))
+(k.register-group! :action_1 "Actions (1)" ";" (k.icon "X " :red))
+(k.register-group! :action_2 "Actions (2)" "t" (k.icon "X " :red))
 
 true

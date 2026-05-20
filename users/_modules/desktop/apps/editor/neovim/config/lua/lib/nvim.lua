@@ -19,6 +19,9 @@ end
 M["v/cwd"] = function(...)
   return vim.fn.getcwd(...)
 end
+M["v/mode"] = function(...)
+  return vim.fn.mode(...)
+end
 M["v/input"] = function(...)
   return vim.ui.input(...)
 end

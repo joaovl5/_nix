@@ -1,11 +1,11 @@
 -- [nfnl] fnl/plugins/lsp/languages/fennel.fnl
 local _1_ = require("lib.plugins")
 local _2_ = require("lib.keys")
-local spec_23_auto = {}
-for __24_auto, attrs_25_auto in ipairs({}) do
-  for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
-    spec_23_auto[key_26_auto] = value_27_auto
+local spec_24_auto = {}
+for __25_auto, attrs_26_auto in ipairs({}) do
+  for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
+    spec_24_auto[key_27_auto] = value_28_auto
   end
 end
-spec_23_auto[1] = "bakpakin/janet.vim"
-return spec_23_auto
+spec_24_auto[1] = "bakpakin/janet.vim"
+return spec_24_auto

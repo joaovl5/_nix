@@ -29,11 +29,11 @@ local function setup_cc()
 end
 local _5_ = require("lib.plugins")
 local _6_ = require("lib.keys")
-local spec_23_auto = {}
-for __24_auto, attrs_25_auto in ipairs({_5_.version("^18.0.0"), _5_.deps({"nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter", "ravitemer/codecompanion-history.nvim", "franco-ruggeri/codecompanion-spinner.nvim"}), _5_.keys(_6_.group("ai", _6_.bind("a", _6_.cmd("CodeCompanionActions"), _6_.desc("Actions"), _6_.m("n", "v")), _6_.bind("c", _6_.cmd("CodeCompanionChat Toggle"), _6_.desc("Chat"), _6_.m("n", "v")), _6_.bind("r", _6_.cmd("CodeCompanionCmd"), _6_.desc("Run command"), _6_.m("n", "v")), _6_.bind("l", _6_.cmd("CodeCompanion"), _6_.desc("Inline Assist"), _6_.m("n", "v")))), _5_.opts(setup_cc)}) do
-  for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
-    spec_23_auto[key_26_auto] = value_27_auto
+local spec_24_auto = {}
+for __25_auto, attrs_26_auto in ipairs({_5_.version("^18.0.0"), _5_.deps({"nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter", "ravitemer/codecompanion-history.nvim", "franco-ruggeri/codecompanion-spinner.nvim"}), _5_.keys(_6_.group("ai", _6_.bind("a", _6_.cmd("CodeCompanionActions"), _6_.desc("Actions"), _6_.m("n", "v")), _6_.bind("c", _6_.cmd("CodeCompanionChat Toggle"), _6_.desc("Chat"), _6_.m("n", "v")), _6_.bind("r", _6_.cmd("CodeCompanionCmd"), _6_.desc("Run command"), _6_.m("n", "v")), _6_.bind("l", _6_.cmd("CodeCompanion"), _6_.desc("Inline Assist"), _6_.m("n", "v")))), _5_.opts(setup_cc)}) do
+  for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
+    spec_24_auto[key_27_auto] = value_28_auto
   end
 end
-spec_23_auto[1] = "olimorris/codecompanion.nvim"
-return spec_23_auto
+spec_24_auto[1] = "olimorris/codecompanion.nvim"
+return spec_24_auto

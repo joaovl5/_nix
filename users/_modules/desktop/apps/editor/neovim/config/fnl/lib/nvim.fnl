@@ -19,6 +19,9 @@
 (fn M.v/cwd [...]
   (vim.fn.getcwd ...))
 
+(fn M.v/mode [...]
+  (vim.fn.mode ...))
+
 (fn M.v/input [...]
   (vim.ui.input ...))
 

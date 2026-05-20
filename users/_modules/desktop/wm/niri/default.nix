@@ -1,7 +1,8 @@
 {
-  nx = _: {
+  nx = {pkgs, ...}: {
     programs.niri = {
       enable = true;
+      package = pkgs.niri-stable;
     };
   };
   hm = {

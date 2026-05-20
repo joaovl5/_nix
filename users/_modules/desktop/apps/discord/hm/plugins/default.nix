@@ -36,7 +36,6 @@ _: {
     permissionFreeWill.enable = true;
     permissionsViewer.enable = true;
     channelTabs.enable = true;
-    sidebarChat.enable = true;
     webScreenShareFixes.enable = true;
     webpackTarball.enable = true;
   };

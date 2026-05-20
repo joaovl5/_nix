@@ -1,11 +1,12 @@
 ---
 name: neovim-configuration
-description: Use when editing this repo's Neovim config under users/_modules/desktop/apps/editor/neovim; covers source-vs-generated boundaries, the recompile wrapper, and common maintenance pitfalls
+description: Use when editing this repo's Neovim config or researching Neovim behavior with help pages; covers source boundaries, help-first research, the recompile wrapper, and pitfalls
 ---
 
 # Neovim Configuration
 
-- **Use this when:** editing `users/_modules/desktop/apps/editor/neovim/`
+- **Use this when:** editing `users/_modules/desktop/apps/editor/neovim/` or
+  researching Neovim behavior from installed help
 - **Pairing:** for Fennel work, also load `fennel-development`
 - **Path base:** paths below are relative to
   `users/_modules/desktop/apps/editor/neovim/`
@@ -14,6 +15,18 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 
 - **Never edit generated Lua:** leave `config/lua/**` and
   `config/flsproject.lua` alone; edit Fennel source, then recompile
+
+## Help-first research
+
+- **Prefer help pages:** for Neovim behavior, options, commands, Lua APIs, and
+  plugin docs, search installed help before web search
+- **Helper CLI:** run `uv run skill://neovim-configuration/scripts/nvim-help.py --help`
+  for tag lookup, text search, and tag-context dumps
+- **Reference:** detailed workflow, raw commands, and pitfalls live in
+  `references/help-search.md`
+- **Runtime Lua helper:** for repo-configured headless Lua probes, run
+  `uv run skill://neovim-configuration/scripts/nvim-lua.py --help` instead of
+  hand-writing `nvim --headless --cmd 'set rtp^=...' -u ...`
 
 ## Where changes go
 
@@ -99,6 +112,9 @@ description: Use when editing this repo's Neovim config under users/_modules/des
 - **Startup smoke:** run `nvim --headless +qa` for a fast config load check
 - **Eager smoke:** when lazy/eager loading changes, run
   `NVIM_EAGER_PLUGINS=1 nvim --headless "+lua local s=require('lazy').stats(); if s.loaded ~= s.count then error(('lazy loaded %d/%d plugins'):format(s.loaded, s.count)) end; print(('lazy loaded %d/%d plugins'):format(s.loaded, s.count))" +qa`
+- **Lua probe:** run arbitrary Lua against this repo config with
+  `uv run skill://neovim-configuration/scripts/nvim-lua.py 'print(vim.inspect(vim.o.cmdheight))'`
+  - use `--defer-ms 200` when checking lazy/which-key state scheduled after startup
 
 
 ## Common maintenance tasks

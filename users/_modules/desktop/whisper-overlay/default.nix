@@ -17,7 +17,7 @@
     # be painfully slow. But be prepared to let your computer build packages for 2-3 hours.
 
     # Enable the user service
-    services.realtime-stt-server.enable = true;
+    services.realtime-stt-server.enable = false;
     # If you want to automatically start the service with your graphical session,
     # enable this too. If you want to start and stop the service on demand to save
     # resources, don't enable this and use `systemctl --user <start|stop> realtime-stt-server`.
@@ -25,6 +25,6 @@
 
     # Add the whisper-overlay package so you can start it manually.
     # Alternatively add it to the autostart of your display environment or window manager.
-    home.packages = [pkgs.whisper-overlay];
+    # home.packages = [pkgs.whisper-overlay];
   };
 }

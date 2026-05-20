@@ -1,7 +1,7 @@
 -- [nfnl] fnl/plugins/indent.fnl
 local _1_ = require("lib.plugins")
 local _2_ = require("lib.keys")
-local spec_23_auto = {}
+local spec_24_auto = {}
 local function _3_()
   local hk = require("ibl.hooks")
   local hl_setup = hk.type.HIGHLIGHT_SETUP
@@ -19,10 +19,10 @@ local function _3_()
   hk.register(hl_setup, _5_)
   return {indent = {highlight = bg_hl, char = "\226\139\174"}, scope = {highlight = hl, char = "\226\139\174", show_exact_scope = true}}
 end
-for __24_auto, attrs_25_auto in ipairs({_1_.main("ibl"), _1_.event("BufEnter"), _1_.opts(_3_)}) do
-  for key_26_auto, value_27_auto in pairs(attrs_25_auto) do
-    spec_23_auto[key_26_auto] = value_27_auto
+for __25_auto, attrs_26_auto in ipairs({_1_.main("ibl"), _1_.event("BufEnter"), _1_.opts(_3_)}) do
+  for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
+    spec_24_auto[key_27_auto] = value_28_auto
   end
 end
-spec_23_auto[1] = "lukas-reineke/indent-blankline.nvim"
-return spec_23_auto
+spec_24_auto[1] = "lukas-reineke/indent-blankline.nvim"
+return spec_24_auto

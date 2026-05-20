@@ -1,4 +1,10 @@
 let
+  git_release_commit_revisions = {
+    # npins stores annotated tag object IDs for GitRelease pins, but flake-like
+    # consumers such as niri-flake expect the peeled commit revision in `rev`.
+    "d85b524d7c07a47345eab434f471f2b7bfa2c9c3" = "01be0e65f4eb91a9cd624ac0b76aaeab765c7294";
+    "838e68b9ef35613524b0a76a569afdaab7d5ce8c" = "388d291e82ffbc73be18169d39470f340707edaa";
+  };
   raw_source = source:
     source
     // {
@@ -6,9 +12,11 @@ let
     }
     // (
       if source ? revision
-      then {
-        rev = source.revision;
-        shortRev = builtins.substring 0 7 source.revision;
+      then let
+        rev = git_release_commit_revisions.${source.revision} or source.revision;
+      in {
+        inherit rev;
+        shortRev = builtins.substring 0 7 rev;
       }
       else {}
     );

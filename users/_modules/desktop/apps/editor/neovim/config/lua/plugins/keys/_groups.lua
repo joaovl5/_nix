@@ -11,4 +11,8 @@ k["register-group!"]("debug", "Debug", k.l("d"), k.icon("\243\176\163\137 ", "pu
 k["register-group!"]("repl", "REPL", k.l("r"), k.icon("\243\176\181\137 ", "green"))
 k["register-group!"]("ai", "AI", k.l("a"), k.icon("\238\176\144 ", "purple"))
 k["register-group!"]("meta", "Meta", k.l("_"), k.icon("\238\171\184 ", "grey"))
+k["register-group!"]("merge", "Merge", k.l("u"), k.icon("X ", "grey"))
+k["register-group!"]("stats", "Stats", k.l("t"), k.icon("X ", "grey"))
+k["register-group!"]("action_1", "Actions (1)", ";", k.icon("X ", "red"))
+k["register-group!"]("action_2", "Actions (2)", "t", k.icon("X ", "red"))
 return true

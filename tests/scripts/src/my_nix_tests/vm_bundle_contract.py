@@ -6,6 +6,8 @@ if TYPE_CHECKING:
   from collections.abc import Callable
 
   from nix_machine_protocol import Machine
+else:
+  Machine = object
 
 
 def _assert_copied_file(
