@@ -1,3 +1,3 @@
 _: {
-  projectRootFile = "npins/sources.json";
+  projectRootFile = "unflake.nix";
 }

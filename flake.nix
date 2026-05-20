@@ -1,5 +1,5 @@
 {
   description = "lav nixos config";
 
-  outputs = _inputs: import ./default.nix;
+  outputs = _inputs: removeAttrs (import ./default.nix) ["flake-file"];
 }
