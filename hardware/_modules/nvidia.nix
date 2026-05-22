@@ -31,6 +31,17 @@
     ${pkgs.coreutils}/bin/mv "$tmp" "$dst"
     trap - EXIT
   '';
+  nvidia_cdi_precheck = pkgs.writeShellScript "nvidia-cdi-precheck" ''
+    set -euo pipefail
+
+    loaded_version="$(${pkgs.kmod}/bin/modinfo -F version nvidia 2>/dev/null || true)"
+    expected_version="${config.hardware.nvidia.package.version}"
+
+    if [ -n "$loaded_version" ] && [ "$loaded_version" != "$expected_version" ]; then
+      echo "nvidia-cdi-generator: skipping until reboot into NVIDIA driver $expected_version (loaded $loaded_version)" >&2
+      exit 1
+    fi
+  '';
 in
   o.module "nvidia" (with o; {
     enable = toggle "Enable nvidia settings" true;
@@ -53,6 +64,13 @@ in
         nixpkgs.config.cudaCapabilities = [opts.cuda_cap];
         services.xserver.videoDrivers = ["nvidia"];
         environment.systemPackages = [pkgs.libnvidia-container];
+        systemd.services.nvidia-container-toolkit-cdi-generator.serviceConfig = {
+          # Live driver upgrades can leave the loaded kernel module behind the
+          # new userspace NVML library until the next reboot. Skip CDI
+          # regeneration in that known state, but keep real post-reboot
+          # generator failures visible.
+          ExecCondition = [nvidia_cdi_precheck];
+        };
         systemd.user.services.nvidia-rootless-cdi = {
           description = "Prepare NVIDIA CDI spec for rootless Docker";
           wantedBy = ["default.target"];

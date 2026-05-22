@@ -24,14 +24,14 @@ in
               warn-dirty = false;
               builders-use-substitutes = true;
               auto-optimise-store = true;
-              # Prevent heavyweight local builds (Firefox/Rust LTO, CUDA) from exhausting RAM.
-              max-jobs = 1;
-              cores = 4;
+              max-jobs = 12;
+              cores = 12;
+              # http3 = true;
+              http2 = true;
+              http-connections = 50;
               experimental-features = [
                 "nix-command"
                 "flakes"
-                "pipe-operator" # if not using lix, is `pipe-operators`
-                "flake-self-attrs" # used for some projects using submodules
               ];
 
               substituters = [

@@ -31,6 +31,13 @@ in {
     python3
   ];
 
+  postPatch = ''
+    substituteInPlace apps/api/src/index.ts \
+      --replace-fail \
+        "void startServer(injectWebSocket);" \
+        "void startServer(injectWebSocket, Number(process.env.KANEO_API_PORT || 1337));"
+  '';
+
   buildPhase = ''
     runHook preBuild
 
@@ -125,16 +132,10 @@ in {
     done
     EOF
 
-    cat > "$out/share/kaneo/api-launcher.mjs" <<EOF
-    import { pathToFileURL } from "node:url";
-    const mod = await import(pathToFileURL("$out/libexec/kaneo/apps/api/dist/index.js"));
-    await mod.startServer(Number(process.env.KANEO_API_PORT || 1337));
-    EOF
-
     cat > "$out/bin/kaneo-api" <<EOF
     #!${stdenv.shell}
     set -euo pipefail
-    exec ${nodejs_20}/bin/node --enable-source-maps "$out/share/kaneo/api-launcher.mjs" "\$@"
+    exec ${nodejs_20}/bin/node --enable-source-maps "${runtime_root}/apps/api/dist/index.js" "\$@"
     EOF
 
     cat > "$out/bin/kaneo-web" <<'EOF'

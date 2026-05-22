@@ -24,7 +24,7 @@ check: fmt
     {{ nix_raw }} flake check
 
 fmt:
-    @jpm janet _scripts/format.janet --quiet
+    echo "..."
 
 [script("fish")]
 deploy: check

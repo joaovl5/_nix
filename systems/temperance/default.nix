@@ -1,4 +1,5 @@
 {
+  lib,
   mylib,
   inputs,
   ...
@@ -24,6 +25,10 @@ in {
       ];
     };
   };
+
+  # This VPS has no `/dev/kvm`, and the inherited libvirtd daemon can leave
+  # `libvirtd.service` failed after its idle shutdown path.
+  virtualisation.libvirtd.enable = lib.mkForce false;
 
   systemd.tmpfiles.rules = [
     "d /var/lib/backups 0755 root root -"

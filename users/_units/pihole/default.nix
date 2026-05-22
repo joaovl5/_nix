@@ -107,15 +107,15 @@ in
 
     systemd = {
       services.pihole-pwhash = {
-        description = "Initialize Pi-hole API password hash";
+        description = "Initialize Pi-hole API password";
         requiredBy = ["pihole-ftl.service"];
         before = ["pihole-ftl.service"];
         serviceConfig = {
           Type = "simple";
           User = user;
           Group = group;
-          ExecStart = pkgs.writeShellScript "exec_pihole_pwhash" ''
-            ${pkg}/bin/pihole-FTL --config webserver.api.pwhash $(cat ${s.secret_path "pihole_password_hash"})
+          ExecStart = pkgs.writeShellScript "exec_pihole_password" ''
+            ${pkg}/bin/pihole-FTL --config webserver.api.password "$(${pkgs.coreutils}/bin/cat ${s.secret_path "pihole_password"})"
           '';
 
           inherit (pihole_ftl) AmbientCapabilities;

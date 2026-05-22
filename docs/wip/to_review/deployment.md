@@ -60,6 +60,20 @@ causes of service failures before attempting further fixes.
 # Fast activation reproduction
 deploy --skip-checks
 
+# Safe SSH probe template for manual debugging.
+# Keep these options on all ad-hoc probes so ssh never falls back to
+# keyboard-interactive/password auth and trips fail2ban.
+ssh \
+  -o BatchMode=yes \
+  -o PreferredAuthentications=publickey \
+  -o PasswordAuthentication=no \
+  -o KbdInteractiveAuthentication=no \
+  -o NumberOfPasswordPrompts=0 \
+  -o ConnectTimeout=10 \
+  -p 59222 \
+  temperance@89.167.107.74 \
+  'systemctl --failed --no-pager'
+
 # Activation-relevant unit state (adapt host and unit names as needed)
 ssh tyrant@192.168.15.13 \
   'systemctl show -p ActiveState -p SubState -p Result -p ExecMainStatus \
@@ -671,3 +685,209 @@ hister list-urls
 - If future deploys require Hister to be immediately routable, solve that as a
   service readiness/wrapper/config problem, not by changing Hister's source
   without stronger evidence.
+
+## Post-mortem: lavpc NVIDIA CDI generator blocked live deploy
+
+### Symptom
+
+- `deploy --skip-checks --log-dir logs --debug-logs --confirm-timeout 1800
+  --activation-timeout 1800` successfully built, copied, and activated
+  `tyrant` and `temperance`, then failed during forward activation of `lavpc`.
+- The failed unit was `nvidia-container-toolkit-cdi-generator.service`.
+- The generator logged `failed to initialize NVML: Driver/library version
+  mismatch`, and deploy-rs rolled back/revoked already-confirmed nodes.
+
+### Root cause
+
+- This was an NVIDIA live-driver-switch mismatch on `lavpc`, not another
+  Pi-hole / WireGuard / OctoDNS activation race.
+- Evidence from `lavpc`:
+  - `/run/current-system` differed from `/run/booted-system`,
+  - `modinfo -F version nvidia` reported loaded/boot module version
+    `595.58.03`,
+  - `nvidia-smi` used NVML library version `595.71` and failed with
+    `Driver/library version mismatch`.
+- The system can activate the new generation live, but the running kernel
+  module cannot be replaced until reboot. GPU/NVML consumers can stay broken
+  until `lavpc` boots into the matching generation.
+
+### Fix used in this repo
+
+- `hardware/_modules/nvidia.nix` now adds an `ExecCondition` precheck for
+  `nvidia-container-toolkit-cdi-generator.service`.
+- If the loaded NVIDIA module version differs from the evaluated NVIDIA
+  package version, systemd skips CDI regeneration instead of marking the unit
+  failed. Once `lavpc` reboots into the matching generation, the generator
+  runs normally and post-reboot failures remain visible.
+
+### Verification after fix
+
+- `nix fmt`, targeted `prek --files`, and `nix flake check --all-systems`
+  passed after the Nix change.
+- `deploy --skip-checks --log-dir logs --debug-logs --confirm-timeout 1800
+  --activation-timeout 1800` then completed successfully; deploy-rs confirmed
+  activation for `lavpc`, `temperance`, and `tyrant`.
+- Post-deploy `lavpc` state:
+  - `nvidia-container-toolkit-cdi-generator.service`:
+    `ActiveState=inactive`, `Result=exec-condition`, `ExecMainStatus=0`,
+  - no failed system units,
+  - `/run/current-system` still differs from `/run/booted-system`,
+  - loaded NVIDIA module remains `595.58.03`, while NVML is `595.71`.
+- Therefore the deploy path is fixed, but GPU/NVML use on `lavpc` still needs
+  a reboot into the deployed generation.
+- Follow-up noise found after successful deploy: `temperance` later had
+  `libvirtd.service` failed after its idle shutdown path logged
+  `Make forcefull daemon shutdown`. This occurred after deploy confirmation
+  and is separate from the NVIDIA activation blocker.
+
+### Operational lessons
+
+- For NVIDIA `Driver/library version mismatch`, first compare current vs
+  booted system and loaded module vs NVML library:
+  - `readlink /run/current-system`
+  - `readlink /run/booted-system`
+  - `modinfo -F version nvidia`
+  - `nvidia-smi --query-gpu=driver_version --format=csv,noheader`
+- Reboot `lavpc` before deeper NVIDIA debugging when current and booted driver
+  versions differ.
+- Do not confuse the deploy-rs revocation of previously confirmed nodes with
+  the first blocker. In this case, the primary forward blocker was only the
+  `lavpc` NVIDIA CDI generator.
+
+## Post-mortem: temperance libvirtd failed after idle shutdown
+
+### Symptom
+
+- After the NVIDIA deploy fix, `deploy --skip-checks` completed successfully,
+  but a post-deploy failed-unit check on `temperance` showed
+  `libvirtd.service` failed.
+- The unit had been socket/wanted started during activation, then after about
+  two minutes logged `Make forcefull daemon shutdown` and exited status `1`.
+- `libvirtd.socket`, `libvirtd-ro.socket`, and `libvirtd-admin.socket` remained
+  active/listening, so later socket activation could reproduce the failed state.
+
+### Root cause
+
+- `temperance` is a VPS without `/dev/kvm`; direct host evidence showed
+  `/dev/kvm missing` and libvirt repeatedly logging
+  `Unable to open /dev/kvm: No such file or directory`.
+- The libvirt enablement was inherited from the shared host bootstrap:
+  `systems/_bootstrap/host.nix` enables `virtualisation.libvirtd` for all
+  hosts.
+- `temperance` does not explicitly need libvirt in its host config, so this was
+  inherited default noise rather than an intentional service for that host.
+
+### Fix used in this repo
+
+- `systems/temperance/default.nix` now force-disables libvirt for this host:
+  `virtualisation.libvirtd.enable = lib.mkForce false;`.
+- This avoids masking libvirt exit status globally and keeps the fix scoped to
+  the host that lacks KVM.
+
+### Verification after fix
+
+- Local eval confirmed `temperance` now has
+  `virtualisation.libvirtd.enable = false` and no generated
+  `libvirtd.service` or `libvirtd.socket`.
+- `nix fmt`, targeted `prek --files`, and `nix flake check --all-systems`
+  passed after the Nix change.
+- A full `deploy --skip-checks` activated and confirmed `temperance`, but then
+  failed later on unrelated `tyrant` `kaneo-api.service` auto-restart state and
+  revoked the earlier success.
+- Targeted `deploy --skip-checks .#temperance --log-dir logs --debug-logs
+  --confirm-timeout 1800 --activation-timeout 1800` then completed
+  successfully and confirmed activation.
+- Post-deploy `temperance` checks reported zero failed units, and libvirt units
+  (`libvirtd.service`, `libvirtd*.socket`, `libvirt-guests.service`,
+  `virtlockd.socket`, `virtlogd.socket`) all had `LoadState=not-found` /
+  `ActiveState=inactive`.
+
+## Post-mortem: tyrant Kaneo API launcher mismatch
+
+### Symptom
+
+- A full `deploy --skip-checks` after the `temperance` libvirt fix activated
+  and confirmed `temperance`, then failed during `tyrant` activation.
+- Live `tyrant` evidence showed `kaneo-api.service` in
+  `ActiveState=activating`, `SubState=auto-restart`, `Result=exit-code`,
+  `ExecMainStatus=1`, while `kaneo-web.service` stayed active/running.
+- `kaneo-api.service` repeatedly completed database startup and migrations,
+  then crashed at WebSocket injection with:
+  `TypeError: injectWebSocket2 is not a function`.
+
+### Root cause
+
+- The packaged `kaneo-api` launcher in `packages/kaneo/default.nix` imported
+  Kaneo's compiled `dist/index.js` and called
+  `startServer(Number(process.env.KANEO_API_PORT || 1337))`.
+- Upstream Kaneo's `startServer` signature is
+  `startServer(injectWebSocket, port = 1337)`, and the source main path calls
+  it as `startServer(injectWebSocket)`.
+- The launcher accidentally passed the port number as the first
+  `injectWebSocket` argument, so the API crashed after startup work and stayed
+  in systemd auto-restart. Deploy-rs then treated the auto-restarting non-zero
+  service as an activation failure.
+
+### Fix used in this repo
+
+- `packages/kaneo/default.nix` now patches Kaneo's source main entry to pass
+  `Number(process.env.KANEO_API_PORT || 1337)` as the second `startServer`
+  argument.
+- The packaged `kaneo-api` wrapper now executes the compiled `dist/index.js`
+  directly, letting Kaneo's own main path pass the correct module-local
+  `injectWebSocket`.
+- This keeps the configured port support without recreating Kaneo's startup
+  wiring in a separate launcher module.
+
+### Verification after fix
+
+- `nix build .#kaneo --no-link` built the patched package.
+- The generated `kaneo-api` wrapper now executes
+  `libexec/kaneo/apps/api/dist/index.js` directly, and the compiled main path
+  contains `startServer(injectWebSocket, Number(process.env.KANEO_API_PORT ||
+  1337))`.
+- `nix fmt`, targeted `prek --files`, and `nix flake check --all-systems`
+  passed after the Nix change.
+- Targeted `deploy --skip-checks .#tyrant --log-dir logs --debug-logs
+  --confirm-timeout 1800 --activation-timeout 1800` completed successfully
+  and confirmed activation.
+- Post-deploy `tyrant` checks reported zero failed units:
+  - `kaneo-api.service`: `ActiveState=active`, `SubState=running`,
+    `Result=success`, `ExecMainStatus=0`, `NRestarts=0`,
+  - `kaneo-web.service`: `ActiveState=active`, `SubState=running`,
+    `Result=success`, `ExecMainStatus=0`, `NRestarts=0`,
+  - local API probe `GET http://127.0.0.1:1337/api/health` returned
+    `{"status":"ok"}`.
+- A subsequent full `deploy --skip-checks --log-dir logs --debug-logs
+  --confirm-timeout 1800 --activation-timeout 1800` completed successfully and
+  deploy-rs confirmed activation for `tyrant`, `temperance`, and `lavpc`.
+- Post-full-deploy spot checks confirmed `tyrant` and `lavpc` had zero failed
+  units. Follow-up SSH probes to `temperance` returned `Connection refused` on
+  port `59222` even though deploy-rs had confirmed activation; debug this as a
+  separate SSH/listener issue rather than a Kaneo blocker.
+
+## Operational incident: unsafe manual SSH probes and fail2ban
+
+### What happened
+
+- After the Kaneo deploy verification, manual follow-up probes to `temperance`
+  were run with plain `ssh` / `ssh -o ConnectTimeout=10`, for example:
+  `ssh -p 59222 temperance@89.167.107.74 ...`.
+- Those probes did not force public-key-only batch auth. When the raw
+  IP-based invocation did not immediately complete with the expected key path,
+  OpenSSH was allowed to fall back to keyboard-interactive/PAM.
+- `temperance` logs showed repeated `Failed keyboard-interactive/pam` attempts,
+  an exceeded `LoginGraceTime`, and fail2ban blocked the client IP. The
+  observed `Connection refused` was therefore ban/firewall fallout, not proof
+  that sshd or deployment had failed.
+
+### Rule for future agents
+
+- Do not run ad-hoc deployment SSH probes without the safe public-key-only
+  options from the common commands section.
+- Prefer the configured host alias when it selects the intended identity. If
+  using a raw hostname/IP, include `BatchMode=yes`, disable password and
+  keyboard-interactive auth, and set `NumberOfPasswordPrompts=0`.
+- If a probe returns `Connection refused` after earlier authentication
+  failures, check for fail2ban/firewall bans before concluding that sshd is
+  down.

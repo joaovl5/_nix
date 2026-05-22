@@ -4,29 +4,13 @@ let
     unflake_indirect_nixpkgs = builtins.getFlake "flake:nixpkgs";
   };
   specs = rec {
-    unflake_github_asciimoo_hister_rev_43f0f83b8e95db093750b01bcf67339ed836610c = {
-      type = "github";
-      owner = "asciimoo";
-      repo = "hister";
-      rev = "43f0f83b8e95db093750b01bcf67339ed836610c";
-      lastModified = 1779291833;
-      narHash = "sha256-6ikVTpBynzZZVK3lK/qbabFdx3tOcpDdt3F5723j0Og=";
-    };
-    unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2 = {
-      type = "github";
-      owner = "blue-berry";
-      repo = "janet-lsp.nix";
-      rev = "b8334a469d38f191198a20a75a6c470c2ea588d2";
-      lastModified = 1757504214;
-      narHash = "sha256-XcIUAmfzBNcsln/XZu9dZoTCTyxoCjNeg//6IK35INs=";
-    };
     unflake_github_cachix_nix_ref_devenv-2-34 = {
       type = "github";
       owner = "cachix";
       repo = "nix";
-      rev = "42d4b7de21c15f28c568410f4383fa06a8458a40";
-      lastModified = 1776511668;
-      narHash = "sha256-g2KEBuHpc3a56c+jPcg0+w6LSuIj6f+zzdztLCOyIhc=";
+      rev = "b58ad8fb752809db919ae865c6b2aa3be7d55e1f";
+      lastModified = 1779391158;
+      narHash = "sha256-NUKwtyaooPLJPBOdg0piBgR6NIzY/n2W45+qkYdh+h8=";
     };
     unflake_github_cachix_cachix_ref_latest = {
       type = "github";
@@ -48,9 +32,9 @@ let
       type = "github";
       owner = "cachix";
       repo = "devenv";
-      rev = "1568eead6164e2b51e6917dfae8a121cbb3efafc";
-      lastModified = 1779291552;
-      narHash = "sha256-T7s59XNMflXd7SSOlv4UUUyoDWoJrLwavMtjmlmmO0w=";
+      rev = "a904b9b62d53399bb1c01b3ccf25255b59641b65";
+      lastModified = 1779391247;
+      narHash = "sha256-esZvb5j2bjfBBYjj6OPi4mGLfFuQ5uguBCLI1S0u40E=";
     };
     unflake_github_cachix_git-hooks-nix = {
       type = "github";
@@ -68,22 +52,6 @@ let
       lastModified = 1778507602;
       narHash = "sha256-kTwur1wV+01SdqskVMSo6JMEpg71ps3HpbFY2GsflKs=";
     };
-    unflake_github_dj95_zjstatus_rev_f7f58bd3cb30352a8da85926636b8ec41770098a = {
-      type = "github";
-      owner = "dj95";
-      repo = "zjstatus";
-      rev = "f7f58bd3cb30352a8da85926636b8ec41770098a";
-      lastModified = 1776491188;
-      narHash = "sha256-sjMs63OaRhwCrl46v1A+K2EJdqnw63Pc7BMnHqiU790=";
-    };
-    unflake_github_flameflag_nixcord_rev_658b4cfe1aa535a7a9a483503aaefcca87ec8aea = {
-      type = "github";
-      owner = "flameflag";
-      repo = "nixcord";
-      rev = "658b4cfe1aa535a7a9a483503aaefcca87ec8aea";
-      lastModified = 1779292128;
-      narHash = "sha256-8ynxFmZsbIMMOyH1BYsQeQ79rp2LH8FF129pZyInooY=";
-    };
     unflake_github_ghostty-org_ghostty = {
       type = "github";
       owner = "ghostty-org";
@@ -91,14 +59,6 @@ let
       rev = "46d54ed673a004df09078bee56e809421a82370e";
       lastModified = 1779295097;
       narHash = "sha256-A9ylCu+v45kXFxC0jO7N4bLo7sraDoeV0r9mYvqaH8I=";
-    };
-    unflake_github_gytis-ivaskevicius_flake-utils-plus_rev_afcb15b845e74ac5e998358709b2b5fe42a948d1 = {
-      type = "github";
-      owner = "gytis-ivaskevicius";
-      repo = "flake-utils-plus";
-      rev = "afcb15b845e74ac5e998358709b2b5fe42a948d1";
-      lastModified = 1738591040;
-      narHash = "sha256-4WNeriUToshQ/L5J+dTSWC5OJIwT39SEP7V7oylndi8=";
     };
     unflake_github_hercules-ci_flake-parts = {
       type = "github";
@@ -124,14 +84,6 @@ let
       lastModified = 1779130139;
       narHash = "sha256-BLrtr42azquO7MdGFU5a7KiMl3YpFlTeIXqy1fT5GlQ=";
     };
-    unflake_github_janik-haag_nixos-dns_rev_4fd527b1bb92cff2f80b3297ae68588dbe772c49 = {
-      type = "github";
-      owner = "janik-haag";
-      repo = "nixos-dns";
-      rev = "4fd527b1bb92cff2f80b3297ae68588dbe772c49";
-      lastModified = 1778345684;
-      narHash = "sha256-Q+s91/rtWoE3DIFf5EfNnsDplFia5sgfb/Q+CPsSy1Y=";
-    };
     unflake_github_jeslie0_npm-lockfile-fix = {
       type = "github";
       owner = "jeslie0";
@@ -140,14 +92,6 @@ let
       lastModified = 1775903712;
       narHash = "sha256-2GV79U6iVH4gKAPWYrxUReB0S41ty/Y3dBLquU8AlaA=";
     };
-    unflake_github_joaovl5_whisper-overlay_rev_fbf0501b6a2dab1f9aa408f4b11624f58debb5da = {
-      type = "github";
-      owner = "joaovl5";
-      repo = "whisper-overlay";
-      rev = "fbf0501b6a2dab1f9aa408f4b11624f58debb5da";
-      lastModified = 1777261856;
-      narHash = "sha256-9Y3DiVQnlZr89bLb3AGgK0osaOyEGVUe69uo5FayXoA=";
-    };
     unflake_github_maroka-chan_vpn-confinement = {
       type = "github";
       owner = "maroka-chan";
@@ -155,30 +99,6 @@ let
       rev = "cf5bfc4c3559f2e783698b1aa23c165072039a7d";
       lastModified = 1778182451;
       narHash = "sha256-Bz3n2THDGf90Z9gMqhH/J492prYH8B6RFRlxv/fPBwc=";
-    };
-    unflake_github_mic92_sops-nix_rev_c591bf665727040c6cc5cb409079acb22dcce33c = {
-      type = "github";
-      owner = "mic92";
-      repo = "sops-nix";
-      rev = "c591bf665727040c6cc5cb409079acb22dcce33c";
-      lastModified = 1777944972;
-      narHash = "sha256-VfGRo1qTBKOe3s2gOv8LSoA6Fk19PvBlwQ1ECN0Evn8=";
-    };
-    unflake_github_microvm-nix_microvm-nix_rev_77024c22f4ddf509137fc732094888d1ffe631e2 = {
-      type = "github";
-      owner = "microvm-nix";
-      repo = "microvm.nix";
-      rev = "77024c22f4ddf509137fc732094888d1ffe631e2";
-      lastModified = 1779043402;
-      narHash = "sha256-1dH6yiwEck1n3oz5TDUV5TGbwNqu46eNTVHbhFO2U5k=";
-    };
-    unflake_github_musnix_musnix_rev_8548782f0d1d0928daa3fffde8a008f72219a3f3 = {
-      type = "github";
-      owner = "musnix";
-      repo = "musnix";
-      rev = "8548782f0d1d0928daa3fffde8a008f72219a3f3";
-      lastModified = 1777848538;
-      narHash = "sha256-Dj51C0NWsglqRrCpdmMr2nFiYacFOid1Tor4H9yG2HY=";
     };
     unflake_github_nix-community_bun2nix = {
       type = "github";
@@ -196,45 +116,13 @@ let
       lastModified = 1774369503;
       narHash = "sha256-YeCF4iBhlvTqkn4mihjZgixnDcEVgfyQlNeBsbLYUgQ=";
     };
-    unflake_github_nix-community_disko_rev_65fb947964bd44fc0008faf77d1fcb7a9f40bb32 = {
-      type = "github";
-      owner = "nix-community";
-      repo = "disko";
-      rev = "65fb947964bd44fc0008faf77d1fcb7a9f40bb32";
-      lastModified = 1779226674;
-      narHash = "sha256-wuOkjI6pRiN4sEn/EPBRnNW5cmcpvd7xtIM8y5LooAs=";
-    };
-    unflake_github_nix-community_emacs-overlay_rev_5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe = {
-      type = "github";
-      owner = "nix-community";
-      repo = "emacs-overlay";
-      rev = "5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe";
-      lastModified = 1779250628;
-      narHash = "sha256-QrHi1w+g7p58wMxcK9jOXr3oi2PRWQ+i4Sw38sL3dB4=";
-    };
-    unflake_github_nix-community_fenix_rev_848395a91def85c11694587636151d89555f1ddb = {
-      type = "github";
-      owner = "nix-community";
-      repo = "fenix";
-      rev = "848395a91def85c11694587636151d89555f1ddb";
-      lastModified = 1779270500;
-      narHash = "sha256-r60KTphdevmdIDz1iJ529HvcpOq082ZZ1OnN3jDnrqk=";
-    };
-    unflake_github_nix-community_home-manager_rev_bd868f769a69d3b6091a1da68a75cb83a181033c = {
-      type = "github";
-      owner = "nix-community";
-      repo = "home-manager";
-      rev = "bd868f769a69d3b6091a1da68a75cb83a181033c";
-      lastModified = 1779213149;
-      narHash = "sha256-Cf+p/T4Z3n9Sw0TiR3kQaIwQI+/hfvLJcoTzeq6yS3E=";
-    };
     unflake_github_nix-community_nixd = {
       type = "github";
       owner = "nix-community";
       repo = "nixd";
-      rev = "2953bad8f6f8f9e9776cda74a0979f45bab03d27";
-      lastModified = 1779254112;
-      narHash = "sha256-0qFZD6Ii1Em8WtQqW4/OdEEFKY45hh2u3qfIOhTzHSs=";
+      rev = "8f09666d08ff84163881545939668d2409f79bfa";
+      lastModified = 1779328436;
+      narHash = "sha256-bRzpb6egVgT4BQS8IsRwR9t8jwwkA3CsXkoYOU2osBk=";
     };
     unflake_github_nix-community_nixpkgs-lib = {
       type = "github";
@@ -244,14 +132,6 @@ let
       lastModified = 1778984393;
       narHash = "sha256-r755Kh5Q0XBTPNuv9rL2rsUJTq8BDhb+lIwRWhl6yYA=";
     };
-    unflake_github_nix-community_nur_rev_4a2b594dd378d794372ebd7d622a984dac29bda3 = {
-      type = "github";
-      owner = "nix-community";
-      repo = "nur";
-      rev = "4a2b594dd378d794372ebd7d622a984dac29bda3";
-      lastModified = 1779283311;
-      narHash = "sha256-/LW1h4rLmdTzq6L80BQIRzyCa4Ax2Ws9R/xTWgjWXog=";
-    };
     unflake_github_nix-community_pyproject-nix = {
       type = "github";
       owner = "nix-community";
@@ -259,22 +139,6 @@ let
       rev = "a228447c3e179d477c1b6246ef3efa8cfe3c469a";
       lastModified = 1778901413;
       narHash = "sha256-GSKXTAnFqRAMlZkJrIPcQMYf+lpMr66K3i60mB9STvc=";
-    };
-    unflake_github_nix-media-server_nixarr_rev_3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43 = {
-      type = "github";
-      owner = "nix-media-server";
-      repo = "nixarr";
-      rev = "3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43";
-      lastModified = 1778908661;
-      narHash = "sha256-eeRN0ew1VfutaVNxoaYvua7CHoqc7gI5vLPxUL5ko7k=";
-    };
-    unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e = {
-      type = "github";
-      owner = "nix-systems";
-      repo = "default";
-      rev = "da67096a3b9bf56a91d16901293e51ba5b49a27e";
-      lastModified = 1681028828;
-      narHash = "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=";
     };
     unflake_github_nix-systems_default = {
       type = "github";
@@ -304,9 +168,9 @@ let
       type = "github";
       owner = "nixos";
       repo = "nixpkgs";
-      rev = "d233902339c02a9c334e7e593de68855ad26c4cb";
-      lastModified = 1778869304;
-      narHash = "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=";
+      rev = "d99b013d5d1931ad77fe3912ed218170dec5d9a4";
+      lastModified = 1779259093;
+      narHash = "sha256-7DKWmH23hL2eYdkxCKeqj2i+yljTKuU+3Nk1UPHOnxc=";
     };
     unflake_github_nixos_nixpkgs_rev_215d4d0fd80ca5163643b03a33fde804a29cc1e2 = {
       type = "github";
@@ -316,22 +180,6 @@ let
       lastModified = 1643052045;
       narHash = "sha256-uGJ0VXIhWKGXxkeNnq4TvV3CIOkUJ3PAoLZ3HMzNVMw=";
     };
-    unflake_github_nixos_nixpkgs_rev_687f05a9184cad4eaf905c48b63649e3a86f5433 = {
-      type = "github";
-      owner = "nixos";
-      repo = "nixpkgs";
-      rev = "687f05a9184cad4eaf905c48b63649e3a86f5433";
-      lastModified = 1779102034;
-      narHash = "sha256-vZJZjLo513IeI8hjzHFc6TDezUd4uCE2Eq4SNO3DNNg=";
-    };
-    unflake_github_nixos_nixpkgs_rev_8e72e9888e67ce593df16546cd31e0d75544ad0d = {
-      type = "github";
-      owner = "nixos";
-      repo = "nixpkgs";
-      rev = "8e72e9888e67ce593df16546cd31e0d75544ad0d";
-      lastModified = 1779273561;
-      narHash = "sha256-O3UFKrh5oDyOwqD4Njdf7+SIxptOl3gHZyesYvNsIbw=";
-    };
     unflake_github_nixos_nixpkgs_rev_a62e6edd6d5e1fa0329b8653c801147986f8d446 = {
       type = "github";
       owner = "nixos";
@@ -339,14 +187,6 @@ let
       rev = "a62e6edd6d5e1fa0329b8653c801147986f8d446";
       lastModified = 1717159533;
       narHash = "sha256-oamiKNfr2MS6yH64rUn99mIZjc45nGJlj9eGth/3Xuw=";
-    };
-    unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb = {
-      type = "github";
-      owner = "nixos";
-      repo = "nixpkgs";
-      rev = "d233902339c02a9c334e7e593de68855ad26c4cb";
-      lastModified = 1778869304;
-      narHash = "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=";
     };
     unflake_github_numtide_blueprint = {
       type = "github";
@@ -372,14 +212,6 @@ let
       lastModified = 1731533236;
       narHash = "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=";
     };
-    unflake_github_numtide_llm-agents-nix_rev_3c69691d60d50f87cc0d5f6222992b63c90b010d = {
-      type = "github";
-      owner = "numtide";
-      repo = "llm-agents.nix";
-      rev = "3c69691d60d50f87cc0d5f6222992b63c90b010d";
-      lastModified = 1779257624;
-      narHash = "sha256-pXnXgFvoFQKt4gDnOx0OjKSsv0T51QmN5thbzWf9WX0=";
-    };
     unflake_github_numtide_treefmt-nix = {
       type = "github";
       owner = "numtide";
@@ -388,29 +220,13 @@ let
       lastModified = 1775636079;
       narHash = "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0=";
     };
-    unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7 = {
-      type = "github";
-      owner = "obra";
-      repo = "superpowers";
-      rev = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7";
-      lastModified = 1777932301;
-      narHash = "sha256-3E3rO6hR87JUfS3XV1Eaoz6SDWOftleWvN9UPNFEMjw=";
-    };
     unflake_github_oxalica_rust-overlay = {
       type = "github";
       owner = "oxalica";
       repo = "rust-overlay";
-      rev = "86dbfb70dc1c2967245d87ed6d07d2c8bda305e3";
-      lastModified = 1779247103;
-      narHash = "sha256-DwltBoBl9a7fCzlKi3xnNha1NHbfvawwkNdnTXEyfFQ=";
-    };
-    unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a = {
-      type = "github";
-      owner = "postsolar";
-      repo = "tree-sitter-kanata";
-      rev = "af53b4c35d6faa3b4ba7c317fb795a6eb679b42a";
-      lastModified = 1758479938;
-      narHash = "sha256-+7EiIkcSe4raApw1H1iQJC2aILLdSrM7Y3tAswbCO1o=";
+      rev = "672fa5fc5608d5cd82286a6f69aaf84a40b4fe41";
+      lastModified = 1779333539;
+      narHash = "sha256-lpmN2lrBDZDPjov2cbD3bOOJsI0fkKolKXasYPCqSys=";
     };
     unflake_github_pyproject-nix_build-system-pkgs = {
       type = "github";
@@ -444,14 +260,6 @@ let
       lastModified = 1771957511;
       narHash = "sha256-MxpsyVQguwmeN40gblvcYLtL4xiriGYB6UyP+JergpQ=";
     };
-    unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be = {
-      type = "github";
-      owner = "roosnic1";
-      repo = "octodns-pihole";
-      rev = "566a863bc67e18ced24906e7838fa6cff0f471be";
-      lastModified = 1770915826;
-      narHash = "sha256-6pUanEEezAIfNtQB7ia0FThzMv99iI84oTtHOmcIxSE=";
-    };
     unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e = {
       type = "github";
       owner = "rossng";
@@ -460,77 +268,230 @@ let
       lastModified = 1772186516;
       narHash = "sha256-8s28pzmQ6TOIUzznwFibtW1CMieMUl1rYJIxoQYor58=";
     };
-    unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64 = {
-      type = "github";
-      owner = "sbarbett";
-      repo = "pihole6api";
-      rev = "e87c651ce0e084bc5f15c529d6103c524ee98d64";
-      lastModified = 1766505417;
-      narHash = "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/degoog.git";
+      ref = "0.18.0";
+      rev = "781545eb198a9698484cd358ae9359a0dabee0e3";
+      shallow = true;
+      lastModified = 1779220217;
+      narHash = "sha256-aY5srxyBhcjNWZjilrcr3NrZmyn7cvJZNPAumbBTzp0=";
     };
-    unflake_github_serokell_deploy-rs_rev_77c906c0ba56aabdbc72041bf9111b565cdd6171 = {
-      type = "github";
-      owner = "serokell";
-      repo = "deploy-rs";
-      rev = "77c906c0ba56aabdbc72041bf9111b565cdd6171";
-      lastModified = 1770019181;
-      narHash = "sha256-hwsYgDnby50JNVpTRYlF3UR/Rrpt01OrxVuryF40CFY=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-NUR-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/NUR.git";
+      ref = "main";
+      rev = "0eb289ecf974255757de0c80d04ce2685a36fb14";
+      shallow = true;
+      lastModified = 1779391762;
+      narHash = "sha256-aAkn8CS7VMVXdi+MrUDblyVNzykQys/1RWbfVwdyMZ0=";
     };
-    unflake_github_sodiboo_niri-flake_rev_f4027707431220ffb660ae0da0e03fd5229ab4d9 = {
-      type = "github";
-      owner = "sodiboo";
-      repo = "niri-flake";
-      rev = "f4027707431220ffb660ae0da0e03fd5229ab4d9";
-      lastModified = 1779213531;
-      narHash = "sha256-B4pOfIX6CpCD/cKckwNP3DYDxEUBG1x/K3vqwYNonx4=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/default.git";
+      ref = "main";
+      rev = "da67096a3b9bf56a91d16901293e51ba5b49a27e";
+      shallow = true;
+      lastModified = 1681028828;
+      narHash = "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=";
     };
-    unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4 = {
-      type = "github";
-      owner = "sogaiu";
-      repo = "jandent";
-      rev = "1943b1b9d8862f52f68ba63350f40a122b291eb4";
-      lastModified = 1775279411;
-      narHash = "sha256-E1AtLmkMwkcYTO9zJNlbkl7muIM9F5a9Y9gr1HmxJZo=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-fenix-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/fenix.git";
+      ref = "main";
+      rev = "a6ebca03f87958a09065959897223790014cdcac";
+      shallow = true;
+      lastModified = 1779357702;
+      narHash = "sha256-QGu9ycXwaaqUzDkP7bcanTjGhuqlUNmjh1jLUPjDHgw=";
     };
-    unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027 = {
-      type = "github";
-      owner = "supreeeme";
-      repo = "xwayland-satellite";
-      rev = "a879e5e0896a326adc79c474bf457b8b99011027";
-      lastModified = 1773622265;
-      narHash = "sha256-wToKwH7IgWdGLMSIWksEDs4eumR6UbbsuPQ42r0oTXQ=";
-    };
-    unflake_github_thatotherandrew_hexecute_rev_df00365964ed2f7144f364ee1bdbefec81334583 = {
-      type = "github";
-      owner = "thatotherandrew";
-      repo = "hexecute";
-      rev = "df00365964ed2f7144f364ee1bdbefec81334583";
-      lastModified = 1778089142;
-      narHash = "sha256-hiLMu/3QznCgKcfhS1E4JzbIe3XP2/c90eWssum3qhE=";
-    };
-    unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4 = {
-      type = "github";
-      owner = "usekaneo";
-      repo = "kaneo";
-      rev = "0f39464f5873d0525dd29f533898ecc323431ed4";
-      lastModified = 1779132347;
-      narHash = "sha256-MRXMFRVQjXXidfGbPZxIu9q4doMah1FdMgiBZozDfCs=";
-    };
-    unflake_github_vic_flake-file = {
-      type = "github";
-      owner = "vic";
-      repo = "flake-file";
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-file-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/flake-file.git";
+      ref = "main";
       rev = "c58eb27d9434e5be0c8693f1eb18d47035bc21ba";
+      shallow = true;
       lastModified = 1779051720;
       narHash = "sha256-+jbXnODsR19pFKB0x/6kHhFgW6yV6N+CGClFr45eDU8=";
     };
-    unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f = {
-      type = "github";
-      owner = "yalter";
-      repo = "niri";
-      rev = "cd5ac3e5e04bb5a11276d3c755fa25242818e05f";
-      lastModified = 1778858756;
-      narHash = "sha256-9VvAHNoi2wd0fxLfJOPChZMS7l6rhCtAJmpd59Hv5rw=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-hexecute-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/hexecute.git";
+      ref = "main";
+      rev = "df00365964ed2f7144f364ee1bdbefec81334583";
+      shallow = true;
+      lastModified = 1778089142;
+      narHash = "sha256-hiLMu/3QznCgKcfhS1E4JzbIe3XP2/c90eWssum3qhE=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/kaneo.git";
+      ref = "main";
+      rev = "0f39464f5873d0525dd29f533898ecc323431ed4";
+      shallow = true;
+      lastModified = 1779132347;
+      narHash = "sha256-MRXMFRVQjXXidfGbPZxIu9q4doMah1FdMgiBZozDfCs=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-llm-agents-nix-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/llm-agents.nix.git";
+      ref = "main";
+      rev = "a98bde078e61857e16a41e88587ea4e2a422c354";
+      shallow = true;
+      lastModified = 1779392924;
+      narHash = "sha256-Vj8VxtRg89gwA2ThsxZjj9VJCQlHBIdTdvIcLTgWjGc=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-microvm-nix-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/microvm.nix.git";
+      ref = "main";
+      rev = "9755fd345bd64d1c75ba12b63089c926dd5d886e";
+      shallow = true;
+      lastModified = 1779300350;
+      narHash = "sha256-slQySSmaIewOxdZXF0/g0GSiVg7vJy209Yjs7fDNms8=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/niri-flake.git";
+      ref = "main";
+      rev = "f539bec9083f42a406db82e3d974162281e69d12";
+      shallow = true;
+      lastModified = 1779378331;
+      narHash = "sha256-A8MBNRY+FDLVJ64HWjrcdbtahlAey3fvca/hu9q07yA=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/nixarr.git";
+      ref = "main";
+      rev = "3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43";
+      shallow = true;
+      lastModified = 1778908661;
+      narHash = "sha256-eeRN0ew1VfutaVNxoaYvua7CHoqc7gI5vLPxUL5ko7k=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/nixcord.git";
+      ref = "main";
+      rev = "71aabc1e979259508aca5c24696c75fcb27528b9";
+      shallow = true;
+      lastModified = 1779383854;
+      narHash = "sha256-tIeKJnd7Gb7yMxyrZ+q5szbgoegzaTDWzLbZokMifJg=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixos-dns-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/nixos-dns.git";
+      ref = "main";
+      rev = "4fd527b1bb92cff2f80b3297ae68588dbe772c49";
+      shallow = true;
+      lastModified = 1778345684;
+      narHash = "sha256-Q+s91/rtWoE3DIFf5EfNnsDplFia5sgfb/Q+CPsSy1Y=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/octodns-pihole.git";
+      ref = "main";
+      rev = "566a863bc67e18ced24906e7838fa6cff0f471be";
+      shallow = true;
+      lastModified = 1770915826;
+      narHash = "sha256-6pUanEEezAIfNtQB7ia0FThzMv99iI84oTtHOmcIxSE=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/pihole6api.git";
+      ref = "main";
+      rev = "e87c651ce0e084bc5f15c529d6103c524ee98d64";
+      shallow = true;
+      lastModified = 1766505417;
+      narHash = "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/superpowers.git";
+      ref = "main";
+      rev = "f9b088f7b3a6fe9d9a9a98e392ad13c9d47053a4";
+      shallow = true;
+      lastModified = 1776201211;
+      narHash = "sha256-Nbfzvd7h7KrO9OW7W3DdUgDkQW11xSfZylFXLWJ8J5I=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-treefmt-nix-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/treefmt-nix.git";
+      ref = "main";
+      rev = "790751ff7fd3801feeaf96d7dc416a8d581265ba";
+      shallow = true;
+      lastModified = 1775636079;
+      narHash = "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-zjstatus-git_ref_main_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/zjstatus.git";
+      ref = "main";
+      rev = "f7f58bd3cb30352a8da85926636b8ec41770098a";
+      shallow = true;
+      lastModified = 1776491188;
+      narHash = "sha256-sjMs63OaRhwCrl46v1A+K2EJdqnw63Pc7BMnHqiU790=";
+    };
+    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main = {
+      type = "git";
+      url = "https://git.sr.ht/~micampe/fennel-ls-nvim-docs";
+      ref = "main";
+      rev = "a072d3f5d2dd98cf0411cd16446a0f3c96ee7938";
+      revCount = 27;
+      lastModified = 1777640939;
+      narHash = "sha256-DpLNcaH3JRrXO8Ds0ZlzoBQFSaOD8xK5+iYZSICBqao=";
+    };
+    unflake_git_https---git-sr-ht--watersucks-optnix_ref_main = {
+      type = "git";
+      url = "https://git.sr.ht/~watersucks/optnix";
+      ref = "main";
+      rev = "c320dc5494c0caaca9ee4341367618c06a957709";
+      revCount = 125;
+      lastModified = 1776468647;
+      narHash = "sha256-zx5O1RyRl6Fq+mvMh+JdS18aXR8644bcN9MKh2fN19M=";
+    };
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main = {
+      type = "git";
+      url = "https://github.com/Supreeeme/xwayland-satellite.git";
+      ref = "main";
+      rev = "a879e5e0896a326adc79c474bf457b8b99011027";
+      revCount = 242;
+      lastModified = 1773622265;
+      narHash = "sha256-wToKwH7IgWdGLMSIWksEDs4eumR6UbbsuPQ42r0oTXQ=";
+    };
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_main = {
+      type = "git";
+      url = "https://github.com/YaLTeR/niri.git";
+      ref = "main";
+      rev = "4294948cf1c70c50e938383c2c865d7ca455ac7e";
+      revCount = 2795;
+      lastModified = 1779374863;
+      narHash = "sha256-qKWgJ2MUODpg+b8tOwWMdMKREvs8TdGBz63SHaQZCeA=";
+    };
+    unflake_git_https---github-com-joaovl5-whisper-overlay-git_ref_main = {
+      type = "git";
+      url = "https://github.com/joaovl5/whisper-overlay.git";
+      ref = "main";
+      rev = "fbf0501b6a2dab1f9aa408f4b11624f58debb5da";
+      revCount = 37;
+      lastModified = 1777261856;
+      narHash = "sha256-9Y3DiVQnlZr89bLb3AGgK0osaOyEGVUe69uo5FayXoA=";
+    };
+    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_ref_main = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/lav/hermes-agent.git";
+      ref = "main";
+      rev = "db84a78e618bf973ffc403ed2e1f8162f2591daa";
+      revCount = 8389;
+      lastModified = 1778846642;
+      narHash = "sha256-wJoPWAInmXL5Lu0wLL3eaqdddqFOHP+92NZI7zgSAwI=";
+    };
+    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/lav/sane_fnlfmt.git";
+      ref = "main";
+      rev = "87b02d05d870c66730f9dd39f3af26a1b46f1172";
+      revCount = 137;
+      lastModified = 1778866012;
+      narHash = "sha256-BTHttm/PmXdA/Lvg5io90ucqi73GFeIdEBnXHam+0wI=";
     };
     unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main = {
       type = "git";
@@ -541,128 +502,211 @@ let
       lastModified = 1778145955;
       narHash = "sha256-oWbe+HdIxvyNfrHUHKrh3aIOgMW0fjn6Ez+lMf7It3U=";
     };
-    unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow = {
       type = "git";
-      url = "https://github.com/rust-lang/rust-analyzer.git";
-      ref = "nightly";
-      rev = "f4bd646a7867c7814770168e0d4b9bd3418c1066";
-      revCount = 39993;
-      lastModified = 1779221047;
-      narHash = "sha256-HkOWI9C4kxA6xkS9GXhe4hAAme7ekOWje3b1U7rLSIo=";
+      url = "ssh://git@git.trll.ing/mirrors/deploy-rs.git";
+      ref = "master";
+      rev = "77c906c0ba56aabdbc72041bf9111b565cdd6171";
+      shallow = true;
+      lastModified = 1770019181;
+      narHash = "sha256-hwsYgDnby50JNVpTRYlF3UR/Rrpt01OrxVuryF40CFY=";
     };
-    unflake_git_ssh---git-github-com-numtide-treefmt-nix-git_rev_790751ff7fd3801feeaf96d7dc416a8d581265ba = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-disko-git_ref_master_shallow = {
       type = "git";
-      url = "ssh://git@github.com/numtide/treefmt-nix.git";
-      rev = "790751ff7fd3801feeaf96d7dc416a8d581265ba";
-      revCount = 549;
-      lastModified = 1775636079;
-      narHash = "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0=";
+      url = "ssh://git@git.trll.ing/mirrors/disko.git";
+      ref = "master";
+      rev = "65fb947964bd44fc0008faf77d1fcb7a9f40bb32";
+      shallow = true;
+      lastModified = 1779226674;
+      narHash = "sha256-wuOkjI6pRiN4sEn/EPBRnNW5cmcpvd7xtIM8y5LooAs=";
     };
-    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-emacs-overlay-git_ref_master_shallow = {
       type = "git";
-      url = "ssh://git@git.trll.ing/lav/sane_fnlfmt.git";
-      rev = "87b02d05d870c66730f9dd39f3af26a1b46f1172";
-      revCount = 137;
-      lastModified = 1778866012;
-      narHash = "sha256-BTHttm/PmXdA/Lvg5io90ucqi73GFeIdEBnXHam+0wI=";
+      url = "ssh://git@git.trll.ing/mirrors/emacs-overlay.git";
+      ref = "master";
+      rev = "c0ee65d473ebdd79e27ae32636054ea89ec990a8";
+      shallow = true;
+      lastModified = 1779389208;
+      narHash = "sha256-nTvPl9e2jnBNsiuQ0I5wq1VOpvVQcJuIynLMssO0LtQ=";
     };
-    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-utils-plus-git_ref_master_shallow = {
       type = "git";
-      url = "https://git.sr.ht/~micampe/fennel-ls-nvim-docs";
-      rev = "a072d3f5d2dd98cf0411cd16446a0f3c96ee7938";
-      revCount = 27;
-      lastModified = 1777640939;
-      narHash = "sha256-DpLNcaH3JRrXO8Ds0ZlzoBQFSaOD8xK5+iYZSICBqao=";
+      url = "ssh://git@git.trll.ing/mirrors/flake-utils-plus.git";
+      ref = "master";
+      rev = "afcb15b845e74ac5e998358709b2b5fe42a948d1";
+      shallow = true;
+      lastModified = 1738591040;
+      narHash = "sha256-4WNeriUToshQ/L5J+dTSWC5OJIwT39SEP7V7oylndi8=";
     };
-    unflake_git_ssh---git-git-trll-ing-lav-jcode_rev_a8c772ca7b0a8085a5bc9eddba6561fb78e50b45 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-hister-git_ref_master_shallow = {
       type = "git";
-      url = "ssh://git@git.trll.ing/lav/jcode";
-      rev = "a8c772ca7b0a8085a5bc9eddba6561fb78e50b45";
-      revCount = 3127;
-      lastModified = 1778236702;
-      narHash = "sha256-Y57eDjJSW+9t4SwZ01pK2Naaw8IqrfU4c63pYFObAsI=";
+      url = "ssh://git@git.trll.ing/mirrors/hister.git";
+      ref = "master";
+      rev = "0f9d4f022dd1938fa1b0b410ee24d121481b8f0f";
+      shallow = true;
+      lastModified = 1779388920;
+      narHash = "sha256-6+laKzygw0FLDfYRv681nvFfTv7l3J496MBgVmEP52o=";
     };
-    unflake_git_https---git-sr-ht--watersucks-optnix_rev_c320dc5494c0caaca9ee4341367618c06a957709 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-home-manager-git_ref_master_shallow = {
       type = "git";
-      url = "https://git.sr.ht/~watersucks/optnix";
-      rev = "c320dc5494c0caaca9ee4341367618c06a957709";
-      revCount = 125;
-      lastModified = 1776468647;
-      narHash = "sha256-zx5O1RyRl6Fq+mvMh+JdS18aXR8644bcN9MKh2fN19M=";
+      url = "ssh://git@git.trll.ing/mirrors/home-manager.git";
+      ref = "master";
+      rev = "928d72376949e222ea4f07b44828a55b0136422e";
+      shallow = true;
+      lastModified = 1779336838;
+      narHash = "sha256-n1+l78hJRABp4cQHKeD0BVByT0vZLPqd09Tvoq8Q+d8=";
     };
-    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_rev_db84a78e618bf973ffc403ed2e1f8162f2591daa = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow = {
       type = "git";
-      url = "ssh://git@git.trll.ing/lav/hermes-agent.git";
-      rev = "db84a78e618bf973ffc403ed2e1f8162f2591daa";
-      revCount = 8389;
-      lastModified = 1778846642;
-      narHash = "sha256-wJoPWAInmXL5Lu0wLL3eaqdddqFOHP+92NZI7zgSAwI=";
+      url = "ssh://git@git.trll.ing/mirrors/musnix.git";
+      ref = "master";
+      rev = "8548782f0d1d0928daa3fffde8a008f72219a3f3";
+      shallow = true;
+      lastModified = 1777848538;
+      narHash = "sha256-Dj51C0NWsglqRrCpdmMr2nFiYacFOid1Tor4H9yG2HY=";
     };
-    unflake_git_https---github-com-stoeffel-nix-test-runner-git = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-sops-nix-git_ref_master_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/sops-nix.git";
+      ref = "master";
+      rev = "c591bf665727040c6cc5cb409079acb22dcce33c";
+      shallow = true;
+      lastModified = 1777944972;
+      narHash = "sha256-VfGRo1qTBKOe3s2gOv8LSoA6Fk19PvBlwQ1ECN0Evn8=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/tree-sitter-kanata.git";
+      ref = "master";
+      rev = "af53b4c35d6faa3b4ba7c317fb795a6eb679b42a";
+      shallow = true;
+      lastModified = 1758479938;
+      narHash = "sha256-+7EiIkcSe4raApw1H1iQJC2aILLdSrM7Y3tAswbCO1o=";
+    };
+    unflake_git_https---github-com-edolstra-flake-compat-git_ref_master = {
+      type = "git";
+      url = "https://github.com/edolstra/flake-compat.git";
+      ref = "master";
+      rev = "5edf11c44bc78a0d334f6334cdaf7d60d732daab";
+      revCount = 91;
+      lastModified = 1767039857;
+      narHash = "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=";
+    };
+    unflake_git_https---github-com-nixos-flake-compat-git_ref_master = {
+      type = "git";
+      url = "https://github.com/nixos/flake-compat.git";
+      ref = "master";
+      rev = "5edf11c44bc78a0d334f6334cdaf7d60d732daab";
+      revCount = 91;
+      lastModified = 1767039857;
+      narHash = "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=";
+    };
+    unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master = {
       type = "git";
       url = "https://github.com/stoeffel/nix-test-runner.git";
+      ref = "master";
       rev = "c45d45b11ecef3eb9d834c3b6304c05c49b06ca2";
       revCount = 59;
       lastModified = 1588761593;
       narHash = "sha256-FKJykltAN/g3eIceJl4SfDnnyuH2jHImhMrXS2KvGIs=";
     };
-    unflake_git_https---spectrum-os-org-git-spectrum = {
+    unflake_git_ssh---git-git-trll-ing-lav-jcode_ref_master = {
       type = "git";
-      url = "https://spectrum-os.org/git/spectrum";
-      rev = "5b3151fd08d1f1e3e166a328449fe6fe5092f316";
-      revCount = 1267;
-      lastModified = 1779087335;
-      narHash = "sha256-UWAP7gwfK131SH/GqurZ5jc2Q/Tkgaa8OC3NR8wcnww=";
+      url = "ssh://git@git.trll.ing/lav/jcode";
+      ref = "master";
+      rev = "a8c772ca7b0a8085a5bc9eddba6561fb78e50b45";
+      revCount = 3127;
+      lastModified = 1778236702;
+      narHash = "sha256-Y57eDjJSW+9t4SwZ01pK2Naaw8IqrfU4c63pYFObAsI=";
     };
-    unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz = {
-      type = "tarball";
-      url = "https://api.flakehub.com/f/pinned/edolstra/flake-compat/1.1.0/01948eb7-9cba-704f-bbf3-3fa956735b52/source.tar.gz";
-      rev = "ff81ac966bb2cae68946d5ed5fc4994f96d0ffec";
-      revCount = 69;
-      lastModified = 1733328505;
-      narHash = "sha256-NeCCThCEP3eCl2l/+27kNNK7QrwZB1IJCrXfrbv5oqU=";
+    unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly = {
+      type = "git";
+      url = "https://github.com/rust-lang/rust-analyzer.git";
+      ref = "nightly";
+      rev = "7f916ab1b1f669cec017960c2d91a9a87b4b7bae";
+      revCount = 40004;
+      lastModified = 1779303932;
+      narHash = "sha256-alMOllPgosTsuXGjhvQvbGH0ekPOZW0QfGTI0NdJtbQ=";
     };
-    unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/Supreeeme/xwayland-satellite/tarball/refs/tags/v0.7";
-      lastModified = 1755491097;
-      narHash = "sha256-m+9tUfsmBeF2Gn4HWa6vSITZ4Gz1eA1F5Kh62B0N4oE=";
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-25-11 = {
+      type = "git";
+      url = "https://github.com/NixOS/nixpkgs.git";
+      ref = "nixos-25.11";
+      rev = "687f05a9184cad4eaf905c48b63649e3a86f5433";
+      revCount = 912939;
+      lastModified = 1779102034;
+      narHash = "sha256-vZJZjLo513IeI8hjzHFc6TDezUd4uCE2Eq4SNO3DNNg=";
     };
-    unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/YaLTeR/niri/tarball/refs/tags/v25.08";
-      lastModified = 1756556321;
-      narHash = "sha256-RLD89dfjN0RVO86C/Mot0T7aduCygPGaYbog566F0Qo=";
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable = {
+      type = "git";
+      url = "https://github.com/NixOS/nixpkgs.git";
+      ref = "nixos-unstable";
+      rev = "d233902339c02a9c334e7e593de68855ad26c4cb";
+      revCount = 998534;
+      lastModified = 1778869304;
+      narHash = "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=";
     };
-    unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/degoog-org/degoog/tarball/refs/tags/0.18.0";
-      lastModified = 1779220217;
-      narHash = "sha256-aY5srxyBhcjNWZjilrcr3NrZmyn7cvJZNPAumbBTzp0=";
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable-small = {
+      type = "git";
+      url = "https://github.com/NixOS/nixpkgs.git";
+      ref = "nixos-unstable-small";
+      rev = "657e2fa0760e27167cdacb1ec5d84782be312013";
+      revCount = 1002800;
+      lastModified = 1779350018;
+      narHash = "sha256-fHMrI2uuDNdQy0X6vgDdLoAHEMV4phk8OLtNMra7Vyk=";
     };
-    unflake_tarball_https---api-github-com-repos-gmodena-nix-flatpak-tarball-refs-tags-v0-7-0 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/gmodena/nix-flatpak/tarball/refs/tags/v0.7.0";
-      lastModified = 1767983141;
-      narHash = "sha256-7ZCulYUD9RmJIDULTRkGLSW1faMpDlPKcbWJLYHoXcs=";
-    };
-    unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/quietpublish/mardi-gras/tarball/refs/tags/v0.22.0";
-      lastModified = 1779039464;
-      narHash = "sha256-JBiig+kI2X6SZhEb5mAiacLiMI5nIU0klWlBCBFshMo=";
-    };
-    unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/rvben/rumdl/tarball/refs/tags/v0.1.95";
+    unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/rumdl.git";
+      ref = "v0.1.95";
+      rev = "e2084bd1bc70402a142a6c65475a0b07ae687847";
+      shallow = true;
       lastModified = 1779221704;
       narHash = "sha256-EH5E9iBxEOik8ZibQqK8A5PeKhYbUxioY5JJlDAg6W8=";
     };
-    unflake_tarball_https---api-github-com-repos-turnerdev-janet-nix-tarball-refs-tags-v0-2-1 = {
-      type = "tarball";
-      url = "https://api.github.com/repos/turnerdev/janet-nix/tarball/refs/tags/v0.2.1";
-      lastModified = 1776872502;
-      narHash = "sha256-17D5xeTKJpv14qyrT8dssdD5Q3jw+UODBFNp2C50big=";
+    unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/mardi-gras.git";
+      ref = "v0.22.0";
+      rev = "98f05f7b1e3e30800e6f8509f5f49e0d2a905d22";
+      shallow = true;
+      lastModified = 1779039464;
+      narHash = "sha256-JBiig+kI2X6SZhEb5mAiacLiMI5nIU0klWlBCBFshMo=";
+    };
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7 = {
+      type = "git";
+      url = "https://github.com/Supreeeme/xwayland-satellite.git";
+      ref = "v0.7";
+      rev = "838e68b9ef35613524b0a76a569afdaab7d5ce8c";
+      revCount = 146;
+      lastModified = 1755491097;
+      narHash = "sha256-m+9tUfsmBeF2Gn4HWa6vSITZ4Gz1eA1F5Kh62B0N4oE=";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow = {
+      type = "git";
+      url = "ssh://git@git.trll.ing/mirrors/nix-flatpak.git";
+      ref = "v0.7.0";
+      rev = "440818969ac2cbd77bfe025e884d0aa528991374";
+      shallow = true;
+      lastModified = 1767983141;
+      narHash = "sha256-7ZCulYUD9RmJIDULTRkGLSW1faMpDlPKcbWJLYHoXcs=";
+    };
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08 = {
+      type = "git";
+      url = "https://github.com/YaLTeR/niri.git";
+      ref = "v25.08";
+      rev = "d85b524d7c07a47345eab434f471f2b7bfa2c9c3";
+      revCount = 2362;
+      lastModified = 1756556321;
+      narHash = "sha256-RLD89dfjN0RVO86C/Mot0T7aduCygPGaYbog566F0Qo=";
+    };
+    unflake_git_https---spectrum-os-org-git-spectrum = {
+      type = "git";
+      url = "https://spectrum-os.org/git/spectrum";
+      rev = "bc2173e7e82a4a16d2254bb247f697cee49962d9";
+      revCount = 1268;
+      lastModified = 1779367023;
+      narHash = "sha256-+gdIEMrqCBpqmX49pD1GiCtrcXtqWrg33Du/I9vbO5c=";
     };
     unflake_tarball_https---channels-nixos-org-nixos-25-11-nixexprs-tar-xz = {
       type = "tarball";
@@ -686,42 +730,37 @@ let
       lastModified = 1733328505;
       narHash = "sha256-NeCCThCEP3eCl2l/+27kNNK7QrwZB1IJCrXfrbv5oqU=";
     };
-    unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2_flake_false = unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2;
     unflake_github_ghostty-org_ghostty_flake_false = unflake_github_ghostty-org_ghostty;
-    unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e_flake_false = unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e;
     unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable_flake_false = unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable;
-    unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7_flake_false = unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7;
-    unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a_flake_false = unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a;
-    unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be_flake_false = unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be;
     unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e_flake_false = unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e;
-    unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64_flake_false = unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64;
-    unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4_flake_false = unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4;
-    unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027_flake_false = unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027;
-    unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4_flake_false = unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4;
-    unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f_flake_false = unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f;
+    unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow;
+    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main_flake_false = unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main;
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main_flake_false = unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main;
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_main_flake_false = unflake_git_https---github-com-YaLTeR-niri-git_ref_main;
+    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main_flake_false = unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main;
     unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main_flake_false = unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main;
+    unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow;
+    unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false = unflake_git_https---github-com-edolstra-flake-compat-git_ref_master;
+    unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false = unflake_git_https---github-com-nixos-flake-compat-git_ref_master;
+    unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master_flake_false = unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master;
     unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly_flake_false = unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly;
-    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172_flake_false = unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172;
-    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938_flake_false = unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938;
-    unflake_git_https---github-com-stoeffel-nix-test-runner-git_flake_false = unflake_git_https---github-com-stoeffel-nix-test-runner-git;
+    unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow;
+    unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow_flake_false = unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow;
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7_flake_false = unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7;
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08_flake_false = unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08;
     unflake_git_https---spectrum-os-org-git-spectrum_flake_false = unflake_git_https---spectrum-os-org-git-spectrum;
-    unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false = unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz;
-    unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7_flake_false = unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7;
-    unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08_flake_false = unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08;
-    unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0_flake_false = unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0;
-    unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0_flake_false = unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0;
-    unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95_flake_false = unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95;
   };
   deps = indirect_deps // builtins.mapAttrs (_: spec: builtins.fetchTree spec) specs;
   injections = rec {
     unflake_indirect_nixpkgs = {
     };
-    unflake_github_asciimoo_hister_rev_43f0f83b8e95db093750b01bcf67339ed836610c = {
-      flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-    };
     unflake_github_cachix_nix_ref_devenv-2-34 = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+      flake-compat = "unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false";
       flake-parts = "unflake_github_hercules-ci_flake-parts";
       git-hooks-nix = "unflake_github_cachix_git-hooks-nix";
       nixpkgs = "unflake_tarball_https---channels-nixos-org-nixos-25-11-nixexprs-tar-xz";
@@ -730,7 +769,7 @@ let
     };
     unflake_github_cachix_cachix_ref_latest = {
       devenv = "unflake_github_cachix_devenv";
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+      flake-compat = "unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false";
       git-hooks = "unflake_github_cachix_git-hooks-nix";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
     };
@@ -740,7 +779,7 @@ let
     unflake_github_cachix_devenv = {
       cachix = "unflake_github_cachix_cachix_ref_latest";
       crate2nix = "unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e_flake_false";
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+      flake-compat = "unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false";
       flake-parts = "unflake_github_hercules-ci_flake-parts";
       ghostty = "unflake_github_ghostty-org_ghostty_flake_false";
       git-hooks = "unflake_github_cachix_git-hooks-nix";
@@ -750,29 +789,14 @@ let
       rust-overlay = "unflake_github_oxalica_rust-overlay";
     };
     unflake_github_cachix_git-hooks-nix = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+      flake-compat = "unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false";
       gitignore = "unflake_github_hercules-ci_gitignore-nix";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
     };
     unflake_github_cachix_pre-commit-hooks-nix = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+      flake-compat = "unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false";
       gitignore = "unflake_github_hercules-ci_gitignore-nix";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-    };
-    unflake_github_dj95_zjstatus_rev_f7f58bd3cb30352a8da85926636b8ec41770098a = {
-      crane = "unflake_github_ipetkov_crane";
-      flake-utils = "unflake_github_numtide_flake-utils";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-      rust-overlay = "unflake_github_oxalica_rust-overlay";
-    };
-    unflake_github_flameflag_nixcord_rev_658b4cfe1aa535a7a9a483503aaefcca87ec8aea = {
-      flake-compat = "unflake_tarball_https---flakehub-com-f-edolstra-flake-compat-1-tar-gz";
-      flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
-      nixpkgs-nixcord = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
-    };
-    unflake_github_gytis-ivaskevicius_flake-utils-plus_rev_afcb15b845e74ac5e998358709b2b5fe42a948d1 = {
-      flake-utils = "unflake_github_numtide_flake-utils";
     };
     unflake_github_hercules-ci_flake-parts = {
       nixpkgs-lib = "unflake_github_nix-community_nixpkgs-lib";
@@ -782,32 +806,10 @@ let
     };
     unflake_github_ipetkov_crane = {
     };
-    unflake_github_janik-haag_nixos-dns_rev_4fd527b1bb92cff2f80b3297ae68588dbe772c49 = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-      systems = "unflake_github_nix-systems_default";
-      treefmt-nix = "unflake_github_numtide_treefmt-nix";
-    };
     unflake_github_jeslie0_npm-lockfile-fix = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
     };
-    unflake_github_joaovl5_whisper-overlay_rev_fbf0501b6a2dab1f9aa408f4b11624f58debb5da = {
-      devshell = "unflake_github_numtide_devshell";
-      flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-      pre-commit-hooks = "unflake_github_cachix_pre-commit-hooks-nix";
-    };
     unflake_github_maroka-chan_vpn-confinement = {
-    };
-    unflake_github_mic92_sops-nix_rev_c591bf665727040c6cc5cb409079acb22dcce33c = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-    };
-    unflake_github_microvm-nix_microvm-nix_rev_77024c22f4ddf509137fc732094888d1ffe631e2 = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-      spectrum = "unflake_git_https---spectrum-os-org-git-spectrum_flake_false";
-    };
-    unflake_github_musnix_musnix_rev_8548782f0d1d0928daa3fffde8a008f72219a3f3 = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
     };
     unflake_github_nix-community_bun2nix = {
       flake-parts = "unflake_github_hercules-ci_flake-parts";
@@ -820,23 +822,9 @@ let
       devshell = "unflake_github_numtide_devshell";
       flake-compat = "unflake_tarball_https---flakehub-com-f-edolstra-flake-compat-1-tar-gz";
       flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nix-test-runner = "unflake_git_https---github-com-stoeffel-nix-test-runner-git_flake_false";
+      nix-test-runner = "unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master_flake_false";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
       pre-commit-hooks = "unflake_github_cachix_pre-commit-hooks-nix";
-    };
-    unflake_github_nix-community_disko_rev_65fb947964bd44fc0008faf77d1fcb7a9f40bb32 = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-    };
-    unflake_github_nix-community_emacs-overlay_rev_5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-      nixpkgs-stable = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
-    };
-    unflake_github_nix-community_fenix_rev_848395a91def85c11694587636151d89555f1ddb = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-      rust-analyzer-src = "unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly_flake_false";
-    };
-    unflake_github_nix-community_home-manager_rev_bd868f769a69d3b6091a1da68a75cb83a181033c = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
     };
     unflake_github_nix-community_nixd = {
       flake-parts = "unflake_github_hercules-ci_flake-parts";
@@ -845,18 +833,8 @@ let
     };
     unflake_github_nix-community_nixpkgs-lib = {
     };
-    unflake_github_nix-community_nur_rev_4a2b594dd378d794372ebd7d622a984dac29bda3 = {
-      flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-    };
     unflake_github_nix-community_pyproject-nix = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
-    };
-    unflake_github_nix-media-server_nixarr_rev_3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43 = {
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
-      treefmt-nix = "unflake_github_numtide_treefmt-nix";
-      vpnconfinement = "unflake_github_maroka-chan_vpn-confinement";
-      website-builder = "unflake_github_rasmus-kirk_website-builder";
     };
     unflake_github_nix-systems_default = {
     };
@@ -868,13 +846,7 @@ let
     };
     unflake_github_nixos_nixpkgs_rev_215d4d0fd80ca5163643b03a33fde804a29cc1e2 = {
     };
-    unflake_github_nixos_nixpkgs_rev_687f05a9184cad4eaf905c48b63649e3a86f5433 = {
-    };
-    unflake_github_nixos_nixpkgs_rev_8e72e9888e67ce593df16546cd31e0d75544ad0d = {
-    };
     unflake_github_nixos_nixpkgs_rev_a62e6edd6d5e1fa0329b8653c801147986f8d446 = {
-    };
-    unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb = {
     };
     unflake_github_numtide_blueprint = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
@@ -885,14 +857,6 @@ let
     };
     unflake_github_numtide_flake-utils = {
       systems = "unflake_github_nix-systems_default";
-    };
-    unflake_github_numtide_llm-agents-nix_rev_3c69691d60d50f87cc0d5f6222992b63c90b010d = {
-      blueprint = "unflake_github_numtide_blueprint";
-      bun2nix = "unflake_github_nix-community_bun2nix";
-      flake-parts = "unflake_github_hercules-ci_flake-parts";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-      systems = "unflake_github_nix-systems_default";
-      treefmt-nix = "unflake_github_numtide_treefmt-nix";
     };
     unflake_github_numtide_treefmt-nix = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
@@ -915,36 +879,77 @@ let
     unflake_github_rasmus-kirk_website-builder = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
     };
-    unflake_github_serokell_deploy-rs_rev_77c906c0ba56aabdbc72041bf9111b565cdd6171 = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
-      utils = "unflake_github_numtide_flake-utils";
+    unflake_git_ssh---git-git-trll-ing-mirrors-NUR-git_ref_main_shallow = {
+      flake-parts = "unflake_github_hercules-ci_flake-parts";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
     };
-    unflake_github_sodiboo_niri-flake_rev_f4027707431220ffb660ae0da0e03fd5229ab4d9 = {
-      niri-stable = "unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08_flake_false";
-      niri-unstable = "unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f_flake_false";
+    unflake_git_ssh---git-git-trll-ing-mirrors-fenix-git_ref_main_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+      rust-analyzer-src = "unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly_flake_false";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-file-git_ref_main_shallow = {
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-hexecute-git_ref_main_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-llm-agents-nix-git_ref_main_shallow = {
+      blueprint = "unflake_github_numtide_blueprint";
+      bun2nix = "unflake_github_nix-community_bun2nix";
+      flake-parts = "unflake_github_hercules-ci_flake-parts";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+      systems = "unflake_github_nix-systems_default";
+      treefmt-nix = "unflake_github_numtide_treefmt-nix";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-microvm-nix-git_ref_main_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+      spectrum = "unflake_git_https---spectrum-os-org-git-spectrum_flake_false";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow = {
+      niri-stable = "unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08_flake_false";
+      niri-unstable = "unflake_git_https---github-com-YaLTeR-niri-git_ref_main_flake_false";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
       nixpkgs-stable = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
-      xwayland-satellite-stable = "unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7_flake_false";
-      xwayland-satellite-unstable = "unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027_flake_false";
+      xwayland-satellite-stable = "unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7_flake_false";
+      xwayland-satellite-unstable = "unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main_flake_false";
     };
-    unflake_github_thatotherandrew_hexecute_rev_df00365964ed2f7144f364ee1bdbefec81334583 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
+      treefmt-nix = "unflake_github_numtide_treefmt-nix";
+      vpnconfinement = "unflake_github_maroka-chan_vpn-confinement";
+      website-builder = "unflake_github_rasmus-kirk_website-builder";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow = {
+      flake-compat = "unflake_tarball_https---flakehub-com-f-edolstra-flake-compat-1-tar-gz";
+      flake-parts = "unflake_github_hercules-ci_flake-parts";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
+      nixpkgs-nixcord = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixos-dns-git_ref_main_shallow = {
+      flake-compat = "unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+      systems = "unflake_github_nix-systems_default";
+      treefmt-nix = "unflake_github_numtide_treefmt-nix";
     };
-    unflake_github_vic_flake-file = {
-    };
-    unflake_git_ssh---git-github-com-numtide-treefmt-nix-git_rev_790751ff7fd3801feeaf96d7dc416a8d581265ba = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-treefmt-nix-git_ref_main_shallow = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
     };
-    unflake_git_ssh---git-git-trll-ing-lav-jcode_rev_a8c772ca7b0a8085a5bc9eddba6561fb78e50b45 = {
-      crate2nix = "unflake_github_nix-community_crate2nix";
-      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+    unflake_git_ssh---git-git-trll-ing-mirrors-zjstatus-git_ref_main_shallow = {
+      crane = "unflake_github_ipetkov_crane";
+      flake-utils = "unflake_github_numtide_flake-utils";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+      rust-overlay = "unflake_github_oxalica_rust-overlay";
     };
-    unflake_git_https---git-sr-ht--watersucks-optnix_rev_c320dc5494c0caaca9ee4341367618c06a957709 = {
-      flake-compat = "unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false";
+    unflake_git_https---git-sr-ht--watersucks-optnix_ref_main = {
+      flake-compat = "unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
     };
-    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_rev_db84a78e618bf973ffc403ed2e1f8162f2591daa = {
+    unflake_git_https---github-com-joaovl5-whisper-overlay-git_ref_main = {
+      devshell = "unflake_github_numtide_devshell";
+      flake-parts = "unflake_github_hercules-ci_flake-parts";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+      pre-commit-hooks = "unflake_github_cachix_pre-commit-hooks-nix";
+    };
+    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_ref_main = {
       flake-parts = "unflake_github_hercules-ci_flake-parts";
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
       npm-lockfile-fix = "unflake_github_jeslie0_npm-lockfile-fix";
@@ -952,10 +957,45 @@ let
       pyproject-nix = "unflake_github_pyproject-nix_pyproject-nix";
       uv2nix = "unflake_github_pyproject-nix_uv2nix";
     };
-    unflake_tarball_https---api-github-com-repos-gmodena-nix-flatpak-tarball-refs-tags-v0-7-0 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow = {
+      flake-compat = "unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+      utils = "unflake_github_numtide_flake-utils";
     };
-    unflake_tarball_https---api-github-com-repos-turnerdev-janet-nix-tarball-refs-tags-v0-2-1 = {
+    unflake_git_ssh---git-git-trll-ing-mirrors-disko-git_ref_master_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-emacs-overlay-git_ref_master_shallow = {
       nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+      nixpkgs-stable = "unflake_github_nixos_nixpkgs_ref_nixos-25-11";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-utils-plus-git_ref_master_shallow = {
+      flake-utils = "unflake_github_numtide_flake-utils";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-hister-git_ref_master_shallow = {
+      flake-parts = "unflake_github_hercules-ci_flake-parts";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-home-manager-git_ref_master_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-sops-nix-git_ref_master_shallow = {
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable";
+    };
+    unflake_git_ssh---git-git-trll-ing-lav-jcode_ref_master = {
+      crate2nix = "unflake_github_nix-community_crate2nix";
+      nixpkgs = "unflake_github_nixos_nixpkgs_ref_nixos-unstable";
+    };
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-25-11 = {
+    };
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable = {
+    };
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable-small = {
+    };
+    unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow = {
     };
     unflake_tarball_https---channels-nixos-org-nixos-25-11-nixexprs-tar-xz = {
     };
@@ -980,140 +1020,135 @@ let
     in self;
   universe = rec {
     unflake_indirect_nixpkgs = inject "unflake_indirect_nixpkgs" "flake.nix" "";
-    unflake_github_asciimoo_hister_rev_43f0f83b8e95db093750b01bcf67339ed836610c = inject "unflake_github_asciimoo_hister_rev_43f0f83b8e95db093750b01bcf67339ed836610c" "flake.nix" "";
-    unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2_flake_false = deps.unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2_flake_false;
     unflake_github_cachix_nix_ref_devenv-2-34 = inject "unflake_github_cachix_nix_ref_devenv-2-34" "flake.nix" "";
     unflake_github_cachix_cachix_ref_latest = inject "unflake_github_cachix_cachix_ref_latest" "flake.nix" "";
     unflake_github_cachix_devenv-nixpkgs_ref_rolling = inject "unflake_github_cachix_devenv-nixpkgs_ref_rolling" "flake.nix" "";
     unflake_github_cachix_devenv = inject "unflake_github_cachix_devenv" "flake.nix" "";
     unflake_github_cachix_git-hooks-nix = inject "unflake_github_cachix_git-hooks-nix" "flake.nix" "";
     unflake_github_cachix_pre-commit-hooks-nix = inject "unflake_github_cachix_pre-commit-hooks-nix" "flake.nix" "";
-    unflake_github_dj95_zjstatus_rev_f7f58bd3cb30352a8da85926636b8ec41770098a = inject "unflake_github_dj95_zjstatus_rev_f7f58bd3cb30352a8da85926636b8ec41770098a" "flake.nix" "";
-    unflake_github_flameflag_nixcord_rev_658b4cfe1aa535a7a9a483503aaefcca87ec8aea = inject "unflake_github_flameflag_nixcord_rev_658b4cfe1aa535a7a9a483503aaefcca87ec8aea" "flake.nix" "";
     unflake_github_ghostty-org_ghostty_flake_false = deps.unflake_github_ghostty-org_ghostty_flake_false;
-    unflake_github_gytis-ivaskevicius_flake-utils-plus_rev_afcb15b845e74ac5e998358709b2b5fe42a948d1 = inject "unflake_github_gytis-ivaskevicius_flake-utils-plus_rev_afcb15b845e74ac5e998358709b2b5fe42a948d1" "flake.nix" "";
     unflake_github_hercules-ci_flake-parts = inject "unflake_github_hercules-ci_flake-parts" "flake.nix" "";
     unflake_github_hercules-ci_gitignore-nix = inject "unflake_github_hercules-ci_gitignore-nix" "flake.nix" "";
     unflake_github_ipetkov_crane = inject "unflake_github_ipetkov_crane" "flake.nix" "";
-    unflake_github_janik-haag_nixos-dns_rev_4fd527b1bb92cff2f80b3297ae68588dbe772c49 = inject "unflake_github_janik-haag_nixos-dns_rev_4fd527b1bb92cff2f80b3297ae68588dbe772c49" "flake.nix" "";
     unflake_github_jeslie0_npm-lockfile-fix = inject "unflake_github_jeslie0_npm-lockfile-fix" "flake.nix" "";
-    unflake_github_joaovl5_whisper-overlay_rev_fbf0501b6a2dab1f9aa408f4b11624f58debb5da = inject "unflake_github_joaovl5_whisper-overlay_rev_fbf0501b6a2dab1f9aa408f4b11624f58debb5da" "flake.nix" "";
     unflake_github_maroka-chan_vpn-confinement = inject "unflake_github_maroka-chan_vpn-confinement" "flake.nix" "";
-    unflake_github_mic92_sops-nix_rev_c591bf665727040c6cc5cb409079acb22dcce33c = inject "unflake_github_mic92_sops-nix_rev_c591bf665727040c6cc5cb409079acb22dcce33c" "flake.nix" "";
-    unflake_github_microvm-nix_microvm-nix_rev_77024c22f4ddf509137fc732094888d1ffe631e2 = inject "unflake_github_microvm-nix_microvm-nix_rev_77024c22f4ddf509137fc732094888d1ffe631e2" "flake.nix" "";
-    unflake_github_musnix_musnix_rev_8548782f0d1d0928daa3fffde8a008f72219a3f3 = inject "unflake_github_musnix_musnix_rev_8548782f0d1d0928daa3fffde8a008f72219a3f3" "flake.nix" "";
     unflake_github_nix-community_bun2nix = inject "unflake_github_nix-community_bun2nix" "flake.nix" "";
     unflake_github_nix-community_crate2nix = inject "unflake_github_nix-community_crate2nix" "flake.nix" "";
-    unflake_github_nix-community_disko_rev_65fb947964bd44fc0008faf77d1fcb7a9f40bb32 = inject "unflake_github_nix-community_disko_rev_65fb947964bd44fc0008faf77d1fcb7a9f40bb32" "flake.nix" "";
-    unflake_github_nix-community_emacs-overlay_rev_5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe = inject "unflake_github_nix-community_emacs-overlay_rev_5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe" "flake.nix" "";
-    unflake_github_nix-community_fenix_rev_848395a91def85c11694587636151d89555f1ddb = inject "unflake_github_nix-community_fenix_rev_848395a91def85c11694587636151d89555f1ddb" "flake.nix" "";
-    unflake_github_nix-community_home-manager_rev_bd868f769a69d3b6091a1da68a75cb83a181033c = inject "unflake_github_nix-community_home-manager_rev_bd868f769a69d3b6091a1da68a75cb83a181033c" "flake.nix" "";
     unflake_github_nix-community_nixd = inject "unflake_github_nix-community_nixd" "flake.nix" "";
     unflake_github_nix-community_nixpkgs-lib = inject "unflake_github_nix-community_nixpkgs-lib" "flake.nix" "";
-    unflake_github_nix-community_nur_rev_4a2b594dd378d794372ebd7d622a984dac29bda3 = inject "unflake_github_nix-community_nur_rev_4a2b594dd378d794372ebd7d622a984dac29bda3" "flake.nix" "";
     unflake_github_nix-community_pyproject-nix = inject "unflake_github_nix-community_pyproject-nix" "flake.nix" "";
-    unflake_github_nix-media-server_nixarr_rev_3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43 = inject "unflake_github_nix-media-server_nixarr_rev_3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43" "flake.nix" "";
-    unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e_flake_false = deps.unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e_flake_false;
     unflake_github_nix-systems_default = inject "unflake_github_nix-systems_default" "flake.nix" "";
     unflake_github_nixos_nixpkgs_ref_nixos-25-11 = inject "unflake_github_nixos_nixpkgs_ref_nixos-25-11" "flake.nix" "";
     unflake_github_nixos_nixpkgs_ref_nixos-unstable = inject "unflake_github_nixos_nixpkgs_ref_nixos-unstable" "flake.nix" "";
     unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable_flake_false = deps.unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable_flake_false;
     unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable = inject "unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable" "flake.nix" "";
     unflake_github_nixos_nixpkgs_rev_215d4d0fd80ca5163643b03a33fde804a29cc1e2 = inject "unflake_github_nixos_nixpkgs_rev_215d4d0fd80ca5163643b03a33fde804a29cc1e2" "flake.nix" "";
-    unflake_github_nixos_nixpkgs_rev_687f05a9184cad4eaf905c48b63649e3a86f5433 = inject "unflake_github_nixos_nixpkgs_rev_687f05a9184cad4eaf905c48b63649e3a86f5433" "flake.nix" "";
-    unflake_github_nixos_nixpkgs_rev_8e72e9888e67ce593df16546cd31e0d75544ad0d = inject "unflake_github_nixos_nixpkgs_rev_8e72e9888e67ce593df16546cd31e0d75544ad0d" "flake.nix" "";
     unflake_github_nixos_nixpkgs_rev_a62e6edd6d5e1fa0329b8653c801147986f8d446 = inject "unflake_github_nixos_nixpkgs_rev_a62e6edd6d5e1fa0329b8653c801147986f8d446" "flake.nix" "";
-    unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb = inject "unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb" "flake.nix" "";
     unflake_github_numtide_blueprint = inject "unflake_github_numtide_blueprint" "flake.nix" "";
     unflake_github_numtide_devshell = inject "unflake_github_numtide_devshell" "flake.nix" "";
     unflake_github_numtide_flake-utils = inject "unflake_github_numtide_flake-utils" "flake.nix" "";
-    unflake_github_numtide_llm-agents-nix_rev_3c69691d60d50f87cc0d5f6222992b63c90b010d = inject "unflake_github_numtide_llm-agents-nix_rev_3c69691d60d50f87cc0d5f6222992b63c90b010d" "flake.nix" "";
     unflake_github_numtide_treefmt-nix = inject "unflake_github_numtide_treefmt-nix" "flake.nix" "";
-    unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7_flake_false = deps.unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7_flake_false;
     unflake_github_oxalica_rust-overlay = inject "unflake_github_oxalica_rust-overlay" "flake.nix" "";
-    unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a_flake_false = deps.unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a_flake_false;
     unflake_github_pyproject-nix_build-system-pkgs = inject "unflake_github_pyproject-nix_build-system-pkgs" "flake.nix" "";
     unflake_github_pyproject-nix_pyproject-nix = inject "unflake_github_pyproject-nix_pyproject-nix" "flake.nix" "";
     unflake_github_pyproject-nix_uv2nix = inject "unflake_github_pyproject-nix_uv2nix" "flake.nix" "";
     unflake_github_rasmus-kirk_website-builder = inject "unflake_github_rasmus-kirk_website-builder" "flake.nix" "";
-    unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be_flake_false = deps.unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be_flake_false;
     unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e_flake_false = deps.unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e_flake_false;
-    unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64_flake_false = deps.unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64_flake_false;
-    unflake_github_serokell_deploy-rs_rev_77c906c0ba56aabdbc72041bf9111b565cdd6171 = inject "unflake_github_serokell_deploy-rs_rev_77c906c0ba56aabdbc72041bf9111b565cdd6171" "flake.nix" "";
-    unflake_github_sodiboo_niri-flake_rev_f4027707431220ffb660ae0da0e03fd5229ab4d9 = inject "unflake_github_sodiboo_niri-flake_rev_f4027707431220ffb660ae0da0e03fd5229ab4d9" "flake.nix" "";
-    unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4_flake_false = deps.unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4_flake_false;
-    unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027_flake_false = deps.unflake_github_supreeeme_xwayland-satellite_rev_a879e5e0896a326adc79c474bf457b8b99011027_flake_false;
-    unflake_github_thatotherandrew_hexecute_rev_df00365964ed2f7144f364ee1bdbefec81334583 = inject "unflake_github_thatotherandrew_hexecute_rev_df00365964ed2f7144f364ee1bdbefec81334583" "flake.nix" "";
-    unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4_flake_false = deps.unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4_flake_false;
-    unflake_github_vic_flake-file = inject "unflake_github_vic_flake-file" "flake.nix" "";
-    unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f_flake_false = deps.unflake_github_yalter_niri_rev_cd5ac3e5e04bb5a11276d3c755fa25242818e05f_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-NUR-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-NUR-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-fenix-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-fenix-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-file-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-flake-file-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-hexecute-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-hexecute-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-llm-agents-nix-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-llm-agents-nix-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-microvm-nix-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-microvm-nix-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-nixos-dns-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-nixos-dns-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-treefmt-nix-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-treefmt-nix-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-zjstatus-git_ref_main_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-zjstatus-git_ref_main_shallow" "flake.nix" "";
+    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main_flake_false = deps.unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main_flake_false;
+    unflake_git_https---git-sr-ht--watersucks-optnix_ref_main = inject "unflake_git_https---git-sr-ht--watersucks-optnix_ref_main" "flake.nix" "";
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main_flake_false = deps.unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_main_flake_false;
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_main_flake_false = deps.unflake_git_https---github-com-YaLTeR-niri-git_ref_main_flake_false;
+    unflake_git_https---github-com-joaovl5-whisper-overlay-git_ref_main = inject "unflake_git_https---github-com-joaovl5-whisper-overlay-git_ref_main" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_ref_main = inject "unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_ref_main" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main_flake_false = deps.unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main_flake_false;
     unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main_flake_false = deps.unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-disko-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-disko-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-emacs-overlay-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-emacs-overlay-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-flake-utils-plus-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-flake-utils-plus-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-hister-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-hister-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-home-manager-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-home-manager-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-sops-nix-git_ref_master_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-sops-nix-git_ref_master_shallow" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow_flake_false;
+    unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false = deps.unflake_git_https---github-com-edolstra-flake-compat-git_ref_master_flake_false;
+    unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false = deps.unflake_git_https---github-com-nixos-flake-compat-git_ref_master_flake_false;
+    unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master_flake_false = deps.unflake_git_https---github-com-stoeffel-nix-test-runner-git_ref_master_flake_false;
+    unflake_git_ssh---git-git-trll-ing-lav-jcode_ref_master = inject "unflake_git_ssh---git-git-trll-ing-lav-jcode_ref_master" "flake.nix" "";
     unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly_flake_false = deps.unflake_git_https---github-com-rust-lang-rust-analyzer-git_ref_nightly_flake_false;
-    unflake_git_ssh---git-github-com-numtide-treefmt-nix-git_rev_790751ff7fd3801feeaf96d7dc416a8d581265ba = inject "unflake_git_ssh---git-github-com-numtide-treefmt-nix-git_rev_790751ff7fd3801feeaf96d7dc416a8d581265ba" "flake.nix" "";
-    unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172_flake_false = deps.unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172_flake_false;
-    unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938_flake_false = deps.unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938_flake_false;
-    unflake_git_ssh---git-git-trll-ing-lav-jcode_rev_a8c772ca7b0a8085a5bc9eddba6561fb78e50b45 = inject "unflake_git_ssh---git-git-trll-ing-lav-jcode_rev_a8c772ca7b0a8085a5bc9eddba6561fb78e50b45" "flake.nix" "";
-    unflake_git_https---git-sr-ht--watersucks-optnix_rev_c320dc5494c0caaca9ee4341367618c06a957709 = inject "unflake_git_https---git-sr-ht--watersucks-optnix_rev_c320dc5494c0caaca9ee4341367618c06a957709" "flake.nix" "";
-    unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_rev_db84a78e618bf973ffc403ed2e1f8162f2591daa = inject "unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_rev_db84a78e618bf973ffc403ed2e1f8162f2591daa" "flake.nix" "";
-    unflake_git_https---github-com-stoeffel-nix-test-runner-git_flake_false = deps.unflake_git_https---github-com-stoeffel-nix-test-runner-git_flake_false;
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-25-11 = inject "unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-25-11" "flake.nix" "";
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable = inject "unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable" "flake.nix" "";
+    unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable-small = inject "unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable-small" "flake.nix" "";
+    unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow_flake_false = deps.unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow_flake_false;
+    unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7_flake_false = deps.unflake_git_https---github-com-Supreeeme-xwayland-satellite-git_ref_v0-7_flake_false;
+    unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow = inject "unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow" "flake.nix" "";
+    unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08_flake_false = deps.unflake_git_https---github-com-YaLTeR-niri-git_ref_v25-08_flake_false;
     unflake_git_https---spectrum-os-org-git-spectrum_flake_false = deps.unflake_git_https---spectrum-os-org-git-spectrum_flake_false;
-    unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false = deps.unflake_tarball_https---api-flakehub-com-f-pinned-edolstra-flake-compat-1-1-0-01948eb7-9cba-704f-bbf3-3fa956735b52-source-tar-gz_flake_false;
-    unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7_flake_false = deps.unflake_tarball_https---api-github-com-repos-Supreeeme-xwayland-satellite-tarball-refs-tags-v0-7_flake_false;
-    unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08_flake_false = deps.unflake_tarball_https---api-github-com-repos-YaLTeR-niri-tarball-refs-tags-v25-08_flake_false;
-    unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0_flake_false = deps.unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0_flake_false;
-    unflake_tarball_https---api-github-com-repos-gmodena-nix-flatpak-tarball-refs-tags-v0-7-0 = inject "unflake_tarball_https---api-github-com-repos-gmodena-nix-flatpak-tarball-refs-tags-v0-7-0" "flake.nix" "";
-    unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0_flake_false = deps.unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0_flake_false;
-    unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95_flake_false = deps.unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95_flake_false;
-    unflake_tarball_https---api-github-com-repos-turnerdev-janet-nix-tarball-refs-tags-v0-2-1 = inject "unflake_tarball_https---api-github-com-repos-turnerdev-janet-nix-tarball-refs-tags-v0-2-1" "flake.nix" "";
     unflake_tarball_https---channels-nixos-org-nixos-25-11-nixexprs-tar-xz = inject "unflake_tarball_https---channels-nixos-org-nixos-25-11-nixexprs-tar-xz" "flake.nix" "";
     unflake_tarball_https---channels-nixos-org-nixos-unstable-nixexprs-tar-xz = inject "unflake_tarball_https---channels-nixos-org-nixos-unstable-nixexprs-tar-xz" "flake.nix" "";
     unflake_tarball_https---flakehub-com-f-edolstra-flake-compat-1-tar-gz = inject "unflake_tarball_https---flakehub-com-f-edolstra-flake-compat-1-tar-gz" "flake.nix" "";
   };
   inputs = {
-    all-systems = universe.unflake_github_nix-systems_default_rev_da67096a3b9bf56a91d16901293e51ba5b49a27e_flake_false;
-    degoog-src = universe.unflake_tarball_https---api-github-com-repos-degoog-org-degoog-tarball-refs-tags-0-18-0_flake_false;
-    deploy-rs = universe.unflake_github_serokell_deploy-rs_rev_77c906c0ba56aabdbc72041bf9111b565cdd6171;
-    disko = universe.unflake_github_nix-community_disko_rev_65fb947964bd44fc0008faf77d1fcb7a9f40bb32;
-    emacs-bleeding-edge = universe.unflake_github_nix-community_emacs-overlay_rev_5f8f3a12b25e29c1dd0a6363b61eba7d2f9944fe;
-    fenix = universe.unflake_github_nix-community_fenix_rev_848395a91def85c11694587636151d89555f1ddb;
-    fennel-ls-nvim-docs = universe.unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_rev_a072d3f5d2dd98cf0411cd16446a0f3c96ee7938_flake_false;
-    flake-file = universe.unflake_github_vic_flake-file;
-    fup = universe.unflake_github_gytis-ivaskevicius_flake-utils-plus_rev_afcb15b845e74ac5e998358709b2b5fe42a948d1;
-    hermes-agent = universe.unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_rev_db84a78e618bf973ffc403ed2e1f8162f2591daa;
-    hexecute = universe.unflake_github_thatotherandrew_hexecute_rev_df00365964ed2f7144f364ee1bdbefec81334583;
-    hister = universe.unflake_github_asciimoo_hister_rev_43f0f83b8e95db093750b01bcf67339ed836610c;
-    hm = universe.unflake_github_nix-community_home-manager_rev_bd868f769a69d3b6091a1da68a75cb83a181033c;
-    jandent-src = universe.unflake_github_sogaiu_jandent_rev_1943b1b9d8862f52f68ba63350f40a122b291eb4_flake_false;
-    janet-lsp-src = universe.unflake_github_blue-berry_janet-lsp-nix_rev_b8334a469d38f191198a20a75a6c470c2ea588d2_flake_false;
-    janet-nix = universe.unflake_tarball_https---api-github-com-repos-turnerdev-janet-nix-tarball-refs-tags-v0-2-1;
-    jcode = universe.unflake_git_ssh---git-git-trll-ing-lav-jcode_rev_a8c772ca7b0a8085a5bc9eddba6561fb78e50b45;
-    kaneo-src = universe.unflake_github_usekaneo_kaneo_rev_0f39464f5873d0525dd29f533898ecc323431ed4_flake_false;
-    llm-agents = universe.unflake_github_numtide_llm-agents-nix_rev_3c69691d60d50f87cc0d5f6222992b63c90b010d;
-    mardi-gras-src = universe.unflake_tarball_https---api-github-com-repos-quietpublish-mardi-gras-tarball-refs-tags-v0-22-0_flake_false;
-    microvm = universe.unflake_github_microvm-nix_microvm-nix_rev_77024c22f4ddf509137fc732094888d1ffe631e2;
-    musnix = universe.unflake_github_musnix_musnix_rev_8548782f0d1d0928daa3fffde8a008f72219a3f3;
+    all-systems = universe.unflake_git_ssh---git-git-trll-ing-mirrors-default-git_ref_main_shallow_flake_false;
+    degoog-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-degoog-git_ref_0-18-0_shallow_flake_false;
+    deploy-rs = universe.unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow;
+    disko = universe.unflake_git_ssh---git-git-trll-ing-mirrors-disko-git_ref_master_shallow;
+    emacs-bleeding-edge = universe.unflake_git_ssh---git-git-trll-ing-mirrors-emacs-overlay-git_ref_master_shallow;
+    fenix = universe.unflake_git_ssh---git-git-trll-ing-mirrors-fenix-git_ref_main_shallow;
+    fennel-ls-nvim-docs = universe.unflake_git_https---git-sr-ht--micampe-fennel-ls-nvim-docs_ref_main_flake_false;
+    flake-file = universe.unflake_git_ssh---git-git-trll-ing-mirrors-flake-file-git_ref_main_shallow;
+    fup = universe.unflake_git_ssh---git-git-trll-ing-mirrors-flake-utils-plus-git_ref_master_shallow;
+    hermes-agent = universe.unflake_git_ssh---git-git-trll-ing-lav-hermes-agent-git_ref_main;
+    hexecute = universe.unflake_git_ssh---git-git-trll-ing-mirrors-hexecute-git_ref_main_shallow;
+    hister = universe.unflake_git_ssh---git-git-trll-ing-mirrors-hister-git_ref_master_shallow;
+    hm = universe.unflake_git_ssh---git-git-trll-ing-mirrors-home-manager-git_ref_master_shallow;
+    jcode = universe.unflake_git_ssh---git-git-trll-ing-lav-jcode_ref_master;
+    kaneo-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-kaneo-git_ref_main_shallow_flake_false;
+    llm-agents = universe.unflake_git_ssh---git-git-trll-ing-mirrors-llm-agents-nix-git_ref_main_shallow;
+    mardi-gras-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-mardi-gras-git_ref_v0-22-0_shallow_flake_false;
+    microvm = universe.unflake_git_ssh---git-git-trll-ing-mirrors-microvm-nix-git_ref_main_shallow;
+    musnix = universe.unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow;
     mysecrets = universe.unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main_flake_false;
-    niri = universe.unflake_github_sodiboo_niri-flake_rev_f4027707431220ffb660ae0da0e03fd5229ab4d9;
-    nix-flatpak = universe.unflake_tarball_https---api-github-com-repos-gmodena-nix-flatpak-tarball-refs-tags-v0-7-0;
-    nixarr = universe.unflake_github_nix-media-server_nixarr_rev_3bde55fe657ee3ec1c2b2c05294ff381cb8f2d43;
-    nixcord = universe.unflake_github_flameflag_nixcord_rev_658b4cfe1aa535a7a9a483503aaefcca87ec8aea;
-    nixos-dns = universe.unflake_github_janik-haag_nixos-dns_rev_4fd527b1bb92cff2f80b3297ae68588dbe772c49;
-    nixpkgs = universe.unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb;
-    nur = universe.unflake_github_nix-community_nur_rev_4a2b594dd378d794372ebd7d622a984dac29bda3;
-    octodns-pihole-src = universe.unflake_github_roosnic1_octodns-pihole_rev_566a863bc67e18ced24906e7838fa6cff0f471be_flake_false;
-    optnix = universe.unflake_git_https---git-sr-ht--watersucks-optnix_rev_c320dc5494c0caaca9ee4341367618c06a957709;
-    pihole6api-src = universe.unflake_github_sbarbett_pihole6api_rev_e87c651ce0e084bc5f15c529d6103c524ee98d64_flake_false;
-    rumdl-src = universe.unflake_tarball_https---api-github-com-repos-rvben-rumdl-tarball-refs-tags-v0-1-95_flake_false;
-    sane-fnlfmt-src = universe.unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_rev_87b02d05d870c66730f9dd39f3af26a1b46f1172_flake_false;
-    sops-nix = universe.unflake_github_mic92_sops-nix_rev_c591bf665727040c6cc5cb409079acb22dcce33c;
-    stable = universe.unflake_github_nixos_nixpkgs_rev_687f05a9184cad4eaf905c48b63649e3a86f5433;
-    superpowers = universe.unflake_github_obra_superpowers_rev_f2cbfbefebbfef77321e4c9abc9e949826bea9d7_flake_false;
-    tree-sitter-kanata = universe.unflake_github_postsolar_tree-sitter-kanata_rev_af53b4c35d6faa3b4ba7c317fb795a6eb679b42a_flake_false;
-    treefmt-nix = universe.unflake_git_ssh---git-github-com-numtide-treefmt-nix-git_rev_790751ff7fd3801feeaf96d7dc416a8d581265ba;
-    unstable = universe.unflake_github_nixos_nixpkgs_rev_d233902339c02a9c334e7e593de68855ad26c4cb;
-    unstable-small = universe.unflake_github_nixos_nixpkgs_rev_8e72e9888e67ce593df16546cd31e0d75544ad0d;
-    whisper-overlay = universe.unflake_github_joaovl5_whisper-overlay_rev_fbf0501b6a2dab1f9aa408f4b11624f58debb5da;
-    zjstatus = universe.unflake_github_dj95_zjstatus_rev_f7f58bd3cb30352a8da85926636b8ec41770098a;
+    niri = universe.unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow;
+    nix-flatpak = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow;
+    nixarr = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow;
+    nixcord = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow;
+    nixos-dns = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nixos-dns-git_ref_main_shallow;
+    nixpkgs = universe.unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable;
+    nur = universe.unflake_git_ssh---git-git-trll-ing-mirrors-NUR-git_ref_main_shallow;
+    octodns-pihole-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-octodns-pihole-git_ref_main_shallow_flake_false;
+    optnix = universe.unflake_git_https---git-sr-ht--watersucks-optnix_ref_main;
+    pihole6api-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-pihole6api-git_ref_main_shallow_flake_false;
+    rumdl-src = universe.unflake_git_ssh---git-git-trll-ing-mirrors-rumdl-git_ref_v0-1-95_shallow_flake_false;
+    sane-fnlfmt-src = universe.unflake_git_ssh---git-git-trll-ing-lav-sane_fnlfmt-git_ref_main_flake_false;
+    sops-nix = universe.unflake_git_ssh---git-git-trll-ing-mirrors-sops-nix-git_ref_master_shallow;
+    stable = universe.unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-25-11;
+    superpowers = universe.unflake_git_ssh---git-git-trll-ing-mirrors-superpowers-git_ref_main_shallow_flake_false;
+    tree-sitter-kanata = universe.unflake_git_ssh---git-git-trll-ing-mirrors-tree-sitter-kanata-git_ref_master_shallow_flake_false;
+    treefmt-nix = universe.unflake_git_ssh---git-git-trll-ing-mirrors-treefmt-nix-git_ref_main_shallow;
+    unstable = universe.unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable;
+    unstable-small = universe.unflake_git_https---github-com-NixOS-nixpkgs-git_ref_nixos-unstable-small;
+    whisper-overlay = universe.unflake_git_https---github-com-joaovl5-whisper-overlay-git_ref_main;
+    zjstatus = universe.unflake_git_ssh---git-git-trll-ing-mirrors-zjstatus-git_ref_main_shallow;
   };
 in inputs // {
   withInputs = fn: let outputs = fn (inputs // { inherit self; }); self = outputs // {

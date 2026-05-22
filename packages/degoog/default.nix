@@ -36,7 +36,7 @@ in
     npmDeps = fetchNpmDeps {
       name = "degoog-${upstreamPackage.version}-npm-deps";
       inherit src;
-      hash = "sha256-yb2XHLaPDH6ThzFxtqGdS0wuBQDmugGsAnwfyJxFGlI=";
+      hash = "sha256-ypDF3iK14mf1npJX1mAMsrkvnuhE0raeMxjc94gelGI=";
       nativeBuildInputs = [nodejs];
       postPatch = patchPackageJson;
     };
