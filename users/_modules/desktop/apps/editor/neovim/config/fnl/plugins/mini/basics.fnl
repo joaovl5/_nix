@@ -36,7 +36,8 @@
                   :win_borders :solid}
         :mappings {; <C-s> save
                    :basic true
-                   ; <C-hjkl> window nav mappings
-                   :windows true
+                   ; <C-hjkl> window nav mappings are declared in
+                   ; plugins/keys/_keymap.fnl for terminal-mode support
+                   :windows false
                    ; disable <M-hjkl> cursor nav in insert/command modes
                    :move_with_alt true}}))]

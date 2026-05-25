@@ -61,4 +61,4 @@ local function keys(...)
   end
   return {keys = specs}
 end
-return {event = opt("event"), ft = opt("ft"), keys = keys, opts = opt("opts"), deps = opt("dependencies"), prio = opt("priority"), priority = opt("priority"), version = opt("version"), cmd = opt("cmd"), lazy = opt("lazy"), config = opt("config"), init = opt("init"), builtin = opt("builtin"), main = opt("main")}
+return {event = opt("event"), ft = opt("ft"), keys = keys, opts = opt("opts"), deps = opt("dependencies"), prio = opt("priority"), priority = opt("priority"), version = opt("version"), enabled = opt("enabled"), cmd = opt("cmd"), lazy = opt("lazy"), config = opt("config"), init = opt("init"), builtin = opt("builtin"), main = opt("main")}

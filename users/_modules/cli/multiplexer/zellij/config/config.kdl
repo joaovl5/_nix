@@ -6,6 +6,7 @@ session_serialization false
 serialize_pane_viewport true
 osc8_hyperlinks true
 pane_frames false
+on_force_close "detach"
 ui {
   pane_frames {
     rounded_corners false
@@ -180,3 +181,4 @@ web_server_cert "/home/lav/.certs/localhost+3.pem"
 web_server_key "/home/lav/.certs/localhost+3-key.pem"
 enforce_https_on_localhost true
 web_server_port 4430
+

@@ -1,4 +1,4 @@
-{:auto_show true
+{:auto_show false
  :auto_show_delay_ms 0
  :window {:border :none
           :direction_priority {:menu_south [:e

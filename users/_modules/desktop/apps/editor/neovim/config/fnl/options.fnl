@@ -95,9 +95,21 @@
    :incsearch true
    :smartcase true})
 
-; set opts
+(local
+  neovide_opts
+  {:neovide_refresh_rate 240
+   :neovide_cursor_animation_length 0.04
+   :neovide_cursor_trail_size 0.4
+   :neovide_cursor_animate_in_insert_mode false
+   :neovide_scroll_animation_length 0.15
+   :neovide_position_animation_length 0.04
+   :neovide_light_radius 2})
+
 (each [opt val (pairs opts)]
   (tset vim.opt opt val))
+
+(each [opt val (pairs neovide_opts)]
+  (tset vim.g opt val))
 
 ; clipboard os sync
 (v/later (fn [] (set vim.o.clipboard :unnamedplus)))

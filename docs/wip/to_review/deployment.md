@@ -892,6 +892,86 @@ hister list-urls
   failures, check for fail2ban/firewall bans before concluding that sshd is
   down.
 
+## Operational incident: qBittorrent crash and Transmission RPC starvation
+
+### Symptom
+
+- `qbittorrent.service` on `tyrant` was failed after `qbittorrent-nox` exited
+  with `SIGSEGV`; Traefik returned `502` for `torrent.trll.ing`.
+- `transmission.service` was `active (running)`, but local RPC/WebUI probes to
+  `127.0.0.1:9091` timed out and `transmission-remote` hung.
+
+### Evidence
+
+- qBittorrent had `Restart=no`, so the transient segfault left the service
+  down until manually started. A manual start restored local WebUI responses.
+- Transmission showed `Too many open files` warnings under the default
+  `LimitNOFILESoft=1024`, then continued to starve RPC even after raising
+  `LimitNOFILE` and reducing peers/seeding. Strace showed the daemon cycling
+  through peer sockets without accepting the local RPC connection.
+- Conservative Transmission tuning reduced file descriptors, but RPC still did
+  not answer. User chose containment over further aggressive tuning.
+
+### Fix used
+
+- Added `Restart=on-failure` / `RestartSec=10s` to qBittorrent.
+- Disabled `nixarr.transmission` for now and rely on qBittorrent.
+- Deployed only `tyrant` from an isolated worktree to avoid unrelated dirty
+  worktree changes.
+
+### Verification
+
+- Targeted `deploy --skip-checks .#tyrant --log-dir logs --debug-logs
+  --confirm-timeout 1800 --activation-timeout 1800` completed and confirmed.
+- Post-deploy checks:
+  - `qbittorrent.service`: `active/running`, `Result=success`.
+  - `transmission.service`: `LoadState=not-found`, inactive.
+  - `http://127.0.0.1:12011/`: `HTTP 200`.
+  - local Traefik probe with `--resolve torrent.trll.ing:443:127.0.0.1`:
+    `HTTP 200`.
+  - no listener remained on `:9091`.
+
+## Follow-up diagnosis: qBittorrent WebUI login crash
+
+### Symptom
+
+- After the containment deploy, `torrent.trll.ing` showed the qBittorrent login
+  form. A normal login attempt failed, and a browser refresh coincided with
+  another `qbittorrent-nox` `SIGSEGV`. The service recovered due to the new
+  `Restart=on-failure` policy.
+
+### Evidence
+
+- `qbittorrent.service` journal showed qBittorrent `v5.2.0` crashing in
+  `Http::Connection::acceptsGzipEncoding(QString)`, inside Qt string
+  comparison from WebUI HTTP request handling.
+- The deployed config still forces VueTorrent as the alternative WebUI and has
+  no configured `WebUI\Username` or `WebUI\Password_PBKDF2`, so qBittorrent
+  falls back to the temporary `admin` password printed to the journal on each
+  start.
+- The stack trace matches upstream qBittorrent issue `#24038` and fix PR
+  `#24286`: qBittorrent 5.2.0 built against Qt 6.11 can crash while parsing
+  `Accept-Encoding` headers, with NixOS + VueTorrent specifically reported.
+
+### Current interpretation
+
+- The rejected login is likely credentials/config drift: credentials are not
+  declared in Nix, and the NixOS module rewrites `qBittorrent.conf` from
+  `services.qbittorrent.serverConfig` on service start.
+- The crash is a separate upstream qBittorrent/Qt HTTP parsing bug triggered by
+  WebUI requests, not Transmission, Traefik, or bad user credentials.
+
+### Candidate fixes
+
+- Best targeted fix: patch/override qBittorrent with upstream PR `#24286` until
+  nixpkgs carries a fixed release.
+- Temporary mitigation: disable VueTorrent and use qBittorrent's built-in WebUI,
+  but this may only reduce request patterns rather than fix the vulnerable
+  `Accept-Encoding` parser.
+- Separate auth cleanup: declare a stable `WebUI\Username` and
+  `WebUI\Password_PBKDF2` in Nix or via a secret-backed config mechanism.
+
+
 ## Implementation note: Gopeed qBittorrent replacement
 
 - Gopeed secrets now live in the private secrets repo as `secrets/gopeed.yaml`
@@ -909,3 +989,20 @@ hister list-urls
   Gopeed directories/watcher support available through the module, but the
   current nixarr revision has no Lidarr settings-sync module, so adding the
   Lidarr download client remains a manual or future custom API-seeding step.
+
+## Operational incident: Sonarr infinite loading after Gopeed migration
+
+- Symptom: `sonarr.trll.ing` loaded the login page, but the authenticated UI/API
+  path could hang indefinitely.
+- Production evidence on `tyrant`: `sonarr.service` was active, local `/`
+  returned HTTP 302, but `/api/v3/queue/status` timed out after 20 seconds.
+- Sonarr still had a stale enabled `Transmission` download client (`id=1`) in its
+  database alongside the new `Gopeed Sonarr Blackhole` client. Sonarr health
+  reported `Unable to communicate with Transmission`, and journals showed
+  repeated `TransmissionProxy` timeouts even though Transmission is disabled.
+- Remediation: deleted the stale Sonarr Transmission download client through the
+  local Sonarr API and restarted `sonarr.service` to clear the cached client
+  state.
+- Verification: the only remaining Sonarr download client is
+  `Gopeed Sonarr Blackhole`; `/api/v3/queue/status` now returns promptly; public
+  `https://sonarr.trll.ing` returns the Sonarr login page.

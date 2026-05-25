@@ -42,7 +42,7 @@
 (fn get_fennel_root_dir [bufnr on_dir]
   (let [fname (vim.api.nvim_buf_get_name bufnr)
         has_fls_cfg #(= :file (. (or (v/fs-stat (vim.fs.joinpath $1
-                                                                      :flsproject.fnl))
+                                                                 :flsproject.fnl))
                                      {}) :type))]
     (on_dir (or (: (vim.iter (vim.fs.parents fname)) :find has_fls_cfg)
                 (vim.fs.root 0 :.git)))))
@@ -51,44 +51,51 @@
   "Setup language servers."
   (let [schemastore (require :schemastore)
         blink (require :blink.cmp)
-        servers {:basedpyright {:on_attach do_basedpyright_attach
-                                :root_dir get_basedpyright_root_dir
-                                :settings {:basedpyright {:analysis {:autoSearchPaths true
-                                                                     :typeCheckingMode :recommended
-                                                                     :diagnosticMode :workspace
-                                                                     :reportUnknownParameterType false
-                                                                     :reportExplicitAny false}}}}
-                 :ruff {:server_capabilities {:hoverProvider false}}
-                 :clangd {:cmd [:clangd :--background-index]}
-                 :biome {}
-                 :janet_lsp {}
-                 :lua_ls {:cmd [:lua-language-server]
-                          :settings {:Lua {:completion {:callSnippet :Replace}}}}
-                 :fennel_ls {:cmd [:fennel-ls]
-                             :single_file_support true
-                             :root_dir get_fennel_root_dir}
-                 :jsonls {:cmd [:jsonls]
-                          :settings {:json {:schemas (schemastore.json.schemas)}}}
-                 :nixd {:cmd [:nixd]
-                        :settings {:nixd {:nixpkgs {:expr "import <nixpkgs> {}"}
-                                          :formatting {:command [:alejandra]}
-                                          :options {:home-manager {;; In case of using home-manager standalone, replace to:
-                                                                   ;;  "expr": "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.<name>.options"
-                                                                   :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.<name>.options.home-manager.users.type.getSubOptions []"}
-                                                    :nixos {:expr (let [nixos_hostname :lavpc]
-                                                                    (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
-                                                                        nixos_hostname
-                                                                        :.options))}}}}}
-                 ; :taplo {:cmd [:taplo]}
-                 :marksman {:cmd [:marksman]}
-                 :stylua {:cmd [:stylua]}
-                 ; :yamlls {:cmd [:yaml-language-server] :args [:--stdio]}
-                 :nil {:cmd [:nil]
-                       :filetypes [:nix]
-                       :root_markers [:flake.nix :.git]
-                       :settings {:nil {:nix {:flake {:autoArchive true
-                                                      :autoEvalInputs true
-                                                      :nixpkgsInputName :nixpkgs}}}}}}]
+        servers
+        {:basedpyright
+         {:on_attach do_basedpyright_attach
+          :root_dir get_basedpyright_root_dir
+          :settings {:basedpyright {:analysis {:autoSearchPaths true
+                                               :typeCheckingMode :recommended
+                                               :diagnosticMode :workspace
+                                               :reportUnknownParameterType false
+                                               :reportExplicitAny false}}}}
+         :ruff {:server_capabilities {:hoverProvider false}}
+         :clangd {:cmd [:clangd :--background-index]}
+         :biome {}
+         :janet_lsp {}
+         ; :rust_analyzer {}
+         :nim_langserver {}
+         :lua_ls {:cmd [:lua-language-server]
+                  :settings {:Lua {:completion {:callSnippet :Replace}}}}
+         :fennel_ls {:cmd [:fennel-ls]
+                     :single_file_support true
+                     :root_dir get_fennel_root_dir}
+         :jsonls {:cmd [:jsonls]
+                  :settings {:json {:schemas (schemastore.json.schemas)}}}
+         :nixd
+         {:cmd [:nixd]
+          :settings
+          {:nixd
+           {:nixpkgs {:expr "import <nixpkgs> {}"}
+            :formatting {:command [:alejandra]}
+            :options {:home-manager {;; In case of using home-manager standalone, replace to:
+                                     ;;  "expr": "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.<name>.options"
+                                     :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.<name>.options.home-manager.users.type.getSubOptions []"}
+                      :nixos {:expr (let [nixos_hostname :lavpc]
+                                      (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
+                                          nixos_hostname
+                                          :.options))}}}}}
+         ; :taplo {:cmd [:taplo]}
+         :marksman {:cmd [:marksman]}
+         :stylua {:cmd [:stylua]}
+         ; :yamlls {:cmd [:yaml-language-server] :args [:--stdio]}
+         :nil {:cmd [:nil]
+               :filetypes [:nix]
+               :root_markers [:flake.nix :.git]
+               :settings {:nil {:nix {:flake {:autoArchive true
+                                              :autoEvalInputs true
+                                              :nixpkgsInputName :nixpkgs}}}}}}]
     (each [server config (pairs servers)]
       (vim.lsp.config server config)
       (vim.lsp.config server (blink.get_lsp_capabilities))

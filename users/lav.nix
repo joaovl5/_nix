@@ -200,23 +200,12 @@ in {
           ## launcher
           fuzzel # backup
           ## docs
-          libreoffice
+          # libreoffice
           ## file manager
           thunar
           ## settings
           nwg-look
           pwvucontrol
-
-          ## programming
-          dbeaver-bin # db ide thing
-          ### rust
-          (with fenix;
-            combine [
-              default.toolchain
-              latest.rust-src
-            ])
-          ### js :(
-          nodejs
 
           ## vms
           virt-manager

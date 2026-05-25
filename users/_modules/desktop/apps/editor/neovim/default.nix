@@ -59,6 +59,11 @@
       to = "~/.config/nvim";
     };
 
+    hybrid-links.links.neovide = {
+      from = ./neovide;
+      to = "~/.config/neovide";
+    };
+
     xdg.dataFile."fennel-ls/docsets/nvim.lua".source = inputs.fennel-ls-nvim-docs + "/nvim.lua";
 
     programs.neovim = {
@@ -89,72 +94,14 @@
           fennel
         ];
       extraPackages = with pkgs; [
-        (
-          with fenix;
-            complete.withComponents [
-              "cargo"
-              "clippy"
-              "rust-src"
-              "rustc"
-              "rustfmt"
-            ]
-        )
-        rust-analyzer-nightly
-        tree-sitter
         lua5_1
         luarocks
       ];
     };
 
     home.packages = with pkgs; [
-      # deps
-      fd
-      ripgrep
-      tree-sitter
-      curl
-      imagemagick
+      neovide
       neovim-remote
-
-      # language support
-      gitleaks
-      keep-sorted
-      prettierd
-      ## python
-      ty
-      basedpyright
-      ruff
-      (python3.withPackages (
-        ps:
-          with ps; [
-            debugpy
-          ]
-      ))
-      ## js
-      eslint_d
-      biome
-      typescript-language-server
-      typescript
-      vscode-js-debug
-      ## nix
-      alejandra
-      nixd
-      nil
-      statix
-      ## toml and friends
-      taplo
-      yaml-language-server
-      jsonfmt
-      yamlfmt
-      ## shell and friends
-      fish-lsp
-      shfmt
-      ## others
-      kulala-fmt
-      marksman
-      dockerfmt
-      kdlfmt
-      sqruff
-      rumdl
     ];
   };
 }

@@ -1,0 +1,7 @@
+title-hidden = true
+
+[font]
+  normal = ["Kode Mono"]
+  bold   = ["BigBlueTermPlus Nerd Font Mono"]
+  italic = ["RecMonoSmCasual Nerd Font Mono"]
+  size   = 15

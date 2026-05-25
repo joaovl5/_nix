@@ -1,6 +1,11 @@
-(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(import-macros {: do-req : let-req : plugin : p! : key} :./lib/init-macros)
 
-[{:dir _G.plugin_dirs.blink-pairs
+[(p!
+   :zeioth/garbage-day.nvim
+   (event :VeryLazy)
+   (opts {:wakeup_delay 500
+          :grace_period (* 60 10)}))
+ {:dir _G.plugin_dirs.blink-pairs
   :name :blink.pairs
   :event :VeryLazy
   :opts {:mappings {:enabled true :cmdline true}
@@ -8,5 +13,4 @@
                       :cmdline true
                       :matchparen {:enabled true
                                    :cmdline true
-                                   :include_surrounding false}}}}
- (plugin :folke/ts-comments.nvim {:opts {} :event :VeryLazy})]
+                                   :include_surrounding false}}}}]

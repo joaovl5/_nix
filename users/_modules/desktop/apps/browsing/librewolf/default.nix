@@ -1,10 +1,12 @@
 {
   hm = {
+    inputs,
     pkgs,
     lib,
     ...
   } @ args: let
     profile_name = "lav";
+    librewolf_pkg = inputs.self.pkgs.${pkgs.stdenv.hostPlatform.system}."unstable-small".librewolf;
 
     allowed_sites = import ./allowed-sites.nix args;
   in {
@@ -25,7 +27,7 @@
         "en-GB"
         "pt-BR"
       ];
-      package = pkgs.librewolf.override {
+      package = librewolf_pkg.override {
         # firefox/wrapper.nix args
         extraPrefs = lib.readFile ./prefs.js;
       };

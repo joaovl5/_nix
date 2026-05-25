@@ -4,7 +4,7 @@ let
     # keep-sorted start
     (import ./git.nix)
     (import ./langs)
-    (import ./vscode.nix)
+    # (import ./vscode.nix)
     # keep-sorted end
   ];
 in

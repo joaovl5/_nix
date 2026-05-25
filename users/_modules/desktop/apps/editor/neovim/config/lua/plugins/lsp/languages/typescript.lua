@@ -13,4 +13,4 @@ local function _2_()
   end
   return v_2fautocmd("FileType", {pattern = js_ts_filetypes, once = true, callback = _3_})
 end
-return {"pmizio/typescript-tools.nvim", dependencies = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}, lazy = true, init = _2_, opts = {}}
+return {{"pmizio/typescript-tools.nvim", dependencies = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}, lazy = true, init = _2_, opts = {}}, {"folke/ts-comments.nvim", opts = {}, event = "VeryLazy"}}

@@ -1,6 +1,6 @@
 ---
 name: neovim-configuration
-description: Use when editing this repo's Neovim config or researching Neovim behavior with help pages; covers source boundaries, help-first research, the recompile wrapper, and pitfalls
+description: Use BEFORE starting work/research on this repo's Neovim config or neovim in general
 ---
 
 # Neovim Configuration
@@ -20,8 +20,9 @@ description: Use when editing this repo's Neovim config or researching Neovim be
 
 - **Prefer help pages:** for Neovim behavior, options, commands, Lua APIs, and
   plugin docs, search installed help before web search
-- **Helper CLI:** run `uv run skill://neovim-configuration/scripts/nvim-help.py --help`
-  for tag lookup, text search, and tag-context dumps
+- **Helper CLI:** run
+  `uv run skill://neovim-configuration/scripts/nvim-help.py --help` for tag
+  lookup, text search, and tag-context dumps
 - **Reference:** detailed workflow, raw commands, and pitfalls live in
   `references/help-search.md`
 - **Runtime Lua helper:** for repo-configured headless Lua probes, run
@@ -85,9 +86,9 @@ description: Use when editing this repo's Neovim config or researching Neovim be
 
 - **Preferred wrapper:** from `.agents/skills/neovim-configuration`, run
   `uv run scripts/recompile-nfnl.py`
-- **Startup isolation:** the wrapper uses a temporary `XDG_CONFIG_HOME`, `-u NONE`,
-  and an explicit nfnl runtimepath so stale generated Lua cannot load before
-  recompilation
+- **Startup isolation:** the wrapper uses a temporary `XDG_CONFIG_HOME`,
+  `-u NONE`, and an explicit nfnl runtimepath so stale generated Lua cannot
+  load before recompilation
 - **Repo root:** the helper is skill-local and finds the repo root by
   searching upward for `flake.nix`, so caller cwd does not matter
 - **Project anchor:** the default anchor is
@@ -108,14 +109,15 @@ description: Use when editing this repo's Neovim config or researching Neovim be
 ## Quick Neovim checks
 
 - **Compile first:** after Fennel edits, run
-  `uv run skill://neovim-configuration/scripts/recompile-nfnl.py` from the repo
+  `uv run skill://neovim-configuration/scripts/recompile-nfnl.py` from the
+  repo
 - **Startup smoke:** run `nvim --headless +qa` for a fast config load check
 - **Eager smoke:** when lazy/eager loading changes, run
   `NVIM_EAGER_PLUGINS=1 nvim --headless "+lua local s=require('lazy').stats(); if s.loaded ~= s.count then error(('lazy loaded %d/%d plugins'):format(s.loaded, s.count)) end; print(('lazy loaded %d/%d plugins'):format(s.loaded, s.count))" +qa`
 - **Lua probe:** run arbitrary Lua against this repo config with
   `uv run skill://neovim-configuration/scripts/nvim-lua.py 'print(vim.inspect(vim.o.cmdheight))'`
-  - use `--defer-ms 200` when checking lazy/which-key state scheduled after startup
-
+  - use `--defer-ms 200` when checking lazy/which-key state scheduled after
+    startup
 
 ## Common maintenance tasks
 

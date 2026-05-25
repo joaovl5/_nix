@@ -80,7 +80,7 @@ local function _20_(...)
   local _18_ = require("lib.plugins")
   local _19_ = require("lib.keys")
   local spec_24_auto = {}
-  for __25_auto, attrs_26_auto in ipairs({_18_.lazy(false), _18_.version("*"), _18_.opts({options = {extra_ui = true, win_borders = "solid", basic = false}, mappings = {basic = true, windows = true, move_with_alt = true}})}) do
+  for __25_auto, attrs_26_auto in ipairs({_18_.lazy(false), _18_.version("*"), _18_.opts({options = {extra_ui = true, win_borders = "solid", basic = false}, mappings = {basic = true, move_with_alt = true, windows = false}})}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end

@@ -1,6 +1,6 @@
 {
   hm = {pkgs, ...}: let
-    pkg = pkgs.emacs-unstable;
+    pkg = pkgs.emacs;
     # pkg = pkgs.emacs-unstable-pgtk.overrideAttrs (old: {
     #   configureFlags =
     #     old.configureFlags

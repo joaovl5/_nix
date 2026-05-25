@@ -2,6 +2,7 @@
 
 (k.register-group! :tab "Tab" (k.l :q) (k.icon "󰓪 " :blue))
 (k.register-group! :window "Window" (k.l :w) (k.icon "󰕞 " :cyan))
+(k.register-group! :session "Session" (k.l :ws) (k.icon "X " :cyan))
 (k.register-group! :buffer "Buffer" (k.l :b) (k.icon "󱔼 " :azure))
 (k.register-group! :fuzzy "Fuzzy" (k.l :f) (k.icon "🝓 " :yellow))
 (k.register-group! :git "Git" (k.l :g) (k.icon " " :orange))
@@ -15,5 +16,6 @@
 (k.register-group! :stats "Stats" (k.l :t) (k.icon "X " :grey))
 (k.register-group! :action_1 "Actions (1)" ";" (k.icon "X " :red))
 (k.register-group! :action_2 "Actions (2)" "t" (k.icon "X " :red))
+(k.register-group! :marks "Marks" "-" (k.icon "X " :red))
 
 true

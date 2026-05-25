@@ -18,6 +18,12 @@
 
 ; Window manipulation
 (keys!
+  (bind :<C-h> (cmd "wincmd h") (desc "Focus left") (m :n :t))
+  (bind :<C-j> (cmd "wincmd j") (desc "Focus down") (m :n :t))
+  (bind :<C-k> (cmd "wincmd k") (desc "Focus up") (m :n :t))
+  (bind :<C-l> (cmd "wincmd l") (desc "Focus right") (m :n :t)))
+
+(keys!
   (group
     :action_1
     (bind :h (cmd "wincmd H") (desc "Move left"))
@@ -34,6 +40,10 @@
     (bind :l (cmd :tabnext) (desc "Next"))
     (bind :h (cmd :tabprev) (desc "Prev"))
     (bind :d (cmd :tabclose) (desc "Close"))))
+
+(keys!
+  (group
+    :marks))
 
 ; # LEADER
 ; ## Tabs

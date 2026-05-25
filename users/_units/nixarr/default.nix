@@ -114,6 +114,7 @@ in
       };
     };
 
+
     services = {
       flaresolverr = {
         inherit (opts.flaresolverr) enable;

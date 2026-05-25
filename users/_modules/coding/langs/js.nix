@@ -19,8 +19,17 @@
       enable = true;
     };
     home.packages = with pkgs; [
+      # keep-sorted start
+      biome
+      eslint
+      eslint_d
       node_pkg
+      nodejs
+      typescript
       typescript-language-server
+      vscode-js-debug
+
+      # keep-sorted end
     ];
   };
 }

@@ -9,13 +9,13 @@
 (fn transform_items [k_icon k_name]
   (partial transform_items_base k_icon k_name))
 
-(let [sources [:conv_commit
-               :lsp
+(let [sources [:lsp
                :path
                :snippets
                :buffer
                :env
                :git
+               :conv_commit
                :grep]
       debug_sources (let [result [:dap]]
                       (each [_ source (ipairs sources)]

@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(fn get_blink_config [comp_icon comp_kind comp_label]
+(fn get_blink_config [comp_icon comp_kind]
   (let [documentation (require :plugins.lsp.completions._documentation)
         keymap (require :plugins.lsp.completions._keymap)
         kind_icons (require :plugins.lsp.completions._icons)
@@ -10,15 +10,17 @@
     {:keymap keymap
      :appearance {:nerd_font_variant :mono
                   :kind_icons kind_icons}
-     :completion {:ghost_text {:enabled true}
+     :completion {:ghost_text {:enabled false}
                   :keyword {:range :full}
                   :accept {:auto_brackets {:enabled false}}
-                  :list {:selection {:preselect true}}
+                  :list {:selection {:preselect true}
+                         :max_items 250}
                   :documentation documentation
-                  :menu (menu comp_icon comp_kind comp_label)}
+                  :menu (menu comp_icon comp_kind)}
      :sources sources
      :signature signature
      :cmdline {:keymap {:preset :inherit}
+               :sources [:buffer :cmdline]
                :completion {:menu {:auto_show true}}}
      :fuzzy {;; prioritize exact matches
              :sorts [:exact
@@ -29,7 +31,6 @@
 
 (fn setup_blink []
   (let [blink (require :blink.cmp)
-        colorful_menu (require :colorful-menu)
         mini_icons (require :mini.icons)
         _icon_data (fn [ctx]
                      (mini_icons.get :lsp ctx.kind))
@@ -39,12 +40,9 @@
         _icon (fn [ctx]
                 (let [[icon _ _] (_icon_data ctx)]
                   (.. (or icon ctx.kind_icon) ctx.icon_gap)))
-        _cm_text (fn [ctx] (colorful_menu.blink_components_text ctx))
-        _cm_hl (fn [ctx] (colorful_menu.blink_components_highlight ctx))
         comp_icon {:text _icon :highlight _icon_hl}
-        comp_kind {:highlight _icon_hl}
-        comp_label {:text _cm_text :highlight _cm_hl}]
-    (blink.setup (get_blink_config comp_icon comp_kind comp_label))))
+        comp_kind {:highlight _icon_hl}]
+    (blink.setup (get_blink_config comp_icon comp_kind))))
 
 [{:dir _G.plugin_dirs.blink-cmp
   :event :InsertEnter

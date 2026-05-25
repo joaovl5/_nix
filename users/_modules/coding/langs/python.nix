@@ -7,6 +7,13 @@
     home.packages = with pkgs; [
       basedpyright
       ruff
+      ty
+      (python3.withPackages (
+        ps:
+          with ps; [
+            debugpy
+          ]
+      ))
     ];
   };
 }

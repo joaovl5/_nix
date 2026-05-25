@@ -2,8 +2,9 @@
 (local {: v/n : v/later} (require :lib/nvim))
 
 (fn handle_conf [x]
-  (i! "Found " x.conflicts "conflicts!")
-  (v/later #(do-req :resolve :list_conflicts)))
+  (i! "Found conflicts!"))
+
+; (v/later #(do-req :resolve :list_conflicts)))
 
 [(p!
    ; git conflict resolver
@@ -44,7 +45,8 @@
      ; TODO: change to kitty after migratinf off of foot to wezterm
      {:graph_style :unicode
       :process_spinner true
-      :commit_editor {:staged_diff_split_kind :auto}}))
+      :commit_editor {:staged_diff_split_kind :auto}})
+   {:enabled false})
  (p!
    :lewis6991/gitsigns.nvim
    (opts {})

@@ -2,6 +2,7 @@
 local k = require("lib.keys")
 k["register-group!"]("tab", "Tab", k.l("q"), k.icon("\243\176\147\170 ", "blue"))
 k["register-group!"]("window", "Window", k.l("w"), k.icon("\243\176\149\158 ", "cyan"))
+k["register-group!"]("session", "Session", k.l("ws"), k.icon("X ", "cyan"))
 k["register-group!"]("buffer", "Buffer", k.l("b"), k.icon("\243\177\148\188 ", "azure"))
 k["register-group!"]("fuzzy", "Fuzzy", k.l("f"), k.icon("\240\159\157\147 ", "yellow"))
 k["register-group!"]("git", "Git", k.l("g"), k.icon("\239\132\166 ", "orange"))
@@ -15,4 +16,5 @@ k["register-group!"]("merge", "Merge", k.l("u"), k.icon("X ", "grey"))
 k["register-group!"]("stats", "Stats", k.l("t"), k.icon("X ", "grey"))
 k["register-group!"]("action_1", "Actions (1)", ";", k.icon("X ", "red"))
 k["register-group!"]("action_2", "Actions (2)", "t", k.icon("X ", "red"))
+k["register-group!"]("marks", "Marks", "-", k.icon("X ", "red"))
 return true

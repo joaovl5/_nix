@@ -52,6 +52,7 @@
  :prio (opt :priority)
  :priority (opt :priority)
  :version (opt :version)
+ :enabled (opt :enabled)
  :cmd (opt :cmd)
  :lazy (opt :lazy)
  :config (opt :config)

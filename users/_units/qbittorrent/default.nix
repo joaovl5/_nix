@@ -43,6 +43,10 @@ in
                 };
               };
             };
+            systemd.services.qbittorrent.serviceConfig = {
+              Restart = "on-failure";
+              RestartSec = "10s";
+            };
             system.activationScripts.ensure_data_directory_qbittorrent = ''
               echo "[!] Ensuring Qbittorrent directories and symlinks"
               ln -sfn ${internal_data_dir} ${computed_data_dir}
