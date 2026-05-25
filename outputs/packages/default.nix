@@ -18,11 +18,13 @@ in {
         (local_packages)
         degoog
         gopeed-web
+        lidarr-plugins
         kaneo
         octodns-pihole
         pihole6api
         rumdl
         sane_fnlfmt
+        tubifarry
         vm_launcher
         ;
     }

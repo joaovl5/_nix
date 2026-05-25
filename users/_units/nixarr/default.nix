@@ -2,12 +2,29 @@
   mylib,
   config,
   inputs,
+  pkgs,
   ...
 }: let
   my = mylib.use config;
   o = my.options;
   u = my.units;
   inherit (o) t;
+  local_packages = import ../../../packages {inherit pkgs inputs;};
+  install_tubifarry_plugin = pkgs.writeShellScript "install-tubifarry-plugin" ''
+    set -euo pipefail
+
+    plugin_root="${config.nixarr.lidarr.stateDir}/plugins"
+    owner_dir="$plugin_root/TypNull"
+    target_dir="$owner_dir/Tubifarry"
+    source_dir="${local_packages.tubifarry}/share/lidarr/plugins/TypNull/Tubifarry"
+
+    ${pkgs.coreutils}/bin/install -d -m 0750 -o lidarr -g media "$plugin_root" "$owner_dir"
+    ${pkgs.coreutils}/bin/rm -rf -- "$target_dir"
+    ${pkgs.coreutils}/bin/install -d -m 0750 -o lidarr -g media "$target_dir"
+    ${pkgs.coreutils}/bin/cp -R -- "$source_dir"/. "$target_dir"/
+    ${pkgs.coreutils}/bin/chown -R lidarr:media "$target_dir"
+    ${pkgs.coreutils}/bin/chmod -R u=rwX,g=rX,o= "$target_dir"
+  '';
 in
   o.module "unit.nixarr" (with o; {
     enable = toggle "Enable -arr services" false;
@@ -91,6 +108,7 @@ in
       lidarr = {
         enable = true;
         inherit (opts.lidarr.endpoint) port;
+        package = local_packages.lidarr-plugins;
       };
 
       radarr = {
@@ -111,6 +129,16 @@ in
       bazarr = {
         enable = true;
         inherit (opts.bazarr.endpoint) port;
+      };
+    };
+
+    systemd.services.lidarr-install-tubifarry = {
+      description = "Install the Tubifarry Lidarr plugin";
+      before = ["lidarr.service"];
+      requiredBy = ["lidarr.service"];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = install_tubifarry_plugin;
       };
     };
 

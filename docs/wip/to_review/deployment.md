@@ -1006,3 +1006,40 @@ hister list-urls
 - Verification: the only remaining Sonarr download client is
   `Gopeed Sonarr Blackhole`; `/api/v3/queue/status` now returns promptly; public
   `https://sonarr.trll.ing` returns the Sonarr login page.
+
+## Implementation note: Lidarr Tubifarry plugin support
+
+- `unit.nixarr` now uses the repo-local `lidarr-plugins` package instead of
+  `pkgs.lidarr` for Lidarr on `tyrant`.
+- `lidarr-plugins` packages upstream Lidarr `3.1.2.4938` from the official
+  `Lidarr.develop.3.1.2.4938.linux-core-x64.tar.gz` release artifact because
+  the previously deployed `pkgs.lidarr` `3.1.0.4875` lacked the
+  `System -> Plugins` UI/API.
+- `tubifarry` packages upstream Tubifarry `2.1.0` from
+  `Tubifarry-v2.1.0.net8.0.zip`.
+- `lidarr-install-tubifarry.service` installs Tubifarry into
+  `/data/.state/nixarr/lidarr/plugins/TypNull/Tubifarry` before
+  `lidarr.service` starts, so the plugin is reproducible across restarts and
+  deployments.
+- Post-deploy verification showed Lidarr `3.1.2.4938`, active
+  `lidarr.service`, present Tubifarry plugin files, and
+  `/api/v1/system/plugins` returning Tubifarry `2.1.0.0`.
+
+## Implementation note: slskd service for Lidarr/Tubifarry
+
+- Added `unit.slskd` and enabled it on `tyrant`.
+- The service uses `pkgs.slskd`, binds the web/API UI to local port `55090`,
+  and publishes it through the `soulseek.trll.ing` vhost target.
+- The Soulseek peer listen port is `50300` and is opened in the firewall.
+- slskd reads `secrets/slskd.yaml` keys: `slskd_api_key`,
+  `slskd_username`, `slskd_password`, `slskd_soulseek_username`, and
+  `slskd_soulseek_password`.
+- Completed downloads go to `/data/media/downloads/lidarr`; incomplete
+  downloads go to `/data/media/downloads/slskd-incomplete`.
+- The default share directory is `/data/media/library/music`, matching the old
+  Soularr-era behavior. The slskd-specific secrets were split out of
+  `secrets/soularr.yaml` into `secrets/slskd.yaml`.
+- Post-deploy verification showed `slskd.service` active, local HTTP and API
+  probes on `127.0.0.1:55090` returning HTTP 200, public
+  `https://soulseek.trll.ing` returning the slskd app shell, and successful
+  login to the Soulseek server after the initial share scan completed.
