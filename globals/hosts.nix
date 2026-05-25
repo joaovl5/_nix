@@ -95,6 +95,10 @@ in rec {
           enable = true;
         };
 
+        "unit.slskd" = {
+          enable = true;
+        };
+
         "unit.qbittorrent" = {
           enable = false;
         };

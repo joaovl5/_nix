@@ -21,6 +21,7 @@ in {
     ./postgres
     ./qbittorrent
     ./reverse-proxy
+    ./slskd
     ./syncthing
     ./wireguard
     # keep-sorted end

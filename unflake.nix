@@ -497,10 +497,10 @@ let
       type = "git";
       url = "ssh://git@github.com/joaovl5/__secrets.git";
       ref = "main";
-      rev = "39cfeb98f6aafeda68c3c63438bb5997aa80028d";
-      revCount = 49;
-      lastModified = 1779711172;
-      narHash = "sha256-Y1dvDnZCZT+ke59A+Iz1QRT3/upZypKAWB+rK2HjXWs=";
+      rev = "245c7dd1a2b812c88fc7c756a359ef14fed09369";
+      revCount = 50;
+      lastModified = 1779718178;
+      narHash = "sha256-qFItjP082LeOETdLguSob+gViFT3X0puFQm9Q48kjkw=";
     };
     unflake_git_ssh---git-git-trll-ing-mirrors-deploy-rs-git_ref_master_shallow = {
       type = "git";
