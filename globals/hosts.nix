@@ -91,8 +91,12 @@ in rec {
           enable = true;
         };
 
-        "unit.qbittorrent" = {
+        "unit.gopeed" = {
           enable = true;
+        };
+
+        "unit.qbittorrent" = {
+          enable = false;
         };
 
         "unit.forgejo" = {

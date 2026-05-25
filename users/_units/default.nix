@@ -10,6 +10,7 @@ in {
     ./fail2ban
     ./forgejo
     ./fxsync
+    ./gopeed
     ./hermes-agent
     ./hister
     ./kaneo

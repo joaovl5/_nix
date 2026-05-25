@@ -79,9 +79,7 @@ in
       };
       # Torrents
       transmission = {
-        enable = true;
-        vpn.enable = opts.vpn.enable;
-        peerPort = opts.torrent.peer_port;
+        enable = false;
       };
 
       # Jellyfin

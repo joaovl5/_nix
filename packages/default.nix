@@ -7,6 +7,7 @@
   beads-web = pkgs.callPackage ./beads-web {};
   degoog = pkgs.callPackage ./degoog {inherit inputs;};
   frag = pkgs.callPackage ./frag {inherit inputs;};
+  gopeed-web = pkgs.callPackage ./gopeed-web {};
   kaneo = pkgs.callPackage ./kaneo {inherit inputs;};
   mardi-gras = pkgs.callPackage ./mardi-gras {inherit inputs;};
   pihole6api = pkgs.callPackage ./pihole6api {inherit inputs;};
@@ -22,6 +23,7 @@ in {
     beads-web
     degoog
     frag
+    gopeed-web
     kaneo
     mardi-gras
     pihole6api

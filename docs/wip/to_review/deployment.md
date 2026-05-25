@@ -891,3 +891,21 @@ hister list-urls
 - If a probe returns `Connection refused` after earlier authentication
   failures, check for fail2ban/firewall bans before concluding that sshd is
   down.
+
+## Implementation note: Gopeed qBittorrent replacement
+
+- Gopeed secrets now live in the private secrets repo as `secrets/gopeed.yaml`
+  with keys `gopeed_web_password` and `gopeed_api_token`.
+- `unit.gopeed` reads those secrets through SOPS and exposes Gopeed Web on the
+  existing `torrent.trll.ing` endpoint / internal port `12011`.
+- qBittorrent is disabled on `tyrant`, but its unit is kept in the repo for
+  rollback.
+- Transmission remains disabled in `unit.nixarr`.
+- The qBittorrent payload archive target is
+  `/srv/torrents/qbittorrent-archive`; this is intentionally outside the
+  `/home/tyrant` backup snapshot.
+- Radarr and Sonarr are declaratively configured with Torrent Blackhole clients
+  pointing at Gopeed-managed incoming/completed folders. Lidarr has matching
+  Gopeed directories/watcher support available through the module, but the
+  current nixarr revision has no Lidarr settings-sync module, so adding the
+  Lidarr download client remains a manual or future custom API-seeding step.

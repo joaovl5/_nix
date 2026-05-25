@@ -17,6 +17,7 @@ in {
       inherit
         (local_packages)
         degoog
+        gopeed-web
         kaneo
         octodns-pihole
         pihole6api
