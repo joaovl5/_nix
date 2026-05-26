@@ -1,7 +1,5 @@
 """Installer context and configuration."""
 
-from __future__ import annotations
-
 from attrs import define
 from coisas.command import (
   Command,
@@ -21,6 +19,8 @@ class InstallerError(Exception):
 
 @define(frozen=True)
 class SecretsEncryptionParams:
+  """Disk-encryption secret metadata derived from the secrets repository."""
+
   repo_url: str
   sops_file: str
   sops_file_key: str
@@ -29,6 +29,8 @@ class SecretsEncryptionParams:
 
 @define(frozen=True)
 class InstallerContext:
+  """Shared immutable configuration for all installer steps."""
+
   flake: RepositoryURI
   flake_host: str
   secrets: RepositoryURI | None
@@ -48,13 +50,16 @@ class InstallerContext:
 
   @property
   def do_ssh(self) -> CommandWrapper:
+    """Return the SSH wrapper for remote commands."""
     return SSHWrapper(config=self.ssh_config)
 
   @property
   def do_sudo(self) -> CommandWrapper:
+    """Return the sudo wrapper when the target requires elevation."""
     return SudoWrapper() if self.use_sudo else PassthroughWrapper()
 
   def maybe_sudo(self, cmd: Command) -> Command:
+    """Wrap a command with sudo only when the context requires it."""
     return SudoCommand(inner=cmd) if self.use_sudo else cmd
 
   @property

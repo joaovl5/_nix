@@ -1,5 +1,3 @@
-# pyright: reportUnusedCallResult=false
-
 import subprocess
 from contextlib import contextmanager
 from typing import Protocol
@@ -15,14 +13,20 @@ from coisas.command import Command
 
 
 class AppendLineFn(Protocol):
+  """Append a rendered line to the active panel."""
+
   def __call__(self, line: str | Text, style: str | None = None) -> int: ...
 
 
 class SetFailedFn(Protocol):
+  """Mark the active panel as failed."""
+
   def __call__(self) -> None: ...
 
 
 class UpdateLineFn(Protocol):
+  """Replace a rendered line within the active panel."""
+
   def __call__(
     self,
     index: int,
@@ -32,6 +36,8 @@ class UpdateLineFn(Protocol):
 
 
 class PanelWriterLike(Protocol):
+  """Write incremental status updates into a live panel."""
+
   def append_line(
     self, line: str | Text, style: str | None = None
   ) -> int: ...
@@ -46,6 +52,8 @@ class PanelWriterLike(Protocol):
 
 @define
 class PanelWriter:
+  """Concrete callbacks for updating a live status panel."""
+
   append_line: AppendLineFn
   update_line: UpdateLineFn
   set_failed: SetFailedFn
@@ -53,6 +61,8 @@ class PanelWriter:
 
 @define
 class CLI:
+  """Render installer progress and command output in the terminal."""
+
   console: Console
   error_cls: type[Exception] = RuntimeError
 
@@ -84,6 +94,7 @@ class CLI:
     prelude: list[str],
     max_lines: int | None = None,
   ):
+    """Create a live panel session for one logical installer phase."""
     lines: list[Text] = []
     for line in prelude:
       lines.append(Text(line, style="dim"))
@@ -233,6 +244,7 @@ class CLI:
 
   def run_command(
     self,
+    *,
     command: Command,
     description: str,
     writer: PanelWriterLike | None = None,
@@ -240,11 +252,7 @@ class CLI:
     error_cls: type[Exception] | None = None,
     ok_codes: tuple[int, ...] = (0,),
   ) -> int:
-    """Run a command and pretty-print the result. Returns exit code.
-
-    If error_msg is set and the exit code is not in ok_codes,
-    raises error_cls(error_msg). error_cls defaults to self.error_cls.
-    """
+    """Run a command and pretty-print the result."""
     if error_cls is None:
       error_cls = self.error_cls
     command_line = command.render()

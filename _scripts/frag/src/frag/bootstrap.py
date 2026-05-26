@@ -1,11 +1,11 @@
-from __future__ import annotations
-
-import argparse
 import json
 import os
 import shutil
+from collections.abc import Sequence
 from enum import StrEnum
 from pathlib import Path
+
+from cyclopts import App
 
 from frag import runtime_contract, shared_assets_contract
 
@@ -37,8 +37,12 @@ _REQUIRED_DIRECTORIES: tuple[Path, ...] = (
   Path("config/opencode"),
 )
 
+bootstrap_app = App(name="frag-bootstrap", result_action="return_value")
+
 
 class MappingKind(StrEnum):
+  """Describe whether a home mapping comes from profile or shared state."""
+
   PROFILE = "profile"
   SHARED = "shared"
 
@@ -57,9 +61,7 @@ _PROFILE_HOME_VIEW_MAPPINGS: tuple[tuple[Path, MappingKind, Path], ...] = (
 )
 
 
-def _shared_home_view_mappings() -> tuple[
-  tuple[Path, MappingKind, Path], ...
-]:
+def _shared_home_view_mappings() -> tuple[tuple[Path, MappingKind, Path], ...]:
   return tuple(
     (destination_relative, MappingKind.SHARED, state_shared_relative)
     for destination_relative, state_shared_relative in shared_assets_contract.shared_home_view_mappings()
@@ -102,7 +104,6 @@ def _ensure_json_file(path: Path, payload: dict[str, object]) -> None:
 
 
 def _write_bootstrap_token(state_profile: Path, token: str) -> None:
-
   token_path = runtime_contract.bootstrap_token_path(state_profile)
   _ensure_directory(token_path.parent)
   token_path.write_text(f"{token}\n")
@@ -221,9 +222,7 @@ def _write_identity_overlay_contract(
   passwd_path = _RUNTIME_IDENTITY_ROOT / "passwd"
   group_path = _RUNTIME_IDENTITY_ROOT / "group"
   exec_path = _RUNTIME_IDENTITY_ROOT / "exec"
-  passwd_overlay_path = (
-    _RUNTIME_IDENTITY_CONTAINER_ROOT / "passwd"
-  ).as_posix()
+  passwd_overlay_path = (_RUNTIME_IDENTITY_CONTAINER_ROOT / "passwd").as_posix()
   group_overlay_path = (_RUNTIME_IDENTITY_CONTAINER_ROOT / "group").as_posix()
   _ensure_directory(passwd_path.parent)
   passwd_path.parent.chmod(0o755)
@@ -284,6 +283,7 @@ def initialize_profile_environment(
   home: Path,
   metadata: dict[str, str],
 ) -> None:
+  """Create the persisted profile directories, config files, and home view."""
   _ensure_directory(state_profile)
   for relative_directory in _REQUIRED_DIRECTORIES:
     _ensure_directory(state_profile / relative_directory)
@@ -300,16 +300,11 @@ def initialize_profile_environment(
   persistent_home = _persistent_home_root(state_profile)
   _ensure_home_alignment(home=home, persistent_home=persistent_home)
   _ensure_ephemeral_cache(persistent_home)
-  for (
-    destination_relative,
-    mapping_kind,
-    source_relative,
-  ) in _home_view_mappings():
-    root = (
-      state_profile if mapping_kind == MappingKind.PROFILE else state_shared
-    )
+  for destination_relative, mapping_kind, source_relative in _home_view_mappings():
+    root = state_profile if mapping_kind == MappingKind.PROFILE else state_shared
     _symlink_view_entry(
-      persistent_home / destination_relative, root / source_relative
+      persistent_home / destination_relative,
+      root / source_relative,
     )
 
 
@@ -326,12 +321,8 @@ def _requested_owner_from_env() -> tuple[int, int] | None:
     raise RuntimeError("bootstrap ownership target must be numeric") from exc
 
 
-def _requested_supplementary_gids_from_env(
-  *, primary_gid: int
-) -> tuple[int, ...]:
-  raw_gids = os.environ.get(
-    runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, ""
-  )
+def _requested_supplementary_gids_from_env(*, primary_gid: int) -> tuple[int, ...]:
+  raw_gids = os.environ.get(runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, "")
   if not raw_gids.strip():
     return ()
   supplementary_gids: list[int] = []
@@ -366,24 +357,35 @@ def _chown_tree(root: Path, *, uid: int, gid: int) -> None:
       os.chown(file_path, uid, gid, follow_symlinks=False)
 
 
-def _build_parser() -> argparse.ArgumentParser:
-  parser = argparse.ArgumentParser(prog="frag-bootstrap")
-  parser.add_argument("--state-profile", default="/state/profile")
-  parser.add_argument("--state-shared", default="/state/shared")
-  parser.add_argument("--home", default="/home/agent")
-  parser.add_argument("--profile-name", required=True)
-  parser.add_argument("--profile-image", required=True)
-  parser.add_argument("--workspace-root", required=True)
-  parser.add_argument("--image-ref", required=True)
-  parser.add_argument("--shared-assets-identity", required=True)
-  parser.add_argument("--keepalive", nargs=argparse.REMAINDER)
-  return parser
+def _normalize_keepalive_tokens(argv: Sequence[str] | None) -> list[str] | None:
+  if argv is None:
+    return None
+  tokens = list(argv)
+  try:
+    keepalive_index = tokens.index("--keepalive")
+  except ValueError:
+    return tokens
+  normalized = tokens[:keepalive_index]
+  keepalive_values = tokens[keepalive_index + 1 :]
+  for value in keepalive_values:
+    normalized.extend(["--keepalive", value])
+  return normalized
 
 
-def main(argv: list[str] | None = None) -> int:
-  args = _build_parser().parse_args(argv)
-  state_profile = Path(args.state_profile)
-  home = Path(args.home)
+@bootstrap_app.default
+def run_bootstrap(
+  *,
+  state_profile: Path = Path("/state/profile"),
+  state_shared: Path = Path("/state/shared"),
+  home: Path = Path("/home/agent"),
+  profile_name: str,
+  profile_image: str,
+  workspace_root: str,
+  image_ref: str,
+  shared_assets_identity: str,
+  keepalive: tuple[str, ...] = ("sleep", "infinity"),
+) -> int:
+  """Initialize a profile state volume and exec the keepalive process."""
   bootstrap_token = os.environ.get(runtime_contract.BOOTSTRAP_TOKEN_ENV, "")
   phase = "startup"
   try:
@@ -392,15 +394,15 @@ def main(argv: list[str] | None = None) -> int:
     phase = "initialize"
     initialize_profile_environment(
       state_profile=state_profile,
-      state_shared=Path(args.state_shared),
+      state_shared=state_shared,
       home=home,
       metadata={
-        "profile_name": args.profile_name,
-        "profile_image": args.profile_image,
+        "profile_name": profile_name,
+        "profile_image": profile_image,
         "schema_version": "2",
-        "workspace_root": args.workspace_root,
-        "image_ref": args.image_ref,
-        "shared_assets_identity": args.shared_assets_identity,
+        "workspace_root": workspace_root,
+        "image_ref": image_ref,
+        "shared_assets_identity": shared_assets_identity,
       },
     )
     phase = "ownership"
@@ -429,9 +431,8 @@ def main(argv: list[str] | None = None) -> int:
       if requested_owner is not None:
         uid, gid = requested_owner
         os.chown(token_path, uid, gid, follow_symlinks=False)
-    keepalive = args.keepalive or ["sleep", "infinity"]
     phase = "keepalive"
-    os.execvp(keepalive[0], keepalive)
+    os.execvp(keepalive[0], list(keepalive))
   except SystemExit:
     raise
   except Exception as exc:
@@ -443,3 +444,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     raise
   return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+  """Parse frag-bootstrap arguments and run the bootstrap workflow."""
+  result = bootstrap_app(_normalize_keepalive_tokens(argv))
+  return 0 if result is None else int(result)

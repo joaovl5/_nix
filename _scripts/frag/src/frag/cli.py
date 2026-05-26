@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import shutil
 import sys
@@ -32,15 +30,18 @@ _FRAG_PACKAGE_ROOT_ENV = "FRAG_PACKAGE_ROOT"
 
 @profile_app.command(name="list")
 def profile_list() -> int:
+  """List persisted frag profiles."""
   return handle_profile_list()
 
 
 @profile_app.command(name="new")
 def profile_new(
+  *,
   name: str | None = None,
   image: str | None = None,
   workspace_root: str | None = None,
 ) -> int:
+  """Create a new frag profile."""
   return handle_profile_new(
     name=name,
     image=image,
@@ -50,20 +51,24 @@ def profile_new(
 
 @profile_app.command(name="rm")
 def profile_rm(name: str | None = None) -> int:
+  """Remove an existing frag profile."""
   return handle_profile_rm(name=name)
 
 
 @profile_app.command(name="stop")
 def profile_stop(name: str | None = None) -> int:
+  """Stop the running container for a frag profile."""
   return handle_profile_stop(name=name)
 
 
 @app.command(name="enter")
 def enter(*command: str, profile: str | None = None) -> int:
+  """Enter a frag profile container and run a command."""
   return handle_enter(profile=profile, command=command)
 
 
 def build_docker_backend() -> profiles.DockerCliBackend:
+  """Build the Docker backend used by frag CLI commands."""
   return profiles.DockerCliBackend()
 
 
@@ -94,6 +99,7 @@ def _resolve_package_anchor() -> Path | None:
 
 
 def build_image_assets() -> image_assets.ImageAssets:
+  """Resolve packaged image assets relative to the current frag entrypoint."""
   return image_assets.DirectProfileImageAssets(
     package_assets=image_assets.resolve_installed_package_assets(
       _resolve_package_anchor()
@@ -102,6 +108,7 @@ def build_image_assets() -> image_assets.ImageAssets:
 
 
 def handle_profile_list() -> int:
+  """Render every known profile and whether its container is running."""
   docker_backend = build_docker_backend()
   for profile in profiles.list_profiles(docker_backend):
     state = (
@@ -110,8 +117,8 @@ def handle_profile_list() -> int:
       else "stopped"
     )
     print(
-      f"{profile.name}\timage={profile.image}\tworkspace_root={profile.workspace_root}"
-      f"\tvolume={profile.volume_name}\tstate={state}"
+      f"{profile.name}	image={profile.image}	workspace_root={profile.workspace_root}"
+      f"	volume={profile.volume_name}	state={state}"
     )
   return 0
 
@@ -144,7 +151,8 @@ def _create_profile_interactively(
 
 
 def _resolve_selected_profile_name(
-  docker_backend: profiles.DockerCliBackend, profile_name: str | None
+  docker_backend: profiles.DockerCliBackend,
+  profile_name: str | None,
 ) -> str | None:
   selected_profile = profile_name
   if selected_profile is None:
@@ -165,6 +173,7 @@ def handle_profile_new(
   image: str | None,
   workspace_root: str | None,
 ) -> int:
+  """Create a profile from supplied or prompted values."""
   docker_backend = build_docker_backend()
   image_assets_provider = build_image_assets()
   try:
@@ -196,6 +205,7 @@ def handle_profile_new(
 
 
 def handle_profile_rm(*, name: str | None) -> int:
+  """Remove a selected profile after interactive confirmation."""
   docker_backend = build_docker_backend()
   resolved_name = name
   if resolved_name is None:
@@ -205,18 +215,19 @@ def handle_profile_rm(*, name: str | None) -> int:
     resolved_name = prompts.prompt_select_profile(available_names)
     if resolved_name is None:
       return 1
-  existing_profile = profiles.get_profile(docker_backend, resolved_name)
+  existing_profile = profiles.get_profile(docker_backend, name=resolved_name)
   if existing_profile is None:
     raise profiles.ProfileNotFoundError(resolved_name)
   if docker_backend.is_profile_running(existing_profile.name):
     raise profiles.ProfileInUseError(existing_profile.name)
   if not prompts.confirm_profile_removal(resolved_name):
     return 1
-  profiles.remove_profile(docker_backend, resolved_name)
+  profiles.remove_profile(docker_backend, name=resolved_name)
   return 0
 
 
 def handle_profile_stop(*, name: str | None) -> int:
+  """Stop a selected profile container."""
   docker_backend = build_docker_backend()
   resolved_name = name
   if resolved_name is None:
@@ -226,7 +237,7 @@ def handle_profile_stop(*, name: str | None) -> int:
     resolved_name = prompts.prompt_select_profile(available_names)
     if resolved_name is None:
       return 1
-  selected_profile = profiles.get_profile(docker_backend, resolved_name)
+  selected_profile = profiles.get_profile(docker_backend, name=resolved_name)
   if selected_profile is None:
     raise profiles.ProfileNotFoundError(resolved_name)
   docker_runtime.stop_profile_container(selected_profile)
@@ -234,10 +245,12 @@ def handle_profile_stop(*, name: str | None) -> int:
 
 
 def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
+  """Enter a profile container, reusing or starting the runtime as needed."""
   docker_backend = build_docker_backend()
   try:
     selected_profile_name = _resolve_selected_profile_name(
-      docker_backend, profile
+      docker_backend,
+      profile,
     )
   except prompts.PromptAborted:
     return 1
@@ -246,7 +259,8 @@ def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
     return 1
 
   selected_profile = profiles.get_profile(
-    docker_backend, selected_profile_name
+    docker_backend,
+    name=selected_profile_name,
   )
   if selected_profile is None:
     raise profiles.ProfileNotFoundError(selected_profile_name)
@@ -260,9 +274,9 @@ def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
 
   image_assets_provider = build_image_assets()
   runtime_spec = docker_runtime.resolve_runtime_spec(
-    selected_profile,
-    workspace_root,
-    image_assets_provider,
+    profile=selected_profile,
+    workspace_root=workspace_root,
+    image_assets=image_assets_provider,
   )
   runtime_metadata = runtime_contract.current_runtime_metadata(
     runtime_spec=runtime_spec,
@@ -276,12 +290,13 @@ def handle_enter(*, profile: str | None, command: Sequence[str]) -> int:
   else:
     ui.render_status("Loading runtime image…")
     loaded_image_ref = docker_runtime.load_profile_image(
-      selected_profile, image_assets_provider
+      profile=selected_profile,
+      image_assets=image_assets_provider,
     )
     runtime_spec = docker_runtime.resolve_runtime_spec(
-      selected_profile,
-      workspace_root,
-      image_assets_provider,
+      profile=selected_profile,
+      workspace_root=workspace_root,
+      image_assets=image_assets_provider,
       loaded_image_ref=loaded_image_ref,
     )
     bootstrap_token = docker_runtime.bootstrap_token_for_profile(
@@ -320,6 +335,7 @@ def _print_cli_error(error: Exception) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+  """Parse frag CLI arguments and return the selected command exit code."""
   try:
     result = app(argv)
   except CycloptsError as exc:

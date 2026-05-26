@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections.abc import Sequence
 
 import questionary
@@ -9,7 +7,7 @@ _CREATE_PROFILE_SENTINEL = object()
 
 
 class PromptAborted(RuntimeError):
-  pass
+  """Signal that an interactive prompt was cancelled or left blank."""
 
 
 def _ask_prompt(prompt: object) -> object:
@@ -30,6 +28,7 @@ def _ask_required_prompt(prompt: object) -> str:
 
 
 def prompt_select_profile(names: Sequence[str]) -> str | None:
+  """Prompt for a profile selection when profiles are available."""
   if not names:
     return None
   try:
@@ -44,6 +43,7 @@ def prompt_select_profile(names: Sequence[str]) -> str | None:
 def prompt_enter_profile_action(
   names: Sequence[str],
 ) -> tuple[str, str | None]:
+  """Prompt for either selecting an existing profile or creating a new one."""
   if not names:
     return ("create", None)
   answer = _ask_prompt(
@@ -64,6 +64,7 @@ def prompt_enter_profile_action(
 
 
 def confirm_profile_removal(name: str) -> bool:
+  """Prompt for confirmation before deleting a profile."""
   try:
     answer = _ask_prompt(
       questionary.confirm(f"Remove frag profile '{name}'?")
@@ -74,10 +75,12 @@ def confirm_profile_removal(name: str) -> bool:
 
 
 def prompt_profile_name() -> str:
+  """Prompt for a non-blank profile name."""
   return _ask_required_prompt(questionary.text("Profile name"))
 
 
 def prompt_profile_image(image_keys: Sequence[str]) -> str:
+  """Prompt for a profile image key from the packaged catalog."""
   if not image_keys:
     raise PromptAborted
   return str(
@@ -86,10 +89,12 @@ def prompt_profile_image(image_keys: Sequence[str]) -> str:
 
 
 def prompt_workspace_root() -> str:
+  """Prompt for a non-blank workspace root path."""
   return _ask_required_prompt(questionary.path("Workspace root"))
 
 
 def require_non_blank(value: str | None) -> str:
+  """Reject blank values that cannot satisfy required prompt inputs."""
   if value is None or not value.strip():
     raise PromptAborted
   return value

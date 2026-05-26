@@ -1,15 +1,15 @@
 """Integration test: WireGuard relay ingress, confinement, DNS, and fail-closed assertions."""
 
-from __future__ import annotations
-
 import itertools
 import shlex
-from typing import TYPE_CHECKING, Literal, cast
+from collections.abc import Callable
+from typing import Literal, Protocol, runtime_checkable
 
-if TYPE_CHECKING:
-  from collections.abc import Callable
+from nix_machine_protocol import Machine as _MachineProtocol
 
-  from nix_machine_protocol import Machine
+@runtime_checkable
+class Machine(_MachineProtocol, Protocol):
+  """Runtime-checkable view of the NixOS VM driver protocol."""
 
 Family = Literal["4", "6"]
 
@@ -147,27 +147,41 @@ TOY_LISTENER_UNITS = [
 _TOKEN_COUNTER = itertools.count(1)
 
 
+def _require_machine(globals_dict: dict[str, object], key: str) -> Machine:
+  """Return a required VM driver object from the driver globals."""
+  value = globals_dict[key]
+  assert isinstance(value, Machine), (
+    f"Expected Machine for {key}, got {type(value)!r}"
+  )
+  return value
+
+
 def _q(value: str) -> str:
+  """Shell-quote a value for guest command execution."""
   return shlex.quote(value)
 
 
 def _require_callable(obj: object, name: str) -> Callable[..., object]:
+  """Return a named callable from a runtime object."""
   method = getattr(obj, name, None)
   assert callable(method), f"Machine is missing required method {name}()"
-  return cast("Callable[..., object]", method)
+  return method
 
 
 def _start_machine(machine: Machine) -> None:
+  """Start a VM through the driver."""
   _require_callable(machine, "start")()
 
 
 def _shutdown_machine(machine: Machine) -> None:
+  """Shut down a VM through the driver."""
   _require_callable(machine, "shutdown")()
 
 
 def _wait_until_succeeds(
   machine: Machine, command: str, message: str
 ) -> None:
+  """Wait for a command to start succeeding, surfacing driver errors clearly."""
   try:
     machine.wait_until_succeeds(command)
   except Exception as exc:  # pragma: no cover - integration-driver surface
@@ -175,6 +189,7 @@ def _wait_until_succeeds(
 
 
 def _succeed(machine: Machine, command: str, message: str) -> str:
+  """Run a command and reframe driver failures as assertion failures."""
   try:
     return machine.succeed(command).strip()
   except Exception as exc:  # pragma: no cover - integration-driver surface
@@ -182,6 +197,7 @@ def _succeed(machine: Machine, command: str, message: str) -> str:
 
 
 def _fail(machine: Machine, command: str, message: str) -> str:
+  """Run a command and assert that it fails."""
   status, output = machine.execute(command)
   assert status != 0, (
     f"{message}. Command unexpectedly succeeded: {command}\n{output}"
@@ -190,37 +206,45 @@ def _fail(machine: Machine, command: str, message: str) -> str:
 
 
 def _command_prefix(namespace: str | None = None) -> str:
+  """Return the optional namespace command prefix."""
   if namespace is None:
     return ""
   return f"ip netns exec {_q(namespace)} "
 
 
 def _family_flag(family: Family) -> str:
+  """Return the curl IP-family flag."""
   return "--ipv4" if family == "4" else "--ipv6"
 
 
 def _socket_family(family: Family) -> str:
+  """Return the socket family constant name."""
   return "AF_INET" if family == "4" else "AF_INET6"
 
 
 def _literal_url(address: str, port: int, path: str = "/") -> str:
+  """Build an HTTP URL for an IPv4 or IPv6 literal address."""
   host = f"[{address}]" if ":" in address else address
   return f"http://{host}:{port}{path}"
 
 
 def _token(prefix: str) -> str:
+  """Return a unique per-run token for listener and probe assertions."""
   return f"{prefix}-{next(_TOKEN_COUNTER):04d}"
 
 
 def _log_path(name: str) -> str:
+  """Return a fixture log path under the WireGuard test root."""
   return f"{LOG_ROOT}/{name}.log"
 
 
 def _clear_log(machine: Machine, path: str) -> None:
+  """Create or truncate a fixture log file."""
   _succeed(machine, f": > {_q(path)}", f"Failed to clear log {path}")
 
 
 def _log_has_token(machine: Machine, path: str, token: str) -> bool:
+  """Return whether a fixture log contains a token."""
   status, _ = machine.execute(f"grep -F {_q(token)} {_q(path)} >/dev/null")
   return status == 0
 
@@ -228,6 +252,7 @@ def _log_has_token(machine: Machine, path: str, token: str) -> bool:
 def _assert_log_has_token(
   machine: Machine, path: str, token: str, message: str
 ) -> None:
+  """Assert that a fixture log contains a token."""
   assert _log_has_token(machine, path, token), (
     f"{message}: token {token!r} missing from {path}"
   )
@@ -236,6 +261,7 @@ def _assert_log_has_token(
 def _assert_log_lacks_token(
   machine: Machine, path: str, token: str, message: str
 ) -> None:
+  """Assert that a fixture log does not contain a token."""
   assert not _log_has_token(machine, path, token), (
     f"{message}: token {token!r} unexpectedly present in {path}"
   )
@@ -244,6 +270,7 @@ def _assert_log_lacks_token(
 def _assert_log_has_entry(
   machine: Machine, path: str, token: str, source: str, message: str
 ) -> None:
+  """Assert that a fixture log contains an exact token/source entry."""
   entry = f"{token} {source}"
   status, _ = machine.execute(f"grep -Fx {_q(entry)} {_q(path)} >/dev/null")
   assert status == 0, f"{message}: entry {entry!r} missing from {path}"
@@ -258,6 +285,7 @@ def _http_get(
   namespace: str | None = None,
   path: str = "/",
 ) -> str:
+  """Issue an HTTP GET from the requested network context."""
   url = _literal_url(address, port, path)
   return _succeed(
     machine,
@@ -277,6 +305,7 @@ def _assert_http_body(
   path: str = "/",
   message: str,
 ) -> None:
+  """Assert that an HTTP endpoint returns the expected body."""
   body = _http_get(
     machine, address, port, family=family, namespace=namespace, path=path
   )
@@ -295,6 +324,7 @@ def _assert_http_fails(
   path: str = "/",
   message: str,
 ) -> None:
+  """Assert that an HTTP endpoint is unreachable."""
   url = _literal_url(address, port, path)
   _fail(
     machine,
@@ -313,6 +343,7 @@ def _python_network_command(
   expect_reply: bool,
   source_address: str | None = None,
 ) -> str:
+  """Build a Python network client command for the requested protocol."""
   socket_type = "SOCK_STREAM" if protocol == "tcp" else "SOCK_DGRAM"
   script_lines = [
     "import socket, sys",
@@ -364,6 +395,7 @@ def _tcp_roundtrip(
   expect_reply: bool = True,
   source_address: str | None = None,
 ) -> str:
+  """Run a TCP exchange against a listener under test."""
   return _succeed(
     machine,
     _command_prefix(namespace)
@@ -391,6 +423,7 @@ def _udp_roundtrip(
   expect_reply: bool = True,
   source_address: str | None = None,
 ) -> str:
+  """Run a UDP exchange against a listener under test."""
   return _succeed(
     machine,
     _command_prefix(namespace)
@@ -410,6 +443,7 @@ def _udp_roundtrip(
 def _run_service_capture(
   machine: Machine, service: str, output_path: str
 ) -> str:
+  """Start a service and capture its output file."""
   _succeed(
     machine,
     f"rm -f {_q(output_path)}",
@@ -444,6 +478,7 @@ def _assert_confined_source_observer_fail_closed(
   output_failure: str,
   observer_failure: str,
 ) -> None:
+  """Assert that a confined source observer fails closed during outage."""
   _wait_until_succeeds(
     probe,
     f"curl --fail --silent --show-error {_family_flag(observer_family)} --max-time {HTTP_TIMEOUT} {_q(_literal_url(observer_address, SOURCE_OBSERVER_PORT, f'/_preflight?token={observer_token}-preflight'))} >/dev/null",
@@ -472,6 +507,7 @@ def _assert_denied_listener_preflight(
   message: str,
   blocked_machine: Machine | None = None,
 ) -> None:
+  """Assert that the allowed path works before the denied path is tested."""
   blocked_on = machine if blocked_machine is None else blocked_machine
   _clear_log(machine, log_path)
   _succeed(machine, control_command, f"{message}: control preflight failed")
@@ -488,6 +524,7 @@ def _assert_denied_listener_preflight(
 def _dig_query(
   machine: Machine, server: str, token: str, *, family: Family
 ) -> str:
+  """Run a confined dig query against a specific resolver."""
   query_name = f"{token}{DNS_SUFFIX}"
   dig_family = "-4" if family == "4" else "-6"
   qtype = "A" if family == "4" else "AAAA"
@@ -507,6 +544,7 @@ def _assert_route(
   expected_absent: list[str],
   message: str,
 ) -> None:
+  """Assert that namespace route selection matches the expected path."""
   command = (
     f"{_command_prefix(WG_NAMESPACE)}ip -6 route get {_q(address)}"
     if family == "6"
@@ -526,6 +564,7 @@ def _assert_route(
 def _assert_service_inactive(
   machine: Machine, service: str, message: str
 ) -> None:
+  """Assert that a service is not active."""
   output = _succeed(
     machine,
     f"systemctl show {_q(service)} --property=ActiveState,SubState,Result --value --no-pager",
@@ -540,6 +579,7 @@ def _assert_service_inactive(
 def _assert_service_failed(
   machine: Machine, service: str, message: str
 ) -> None:
+  """Assert that a service failed with exit-code."""
   output = _succeed(
     machine,
     f"systemctl show {_q(service)} --property=ActiveState,Result --value --no-pager",
@@ -554,6 +594,7 @@ def _assert_service_failed(
 def _assert_failed_wg_backend_state_absent(
   isolated: Machine, *, context: str
 ) -> None:
+  """Assert that failed backend setup left no residual state."""
   _fail(
     isolated,
     f"test -e /run/netns/{FAILED_WG_NAMESPACE}",
@@ -612,6 +653,7 @@ def _assert_failed_wg_backend_state_absent(
 
 
 def _assert_failed_wg_backend_cleanup(isolated: Machine) -> None:
+  """Assert that failed backend setup cleans up before recovery."""
   _assert_service_failed(
     isolated,
     FAILED_WG_UNIT,
@@ -680,6 +722,7 @@ def _assert_failed_wg_backend_cleanup(isolated: Machine) -> None:
 def _wait_for_wg_recovery(
   relay: Machine, isolated: Machine, probe: Machine
 ) -> None:
+  """Wait for the WireGuard stack to become functionally ready again."""
   relay.wait_for_unit(WG_HOST_UNIT)
   isolated.wait_for_unit(WG_HOST_UNIT)
   isolated.wait_for_unit(WG_NAMESPACE_UNIT)
@@ -720,6 +763,7 @@ def _wait_for_wg_recovery(
 def _assert_no_duplicate_state(
   machine: Machine, namespace: str | None = WG_NAMESPACE
 ) -> None:
+  """Assert that restart and recovery did not duplicate namespace or firewall state."""
   if namespace is not None:
     _succeed(
       machine,
@@ -767,6 +811,7 @@ def _assert_no_duplicate_state(
 
 
 def _assert_startup_fail_closed(probe: Machine, isolated: Machine) -> None:
+  """Assert that startup fails closed until the relay comes online."""
   isolated.wait_for_unit(WG_HOST_UNIT)
   # Creating a WireGuard interface does not require a completed handshake, so the
   # namespace unit may be active before the relay is online. Fail-closed evidence
@@ -798,7 +843,7 @@ def _assert_startup_fail_closed(probe: Machine, isolated: Machine) -> None:
       service=service,
       output_path=output_path,
       observer_address=observer_address,
-      observer_family=cast("Family", observer_family),
+      observer_family=observer_family,
       observer_log_path=observer_log_path,
       observer_token=observer_token,
       message=f"Confined source observer {label} must not emit traffic while relay is down",
@@ -814,6 +859,7 @@ def _assert_startup_fail_closed(probe: Machine, isolated: Machine) -> None:
 
 
 def _assert_relay_baseline(probe: Machine, isolated: Machine) -> None:
+  """Assert the baseline relay TCP path and direct-access denial."""
   tcp_v4 = _token("relay-tcp4")
   tcp_v6 = _token("relay-tcp6")
   _assert_http_body(
@@ -865,6 +911,7 @@ def _assert_relay_baseline(probe: Machine, isolated: Machine) -> None:
 
 
 def _assert_relay_ingress(probe: Machine, isolated: Machine) -> None:
+  """Assert relay ingress across TCP, UDP, and dual-protocol listeners."""
   udp_v4 = _token("relay-udp4")
   udp_v6 = _token("relay-udp6")
   both_tcp_v4 = _token("relay-both-tcp4")
@@ -1051,6 +1098,7 @@ def _assert_relay_ingress(probe: Machine, isolated: Machine) -> None:
 
 
 def _assert_route_separation(isolated: Machine) -> None:
+  """Assert that local and remote addresses choose the intended routes."""
   _assert_route(
     isolated,
     PROBE_PRIMARY_V4,
@@ -1086,6 +1134,7 @@ def _assert_route_separation(isolated: Machine) -> None:
 
 
 def _assert_source_observers(isolated: Machine) -> None:
+  """Assert the observed source addresses for plain and confined services."""
   plain_v4_service, plain_v4_output = PLAIN_SOURCE_SERVICES["ipv4"]
   plain_v6_service, plain_v6_output = PLAIN_SOURCE_SERVICES["ipv6"]
   confined_v4_service, confined_v4_output = CONFINED_SOURCE_SERVICES["ipv4"]
@@ -1110,6 +1159,7 @@ def _assert_source_observers(isolated: Machine) -> None:
 
 
 def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
+  """Assert host-to-namespace port mappings and their denial cases."""
   tcp4 = _token("portmap-tcp4")
   tcp6 = _token("portmap-tcp6")
   udp4 = _token("portmap-udp4")
@@ -1311,7 +1361,7 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
       control_command=_command_prefix(WG_NAMESPACE)
       + _python_network_command(
         protocol=mode,
-        family=cast("Family", family),
+        family=family,
         address=namespace_address,
         port=namespace_port,
         token=control,
@@ -1320,7 +1370,7 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
       blocked_command=_command_prefix(None)
       + _python_network_command(
         protocol=mode,
-        family=cast("Family", family),
+        family=family,
         address=shared_address,
         port=host_port,
         token=blocked,
@@ -1392,7 +1442,7 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
       control_command=_command_prefix(WG_NAMESPACE)
       + _python_network_command(
         protocol=mode,
-        family=cast("Family", family),
+        family=family,
         address=namespace_address,
         port=namespace_port,
         token=control,
@@ -1401,7 +1451,7 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
       blocked_command=_command_prefix(None)
       + _python_network_command(
         protocol=mode,
-        family=cast("Family", family),
+        family=family,
         address=shared_address,
         port=host_port,
         token=blocked,
@@ -1417,6 +1467,7 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
 def _assert_open_vpn_ports(
   relay: Machine, probe: Machine, isolated: Machine
 ) -> None:
+  """Assert the tunnel-only open-VPN exposure policy."""
   tcp4 = _token("open-vpn-tcp4")
   tcp6 = _token("open-vpn-tcp6")
   udp4 = _token("open-vpn-udp4")
@@ -1604,11 +1655,11 @@ def _assert_open_vpn_ports(
     _clear_log(isolated, log_path)
     if mode == "tcp":
       assert control in _tcp_roundtrip(
-        relay, wg_address, port, control, family=cast("Family", family)
+        relay, wg_address, port, control, family=family
       )
     else:
       assert control in _udp_roundtrip(
-        relay, wg_address, port, control, family=cast("Family", family)
+        relay, wg_address, port, control, family=family
       )
     _assert_log_has_entry(
       isolated,
@@ -1622,7 +1673,7 @@ def _assert_open_vpn_ports(
       probe,
       _python_network_command(
         protocol=mode,
-        family=cast("Family", family),
+        family=family,
         address=shared_address,
         port=port,
         token=blocked,
@@ -1751,6 +1802,7 @@ def _assert_open_vpn_ports(
 
 
 def _assert_dns(isolated: Machine, probe: Machine) -> None:
+  """Assert the confined DNS allowlist and leak prevention policy."""
   resolv_conf = _succeed(
     isolated,
     f"cat /etc/netns/{_q(WG_NAMESPACE)}/resolv.conf",
@@ -2046,6 +2098,7 @@ def _assert_dns(isolated: Machine, probe: Machine) -> None:
 def _assert_midflight_outage(
   relay: Machine, isolated: Machine, probe: Machine
 ) -> None:
+  """Assert that a live relay outage fails closed and then recovers."""
   _shutdown_machine(relay)
   for label, (service, output_path) in CONFINED_SOURCE_SERVICES.items():
     observer_address, observer_family, observer_log_path, observer_token = (
@@ -2058,7 +2111,7 @@ def _assert_midflight_outage(
       service=service,
       output_path=output_path,
       observer_address=observer_address,
-      observer_family=cast("Family", observer_family),
+      observer_family=observer_family,
       observer_log_path=observer_log_path,
       observer_token=observer_token,
       message=f"Confined source observer {label} must fail closed during relay outage",
@@ -2092,6 +2145,7 @@ def _assert_midflight_outage(
 
 
 def _restart_service(machine: Machine, service: str) -> None:
+  """Restart a service and wait for it to become active."""
   _succeed(
     machine,
     f"systemctl restart {_q(service)}",
@@ -2103,6 +2157,7 @@ def _restart_service(machine: Machine, service: str) -> None:
 def _assert_restart_idempotency(
   relay: Machine, isolated: Machine, probe: Machine
 ) -> None:
+  """Assert that restarts do not duplicate WireGuard state."""
   _restart_service(relay, WG_HOST_UNIT)
   _restart_service(isolated, WG_HOST_UNIT)
   _restart_service(isolated, WG_NAMESPACE_UNIT)
@@ -2119,11 +2174,11 @@ def _assert_restart_idempotency(
   _assert_dns(isolated, probe)
 
 
-def run(driver_globals: dict[str, object]) -> None:
+def run(*, driver_globals: dict[str, object]) -> None:
   """Run the reviewed WireGuard relay ingress and confinement assertions."""
-  relay = cast("Machine", driver_globals["relay"])
-  isolated = cast("Machine", driver_globals["isolated"])
-  probe = cast("Machine", driver_globals["probe"])
+  relay = _require_machine(driver_globals, "relay")
+  isolated = _require_machine(driver_globals, "isolated")
+  probe = _require_machine(driver_globals, "probe")
 
   # Startup must fail closed while the relay peer and upstream path are absent.
   _start_machine(probe)
@@ -2178,4 +2233,4 @@ def run(driver_globals: dict[str, object]) -> None:
 
 
 if __name__ == "__main__":
-  run(globals())
+  run(driver_globals=globals())

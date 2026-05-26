@@ -1,12 +1,12 @@
-from __future__ import annotations
-
-import argparse
 import json
 import os
 import subprocess
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
+
+from cyclopts import App
 
 from frag import profiles, verification
 
@@ -15,15 +15,10 @@ _EXPECTED_WORKSPACE_ROOT = "/workspace-root"
 _SHARED_ASSET_PATH = "$HOME/.config/opencode/opencode.json"
 _READ_ONLY_FAILURE_SUBSTRINGS = ("read-only", "permission denied")
 
-
-def _build_parser() -> argparse.ArgumentParser:
-  parser = argparse.ArgumentParser(
-    description="Run cleanup-safe frag smoke verification"
-  )
-  parser.add_argument("--frag-bin", required=True, type=Path)
-  parser.add_argument("--profile-image", default="main")
-  parser.add_argument("--workspace-root", type=Path, default=Path.cwd())
-  return parser
+smoke_verify_app = App(
+  name="frag-smoke-verify",
+  result_action="return_value",
+)
 
 
 def _run_timed(
@@ -75,9 +70,7 @@ def _require_read_only_failure(
   result: subprocess.CompletedProcess[str], *, path_description: str
 ) -> None:
   detail = (result.stderr or result.stdout).strip().lower()
-  if not any(
-    fragment in detail for fragment in _READ_ONLY_FAILURE_SUBSTRINGS
-  ):
+  if not any(fragment in detail for fragment in _READ_ONLY_FAILURE_SUBSTRINGS):
     raise RuntimeError(
       f"{path_description} failed for an unexpected reason: {detail or result.returncode}"
     )
@@ -91,31 +84,37 @@ def _time_action(
   timings[key] = time.perf_counter() - started_at
 
 
-def main(argv: list[str] | None = None) -> int:
-  args = _build_parser().parse_args(argv)
+@smoke_verify_app.default
+def run_smoke_verify(
+  *,
+  frag_bin: Path,
+  profile_image: str = "main",
+  workspace_root: Path = Path.cwd(),
+) -> int:
+  """Run the cleanup-safe frag smoke verification workflow."""
   docker_backend = profiles.DockerCliBackend()
   artifacts = verification.create_verification_artifacts(
     purpose="smoke",
-    workspace_root=args.workspace_root,
+    workspace_root=workspace_root,
   )
 
   with verification.CleanupHarness() as cleanup:
     cleanup.register(
-      "workspace",
-      lambda: verification.remove_workspace_if_present(
+      label="workspace",
+      callback=lambda: verification.remove_workspace_if_present(
         workspace_path=artifacts.workspace_path
       ),
     )
     cleanup.register(
-      "profile",
-      lambda: verification.remove_profile_if_present(
+      label="profile",
+      callback=lambda: verification.remove_profile_if_present(
         docker_backend=docker_backend,
         profile_name=artifacts.profile_name,
       ),
     )
     cleanup.register(
-      "container",
-      lambda: verification.stop_profile_container_if_present(
+      label="container",
+      callback=lambda: verification.stop_profile_container_if_present(
         profile_name=artifacts.profile_name
       ),
     )
@@ -126,19 +125,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     workspace_gid = artifacts.workspace_path.stat().st_gid
 
-    frag_bin = str(args.frag_bin.expanduser().resolve(strict=False))
+    resolved_frag_bin = str(frag_bin.expanduser().resolve(strict=False))
     timings: dict[str, float] = {}
 
     _run_timed(
       timings,
       "profile_new_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "profile",
       "new",
       "--name",
       artifacts.profile_name,
       "--image",
-      args.profile_image,
+      profile_image,
       "--workspace-root",
       str(artifacts.workspace_path),
     )
@@ -146,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     listed_profiles = _run_timed(
       timings,
       "profile_list_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "profile",
       "list",
     )
@@ -158,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
     enter_whoami = _run_timed(
       timings,
       "enter_whoami_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -175,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     enter_pwd = _run_timed(
       timings,
       "enter_pwd_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -191,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
     _run_timed(
       timings,
       "workspace_write_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -202,13 +201,9 @@ def main(argv: list[str] | None = None) -> int:
       cwd=artifacts.workspace_path,
     )
 
-    workspace_write_path = (
-      artifacts.workspace_path / "smoke-workspace-write.txt"
-    )
+    workspace_write_path = artifacts.workspace_path / "smoke-workspace-write.txt"
     stat_result = workspace_write_path.stat()
-    if (
-      stat_result.st_uid != os.getuid() or stat_result.st_gid != workspace_gid
-    ):
+    if stat_result.st_uid != os.getuid() or stat_result.st_gid != workspace_gid:
       raise RuntimeError(
         "workspace write did not preserve host ownership: "
         f"expected uid/gid {os.getuid()}:{workspace_gid}, "
@@ -218,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
     _run_timed(
       timings,
       "omp_help_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -232,7 +227,7 @@ def main(argv: list[str] | None = None) -> int:
     _run_timed(
       timings,
       "home_write_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -245,7 +240,7 @@ def main(argv: list[str] | None = None) -> int:
     shared_asset_write = _run_timed(
       timings,
       "shared_asset_write_rejected_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -273,7 +268,7 @@ def main(argv: list[str] | None = None) -> int:
     _run_timed(
       timings,
       "restart_persistence_check_seconds",
-      frag_bin,
+      resolved_frag_bin,
       "enter",
       "--profile",
       artifacts.profile_name,
@@ -300,6 +295,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"timing_summary={json.dumps(timings, sort_keys=True)}")
 
   return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+  """Parse smoke verification arguments and run the verification workflow."""
+  result = smoke_verify_app(argv)
+  return 0 if result is None else int(result)
 
 
 if __name__ == "__main__":

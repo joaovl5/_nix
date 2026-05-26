@@ -1,12 +1,11 @@
-from __future__ import annotations
-
 import json
 import re
 import subprocess
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
+
+from attrs import define
 
 from frag import docker_invoke
 from frag.exceptions import LegacySchemaError
@@ -31,49 +30,61 @@ _REQUIRED_STABLE_LABELS = (
 
 
 class DockerBackend(Protocol):
-  def create_volume(self, name: str, labels: dict[str, str]) -> None: ...
+  def create_volume(self, name: str, labels: dict[str, str]) -> None:
+    """Create a profile volume with the provided labels."""
+    ...
 
-  def list_volumes(self) -> list[dict[str, object]]: ...
+  def list_volumes(self) -> list[dict[str, object]]:
+    """List candidate profile volumes and their labels."""
+    ...
 
-  def remove_volume(self, name: str) -> None: ...
+  def remove_volume(self, name: str) -> None:
+    """Remove a profile volume by name."""
+    ...
 
-  def is_profile_running(self, profile_name: str) -> bool: ...
+  def is_profile_running(self, profile_name: str) -> bool:
+    """Report whether the named profile currently has a running container."""
+    ...
 
 
 class ProfileError(RuntimeError):
-  pass
+  """Report profile management failures."""
 
 
 class DockerBackendError(ProfileError):
-  pass
+  """Wrap docker CLI failures surfaced by the backend."""
 
 
 class ProfileNameCollisionError(ProfileError):
-  pass
+  """Reject profile names that collide with existing volume metadata."""
 
 
 class ProfileInUseError(ProfileError):
-  pass
+  """Reject profile mutations while the runtime is still active."""
 
 
 class ProfileNotFoundError(ProfileError):
-  pass
+  """Report that the requested profile does not exist."""
 
 
 class InvalidProfileNameError(ProfileError):
-  pass
+  """Reject profile names that normalize to an empty slug."""
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class Profile:
+  """Describe the stable metadata stored for a frag profile."""
+
   name: str
   image: str
   workspace_root: str
   volume_name: str
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class RuntimeProfileMetadata:
+  """Describe runtime metadata used to validate container reuse."""
+
   image_ref: str
   shared_assets_identity: str
   target_uid: str
@@ -94,7 +105,10 @@ def _run_docker_command(
 
 
 class DockerCliBackend:
-  def create_volume(self, name: str, labels: dict[str, str]) -> None:
+  """Persist profiles in Docker volumes using the docker CLI."""
+
+  def create_volume(self, *, name: str, labels: dict[str, str]) -> None:
+    """Create a labeled Docker volume for a profile."""
     command = ["docker", "volume", "create"]
     for key, value in labels.items():
       command.extend(["--label", f"{key}={value}"])
@@ -102,6 +116,7 @@ class DockerCliBackend:
     _run_docker_command(command)
 
   def list_volumes(self) -> list[dict[str, object]]:
+    """List schema-tagged Docker volumes and their labels."""
     ls_result = _run_docker_command(
       [
         "docker",
@@ -128,10 +143,12 @@ class DockerCliBackend:
       for volume in volumes
     ]
 
-  def remove_volume(self, name: str) -> None:
+  def remove_volume(self, *, name: str) -> None:
+    """Remove a Docker volume by name."""
     _run_docker_command(["docker", "volume", "rm", name])
 
   def is_profile_running(self, profile_name: str) -> bool:
+    """Return whether Docker reports a running container for the profile."""
     result = _run_docker_command(
       [
         "docker",
@@ -145,14 +162,17 @@ class DockerCliBackend:
     return bool(result.stdout.strip())
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class StableProfileMetadata:
+  """Describe the stable schema-tagged profile metadata persisted in labels."""
+
   profile_name: str
   profile_image: str
   workspace_root: str
   schema_version: str = SCHEMA_VERSION
 
   def as_labels(self) -> dict[str, str]:
+    """Return the stable profile metadata in Docker label form."""
     return {
       LABEL_PROFILE: self.profile_name,
       LABEL_IMAGE: self.profile_image,
@@ -161,6 +181,7 @@ class StableProfileMetadata:
     }
 
   def as_profile_json(self) -> dict[str, str]:
+    """Return the stable profile metadata in JSON-serializable form."""
     return {
       "profile_name": self.profile_name,
       "profile_image": self.profile_image,
@@ -172,6 +193,7 @@ class StableProfileMetadata:
 def runtime_metadata_labels(
   runtime_metadata: RuntimeProfileMetadata,
 ) -> dict[str, str]:
+  """Serialize runtime metadata into Docker labels."""
   supplementary_gids = ",".join(
     str(gid) for gid in runtime_metadata.supplementary_gids
   )
@@ -187,6 +209,7 @@ def runtime_metadata_labels(
 def runtime_metadata_from_labels(
   labels: Mapping[str, object],
 ) -> RuntimeProfileMetadata | None:
+  """Deserialize runtime metadata labels when every required value is present."""
   image_ref = labels.get(LABEL_RUNTIME_IMAGE_REF)
   shared_assets_identity = labels.get(LABEL_SHARED_ASSETS_IDENTITY)
   target_uid = labels.get(LABEL_TARGET_UID)
@@ -219,6 +242,7 @@ def runtime_metadata_from_labels(
 
 
 def stable_profile_metadata(profile: Profile) -> StableProfileMetadata:
+  """Project a profile into its stable persisted metadata representation."""
   return StableProfileMetadata(
     profile_name=profile.name,
     profile_image=profile.image,
@@ -229,6 +253,7 @@ def stable_profile_metadata(profile: Profile) -> StableProfileMetadata:
 def ensure_supported_schema(
   labels: Mapping[str, object], *, subject: str
 ) -> str:
+  """Validate that the provided labels advertise the supported schema version."""
   schema_version = labels.get(LABEL_SCHEMA_VERSION)
   if schema_version == "1":
     profile_name = labels.get(LABEL_PROFILE)
@@ -248,6 +273,7 @@ def ensure_supported_schema(
 
 
 def volume_name_for_profile(name: str) -> str:
+  """Normalize a human-readable profile name into a Docker volume name."""
   normalized = re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-")
   if not normalized:
     raise InvalidProfileNameError(
@@ -257,6 +283,7 @@ def volume_name_for_profile(name: str) -> str:
 
 
 def canonicalize_workspace_root(workspace_root: str) -> str:
+  """Resolve and validate the workspace root path for a profile."""
   try:
     resolved = Path(workspace_root).expanduser().resolve(strict=True)
   except FileNotFoundError as exc:
@@ -303,6 +330,7 @@ def create_profile(
   image: str,
   workspace_root: str,
 ) -> Profile:
+  """Create or return a profile backed by a labeled Docker volume."""
   normalized_volume_name = volume_name_for_profile(name)
   profile = Profile(
     name=name,
@@ -317,7 +345,8 @@ def create_profile(
       continue
     ensure_supported_schema(labels, subject="profile volume")
     existing_profile = _profile_from_volume(
-      volume_name=volume_name, labels=labels
+      volume_name=volume_name,
+      labels=labels,
     )
     if existing_profile is None:
       continue
@@ -330,16 +359,16 @@ def create_profile(
     )
 
   docker_backend.create_volume(
-    profile.volume_name,
+    name=profile.volume_name,
     labels=stable_profile_metadata(profile).as_labels(),
   )
   return profile
 
 
 def list_profiles(docker_backend: DockerBackend) -> list[Profile]:
+  """List every schema-2 profile persisted in Docker volumes."""
   profiles_found: list[Profile] = []
   for volume_name, labels in _iter_profile_volumes(docker_backend):
-    # Ignore unrelated unsupported volumes so healthy profiles remain usable.
     if labels.get(LABEL_SCHEMA_VERSION) != SCHEMA_VERSION:
       continue
     profile = _profile_from_volume(volume_name=volume_name, labels=labels)
@@ -349,7 +378,10 @@ def list_profiles(docker_backend: DockerBackend) -> list[Profile]:
   return sorted(profiles_found, key=lambda profile: profile.name)
 
 
-def get_profile(docker_backend: DockerBackend, name: str) -> Profile | None:
+def get_profile(
+  docker_backend: DockerBackend, *, name: str
+) -> Profile | None:
+  """Return a single profile by name when its persisted metadata is valid."""
   for volume_name, labels in _iter_profile_volumes(docker_backend):
     if labels.get(LABEL_PROFILE) != name:
       continue
@@ -361,10 +393,11 @@ def get_profile(docker_backend: DockerBackend, name: str) -> Profile | None:
   return None
 
 
-def remove_profile(docker_backend: DockerBackend, name: str) -> None:
-  profile = get_profile(docker_backend, name)
+def remove_profile(docker_backend: DockerBackend, *, name: str) -> None:
+  """Remove a profile volume after verifying it is not in use."""
+  profile = get_profile(docker_backend, name=name)
   if profile is None:
     raise ProfileNotFoundError(name)
   if docker_backend.is_profile_running(profile.name):
     raise ProfileInUseError(name)
-  docker_backend.remove_volume(profile.volume_name)
+  docker_backend.remove_volume(name=profile.volume_name)

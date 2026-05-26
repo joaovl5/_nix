@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import json
 import subprocess
@@ -50,6 +50,8 @@ class FakeImageAssets:
 
 
 def test_container_name_for_profile_is_deterministic() -> None:
+  """Covers container name for profile is deterministic."""
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.container_name_for_profile("Demo Profile")
     == "frag-demo-profile"
@@ -59,6 +61,7 @@ def test_container_name_for_profile_is_deterministic() -> None:
 def test_bootstrap_token_for_profile_generates_fresh_tokens(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers bootstrap token for profile generates fresh tokens."""
   generated = iter(["fresh-token-1", "fresh-token-2"])
 
   monkeypatch.setattr(
@@ -67,10 +70,12 @@ def test_bootstrap_token_for_profile_generates_fresh_tokens(
     lambda nbytes=32: next(generated),
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.bootstrap_token_for_profile(DEMO_PROFILE)
     == "fresh-token-1"
   )
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.bootstrap_token_for_profile(DEMO_PROFILE)
     == "fresh-token-2"
@@ -80,15 +85,18 @@ def test_bootstrap_token_for_profile_generates_fresh_tokens(
 def test_current_process_user_option_formats_uid_and_gid(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers current process user option formats uid and gid."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1234)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 5678)
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime._current_process_user_option() == "1234:5678"
 
 
 def test_container_workdir_for_cwd_rejects_paths_outside_workspace_root(
   tmp_path: Path,
 ) -> None:
+  """Covers container workdir for cwd rejects paths outside workspace root."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   outside = tmp_path / "outside"
@@ -105,10 +113,12 @@ def test_container_workdir_for_cwd_rejects_paths_outside_workspace_root(
 def test_container_workdir_for_cwd_maps_workspace_relative_path(
   tmp_path: Path,
 ) -> None:
+  """Covers container workdir for cwd maps workspace relative path."""
   workspace_root = tmp_path / "workspace"
   nested = workspace_root / "nested" / "project"
   nested.mkdir(parents=True)
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.container_workdir_for_cwd(
       profile=DEMO_PROFILE,
@@ -122,6 +132,7 @@ def test_container_workdir_for_cwd_maps_workspace_relative_path(
 def test_is_container_running_inspects_exact_named_container(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers is container running inspects exact named container."""
   commands: list[list[str]] = []
 
   inspect_payload = [
@@ -155,7 +166,9 @@ def test_is_container_running_inspects_exact_named_container(
 
   monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime.is_container_running(DEMO_PROFILE) is True
+  # Verify the observed behavior matches the contract.
   assert commands == [
     [
       "docker",
@@ -170,6 +183,7 @@ def test_is_container_running_inspects_exact_named_container(
 def test_is_container_running_rejects_named_container_with_mismatched_metadata(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers is container running rejects named container with mismatched metadata."""
   commands: list[list[str]] = []
 
   inspect_payload = [
@@ -203,7 +217,9 @@ def test_is_container_running_rejects_named_container_with_mismatched_metadata(
 
   monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime.is_container_running(DEMO_PROFILE) is False
+  # Verify the observed behavior matches the contract.
   assert commands == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"]
   ]
@@ -212,6 +228,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_metadata(
 def test_is_container_running_treats_no_such_container_as_not_running(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers is container running treats no such container as not running."""
   commands: list[list[str]] = []
 
   def fake_run(
@@ -227,7 +244,9 @@ def test_is_container_running_treats_no_such_container_as_not_running(
 
   monkeypatch.setattr(docker_runtime.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime.is_container_running(DEMO_PROFILE) is False
+  # Verify the observed behavior matches the contract.
   assert commands == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"]
   ]
@@ -237,6 +256,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_runtime_me
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers is container running rejects named container with mismatched runtime metadata."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
 
@@ -284,6 +304,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_runtime_me
     volume_name=DEMO_PROFILE.volume_name,
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.is_container_running(
       runtime_profile,
@@ -296,6 +317,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_runtime_me
     )
     is False
   )
+  # Verify the observed behavior matches the contract.
   assert commands == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"]
   ]
@@ -305,6 +327,7 @@ def test_start_profile_container_removes_matching_stopped_named_container(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container removes matching stopped named container."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   workspace_root = tmp_path / "workspace"
@@ -373,11 +396,14 @@ def test_start_profile_container_removes_matching_stopped_named_container(
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert calls[:2] == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
     ["docker", "rm", "--force", "frag-demo-profile"],
   ]
+  # Verify the observed behavior matches the contract.
   assert calls[2][0:5] == ["docker", "run", "--detach", "--rm", "--name"]
+  # Verify the observed behavior matches the contract.
   assert calls[2][5] == "frag-demo-profile"
 
 
@@ -385,6 +411,7 @@ def test_start_profile_container_reuses_matching_container_created_during_run_ra
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container reuses matching container created during run race."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgroups", list)
@@ -459,13 +486,17 @@ def test_start_profile_container_reuses_matching_container_created_during_run_ra
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert calls == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
     calls[1],
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
   ]
+  # Verify the observed behavior matches the contract.
   assert calls[1][0:5] == ["docker", "run", "--detach", "--rm", "--name"]
+  # Verify the observed behavior matches the contract.
   assert calls[1][5] == "frag-demo-profile"
+  # Verify the observed behavior matches the contract.
   assert ["docker", "rm", "--force", "frag-demo-profile"] not in calls
 
 
@@ -473,6 +504,7 @@ def test_start_profile_container_recreates_schema_2_container_when_runtime_metad
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container recreates schema 2 container when runtime metadata drifts."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   workspace_root = tmp_path / "workspace"
@@ -531,6 +563,7 @@ def test_start_profile_container_recreates_schema_2_container_when_runtime_metad
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert calls[:2] == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
     ["docker", "rm", "--force", "frag-demo-profile"],
@@ -541,6 +574,7 @@ def test_start_profile_container_refuses_legacy_schema_named_container(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container refuses legacy schema named container."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   workspace_root = tmp_path / "workspace"
@@ -595,6 +629,7 @@ def test_start_profile_container_refuses_legacy_schema_named_container(
       bootstrap_token="token-123",
     )
 
+  # Verify the observed behavior matches the contract.
   assert calls == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"]
   ]
@@ -604,6 +639,7 @@ def test_start_profile_container_removes_stale_mismatched_named_container(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container removes stale mismatched named container."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   workspace_root = tmp_path / "workspace"
@@ -657,11 +693,14 @@ def test_start_profile_container_removes_stale_mismatched_named_container(
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert calls[:2] == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
     ["docker", "rm", "--force", "frag-demo-profile"],
   ]
+  # Verify the observed behavior matches the contract.
   assert calls[2][0:5] == ["docker", "run", "--detach", "--rm", "--name"]
+  # Verify the observed behavior matches the contract.
   assert calls[2][5] == "frag-demo-profile"
 
 
@@ -669,11 +708,13 @@ def test_start_profile_container_uses_runtime_spec_mounts_and_command(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container uses runtime spec mounts and command."""
   monkeypatch.setattr(docker_runtime.os, "getuid", lambda: 1000)
   monkeypatch.setattr(docker_runtime.os, "getgid", lambda: 1000)
   monkeypatch.setattr(
     docker_runtime.os, "getgroups", lambda: [1000, 2001, 2002, 2001]
   )
+  monkeypatch.setattr(image_assets.Path, "home", lambda: tmp_path / "empty-home")
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   shared_root = tmp_path / "shared-home"
@@ -748,6 +789,7 @@ def test_start_profile_container_uses_runtime_spec_mounts_and_command(
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert captured == [
     ["docker", "inspect", "--type", "container", "frag-demo-profile"],
     [
@@ -839,6 +881,7 @@ def test_start_profile_container_uses_runtime_spec_mounts_and_command(
     ],
   ]
   run_command = captured[1]
+  # Verify the observed behavior matches the contract.
   assert "/home/agent" not in run_command
 
 
@@ -846,6 +889,7 @@ def test_start_profile_container_uses_runtime_spec_start_command(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers start profile container uses runtime spec start command."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   runtime_spec = image_assets.RuntimeSpec(
@@ -880,6 +924,7 @@ def test_start_profile_container_uses_runtime_spec_start_command(
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert captured[0] == [
     "docker",
     "inspect",
@@ -887,6 +932,7 @@ def test_start_profile_container_uses_runtime_spec_start_command(
     "container",
     "frag-demo-profile",
   ]
+  # Verify the observed behavior matches the contract.
   assert captured[1][-4:] == [
     "loaded:image",
     "custom-bootstrap",
@@ -898,6 +944,7 @@ def test_start_profile_container_uses_runtime_spec_start_command(
 def test_exec_in_profile_container_uses_tty_when_stdio_is_interactive(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers exec in profile container uses tty when stdio is interactive."""
   captured: list[list[str]] = []
 
   def fake_run(
@@ -916,7 +963,9 @@ def test_exec_in_profile_container_uses_tty_when_stdio_is_interactive(
     command=("bash", "-lc", "pwd"),
   )
 
+  # Verify the observed behavior matches the contract.
   assert result == 23
+  # Verify the observed behavior matches the contract.
   assert captured == [
     [
       "docker",
@@ -938,6 +987,7 @@ def test_exec_in_profile_container_uses_tty_when_stdio_is_interactive(
 def test_exec_in_profile_container_omits_tty_when_stdio_is_not_interactive(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers exec in profile container omits tty when stdio is not interactive."""
   captured: list[list[str]] = []
 
   def fake_run(
@@ -956,7 +1006,9 @@ def test_exec_in_profile_container_omits_tty_when_stdio_is_not_interactive(
     command=("bash", "-lc", "pwd"),
   )
 
+  # Verify the observed behavior matches the contract.
   assert result == 23
+  # Verify the observed behavior matches the contract.
   assert captured == [
     [
       "docker",
@@ -978,11 +1030,13 @@ def test_exec_in_profile_container_omits_tty_when_stdio_is_not_interactive(
 def test_build_bootstrap_wait_command_executes_shell_directly_as_root() -> (
   None
 ):
+  """Covers build bootstrap wait command executes shell directly as root."""
   command = docker_runtime._build_bootstrap_wait_command(
     profile=DEMO_PROFILE,
     bootstrap_token="token-123",
   )
 
+  # Verify the observed behavior matches the contract.
   assert command[:7] == [
     "docker",
     "exec",
@@ -992,13 +1046,16 @@ def test_build_bootstrap_wait_command_executes_shell_directly_as_root() -> (
     f"{runtime_contract.BOOTSTRAP_TOKEN_ENV}=token-123",
     docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
   ]
+  # Verify the observed behavior matches the contract.
   assert command[7:9] == ["sh", "-lc"]
+  # Verify the observed behavior matches the contract.
   assert docker_runtime._IDENTITY_OVERLAY_EXEC_PATH not in command
 
 
 def test_wait_for_profile_bootstrap_polls_until_token_matches(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers wait for profile bootstrap polls until token matches."""
   captured: list[list[str]] = []
   return_codes = iter([BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE, 0])
   slept: list[float] = []
@@ -1033,12 +1090,16 @@ def test_wait_for_profile_bootstrap_polls_until_token_matches(
   wait_attempts = [
     command for command in captured if command[:2] == ["docker", "exec"]
   ]
+  # Verify the observed behavior matches the contract.
   assert slept == [0.25]
+  # Verify the observed behavior matches the contract.
   assert len(wait_attempts) == 2
+  # Verify the observed behavior matches the contract.
   assert all(
     runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH in command[-1]
     for command in wait_attempts
   )
+  # Verify the observed behavior matches the contract.
   assert all(
     docker_runtime._IDENTITY_OVERLAY_EXEC_PATH not in command
     for command in wait_attempts
@@ -1048,6 +1109,7 @@ def test_wait_for_profile_bootstrap_polls_until_token_matches(
 def test_wait_for_profile_bootstrap_times_out_when_token_never_matches(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers wait for profile bootstrap times out when token never matches."""
   attempts: list[list[str]] = []
   slept: list[float] = []
   monotonic_values = iter([0.0, 0.0, 0.25, 0.5])
@@ -1091,14 +1153,18 @@ def test_wait_for_profile_bootstrap_times_out_when_token_never_matches(
   timeout_status_attempts = [
     command for command in wait_attempts if "-e" not in command
   ]
+  # Verify the observed behavior matches the contract.
   assert slept == [0.25]
+  # Verify the observed behavior matches the contract.
   assert len(retry_probe_attempts) == 2
+  # Verify the observed behavior matches the contract.
   assert len(timeout_status_attempts) == 1
 
 
 def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeout(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers wait for profile bootstrap prefers container logs before generic timeout."""
   attempts: list[list[str]] = []
   slept: list[float] = []
   monotonic_values = iter([0.0, 0.0, 0.25, 0.5])
@@ -1140,7 +1206,9 @@ def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeou
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert slept == [0.25]
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "logs",
@@ -1151,6 +1219,7 @@ def test_wait_for_profile_bootstrap_prefers_container_logs_before_generic_timeou
 def test_bootstrap_wait_result_is_not_retryable_for_missing_identity_wrapper() -> (
   None
 ):
+  """Covers bootstrap wait result is not retryable for missing identity wrapper."""
   result = subprocess.CompletedProcess(
     ["docker", "exec"],
     127,
@@ -1158,12 +1227,14 @@ def test_bootstrap_wait_result_is_not_retryable_for_missing_identity_wrapper() -
     stderr=f"stat {docker_runtime._IDENTITY_OVERLAY_EXEC_PATH}: no such file or directory",
   )
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime._bootstrap_wait_result_is_retryable(result) is False
 
 
 def test_wait_for_profile_bootstrap_reports_current_token_failure_status(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers wait for profile bootstrap reports current token failure status."""
   attempts: list[list[str]] = []
 
   def fake_run(
@@ -1200,12 +1271,14 @@ def test_wait_for_profile_bootstrap_reports_current_token_failure_status(
   wait_attempts = [
     command for command in attempts if command[:2] == ["docker", "exec"]
   ]
+  # Verify the observed behavior matches the contract.
   assert len(wait_attempts) == 1
 
 
 def test_wait_for_profile_bootstrap_retries_when_probe_reports_stale_failure_status(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers wait for profile bootstrap retries when probe reports stale failure status."""
   attempts: list[list[str]] = []
   probe_results = iter(
     [
@@ -1260,7 +1333,9 @@ def test_wait_for_profile_bootstrap_retries_when_probe_reports_stale_failure_sta
   wait_attempts = [
     command for command in attempts if command[:2] == ["docker", "exec"]
   ]
+  # Verify the observed behavior matches the contract.
   assert slept == [0.25]
+  # Verify the observed behavior matches the contract.
   assert len(wait_attempts) == 2
 
 
@@ -1268,6 +1343,7 @@ def test_read_persisted_bootstrap_failure_ignores_unreadable_volume_file(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers read persisted bootstrap failure ignores unreadable volume file."""
   monkeypatch.setattr(
     docker_runtime,
     "_profile_volume_mountpoint",
@@ -1279,6 +1355,7 @@ def test_read_persisted_bootstrap_failure_ignores_unreadable_volume_file(
     lambda self: (_ for _ in ()).throw(PermissionError("denied")),
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime._read_persisted_bootstrap_failure(
       profile=DEMO_PROFILE,
@@ -1291,12 +1368,15 @@ def test_read_persisted_bootstrap_failure_ignores_unreadable_volume_file(
 def test_read_bootstrap_failure_detail_checks_current_then_persisted_then_logs(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers read bootstrap failure detail checks current then persisted then logs."""
   calls: list[str] = []
 
   def fake_current(
     *, profile: profiles.Profile, bootstrap_token: str
   ) -> str | None:
+    # Verify the observed behavior matches the contract.
     assert profile is DEMO_PROFILE
+    # Verify the observed behavior matches the contract.
     assert bootstrap_token == "token-123"
     calls.append("current")
     return "current detail"
@@ -1319,6 +1399,7 @@ def test_read_bootstrap_failure_detail_checks_current_then_persisted_then_logs(
   )
   monkeypatch.setattr(docker_runtime, "_read_container_logs", fake_logs)
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime._read_bootstrap_failure_detail(
       profile=DEMO_PROFILE,
@@ -1327,12 +1408,14 @@ def test_read_bootstrap_failure_detail_checks_current_then_persisted_then_logs(
     )
     == "current detail"
   )
+  # Verify the observed behavior matches the contract.
   assert calls == ["current"]
 
 
 def test_read_bootstrap_failure_detail_can_prefer_logs(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers read bootstrap failure detail can prefer logs."""
   calls: list[str] = []
 
   def fake_current(
@@ -1348,6 +1431,7 @@ def test_read_bootstrap_failure_detail_can_prefer_logs(
     return "persisted detail"
 
   def fake_logs(profile: profiles.Profile) -> str | None:
+    # Verify the observed behavior matches the contract.
     assert profile is DEMO_PROFILE
     calls.append("logs")
     return "logs detail"
@@ -1360,6 +1444,7 @@ def test_read_bootstrap_failure_detail_can_prefer_logs(
   )
   monkeypatch.setattr(docker_runtime, "_read_container_logs", fake_logs)
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime._read_bootstrap_failure_detail(
       profile=DEMO_PROFILE,
@@ -1369,6 +1454,7 @@ def test_read_bootstrap_failure_detail_can_prefer_logs(
     )
     == "logs detail"
   )
+  # Verify the observed behavior matches the contract.
   assert calls == ["logs"]
 
 
@@ -1376,6 +1462,7 @@ def test_wait_for_profile_bootstrap_reports_persisted_current_token_failure_afte
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers wait for profile bootstrap reports persisted current token failure after container exit."""
   attempts: list[list[str]] = []
   volume_root = tmp_path / "profile-volume"
   status_path = volume_root / "meta" / "bootstrap-status.json"
@@ -1422,6 +1509,7 @@ def test_wait_for_profile_bootstrap_reports_persisted_current_token_failure_afte
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert ["docker", "volume", "inspect", DEMO_PROFILE.volume_name] in attempts
 
 
@@ -1429,6 +1517,7 @@ def test_wait_for_profile_bootstrap_prefers_logs_before_persisted_status_after_e
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers wait for profile bootstrap prefers logs before persisted status after exit."""
   attempts: list[list[str]] = []
   volume_root = tmp_path / "profile-volume"
   status_path = volume_root / "meta" / "bootstrap-status.json"
@@ -1482,11 +1571,13 @@ def test_wait_for_profile_bootstrap_prefers_logs_before_persisted_status_after_e
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "logs",
     docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
   ] in attempts
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "volume",
@@ -1499,6 +1590,7 @@ def test_wait_for_profile_bootstrap_reports_exited_container_logs_without_status
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers wait for profile bootstrap reports exited container logs without status."""
   attempts: list[list[str]] = []
   volume_root = tmp_path / "profile-volume"
   volume_root.mkdir()
@@ -1541,11 +1633,13 @@ def test_wait_for_profile_bootstrap_reports_exited_container_logs_without_status
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "logs",
     docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
   ] in attempts
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "volume",
@@ -1558,6 +1652,7 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers wait for profile bootstrap reports gone container without status."""
   attempts: list[list[str]] = []
   slept: list[float] = []
   volume_root = tmp_path / "profile-volume"
@@ -1602,12 +1697,15 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status(
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert ["docker", "volume", "inspect", DEMO_PROFILE.volume_name] in attempts
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "logs",
     docker_runtime.container_name_for_profile(DEMO_PROFILE.name),
   ] in attempts
+  # Verify the observed behavior matches the contract.
   assert slept == []
 
 
@@ -1615,6 +1713,7 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status_for_no
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers wait for profile bootstrap reports gone container without status for no such container."""
   attempts: list[list[str]] = []
   slept: list[float] = []
   volume_root = tmp_path / "profile-volume"
@@ -1659,7 +1758,9 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status_for_no
       poll_interval_seconds=0.25,
     )
 
+  # Verify the observed behavior matches the contract.
   assert slept == []
+  # Verify the observed behavior matches the contract.
   assert [
     "docker",
     "logs",
@@ -1673,6 +1774,7 @@ def test_wait_for_profile_bootstrap_reports_gone_container_without_status_for_no
 def test_wait_for_profile_bootstrap_defers_startup_cleanup_semantics() -> (
   None
 ):
+  """Covers wait for profile bootstrap defers startup cleanup semantics."""
   """Explicitly track the untested cleanup-semantics gap for a follow-up task."""
 
 
@@ -1713,6 +1815,7 @@ def test_is_container_running_requires_strict_schema_2_runtime_metadata_match(
   mutate_labels: callable,
   mount_source: str | None,
 ) -> None:
+  """Covers is container running requires strict schema 2 runtime metadata match."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   labels = {
@@ -1757,6 +1860,7 @@ def test_is_container_running_requires_strict_schema_2_runtime_metadata_match(
     volume_name=DEMO_PROFILE.volume_name,
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.is_container_running(
       runtime_profile,
@@ -1775,6 +1879,7 @@ def test_is_container_running_requires_strict_schema_2_runtime_metadata_match(
 def test_is_container_running_refuses_legacy_schema_1_named_container(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers is container running refuses legacy schema 1 named container."""
   inspect_payload = [
     {
       "State": {"Running": True},
@@ -1825,6 +1930,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_identity_m
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers is container running rejects named container with mismatched identity metadata."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
 
@@ -1870,6 +1976,7 @@ def test_is_container_running_rejects_named_container_with_mismatched_identity_m
     volume_name=DEMO_PROFILE.volume_name,
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     docker_runtime.is_container_running(
       runtime_profile,
@@ -1889,6 +1996,7 @@ def test_cli_enter_requires_runtime_metadata_for_container_reuse(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers cli enter requires runtime metadata for container reuse."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   working_dir = workspace_root / "nested"
@@ -1922,7 +2030,7 @@ def test_cli_enter_requires_runtime_metadata_for_container_reuse(
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, name: (
+    lambda _backend, *, name: (
       runtime_profile if name == "Demo Profile" else None
     ),
   )
@@ -1967,9 +2075,13 @@ def test_cli_enter_requires_runtime_metadata_for_container_reuse(
   )
   monkeypatch.chdir(working_dir)
 
+  # Verify the observed behavior matches the contract.
   assert cli.handle_enter(profile="Demo Profile", command=()) == 0
+  # Verify the observed behavior matches the contract.
   assert assets_provider.load_calls == []
+  # Verify the observed behavior matches the contract.
   assert assets_provider.build_calls == [(runtime_profile, workspace_root)]
+  # Verify the observed behavior matches the contract.
   assert calls == [
     ("map", working_dir),
     ("reuse", expected_metadata),
@@ -1981,6 +2093,7 @@ def test_cli_enter_loads_image_starts_container_waits_then_execs(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers cli enter loads image starts container waits then execs."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   working_dir = workspace_root / "nested"
@@ -2004,7 +2117,7 @@ def test_cli_enter_loads_image_starts_container_waits_then_execs(
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, name: (
+    lambda _backend, *, name: (
       runtime_profile if name == "Demo Profile" else None
     ),
   )
@@ -2057,12 +2170,16 @@ def test_cli_enter_loads_image_starts_container_waits_then_execs(
   )
   monkeypatch.chdir(working_dir)
 
+  # Verify the observed behavior matches the contract.
   assert cli.handle_enter(profile="Demo Profile", command=()) == 0
+  # Verify the observed behavior matches the contract.
   assert assets_provider.load_calls == [runtime_profile]
+  # Verify the observed behavior matches the contract.
   assert assets_provider.build_calls == [
     (runtime_profile, workspace_root),
     (runtime_profile, workspace_root),
   ]
+  # Verify the observed behavior matches the contract.
   assert calls == [
     ("map", working_dir),
     (
@@ -2081,6 +2198,7 @@ def test_cli_enter_refuses_pwd_outside_workspace_root(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers cli enter refuses pwd outside workspace root."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   outside = tmp_path / "outside"
@@ -2088,7 +2206,7 @@ def test_cli_enter_refuses_pwd_outside_workspace_root(
 
   monkeypatch.setattr(cli, "build_docker_backend", lambda: object())
   monkeypatch.setattr(
-    cli.profiles, "get_profile", lambda _backend, _name: DEMO_PROFILE
+    cli.profiles, "get_profile", lambda _backend, *, name: DEMO_PROFILE
   )
   monkeypatch.setattr(
     cli.docker_runtime,
@@ -2106,6 +2224,7 @@ def test_cli_enter_refuses_pwd_outside_workspace_root(
 def test_stop_profile_container_stops_named_container(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers stop profile container stops named container."""
   captured: list[list[str]] = []
 
   def fake_run(
@@ -2120,12 +2239,14 @@ def test_stop_profile_container_stops_named_container(
 
   docker_runtime.stop_profile_container(DEMO_PROFILE)
 
+  # Verify the observed behavior matches the contract.
   assert captured == [["docker", "stop", "frag-demo-profile"]]
 
 
 def test_stop_profile_container_surfaces_docker_stop_failures(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers stop profile container surfaces docker stop failures."""
   def fake_run(
     command: list[str], **_kwargs: object
   ) -> subprocess.CompletedProcess[str]:
@@ -2156,15 +2277,18 @@ def test_should_allocate_tty_requires_both_streams_to_be_interactive(
   stdout_tty: bool,
   expected: bool,
 ) -> None:
+  """Covers should allocate tty requires both streams to be interactive."""
   monkeypatch.setattr(docker_runtime.sys.stdin, "isatty", lambda: stdin_tty)
   monkeypatch.setattr(docker_runtime.sys.stdout, "isatty", lambda: stdout_tty)
 
+  # Verify the observed behavior matches the contract.
   assert docker_runtime._should_allocate_tty() is expected
 
 
 def test_resolve_runtime_spec_prefers_loaded_image_reference(
   tmp_path: Path,
 ) -> None:
+  """Covers resolve runtime spec prefers loaded image reference."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   runtime_spec = image_assets.RuntimeSpec(
@@ -2176,18 +2300,20 @@ def test_resolve_runtime_spec_prefers_loaded_image_reference(
   assets_provider = FakeImageAssets(runtime_spec=runtime_spec)
 
   resolved = docker_runtime.resolve_runtime_spec(
-    DEMO_PROFILE,
-    workspace_root,
-    assets_provider,
+    profile=DEMO_PROFILE,
+    workspace_root=workspace_root,
+    image_assets=assets_provider,
     loaded_image_ref="loaded:image",
   )
 
+  # Verify the observed behavior matches the contract.
   assert resolved == image_assets.RuntimeSpec(
     image_ref="loaded:image",
     shared_assets_identity="shared-assets-123",
     shared_mounts=(),
     start_command=("frag-bootstrap",),
   )
+  # Verify the observed behavior matches the contract.
   assert assets_provider.build_calls == [
     (DEMO_PROFILE, workspace_root.resolve())
   ]
@@ -2237,15 +2363,16 @@ def test_resolve_runtime_spec_rejects_invalid_runtime_spec(
   loaded_image_ref: str | None,
   message: str,
 ) -> None:
+  """Covers resolve runtime spec rejects invalid runtime spec."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   assets_provider = FakeImageAssets(runtime_spec=runtime_spec)
 
   with pytest.raises(docker_runtime.DockerRuntimeError, match=message):
     docker_runtime.resolve_runtime_spec(
-      DEMO_PROFILE,
-      workspace_root,
-      assets_provider,
+      profile=DEMO_PROFILE,
+      workspace_root=workspace_root,
+      image_assets=assets_provider,
       loaded_image_ref=loaded_image_ref,
     )
 
@@ -2253,9 +2380,10 @@ def test_resolve_runtime_spec_rejects_invalid_runtime_spec(
 def test_cli_profile_stop_stops_named_container(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers cli profile stop stops named container."""
   monkeypatch.setattr(cli, "build_docker_backend", lambda: object())
   monkeypatch.setattr(
-    cli.profiles, "get_profile", lambda _backend, _name: DEMO_PROFILE
+    cli.profiles, "get_profile", lambda _backend, *, name: DEMO_PROFILE
   )
   stopped: list[str] = []
   monkeypatch.setattr(
@@ -2264,5 +2392,7 @@ def test_cli_profile_stop_stops_named_container(
     lambda profile: stopped.append(profile.name),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "stop", "Demo Profile"]) == 0
+  # Verify the observed behavior matches the contract.
   assert stopped == ["Demo Profile"]

@@ -1,19 +1,17 @@
-from __future__ import annotations
 
-from dataclasses import dataclass, field
+
+from attrs import Factory, define
 
 import pytest
 from frag import cli, profiles, prompts
 from frag.exceptions import LegacySchemaError
 
 
-@dataclass
+@define
 class FakeDockerBackend:
   volumes: dict[str, dict[str, str]]
   running_profiles: set[str]
-  create_volume_calls: list[tuple[str, dict[str, str]]] = field(
-    default_factory=list
-  )
+  create_volume_calls: list[tuple[str, dict[str, str]]] = Factory(list)
 
   def create_volume(self, name: str, labels: dict[str, str]) -> None:
     self.create_volume_calls.append((name, labels.copy()))
@@ -102,6 +100,7 @@ def test_create_profile_canonicalizes_workspace_root(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path,
 ) -> None:
+  """Covers create profile canonicalizes workspace root."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   workspace = tmp_path / "workspace"
   workspace.mkdir()
@@ -119,7 +118,9 @@ def test_create_profile_canonicalizes_workspace_root(
   )
 
   expected_root = str(project.resolve())
+  # Verify the observed behavior matches the contract.
   assert profile.workspace_root == expected_root
+  # Verify the observed behavior matches the contract.
   assert (
     backend.volumes["frag-profile-demo-profile"][
       profiles.LABEL_WORKSPACE_ROOT
@@ -129,6 +130,7 @@ def test_create_profile_canonicalizes_workspace_root(
 
 
 def test_create_profile_rejects_missing_workspace_root(tmp_path) -> None:
+  """Covers create profile rejects missing workspace root."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   with pytest.raises(
@@ -142,12 +144,14 @@ def test_create_profile_rejects_missing_workspace_root(tmp_path) -> None:
       workspace_root=str(tmp_path / "missing"),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
 
 
 def test_create_profile_rejects_non_directory_workspace_root(
   tmp_path,
 ) -> None:
+  """Covers create profile rejects non directory workspace root."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   workspace_file = tmp_path / "workspace-file"
   workspace_file.write_text("not a directory\n")
@@ -163,10 +167,12 @@ def test_create_profile_rejects_non_directory_workspace_root(
       workspace_root=str(workspace_file),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
 
 
 def test_create_profile_creates_labeled_volume(tmp_path) -> None:
+  """Covers create profile creates labeled volume."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   profile = profiles.create_profile(
@@ -176,7 +182,9 @@ def test_create_profile_creates_labeled_volume(tmp_path) -> None:
     workspace_root=_workspace_root(tmp_path),
   )
 
+  # Verify the observed behavior matches the contract.
   assert profile.volume_name == "frag-profile-demo-profile"
+  # Verify the observed behavior matches the contract.
   assert backend.volumes == {
     "frag-profile-demo-profile": {
       profiles.LABEL_PROFILE: "Demo Profile",
@@ -190,6 +198,7 @@ def test_create_profile_creates_labeled_volume(tmp_path) -> None:
 def test_create_profile_rejects_names_without_alphanumeric_characters(
   tmp_path,
 ) -> None:
+  """Covers create profile rejects names without alphanumeric characters."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   with pytest.raises(
@@ -203,12 +212,14 @@ def test_create_profile_rejects_names_without_alphanumeric_characters(
       workspace_root=_workspace_root(tmp_path),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
 
 
 def test_create_profile_rejects_distinct_names_with_same_normalized_volume(
   tmp_path,
 ) -> None:
+  """Covers create profile rejects distinct names with same normalized volume."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo-profile": {
@@ -229,6 +240,7 @@ def test_create_profile_rejects_distinct_names_with_same_normalized_volume(
       workspace_root=_workspace_root(tmp_path, "other"),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.volumes == {
     "frag-profile-demo-profile": {
       profiles.LABEL_PROFILE: "Demo Profile",
@@ -242,6 +254,7 @@ def test_create_profile_rejects_distinct_names_with_same_normalized_volume(
 def test_create_profile_rejects_reusing_existing_name_with_different_metadata(
   tmp_path,
 ) -> None:
+  """Covers create profile rejects reusing existing name with different metadata."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo-profile": {
@@ -264,7 +277,9 @@ def test_create_profile_rejects_reusing_existing_name_with_different_metadata(
       workspace_root=_workspace_root(tmp_path, "other"),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
+  # Verify the observed behavior matches the contract.
   assert backend.volumes == {
     "frag-profile-demo-profile": {
       profiles.LABEL_PROFILE: "Demo Profile",
@@ -278,6 +293,7 @@ def test_create_profile_rejects_reusing_existing_name_with_different_metadata(
 def test_create_profile_is_idempotent_for_matching_existing_metadata(
   tmp_path,
 ) -> None:
+  """Covers create profile is idempotent for matching existing metadata."""
   workspace_root = _workspace_root(tmp_path, "demo")
   backend = FakeDockerBackend(
     volumes={
@@ -298,16 +314,19 @@ def test_create_profile_is_idempotent_for_matching_existing_metadata(
     workspace_root=workspace_root,
   )
 
+  # Verify the observed behavior matches the contract.
   assert profile == profiles.Profile(
     name="Demo Profile",
     image="python:3.14",
     workspace_root=workspace_root,
     volume_name="frag-profile-demo-profile",
   )
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
 
 
 def test_list_profiles_reconstructs_metadata_from_volume_labels() -> None:
+  """Covers list profiles reconstructs metadata from volume labels."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -322,6 +341,7 @@ def test_list_profiles_reconstructs_metadata_from_volume_labels() -> None:
 
   listed = profiles.list_profiles(backend)
 
+  # Verify the observed behavior matches the contract.
   assert listed == [
     profiles.Profile(
       name="demo",
@@ -330,10 +350,12 @@ def test_list_profiles_reconstructs_metadata_from_volume_labels() -> None:
       volume_name="frag-profile-demo",
     )
   ]
-  assert profiles.get_profile(backend, "demo") == listed[0]
+  # Verify the observed behavior matches the contract.
+  assert profiles.get_profile(backend, name="demo") == listed[0]
 
 
 def test_list_profiles_ignores_unrelated_legacy_schema1_volume() -> None:
+  """Covers list profiles ignores unrelated legacy schema1 volume."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -354,6 +376,7 @@ def test_list_profiles_ignores_unrelated_legacy_schema1_volume() -> None:
 
   listed = profiles.list_profiles(backend)
 
+  # Verify the observed behavior matches the contract.
   assert listed == [
     profiles.Profile(
       name="demo",
@@ -362,10 +385,12 @@ def test_list_profiles_ignores_unrelated_legacy_schema1_volume() -> None:
       volume_name="frag-profile-demo",
     )
   ]
-  assert profiles.get_profile(backend, "demo") == listed[0]
+  # Verify the observed behavior matches the contract.
+  assert profiles.get_profile(backend, name="demo") == listed[0]
 
 
 def test_get_profile_refuses_legacy_schema1_volume() -> None:
+  """Covers get profile refuses legacy schema1 volume."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -382,10 +407,11 @@ def test_get_profile_refuses_legacy_schema1_volume() -> None:
     LegacySchemaError,
     match="schema 1 profile volume .*demo.* is not supported",
   ):
-    profiles.get_profile(backend, "demo")
+    profiles.get_profile(backend, name="demo")
 
 
 def test_get_profile_raises_typed_legacy_schema_error() -> None:
+  """Covers get profile raises typed legacy schema error."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -399,12 +425,14 @@ def test_get_profile_raises_typed_legacy_schema_error() -> None:
   )
 
   with pytest.raises(LegacySchemaError) as exc_info:
-    profiles.get_profile(backend, "demo")
+    profiles.get_profile(backend, name="demo")
 
+  # Verify the observed behavior matches the contract.
   assert "schema 1 profile volume" in str(exc_info.value)
 
 
 def test_get_profile_skips_malformed_same_name_schema2_volume() -> None:
+  """Covers get profile skips malformed same name schema2 volume."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo-broken": {
@@ -422,7 +450,8 @@ def test_get_profile_skips_malformed_same_name_schema2_volume() -> None:
     running_profiles=set(),
   )
 
-  assert profiles.get_profile(backend, "demo") == profiles.Profile(
+  # Verify the observed behavior matches the contract.
+  assert profiles.get_profile(backend, name="demo") == profiles.Profile(
     name="demo",
     image="python:3.14",
     workspace_root="/workspace/demo",
@@ -433,6 +462,7 @@ def test_get_profile_skips_malformed_same_name_schema2_volume() -> None:
 def test_create_profile_refuses_legacy_schema1_name_conflict(
   tmp_path,
 ) -> None:
+  """Covers create profile refuses legacy schema1 name conflict."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo-profile": {
@@ -456,10 +486,12 @@ def test_create_profile_refuses_legacy_schema1_name_conflict(
       workspace_root=_workspace_root(tmp_path, "other"),
     )
 
+  # Verify the observed behavior matches the contract.
   assert backend.create_volume_calls == []
 
 
 def test_remove_profile_refuses_running_profiles() -> None:
+  """Covers remove profile refuses running profiles."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -473,12 +505,13 @@ def test_remove_profile_refuses_running_profiles() -> None:
   )
 
   with pytest.raises(profiles.ProfileInUseError):
-    profiles.remove_profile(backend, "demo")
+    profiles.remove_profile(backend, name="demo")
 
 
 def test_profile_new_prompts_for_missing_values(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new prompts for missing values."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   captured: dict[str, object] = {}
 
@@ -522,8 +555,11 @@ def test_profile_new_prompts_for_missing_values(
 
   result = cli.main(["profile", "new"])
 
+  # Verify the observed behavior matches the contract.
   assert result == 0
+  # Verify the observed behavior matches the contract.
   assert prompt_calls == [("python",)]
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "docker_backend": backend,
     "name": "demo",
@@ -535,6 +571,7 @@ def test_profile_new_prompts_for_missing_values(
 def test_profile_new_prompts_with_catalog_image_choices(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new prompts with catalog image choices."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   captured: dict[str, object] = {}
   prompt_calls: list[tuple[str, ...]] = []
@@ -580,8 +617,11 @@ def test_profile_new_prompts_with_catalog_image_choices(
 
   monkeypatch.setattr(cli.profiles, "create_profile", fake_create_profile)
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "new"]) == 0
+  # Verify the observed behavior matches the contract.
   assert prompt_calls == [("main", "cuda")]
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "docker_backend": backend,
     "name": "demo",
@@ -593,6 +633,7 @@ def test_profile_new_prompts_with_catalog_image_choices(
 def test_required_profile_prompts_reject_blank_text_answers(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers required profile prompts reject blank text answers."""
   class FakePrompt:
     def __init__(self, answer: object) -> None:
       self.answer = answer
@@ -620,6 +661,7 @@ def test_required_profile_prompts_reject_blank_text_answers(
 def test_prompt_profile_image_uses_catalog_select_choices(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers prompt profile image uses catalog select choices."""
   captured: dict[str, object] = {}
 
   class FakePrompt:
@@ -634,7 +676,9 @@ def test_prompt_profile_image_uses_catalog_select_choices(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert prompts.prompt_profile_image(("main", "cuda")) == "cuda"
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "message": "Image",
     "choices": ["main", "cuda"],
@@ -644,6 +688,7 @@ def test_prompt_profile_image_uses_catalog_select_choices(
 def test_prompt_profile_image_rejects_cancelled_selection(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers prompt profile image rejects cancelled selection."""
   class FakePrompt:
     def ask(self) -> object:
       return None
@@ -661,6 +706,7 @@ def test_prompt_profile_image_rejects_cancelled_selection(
 def test_profile_new_aborts_cleanly_when_prompt_answer_is_whitespace_only(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new aborts cleanly when prompt answer is whitespace only."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
@@ -679,12 +725,14 @@ def test_profile_new_aborts_cleanly_when_prompt_answer_is_whitespace_only(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "new"]) == 1
 
 
 def test_profile_new_aborts_cleanly_when_required_prompt_is_blank(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new aborts cleanly when required prompt is blank."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
@@ -697,12 +745,14 @@ def test_profile_new_aborts_cleanly_when_required_prompt_is_blank(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "new"]) == 1
 
 
 def test_profile_new_aborts_cleanly_when_prompt_is_cancelled(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new aborts cleanly when prompt is cancelled."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   prompt_aborted = getattr(cli.prompts, "PromptAborted", RuntimeError)
 
@@ -720,12 +770,14 @@ def test_profile_new_aborts_cleanly_when_prompt_is_cancelled(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "new"]) == 1
 
 
 def test_enter_without_profile_uses_prompt_helper(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers enter without profile uses prompt helper."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   chosen: list[tuple[str, ...]] = []
   executed = stub_enter_runtime(monkeypatch)
@@ -762,14 +814,18 @@ def test_enter_without_profile_uses_prompt_helper(
 
   result = cli.main(["enter", "--", "bash"])
 
+  # Verify the observed behavior matches the contract.
   assert result == 0
+  # Verify the observed behavior matches the contract.
   assert chosen == [("demo",)]
+  # Verify the observed behavior matches the contract.
   assert executed == [("demo", "/workspace-root", ("bash",))]
 
 
 def test_enter_without_profile_can_choose_create_flow(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers enter without profile can choose create flow."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   created: list[str] = []
   executed = stub_enter_runtime(monkeypatch)
@@ -825,14 +881,18 @@ def test_enter_without_profile_can_choose_create_flow(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--", "bash"]) == 0
+  # Verify the observed behavior matches the contract.
   assert created == ["new-demo"]
+  # Verify the observed behavior matches the contract.
   assert executed == [("new-demo", "/workspace-root", ("bash",))]
 
 
 def test_prompt_enter_profile_action_treats_colliding_label_as_existing(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers prompt enter profile action treats colliding label as existing."""
   class FakePrompt:
     def __init__(self, selected: object) -> None:
       self.selected = selected
@@ -846,6 +906,7 @@ def test_prompt_enter_profile_action_treats_colliding_label_as_existing(
     lambda _message, choices: FakePrompt(choices[0]),
   )
 
+  # Verify the observed behavior matches the contract.
   assert prompts.prompt_enter_profile_action(["Create a new profile"]) == (
     "existing",
     "Create a new profile",
@@ -855,6 +916,7 @@ def test_prompt_enter_profile_action_treats_colliding_label_as_existing(
 def test_enter_without_profile_creates_profile_when_none_exist(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers enter without profile creates profile when none exist."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
   created: dict[str, object] = {}
   executed = stub_enter_runtime(monkeypatch)
@@ -904,13 +966,16 @@ def test_enter_without_profile_creates_profile_when_none_exist(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--", "bash"]) == 0
+  # Verify the observed behavior matches the contract.
   assert created == {
     "docker_backend": backend,
     "name": "demo",
     "image": "python",
     "workspace_root": "/workspace/demo",
   }
+  # Verify the observed behavior matches the contract.
   assert executed == [("demo", "/workspace-root", ("bash",))]
 
 
@@ -918,6 +983,7 @@ def test_profile_list_shows_metadata_and_state(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers profile list shows metadata and state."""
   backend = FakeDockerBackend(
     volumes={
       "frag-profile-demo": {
@@ -932,7 +998,9 @@ def test_profile_list_shows_metadata_and_state(
 
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "list"]) == 0
+  # Verify the observed behavior matches the contract.
   assert capsys.readouterr().out.splitlines() == [
     "demo\timage=python:3.14\tworkspace_root=/workspace/demo\tvolume=frag-profile-demo\tstate=running"
   ]
@@ -941,6 +1009,7 @@ def test_profile_list_shows_metadata_and_state(
 def test_profile_rm_refuses_running_profiles_without_prompting(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile rm refuses running profiles without prompting."""
   backend = FakeDockerBackend(volumes={}, running_profiles=set())
 
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
@@ -957,12 +1026,14 @@ def test_profile_rm_refuses_running_profiles_without_prompting(
 
   result = cli.main(["profile", "rm", "--name", "demo"])
 
+  # Verify the observed behavior matches the contract.
   assert result == 1
 
 
 def test_docker_cli_backend_wraps_missing_docker_binary(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers docker cli backend wraps missing docker binary."""
   backend = profiles.DockerCliBackend()
 
   def raise_missing_binary(*_args: object, **_kwargs: object) -> object:
@@ -971,10 +1042,11 @@ def test_docker_cli_backend_wraps_missing_docker_binary(
   monkeypatch.setattr(profiles.subprocess, "run", raise_missing_binary)
 
   with pytest.raises(profiles.DockerBackendError):
-    backend.create_volume("frag-profile-demo", labels={})
+    backend.create_volume(name="frag-profile-demo", labels={})
 
 
 def test_runtime_metadata_labels_round_trip_includes_identity_state() -> None:
+  """Covers runtime metadata labels round trip includes identity state."""
   metadata = profiles.RuntimeProfileMetadata(
     image_ref="loaded:image",
     shared_assets_identity="shared-assets-123",
@@ -983,6 +1055,7 @@ def test_runtime_metadata_labels_round_trip_includes_identity_state() -> None:
     supplementary_gids=(2001, 2002),
   )
 
+  # Verify the observed behavior matches the contract.
   assert profiles.runtime_metadata_labels(metadata) == {
     profiles.LABEL_RUNTIME_IMAGE_REF: "loaded:image",
     profiles.LABEL_SHARED_ASSETS_IDENTITY: "shared-assets-123",
@@ -990,6 +1063,7 @@ def test_runtime_metadata_labels_round_trip_includes_identity_state() -> None:
     profiles.LABEL_TARGET_GID: "1001",
     profiles.LABEL_TARGET_SUPPLEMENTARY_GIDS: "2001,2002",
   }
+  # Verify the observed behavior matches the contract.
   assert (
     profiles.runtime_metadata_from_labels(
       profiles.runtime_metadata_labels(metadata)

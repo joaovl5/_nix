@@ -1,9 +1,5 @@
 """Step protocol and installer orchestrator."""
 
-# pyright: reportUnusedCallResult=false, reportUnusedParameter=false
-
-from __future__ import annotations
-
 import shlex
 import subprocess
 import tempfile
@@ -29,7 +25,7 @@ _REMOTE_CACHE = ".cache/nix_installer"
 
 
 def nix_build(flake_ref: str) -> str:
-  """Build a flake ref locally, return the store path."""
+  """Build a flake ref locally and return the resulting store path."""
   result = subprocess.run(
     ["nix", "build", *NIX_FLAGS, flake_ref, "--no-link", "--print-out-paths"],
     capture_output=True,
@@ -46,12 +42,13 @@ def nix_build(flake_ref: str) -> str:
 
 
 def nix_copy_command(
+  *,
   ssh_config: SSHConfig,
   store_path: str,
   remote_store: str | None = None,
   substitute_on_dest: bool = False,
 ) -> ShellCommand:
-  """Build a ShellCommand for nix copy to a remote host."""
+  """Build the nix copy command used to transfer a store path to the target."""
   dest = f"ssh://{ssh_config.host}"
   if remote_store:
     from urllib.parse import quote
@@ -71,7 +68,7 @@ def nix_copy_command(
 
 
 def _nix_eval_tostring(flake_ref: str) -> str:
-  """Evaluate a flake attribute with `toString` application, return stdout."""
+  """Evaluate a flake attribute with `toString` application and return stdout."""
   result = subprocess.run(
     ["nix", "eval", *NIX_FLAGS, "--apply", "toString", flake_ref],
     capture_output=True,
@@ -85,6 +82,8 @@ def _nix_eval_tostring(flake_ref: str) -> str:
 
 
 class Step(Protocol):
+  """Shared contract for installer steps."""
+
   name: str
   description: str
 
@@ -94,11 +93,14 @@ class Step(Protocol):
 
 @define
 class Installer:
+  """Run installer steps in order within an isolated temporary workspace."""
+
   context: InstallerContext
   cli: CLI
   steps: Sequence[Step]
 
   def run(self) -> None:
+    """Execute each configured step with a fresh temporary directory."""
     with tempfile.TemporaryDirectory() as tmp_dir:
       ctx = attrs.evolve(self.context, tmp_dir=tmp_dir)
       for step in self.steps:
@@ -111,6 +113,8 @@ class Installer:
 
 @define
 class CloneRepositories:
+  """Clone remote flake and secrets repositories when needed."""
+
   name: str = "clone_repositories"
   description: str = "Cloning repositories"
 
@@ -157,6 +161,8 @@ class CloneRepositories:
 
 @define
 class DecryptKeyfile:
+  """Decrypt the Disko keyfile from the secrets repository."""
+
   name: str = "decrypt_keyfile"
   description: str = "Decrypting disk encryption keyfile"
 
@@ -191,6 +197,8 @@ class DecryptKeyfile:
 
 @define
 class SendKeyfile:
+  """Upload the decrypted Disko keyfile to the target host."""
+
   name: str = "send_keyfile"
   description: str = "Sending keyfile to target"
 
@@ -233,6 +241,8 @@ class SendKeyfile:
 
 @define
 class ConfigureSubstituters:
+  """Copy the flake's binary cache settings onto the target host."""
+
   name: str = "configure_substituters"
   description: str = "Configuring binary cache substituters on target"
 
@@ -273,6 +283,8 @@ class ConfigureSubstituters:
 
 @define
 class RunDisko:
+  """Build, copy, and execute the Disko script on the target host."""
+
   name: str = "run_disko"
   description: str = "Building and running disko on target"
 
@@ -288,7 +300,10 @@ class RunDisko:
     cli.info(f"Built disko script: {store_path}")
 
     cli.run_command(
-      command=nix_copy_command(context.ssh_config, store_path),
+      command=nix_copy_command(
+        ssh_config=context.ssh_config,
+        store_path=store_path,
+      ),
       description="Copying disko script to target",
       error_msg="Failed to copy disko script to target",
     )
@@ -309,6 +324,8 @@ class RunDisko:
 
 @define
 class RunFacter:
+  """Build, copy, and execute nixos-facter on the target host."""
+
   name: str = "run_facter"
   description: str = "Building and running nixos-facter on target"
 
@@ -321,7 +338,10 @@ class RunFacter:
     cli.info(f"Built nixos-facter: {store_path}")
 
     cli.run_command(
-      command=nix_copy_command(context.ssh_config, store_path),
+      command=nix_copy_command(
+        ssh_config=context.ssh_config,
+        store_path=store_path,
+      ),
       description="Copying nixos-facter to target",
       error_msg="Failed to copy nixos-facter to target",
     )
@@ -345,6 +365,8 @@ class RunFacter:
 
 @define
 class DownloadFacter:
+  """Fetch the generated facter JSON back into the secrets repository."""
+
   name: str = "download_facter"
   description: str = "Downloading facter config from target"
 
@@ -396,6 +418,8 @@ _GIT_INSTALLER_CONFIG = {
 
 @define
 class CommitFacter:
+  """Commit the fetched facter JSON into the secrets repository."""
+
   name: str = "commit_facter"
   description: str = "Committing facter config to secrets repo"
 
@@ -432,6 +456,8 @@ class CommitFacter:
 
 @define
 class UpdateSecretsPin:
+  """Update the flake's pinned secrets input after pushing the secrets repo."""
+
   name: str = "update_secrets_pin"
   description: str = "Updating secrets pin with unflake; push secrets first, then rerun the pin update"
 
@@ -484,6 +510,8 @@ class UpdateSecretsPin:
 
 @define
 class CopyKeys:
+  """Copy local SSH and AGE keys into the target filesystem."""
+
   name: str = "copy_keys"
   description: str = "Copying SSH/AGE keys to target"
 
@@ -565,6 +593,8 @@ class CopyKeys:
 
 @define
 class GenerateInitrdSSHKeys:
+  """Generate the initrd SSH host key inside the mounted target root."""
+
   name: str = "generate_initrd_ssh_keys"
   description: str = "Generating initrd SSH host keys on target"
 
@@ -601,6 +631,8 @@ class GenerateInitrdSSHKeys:
 
 @define
 class InstallSystem:
+  """Copy the built system closure and run nixos-install on the target."""
+
   name: str = "install_system"
   description: str = "Building and installing NixOS system"
 
@@ -629,8 +661,8 @@ class InstallSystem:
 
     cli.run_command(
       command=nix_copy_command(
-        context.ssh_config,
-        store_path,
+        ssh_config=context.ssh_config,
+        store_path=store_path,
         remote_store="local?root=/mnt",
         substitute_on_dest=True,
       ),

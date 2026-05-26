@@ -17,6 +17,21 @@
   dev = ["pytest>=8.0.0"]
 
 [tool.pytest.ini_options]
-  testpaths = ["tests"]
-  markers   = ["manual: tests that must be run manually (not in CI)"]
-  addopts   = "-m 'not manual'"
+  testpaths     = ["tests"]
+  python_files  = ["*.test.py"]
+  markers       = ["manual: tests that must be run manually (not in CI)"]
+  addopts       = "--import-mode=importlib -m 'not manual'"
+
+[tool.basedpyright]
+  # Installer steps intentionally rely on raised failures rather than consuming
+  # every command exit code.
+  reportUnusedCallResult = false
+  # Step implementations must keep the shared protocol signature even when a
+  # specific step does not use every parameter.
+  reportUnusedParameter = false
+
+  executionEnvironments = [
+    # Tests use mock-heavy helpers where localized Any-like flows would add
+    # noise without improving signal.
+    { root = "tests", reportAny = false, reportExplicitAny = false },
+  ]

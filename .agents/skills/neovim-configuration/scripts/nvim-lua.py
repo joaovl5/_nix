@@ -1,9 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
-# dependencies = []
+# requires-python = ">=3.14"
+# dependencies = [
+#     "cyclopts>=4.5.1",
+# ]
 # ///
-import argparse
 import json
 import os
 import subprocess
@@ -12,8 +13,17 @@ import tempfile
 from pathlib import Path
 from typing import TextIO
 
+from cyclopts import App, CycloptsError
+
 SCRIPT_DESCRIPTION = "Run arbitrary Lua inside the repo Neovim config."
 CONFIG_PATH = Path("users/_modules/desktop/apps/editor/neovim/config")
+
+app = App(
+  name="nvim-lua",
+  result_action="return_value",
+  exit_on_error=False,
+  print_error=False,
+)
 
 
 def _emit(text: str, stream: TextIO = sys.stdout) -> None:
@@ -37,10 +47,10 @@ def _lua_literal(value: object) -> str:
   return json.dumps(value)
 
 
-def _read_lua_source(args: argparse.Namespace) -> str:
-  if args.file:
-    return args.file.expanduser().read_text(encoding="utf-8")
-  return " ".join(args.lua)
+def _read_lua_source(*, file: Path | None, lua: tuple[str, ...]) -> str:
+  if file is not None:
+    return file.expanduser().read_text(encoding="utf-8")
+  return " ".join(lua)
 
 
 def _wrapped_lua_source(source: str, *, defer_ms: int, auto_quit: bool) -> str:
@@ -121,45 +131,32 @@ def _run_lua(
   return completed.returncode
 
 
-def _build_parser() -> argparse.ArgumentParser:
-  parser = argparse.ArgumentParser(description=SCRIPT_DESCRIPTION)
-  _ = parser.add_argument("--nvim-bin", default="nvim", help="Neovim binary to run")
-  _ = parser.add_argument(
-    "--defer-ms",
-    type=int,
-    default=0,
-    help="delay Lua execution with vim.defer_fn; useful for scheduled plugin setup",
-  )
-  _ = parser.add_argument(
-    "--no-auto-quit",
-    action="store_true",
-    help="do not call :qa after the Lua snippet; the snippet must exit Neovim",
-  )
-  _ = parser.add_argument(
-    "--file",
-    type=Path,
-    help="read Lua snippet from a file instead of positional arguments",
-  )
-  _ = parser.add_argument("lua", nargs="*", help="Lua snippet to run")
-  return parser
-
-
-def _main() -> int:
-  parser = _build_parser()
-  args = parser.parse_args()
-  if args.defer_ms < 0:
-    parser.error("--defer-ms must be >= 0")
-  if args.file and args.lua:
-    parser.error("pass either --file or Lua arguments, not both")
-  if not args.file and not args.lua:
-    parser.error("pass a Lua snippet or --file PATH")
+@app.default
+def main(
+  *lua: str,
+  nvim_bin: str = "nvim",
+  defer_ms: int = 0,
+  no_auto_quit: bool = False,
+  file: Path | None = None,
+) -> int:
+  """Run a Lua snippet inside the repo Neovim config."""
+  if defer_ms < 0:
+    raise SystemExit("--defer-ms must be >= 0")
+  if file is not None and lua:
+    raise SystemExit("pass either --file or Lua arguments, not both")
+  if file is None and not lua:
+    raise SystemExit("pass a Lua snippet or --file PATH")
   return _run_lua(
-    _read_lua_source(args),
-    nvim_bin=args.nvim_bin,
-    defer_ms=args.defer_ms,
-    auto_quit=not args.no_auto_quit,
+    _read_lua_source(file=file, lua=lua),
+    nvim_bin=nvim_bin,
+    defer_ms=defer_ms,
+    auto_quit=not no_auto_quit,
   )
 
 
 if __name__ == "__main__":
-  raise SystemExit(_main())
+  try:
+    raise SystemExit(app())
+  except CycloptsError as error:
+    print(error)
+    raise SystemExit(1)

@@ -1,9 +1,5 @@
 """Command protocol and typed implementations for installer commands."""
 
-# pyright: reportUnusedCallResult=false
-
-from __future__ import annotations
-
 from pathlib import Path
 from shlex import quote as shlex_quote
 from typing import Protocol, overload, runtime_checkable
@@ -16,6 +12,8 @@ NIX_FLAGS = ["--option", "experimental-features", "nix-command flakes"]
 
 @runtime_checkable
 class Command(Protocol):
+  """Interface for commands that can be rendered and executed."""
+
   def render(self) -> Text: ...
   def build(self) -> list[str]: ...
 
@@ -38,6 +36,8 @@ def _env_prefix(env: dict[str, str]) -> list[str]:
 
 @define
 class ShellCommand:
+  """Represent a direct local shell command."""
+
   program: str
   args: list[str] = Factory(list)
   env: dict[str, str] = Factory(dict)
@@ -58,6 +58,8 @@ class ShellCommand:
 
 @define
 class NixCommand:
+  """Represent a `nix` invocation with shared feature flags."""
+
   args: list[str]  # e.g. ["flake", "update", "mysecrets", "--flake", path]
   env: dict[str, str] = Factory(dict)
 
@@ -77,6 +79,8 @@ class NixCommand:
 
 @define
 class NixRunCommand:
+  """Represent a `nix run` invocation with shared feature flags."""
+
   package: str
   args: list[str] = Factory(list)
   env: dict[str, str] = Factory(dict)
@@ -102,6 +106,8 @@ class NixRunCommand:
 
 @define
 class GitCommand:
+  """Represent a git command with optional config and repository context."""
+
   args: list[str] = Factory(list)
   env: dict[str, str] = Factory(dict)
   repo_path: str | None = None
@@ -133,20 +139,27 @@ class GitCommand:
 
 @define
 class GitHelper:
+  """Create common git commands for a specific repository."""
+
   config: dict[str, str]
   repo_path: str
 
   def add(self, paths: list[str]) -> GitCommand:
+    """Build a git add command."""
     return GitCommand(
       args=["add", *paths], repo_path=self.repo_path, config=self.config
     )
 
   def commit(self, msg: str) -> GitCommand:
+    """Build a git commit command."""
     return GitCommand(
       args=["commit", "-m", msg], repo_path=self.repo_path, config=self.config
     )
 
-  def push(self, remote: str = "origin", ref: str = "HEAD") -> GitCommand:
+  def push(
+    self, *, remote: str = "origin", ref: str = "HEAD"
+  ) -> GitCommand:
+    """Build a git push command."""
     return GitCommand(
       args=["push", "-u", remote, ref], repo_path=self.repo_path
     )
@@ -154,6 +167,8 @@ class GitHelper:
 
 @define(frozen=True)
 class SSHConfig:
+  """Connection details for remote SSH-based commands."""
+
   host: str
   identity: Path
   port: int = 59222
@@ -176,6 +191,8 @@ def _quote_for_ssh(parts: list[str]) -> str:
 
 @define
 class SSHCommand:
+  """Wrap a command for execution over SSH."""
+
   inner: Command
   config: SSHConfig
 
@@ -202,6 +219,8 @@ class SSHCommand:
 
 @define
 class RsyncCommand:
+  """Represent an rsync transfer with optional SSH transport."""
+
   src: str
   dest: str
   ssh_config: SSHConfig | None = None
@@ -239,6 +258,8 @@ class RsyncCommand:
 
 @define
 class SudoCommand:
+  """Wrap a command for execution through sudo."""
+
   inner: Command
 
   def render(self) -> Text:
@@ -252,15 +273,17 @@ class SudoCommand:
 
 
 class CommandWrapper(Protocol):
+  """Compose wrappers that transform commands before execution."""
+
   def wrap(self, cmd: Command) -> Command: ...
 
   @overload
   def __or__(self, other: Command) -> Command: ...
   @overload
-  def __or__(self, other: CommandWrapper) -> CommandWrapper: ...
+  def __or__(self, other: "CommandWrapper") -> "CommandWrapper": ...
   def __or__(
-    self, other: CommandWrapper | Command
-  ) -> CommandWrapper | Command:
+    self, other: "CommandWrapper | Command"
+  ) -> "CommandWrapper | Command":
     if isinstance(other, Command):
       return self.wrap(other)
     return _ComposedWrapper(outer=self, inner=other)
@@ -268,6 +291,8 @@ class CommandWrapper(Protocol):
 
 @define
 class _ComposedWrapper:
+  """Combine two wrappers into a single wrapper pipeline."""
+
   outer: CommandWrapper
   inner: CommandWrapper
 
@@ -277,10 +302,10 @@ class _ComposedWrapper:
   @overload
   def __or__(self, other: Command) -> Command: ...
   @overload
-  def __or__(self, other: CommandWrapper) -> CommandWrapper: ...
+  def __or__(self, other: "CommandWrapper") -> "CommandWrapper": ...
   def __or__(
-    self, other: CommandWrapper | Command
-  ) -> CommandWrapper | Command:
+    self, other: "CommandWrapper | Command"
+  ) -> "CommandWrapper | Command":
     if isinstance(other, Command):
       return self.wrap(other)
     return _ComposedWrapper(outer=self, inner=other)
@@ -288,6 +313,8 @@ class _ComposedWrapper:
 
 @define
 class SSHWrapper:
+  """Apply SSH transport to wrapped commands."""
+
   config: SSHConfig
 
   def wrap(self, cmd: Command) -> Command:
@@ -296,10 +323,10 @@ class SSHWrapper:
   @overload
   def __or__(self, other: Command) -> Command: ...
   @overload
-  def __or__(self, other: CommandWrapper) -> CommandWrapper: ...
+  def __or__(self, other: "CommandWrapper") -> "CommandWrapper": ...
   def __or__(
-    self, other: CommandWrapper | Command
-  ) -> CommandWrapper | Command:
+    self, other: "CommandWrapper | Command"
+  ) -> "CommandWrapper | Command":
     if isinstance(other, Command):
       return self.wrap(other)
     return _ComposedWrapper(outer=self, inner=other)
@@ -307,16 +334,18 @@ class SSHWrapper:
 
 @define
 class SudoWrapper:
+  """Apply sudo execution to wrapped commands."""
+
   def wrap(self, cmd: Command) -> Command:
     return SudoCommand(inner=cmd)
 
   @overload
   def __or__(self, other: Command) -> Command: ...
   @overload
-  def __or__(self, other: CommandWrapper) -> CommandWrapper: ...
+  def __or__(self, other: "CommandWrapper") -> "CommandWrapper": ...
   def __or__(
-    self, other: CommandWrapper | Command
-  ) -> CommandWrapper | Command:
+    self, other: "CommandWrapper | Command"
+  ) -> "CommandWrapper | Command":
     if isinstance(other, Command):
       return self.wrap(other)
     return _ComposedWrapper(outer=self, inner=other)
@@ -324,16 +353,18 @@ class SudoWrapper:
 
 @define
 class PassthroughWrapper:
+  """Leave wrapped commands unchanged."""
+
   def wrap(self, cmd: Command) -> Command:
     return cmd
 
   @overload
   def __or__(self, other: Command) -> Command: ...
   @overload
-  def __or__(self, other: CommandWrapper) -> CommandWrapper: ...
+  def __or__(self, other: "CommandWrapper") -> "CommandWrapper": ...
   def __or__(
-    self, other: CommandWrapper | Command
-  ) -> CommandWrapper | Command:
+    self, other: "CommandWrapper | Command"
+  ) -> "CommandWrapper | Command":
     if isinstance(other, Command):
       return self.wrap(other)
     return _ComposedWrapper(outer=self, inner=other)

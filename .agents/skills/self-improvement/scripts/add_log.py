@@ -1,13 +1,11 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.14"
 # dependencies = [
 #     "cyclopts>=4.5.1",
 #     "pydantic>=2.11.0",
 # ]
 # ///
-
-from __future__ import annotations
 
 import json
 import re
@@ -49,17 +47,20 @@ app = App(
 
 
 def contains_control_characters(value: str) -> bool:
+  """Return whether the value contains Unicode control characters."""
   return any(
     unicodedata.category(character).startswith("C") for character in value
   )
 
 
 def meaningful_character_count(value: str) -> int:
+  """Count alphanumeric characters after Unicode normalization."""
   normalized = unicodedata.normalize("NFKC", value)
   return sum(character.isalnum() for character in normalized)
 
 
 def normalize_for_comparison(value: str) -> str:
+  """Normalize a string for case-insensitive whitespace-insensitive comparisons."""
   normalized = unicodedata.normalize("NFKC", value).casefold()
   return " ".join(normalized.split())
 
@@ -125,6 +126,7 @@ class LogTemplateInput(BaseModel):
 
 
 def slugify(value: str) -> str:
+  """Convert free-form text into a lowercase ASCII filename slug."""
   normalized = unicodedata.normalize("NFKD", value)
   ascii_only = normalized.encode("ascii", "ignore").decode("ascii")
   slug = re.sub(r"[^a-z0-9]+", "-", ascii_only.casefold()).strip("-")
@@ -132,8 +134,9 @@ def slugify(value: str) -> str:
 
 
 def build_template_input(
-  short_title: str, report_brief: str
+  *, short_title: str, report_brief: str
 ) -> LogTemplateInput:
+  """Build and validate the template context for a new log entry."""
   now = datetime.now().astimezone()
   return LogTemplateInput(
     timestamp=int(now.timestamp()),
@@ -145,6 +148,7 @@ def build_template_input(
 
 
 def format_validation_error(error: ValidationError) -> str:
+  """Render a user-facing validation error summary."""
   lines = ["Validation failed:"]
   for entry in error.errors():
     raw_location = ".".join(str(part) for part in entry["loc"]) or "input"
@@ -159,15 +163,18 @@ def format_validation_error(error: ValidationError) -> str:
 
 
 def template_path() -> Path:
+  """Return the base log template path."""
   return Path(__file__).resolve().parent / "log_templates" / "base.md"
 
 
 def output_dir() -> Path:
+  """Return the docs/logs output directory."""
   skill_dir = Path(__file__).resolve().parent.parent
   return skill_dir.parent.parent.parent / "docs" / "logs"
 
 
-def render_template(template_file: Path, context: LogTemplateInput) -> str:
+def render_template(*, template_file: Path, context: LogTemplateInput) -> str:
+  """Render the markdown template with validated log metadata."""
   template = template_file.read_text(encoding="utf-8")
   replacements = context.render_context()
 
@@ -215,7 +222,10 @@ def main(short_title: str, report_brief: str) -> int:
     return 1
 
   try:
-    rendered = render_template(resolved_template_path, log_input)
+    rendered = render_template(
+      template_file=resolved_template_path,
+      context=log_input,
+    )
   except ValueError as error:
     print(error)
     return 1

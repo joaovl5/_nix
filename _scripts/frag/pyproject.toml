@@ -1,8 +1,8 @@
 [project]
   name            = "frag"
   version         = "0.1.0"
-  requires-python = ">=3.13"
-  dependencies    = ["cyclopts", "questionary", "rich"]
+  requires-python = ">=3.14"
+  dependencies    = ["attrs", "cyclopts", "questionary", "rich"]
 
   [project.scripts]
     frag           = "frag.cli:main"
@@ -17,3 +17,7 @@
 
   [tool.setuptools.packages.find]
     where = ["src"]
+
+[tool.pytest.ini_options]
+  python_files = ["*.test.py"]
+  addopts = ["--import-mode=importlib"]

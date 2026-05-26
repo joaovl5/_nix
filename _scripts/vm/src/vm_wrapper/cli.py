@@ -1,12 +1,10 @@
 """Command-line entry points for the VM wrapper."""
 
-from __future__ import annotations
-
-import argparse
 import sys
-from collections.abc import Sequence
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
+from cyclopts import App
 
 from vm_wrapper.bundle import UserFacingError, resolve_inputs, stage_bundle
 from vm_wrapper.nix_runner import (
@@ -18,40 +16,43 @@ from vm_wrapper.nix_runner import (
   run_vm,
 )
 
-
-def build_parser() -> argparse.ArgumentParser:
-  parser = argparse.ArgumentParser(prog="vm-launcher")
-  parser.add_argument("host")
-  parser.add_argument("--age-key")
-  parser.add_argument("--ssh-key")
-  parser.add_argument("--cpu", type=int, default=DEFAULT_VM_CPU)
-  parser.add_argument("--ram", type=int, default=DEFAULT_VM_RAM)
-  return parser
+app = App(name="vm-launcher")
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-  args = build_parser().parse_args(argv)
-
+@app.default
+def main(
+  host: str,
+  *,
+  repo_root: Path | None = None,
+  age_key: Path | None = None,
+  ssh_key: Path | None = None,
+  cpu: int = DEFAULT_VM_CPU,
+  ram: int = DEFAULT_VM_RAM,
+) -> int:
+  """Launch a configured NixOS VM."""
   try:
-    repo_root = Path.cwd()
+    resolved_repo_root = repo_root if repo_root is not None else Path.cwd()
     resolved = resolve_inputs(
-      host=args.host,
+      host=host,
       home_dir=Path.home(),
-      age_key=args.age_key,
-      ssh_key=args.ssh_key,
+      age_key=age_key,
+      ssh_key=ssh_key,
     )
-    available_hosts = list_hosts(repo_root=repo_root)
-    require_host(resolved.host, available_hosts)
-    runner_path = build_vm_runner(repo_root=repo_root, host=resolved.host)
+    available_hosts = list_hosts(repo_root=resolved_repo_root)
+    require_host(host=resolved.host, available_hosts=available_hosts)
+    runner_path = build_vm_runner(
+      repo_root=resolved_repo_root,
+      host=resolved.host,
+    )
 
     with TemporaryDirectory(prefix="vm-bundle-") as bundle_dir_str:
       bundle_dir = Path(bundle_dir_str)
-      stage_bundle(bundle_dir, resolved)
+      stage_bundle(bundle_dir=bundle_dir, resolved=resolved)
       return run_vm(
         runner_path=runner_path,
         bundle_dir=bundle_dir,
-        cpu=args.cpu,
-        ram=args.ram,
+        cpu=cpu,
+        ram=ram,
       )
   except UserFacingError as exc:
     print(f"error: {exc}", file=sys.stderr)
@@ -59,4 +60,4 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-  raise SystemExit(main())
+  raise SystemExit(app())
