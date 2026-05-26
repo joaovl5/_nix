@@ -990,6 +990,36 @@ hister list-urls
   current nixarr revision has no Lidarr settings-sync module, so adding the
   Lidarr download client remains a manual or future custom API-seeding step.
 
+## Operational incident: Gopeed blackhole magnet drops not appearing
+
+- Symptom: Sonarr/Radarr reported grabs as sent to the Gopeed Torrent
+  Blackhole, but Gopeed's task list stayed empty and the blackhole path units
+  had no recent work.
+- Runtime evidence on `tyrant` showed the deployed Sonarr/Radarr download
+  clients still had `saveMagnetFiles = false`, even though the repo had already
+  been updated to set it to `true`.
+- Root cause: magnet-only releases do not create a `.torrent` file. With
+  `saveMagnetFiles = false`, the *arr blackhole client had nothing for the
+  systemd path unit or Gopeed submit script to consume, so no Gopeed task could
+  be created.
+- Fix used: deploy the updated Gopeed/*arr config so Sonarr/Radarr save
+  `.magnet` files, and have the Gopeed blackhole submitter consume both
+  `.torrent` and `.magnet` files.
+- Important deployment lesson: after changing declarative settings-sync values,
+  verify the target host's live API state, not only local Nix evaluation.
+  Useful probes:
+  - inspect `systemctl cat gopeed-blackhole-sonarr.{path,service}` and the
+    matching Radarr units,
+  - query `/api/v3/downloadclient` on Sonarr/Radarr and confirm
+    `saveMagnetFiles = true`,
+  - inspect `/var/lib/gopeed/blackhole/<app>/{incoming,submitted,work,failed}`,
+  - drop a disposable `.magnet` into `incoming` and confirm
+    `GET /api/v1/tasks` on Gopeed shows a new task.
+- Verification after deploy: Sonarr and Radarr both reported
+  `saveMagnetFiles = true`; a synthetic Sonarr `.magnet` file was consumed by
+  `gopeed-blackhole-sonarr.path`, created a Gopeed task, and was then cleaned
+  up.
+
 ## Operational incident: Sonarr infinite loading after Gopeed migration
 
 - Symptom: `sonarr.trll.ing` loaded the login page, but the authenticated UI/API
