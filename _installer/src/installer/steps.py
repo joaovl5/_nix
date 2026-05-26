@@ -456,10 +456,10 @@ class CommitFacter:
 
 @define
 class UpdateSecretsPin:
-  """Update the flake's pinned secrets input after pushing the secrets repo."""
+  """Update the flake's npins-pinned secrets input after pushing the secrets repo."""
 
   name: str = "update_secrets_pin"
-  description: str = "Updating secrets pin with unflake; push secrets first, then rerun the pin update"
+  description: str = "Updating secrets pin with npins; push secrets first, then rerun the pin update"
 
   def should_skip(self, context: InstallerContext) -> bool:
     return not context.auto_commit or not context.auto_push
@@ -468,8 +468,8 @@ class UpdateSecretsPin:
     flake_dir = context.flake_dir
     git = GitHelper(config=_GIT_INSTALLER_CONFIG, repo_path=flake_dir)
 
-    write_unflake_cmd = shlex.quote(
-      f"write-unflake --backend nix --update {shlex.quote(context.flake_secrets_input_name)}"
+    npins_update_cmd = shlex.quote(
+      f"npins update {shlex.quote(context.flake_secrets_input_name)}"
     )
 
     cli.run_command(
@@ -477,11 +477,11 @@ class UpdateSecretsPin:
         "sh",
         [
           "-c",
-          f"cd {shlex.quote(flake_dir)} && nix-shell . -A flake-file.sh --run {write_unflake_cmd}",
+          f"cd {shlex.quote(flake_dir)} && nix-shell -p npins --run {npins_update_cmd}",
         ],
       ),
-      description="Updating secrets pin in unflake.nix",
-      error_msg="Failed to update unflake.nix",
+      description="Updating secrets pin in npins/sources.json",
+      error_msg="Failed to update npins/sources.json",
     )
 
     msg = (
@@ -489,9 +489,9 @@ class UpdateSecretsPin:
     )
 
     cli.run_command(
-      command=git.add(["unflake.nix"]),
-      description="Staging updated unflake.nix",
-      error_msg="Failed to stage unflake.nix",
+      command=git.add(["npins/sources.json"]),
+      description="Staging updated npins/sources.json",
+      error_msg="Failed to stage npins/sources.json",
     )
 
     cli.run_command(

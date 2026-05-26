@@ -1,3 +1,3 @@
 _: {
-  projectRootFile = "unflake.nix";
+  projectRootFile = "default.nix";
 }

@@ -1,25 +1,25 @@
 let
-  inputs = import ./inputs.nix;
+  base_inputs = import ./inputs.nix;
   globals = import ./globals;
   repo_root = toString ./.;
-  flake_file_config =
-    inputs.nixpkgs.lib.evalModules {
-      modules = [
-        inputs.flake-file.flakeModules.unflake
-        ./flake-file.nix
-      ];
-      specialArgs = {inherit inputs;};
-    };
-in
-  inputs.withInputs (inputs: let
-    outputs = inputs.fup.lib.mkFlake (import ./outputs {inherit globals inputs;});
-  in
-    outputs
+
+  base_outputs = inputs.fup.lib.mkFlake (import ./outputs {inherit globals inputs;});
+
+  outputs =
+    base_outputs
     // {
       supportedSystems = ["x86_64-linux"];
+    };
+
+  self =
+    outputs
+    // {
+      inherit inputs outputs;
       outPath = repo_root;
       __toString = self: self.outPath;
-    })
-  // {
-    flake-file = flake_file_config.config.flake-file;
-  }
+      _type = "flake";
+    };
+
+  inputs = base_inputs // {inherit self;};
+in
+  self

@@ -1,21 +1,54 @@
 let
-  raw_inputs = import ./unflake.nix;
+  sources = builtins.removeAttrs (import ./npins) ["__functor"];
+  flake_compat = import sources.flake-compat;
 
-  normalize_source = name: source:
-    if name == "self" || name == "withInputs" || name == "__functor" || name == "_unflake"
+  raw_inputs = [
+    "all-systems"
+    "degoog-src"
+    "fennel-ls-nvim-docs"
+    "flake-compat"
+    "kaneo-src"
+    "mardi-gras-src"
+    "mysecrets"
+    "nix-machine-protocol-src"
+    "octodns-pihole-src"
+    "pihole6api-src"
+    "rumdl-src"
+    "sane-fnlfmt-src"
+    "superpowers"
+    "tree-sitter-kanata"
+  ];
+
+  normalize_source = source:
+    if !(builtins.isAttrs source)
     then source
-    else if builtins.isAttrs source && source ? rev && !(source ? shortRev)
-    then
+    else let
+      rev = source.rev or source.revision or null;
+    in
       source
-      // {
-        shortRev = builtins.substring 0 7 source.rev;
-      }
-    else source;
+      // (
+        if rev != null && !(source ? rev)
+        then {inherit rev;}
+        else {}
+      )
+      // (
+        if rev != null && !(source ? shortRev)
+        then {shortRev = builtins.substring 0 7 rev;}
+        else {}
+      );
 
-  normalize_inputs = builtins.mapAttrs normalize_source;
+  load_flake = source: (flake_compat {src = source;}).outputs;
+
+  load_input = name: source:
+    normalize_source (
+      if builtins.elem name raw_inputs
+      then source
+      else load_flake source
+    );
+
+  inputs = builtins.mapAttrs load_input sources;
 in
-  (normalize_inputs raw_inputs)
+  inputs
   // {
-    withInputs = outputs:
-      raw_inputs.withInputs (inputs: outputs (normalize_inputs inputs));
+    nixpkgs = inputs.unstable;
   }

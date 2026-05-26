@@ -339,8 +339,8 @@ class TestUpdateSecretsPin:
     # Assert the pin update step requires auto-push as well.
     assert UpdateSecretsPin().should_skip(ctx) is True
 
-  def test_updates_unflake_and_stages_generated_lock(self):
-    """Update the secrets pin and stage the resulting unflake change."""
+  def test_updates_npins_and_stages_generated_sources(self):
+    """Update the secrets pin and stage the resulting npins source change."""
     ctx = _make_context(auto_commit=True, auto_push=True)
     cli = _mock_cli()
     UpdateSecretsPin().execute(ctx, cli)
@@ -349,16 +349,16 @@ class TestUpdateSecretsPin:
     assert cli.run_command.call_count == 4
 
     update_cmd = _get_command(cli, 0)
-    # Assert the first command rewrites the secrets pin through write-unflake.
+    # Assert the first command updates the secrets pin through npins.
     assert isinstance(update_cmd, ShellCommand)
     assert update_cmd.build() == [
       "sh",
       "-c",
-      "cd /tmp/test/flake && nix-shell . -A flake-file.sh --run 'write-unflake --backend nix --update mysecrets'",
+      "cd /tmp/test/flake && nix-shell -p npins --run 'npins update mysecrets'",
     ]
 
     stage_cmd = _get_command(cli, 1)
-    # Assert the updated unflake file is staged with installer git config.
+    # Assert the updated npins sources file is staged with installer git config.
     assert stage_cmd.build() == [
       "git",
       "-c",
@@ -368,7 +368,7 @@ class TestUpdateSecretsPin:
       "-C",
       "/tmp/test/flake",
       "add",
-      "unflake.nix",
+      "npins/sources.json",
     ]
 
   def test_installer_skip_message_mentions_manual_push(self):
@@ -381,7 +381,7 @@ class TestUpdateSecretsPin:
 
     # Assert the skip message explains that a manual push is required first.
     cli.info.assert_any_call(
-      "Skipping: Updating secrets pin with unflake; push secrets first, then rerun the pin update"
+      "Skipping: Updating secrets pin with npins; push secrets first, then rerun the pin update"
     )
 
 
