@@ -6,16 +6,12 @@ requires-python = ">=3.13"
 name = "my-nix-tests"
 version = "0.1.0"
 source = { editable = "." }
-
-[package.dev-dependencies]
-dev = [
+dependencies = [
     { name = "nix-machine-protocol" },
 ]
 
 [package.metadata]
-
-[package.metadata.requires-dev]
-dev = [{ name = "nix-machine-protocol", git = "https://github.com/Gastove/nix-machine-protocol" }]
+requires-dist = [{ name = "nix-machine-protocol", git = "https://github.com/Gastove/nix-machine-protocol" }]
 
 [[package]]
 name = "nix-machine-protocol"

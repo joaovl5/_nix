@@ -47,6 +47,10 @@
         flake = false;
       };
       niri.url = mirror "niri-flake" "main";
+      nix-machine-protocol-src = {
+        url = "github:Gastove/nix-machine-protocol/32277f1ade1ab7b4008bc2fa99fba9c35095fc2a";
+        flake = false;
+      };
       nix-flatpak.url = mirror "nix-flatpak" "v0.7.0";
       nixarr.url = mirror "nixarr" "main";
       nixcord.url = mirror "nixcord" "main";

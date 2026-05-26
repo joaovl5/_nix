@@ -33,7 +33,7 @@
       extraPythonPackages = python_pkgs: [(scripts_package python_pkgs)] ++ extra_python_packages python_pkgs;
       testScript = ''
         from my_nix_tests.${python_module_name} import run
-        run(globals())
+        run(driver_globals=globals())
       '';
     };
 in {

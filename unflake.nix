@@ -52,6 +52,14 @@ let
       lastModified = 1778507602;
       narHash = "sha256-kTwur1wV+01SdqskVMSo6JMEpg71ps3HpbFY2GsflKs=";
     };
+    unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a = {
+      type = "github";
+      owner = "gastove";
+      repo = "nix-machine-protocol";
+      rev = "32277f1ade1ab7b4008bc2fa99fba9c35095fc2a";
+      lastModified = 1771798274;
+      narHash = "sha256-3atagQrncN24Y8wDxS+wIdVlB5q5PpPgYjzVoy59Up4=";
+    };
     unflake_github_ghostty-org_ghostty = {
       type = "github";
       owner = "ghostty-org";
@@ -730,6 +738,7 @@ let
       lastModified = 1733328505;
       narHash = "sha256-NeCCThCEP3eCl2l/+27kNNK7QrwZB1IJCrXfrbv5oqU=";
     };
+    unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a_flake_false = unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a;
     unflake_github_ghostty-org_ghostty_flake_false = unflake_github_ghostty-org_ghostty;
     unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable_flake_false = unflake_github_nixos_nixpkgs_ref_nixpkgs-unstable;
     unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e_flake_false = unflake_github_rossng_crate2nix_rev_ba5dd398e31ee422fbe021767eb83b0650303a6e;
@@ -1026,6 +1035,7 @@ let
     unflake_github_cachix_devenv = inject "unflake_github_cachix_devenv" "flake.nix" "";
     unflake_github_cachix_git-hooks-nix = inject "unflake_github_cachix_git-hooks-nix" "flake.nix" "";
     unflake_github_cachix_pre-commit-hooks-nix = inject "unflake_github_cachix_pre-commit-hooks-nix" "flake.nix" "";
+    unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a_flake_false = deps.unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a_flake_false;
     unflake_github_ghostty-org_ghostty_flake_false = deps.unflake_github_ghostty-org_ghostty_flake_false;
     unflake_github_hercules-ci_flake-parts = inject "unflake_github_hercules-ci_flake-parts" "flake.nix" "";
     unflake_github_hercules-ci_gitignore-nix = inject "unflake_github_hercules-ci_gitignore-nix" "flake.nix" "";
@@ -1129,6 +1139,7 @@ let
     musnix = universe.unflake_git_ssh---git-git-trll-ing-mirrors-musnix-git_ref_master_shallow;
     mysecrets = universe.unflake_git_ssh---git-github-com-joaovl5-__secrets-git_ref_main_flake_false;
     niri = universe.unflake_git_ssh---git-git-trll-ing-mirrors-niri-flake-git_ref_main_shallow;
+    nix-machine-protocol-src = universe.unflake_github_gastove_nix-machine-protocol_rev_32277f1ade1ab7b4008bc2fa99fba9c35095fc2a_flake_false;
     nix-flatpak = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nix-flatpak-git_ref_v0-7-0_shallow;
     nixarr = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nixarr-git_ref_main_shallow;
     nixcord = universe.unflake_git_ssh---git-git-trll-ing-mirrors-nixcord-git_ref_main_shallow;
