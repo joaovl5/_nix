@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import hashlib
 import json
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
+
+from attrs import define
 
 from frag import profiles, shared_assets_contract
 from frag.exceptions import DockerRuntimeError, LegacySchemaError
@@ -15,35 +14,45 @@ def _shared_asset_mount_specs() -> tuple[tuple[str, str, str], ...]:
   return shared_assets_contract.shared_runtime_mount_specs()
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class SharedMount:
+  """Describe a single shared asset mount in the runtime container."""
+
   source: Path
   destination: str
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class RuntimeSpec:
+  """Describe the runtime image, mounts, and bootstrap command for a profile."""
+
   image_ref: str
   shared_assets_identity: str
   shared_mounts: tuple[SharedMount, ...]
   start_command: tuple[str, ...]
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class ResolvedSharedMounts:
+  """Capture shared mounts plus the host overrides that influenced them."""
+
   mounts: tuple[SharedMount, ...]
   host_override_sources: tuple[tuple[str, Path], ...]
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class InstalledPackageAssets:
+  """Describe the packaged frag assets resolved from an installed layout."""
+
   shared_assets_root: Path
   catalog_path: Path
   helpers_dir: Path
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class PackagedImageMetadata:
+  """Describe a catalog image entry and its loader helper."""
+
   image_key: str
   image_ref: str
   shared_assets_identity: str
@@ -51,24 +60,32 @@ class PackagedImageMetadata:
 
 
 class ImageAssets(Protocol):
-  def list_image_keys(self) -> tuple[str, ...]: ...
+  def list_image_keys(self) -> tuple[str, ...]:
+    """List the available profile image keys."""
+    ...
 
-  def normalize_profile_image(self, *, image: str) -> str: ...
+  def normalize_profile_image(self, *, image: str) -> str:
+    """Normalize a caller-supplied image key into catalog form."""
+    ...
 
   def resolve_profile_image_metadata(
     self, *, profile: profiles.Profile
-  ) -> PackagedImageMetadata: ...
+  ) -> PackagedImageMetadata:
+    """Resolve the packaged metadata for a profile image."""
+    ...
 
-  def load_image(self, *, profile: profiles.Profile) -> str: ...
+  def load_image(self, *, profile: profiles.Profile) -> str:
+    """Ensure the runtime image is available locally and return its reference."""
+    ...
 
   def build_runtime_spec(
     self, *, profile: profiles.Profile, workspace_root: Path
-  ) -> RuntimeSpec: ...
+  ) -> RuntimeSpec:
+    """Build the runtime specification used to start a profile container."""
+    ...
 
 
-def _shared_asset_entry_has_expected_type(
-  path: Path, entry_type: str
-) -> bool:
+def _shared_asset_entry_has_expected_type(path: Path, entry_type: str) -> bool:
   if entry_type == "directory":
     return path.is_dir()
   if entry_type == "file":
@@ -88,9 +105,7 @@ def _missing_required_shared_assets(
   )
 
 
-def _resolve_host_override_source(
-  host_home: Path, relative_path: Path
-) -> Path:
+def _resolve_host_override_source(host_home: Path, relative_path: Path) -> Path:
   return (host_home / relative_path).expanduser().resolve(strict=False)
 
 
@@ -193,6 +208,7 @@ def _normalize_catalog_image_key(
 
 
 def normalize_catalog_image_key(*, catalog_path: Path, image_key: str) -> str:
+  """Normalize and validate a catalog image key against the packaged catalog."""
   images = _read_catalog_images(catalog_path=catalog_path)
   return _normalize_catalog_image_key(images=images, image_key=image_key)
 
@@ -202,7 +218,8 @@ def _resolve_catalog_image_metadata(
 ) -> PackagedImageMetadata:
   images = _read_catalog_images(catalog_path=catalog_path)
   normalized_key = _normalize_catalog_image_key(
-    images=images, image_key=image_key
+    images=images,
+    image_key=image_key,
   )
   image_entry = images[normalized_key]
   assert isinstance(image_entry, dict)
@@ -227,7 +244,6 @@ def _resolve_catalog_image_metadata(
     )
 
   helper_path = helpers_dir / loader.strip()
-
   return PackagedImageMetadata(
     image_key=normalized_key,
     image_ref=image_ref.strip(),
@@ -239,9 +255,8 @@ def _resolve_catalog_image_metadata(
 def resolve_installed_package_assets(
   package_anchor: Path | str | None = None,
 ) -> InstalledPackageAssets:
-  search_anchor = Path(
-    package_anchor or Path(__file__).resolve()
-  ).expanduser()
+  """Resolve packaged frag assets from an installed wrapper or package path."""
+  search_anchor = Path(package_anchor or Path(__file__).resolve()).expanduser()
   if not search_anchor.is_absolute():
     search_anchor = Path.cwd() / search_anchor
   search_start = (
@@ -281,15 +296,19 @@ def resolve_installed_package_assets(
 
 
 class DirectProfileImageAssets:
+  """Serve image metadata and runtime specs directly from packaged assets."""
+
   def __init__(self, *, package_assets: InstalledPackageAssets) -> None:
     self._package_assets = package_assets
 
   def list_image_keys(self) -> tuple[str, ...]:
+    """List the packaged image keys in catalog order."""
     return tuple(
       _read_catalog_images(catalog_path=self._package_assets.catalog_path)
     )
 
   def normalize_profile_image(self, *, image: str) -> str:
+    """Normalize a profile image key against the packaged catalog."""
     return normalize_catalog_image_key(
       catalog_path=self._package_assets.catalog_path,
       image_key=image,
@@ -298,6 +317,7 @@ class DirectProfileImageAssets:
   def resolve_profile_image_metadata(
     self, *, profile: profiles.Profile
   ) -> PackagedImageMetadata:
+    """Resolve packaged metadata for the requested profile image."""
     return _resolve_catalog_image_metadata(
       catalog_path=self._package_assets.catalog_path,
       helpers_dir=self._package_assets.helpers_dir,
@@ -305,6 +325,7 @@ class DirectProfileImageAssets:
     )
 
   def load_image(self, *, profile: profiles.Profile) -> str:
+    """Run the packaged loader helper and verify the returned image reference."""
     metadata = self.resolve_profile_image_metadata(profile=profile)
 
     if not metadata.helper_path.is_file():
@@ -344,6 +365,7 @@ class DirectProfileImageAssets:
   def build_runtime_spec(
     self, *, profile: profiles.Profile, workspace_root: Path
   ) -> RuntimeSpec:
+    """Build the runtime specification for a profile from packaged assets."""
     metadata = self.resolve_profile_image_metadata(profile=profile)
     resolved_shared_mounts = _resolve_shared_mounts(
       self._package_assets.shared_assets_root

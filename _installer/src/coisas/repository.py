@@ -1,6 +1,6 @@
 """Repository URI parsing for git forge, SSH, HTTPS, and local paths."""
 
-from __future__ import annotations
+
 
 from enum import Enum
 
@@ -8,12 +8,16 @@ from attrs import define
 
 
 class URIType(Enum):
+  """Categories of repository references accepted by the installer."""
+
   LOCAL_PATH = "local_path"
   GIT_FORGE = "git_forge"
   GIT_URL = "git_url"
 
 
 class GitForge(Enum):
+  """Supported forge shorthands."""
+
   GITHUB = "github"
   GITLAB = "gitlab"
   GITEA = "gitea"
@@ -36,12 +40,15 @@ _LOCAL_PATH_PREFIXES = ("/", "./", "~/")
 
 @define(frozen=True)
 class RepositoryURI:
+  """Parse and normalize repository references for installer inputs."""
+
   raw: str
   type: URIType
   forge: GitForge | None = None
 
   @classmethod
   def parse(cls, raw: str) -> RepositoryURI:
+    """Parse a repository reference into a typed representation."""
     if not raw:
       raise ValueError("Repository URI cannot be empty")
 
@@ -61,9 +68,11 @@ class RepositoryURI:
     raise ValueError(f"Unrecognized repository URI format: {raw!r}")
 
   def needs_clone(self) -> bool:
+    """Return whether the repository must be cloned locally first."""
     return self.type != URIType.LOCAL_PATH
 
   def get_url(self) -> str:
+    """Resolve the repository reference into a cloneable URL or local path."""
     if self.type != URIType.GIT_FORGE:
       return self.raw
 

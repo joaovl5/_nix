@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import subprocess
 
@@ -10,6 +10,7 @@ from frag.exceptions import DockerRuntimeError
 def test_run_docker_command_raises_selected_missing_binary_error(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers run docker command raises selected missing binary error."""
   def raise_missing_binary(*_args: object, **_kwargs: object) -> object:
     raise FileNotFoundError("docker")
 
@@ -28,6 +29,7 @@ def test_run_docker_command_raises_selected_missing_binary_error(
 def test_run_docker_command_preserves_nonzero_results_when_requested(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers run docker command preserves nonzero results when requested."""
   def fake_run(
     command: list[str], **_kwargs: object
   ) -> subprocess.CompletedProcess[str]:
@@ -43,11 +45,14 @@ def test_run_docker_command_preserves_nonzero_results_when_requested(
     missing_binary_error=DockerRuntimeError,
   )
 
+  # Verify the observed behavior matches the contract.
   assert result.returncode == 23
+  # Verify the observed behavior matches the contract.
   assert result.stderr == "permission denied"
 
 
 def test_require_success_raises_selected_error_with_stderr_detail() -> None:
+  """Covers require success raises selected error with stderr detail."""
   result = subprocess.CompletedProcess(
     ["docker", "stop", "frag-demo-profile"],
     1,
@@ -60,6 +65,7 @@ def test_require_success_raises_selected_error_with_stderr_detail() -> None:
 
 
 def test_require_success_falls_back_to_stdout_then_returncode() -> None:
+  """Covers require success falls back to stdout then returncode."""
   stdout_only = subprocess.CompletedProcess(
     ["docker", "ps"], 12, stdout="bad output", stderr=""
   )

@@ -1,9 +1,6 @@
-from __future__ import annotations
-
-
 class DockerRuntimeError(RuntimeError):
-  pass
+  """Report runtime failures while managing frag containers."""
 
 
 class LegacySchemaError(DockerRuntimeError):
-  pass
+  """Refuse legacy schema artifacts that require recreation."""

@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import stat
 from pathlib import Path
@@ -105,7 +105,7 @@ def test_stage_bundle_copies_expected_layout(tmp_path: Path) -> None:
 
   resolved = ResolvedInputs(host="lavpc", age_key=age_key, ssh_key=ssh_key)
 
-  stage_bundle(bundle_dir, resolved)
+  stage_bundle(bundle_dir=bundle_dir, resolved=resolved)
 
   staged_age_key = bundle_dir / "age" / "key.txt"
   staged_ssh_key = bundle_dir / "ssh" / "id_ed25519"
@@ -125,7 +125,8 @@ def test_stage_bundle_skips_optional_ssh_key(tmp_path: Path) -> None:
   bundle_dir = tmp_path / "bundle"
 
   stage_bundle(
-    bundle_dir, ResolvedInputs(host="lavpc", age_key=age_key, ssh_key=None)
+    bundle_dir=bundle_dir,
+    resolved=ResolvedInputs(host="lavpc", age_key=age_key, ssh_key=None),
   )
 
   assert (bundle_dir / "age" / "key.txt").read_text(
@@ -149,7 +150,8 @@ def test_stage_bundle_replaces_preexisting_destination_symlink(
   staged_age_key.symlink_to(outside_target)
 
   stage_bundle(
-    bundle_dir, ResolvedInputs(host="lavpc", age_key=age_key, ssh_key=None)
+    bundle_dir=bundle_dir,
+    resolved=ResolvedInputs(host="lavpc", age_key=age_key, ssh_key=None),
   )
 
   assert outside_target.read_text(encoding="ascii") == "outside"

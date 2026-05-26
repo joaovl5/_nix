@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from pathlib import Path
 
@@ -8,6 +8,8 @@ from frag import bootstrap, image_assets, shared_assets_contract
 def test_bootstrap_shared_home_view_mappings_derive_from_shared_asset_contract() -> (
   None
 ):
+  """Covers bootstrap shared home view mappings derive from shared asset contract."""
+  # Verify the observed behavior matches the contract.
   assert bootstrap._shared_home_view_mappings() == tuple(
     (
       entry.home_relative_path,
@@ -21,6 +23,8 @@ def test_bootstrap_shared_home_view_mappings_derive_from_shared_asset_contract()
 def test_image_asset_shared_mount_specs_derive_from_shared_asset_contract() -> (
   None
 ):
+  """Covers image asset shared mount specs derive from shared asset contract."""
+  # Verify the observed behavior matches the contract.
   assert image_assets._shared_asset_mount_specs() == tuple(
     (
       str(entry.packaged_asset_relative_path),
@@ -34,6 +38,8 @@ def test_image_asset_shared_mount_specs_derive_from_shared_asset_contract() -> (
 def test_shared_asset_contract_state_paths_match_runtime_destinations() -> (
   None
 ):
+  """Covers shared asset contract state paths match runtime destinations."""
+  # Verify the observed behavior matches the contract.
   assert all(
     entry.state_shared_relative_path
     == Path(entry.runtime_destination.removeprefix("/state/shared/"))
@@ -42,6 +48,7 @@ def test_shared_asset_contract_state_paths_match_runtime_destinations() -> (
 
 
 def test_shared_asset_contract_declares_terminal_assets() -> None:
+  """Covers shared asset contract declares terminal assets."""
   expected_terminal_entries = {
     (
       Path(".config/fish/conf.d/frag_init.fish"),
@@ -118,10 +125,12 @@ def test_shared_asset_contract_declares_terminal_assets() -> None:
     )
   }
 
+  # Verify the observed behavior matches the contract.
   assert actual_terminal_entries == expected_terminal_entries
 
 
 def test_shared_asset_contract_declares_host_override_entries() -> None:
+  """Covers shared asset contract declares host override entries."""
   expected_host_override_entries = {
     (
       Path(".agents/skills"),
@@ -169,4 +178,5 @@ def test_shared_asset_contract_declares_host_override_entries() -> None:
     for entry in shared_assets_contract.SHARED_HOST_OVERRIDE_ENTRIES
   }
 
+  # Verify the observed behavior matches the contract.
   assert actual_host_override_entries == expected_host_override_entries

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import sys
 
 from rich.console import Console
@@ -15,24 +13,30 @@ def _render_stderr(*, style: str, message: str) -> None:
 
 
 def render_status(message: str) -> None:
+  """Render a status update to stderr."""
   _render_stderr(style="cyan", message=message)
 
 
 def render_warning(message: str) -> None:
+  """Render a warning message to stderr."""
   _render_stderr(style="yellow", message=message)
 
 
 def render_error(message: str) -> None:
+  """Render an error message to stderr."""
   _render_stderr(style="bold red", message=message)
 
 
 def render_no_profile_selected() -> None:
+  """Explain that the requested action needs a selected profile."""
   render_warning("No frag profile selected.")
 
 
 def render_no_workspace(message: str) -> None:
+  """Render a workspace validation failure."""
   render_error(message)
 
 
 def render_legacy_schema_refusal(message: str) -> None:
+  """Render a legacy schema refusal message."""
   render_error(message)

@@ -1,20 +1,31 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
-# dependencies = []
+# requires-python = ">=3.14"
+# dependencies = [
+#     "cyclopts>=4.5.1",
+# ]
 # ///
-from __future__ import annotations
 
-import argparse
 import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import TextIO
+from typing import Annotated, TextIO
+
+from cyclopts import App, CycloptsError, Parameter
 
 SCRIPT_DESCRIPTION = "Search and print Neovim help through headless nvim."
 SLASH_DELIMITER_LENGTH = 2
+InjectedNvimBin = Annotated[str, Parameter(parse=False, show=False)]
+InjectedWithConfig = Annotated[bool, Parameter(parse=False, show=False)]
+
+app = App(
+  name="nvim-help",
+  result_action="return_value",
+  exit_on_error=False,
+  print_error=False,
+)
 
 
 def _emit(text: str, stream: TextIO = sys.stdout) -> None:
@@ -69,14 +80,29 @@ def _strip_slash_delimiters(pattern: str) -> str:
   return pattern
 
 
-def _search_help(args: argparse.Namespace) -> int:
-  pattern = _strip_slash_delimiters(" ".join(args.pattern))
-  if not args.case_sensitive and r"\c" not in pattern and r"\C" not in pattern:
-    pattern = f"{pattern}\\c"
+@app.command(name="search")
+def _search_help(
+  *pattern: str,
+  case_sensitive: bool = False,
+  limit: int = 40,
+  _nvim_bin: InjectedNvimBin = "nvim",
+  _with_config: InjectedWithConfig = False,
+) -> int:
+  """Search help lines with :helpgrep."""
+  if not pattern:
+    raise SystemExit("pass at least one pattern token")
+
+  rendered_pattern = _strip_slash_delimiters(" ".join(pattern))
+  if (
+    not case_sensitive
+    and r"\c" not in rendered_pattern
+    and r"\C" not in rendered_pattern
+  ):
+    rendered_pattern = f"{rendered_pattern}\\c"
 
   lua_source = f"""
-local pattern = {_lua_literal(pattern)}
-local limit = {_lua_literal(args.limit)}
+local pattern = {_lua_literal(rendered_pattern)}
+local limit = {_lua_literal(limit)}
 local ok, err = pcall(vim.api.nvim_cmd, {{
   cmd = "helpgrep",
   args = {{ pattern }},
@@ -108,13 +134,21 @@ if limit > 0 and #qf > limit then
   io.write(string.format("... %d more matches\\n", #qf - limit))
 end
 """.strip()
-  return _run_lua(lua_source, args.nvim_bin, with_config=args.with_config)
+  return _run_lua(lua_source, _nvim_bin, with_config=_with_config)
 
 
-def _page_help(args: argparse.Namespace) -> int:
+@app.command(name="page")
+def _page_help(
+  tag: str,
+  *,
+  context: int = 80,
+  _nvim_bin: InjectedNvimBin = "nvim",
+  _with_config: InjectedWithConfig = False,
+) -> int:
+  """Print help text around a tag."""
   lua_source = f"""
-local tag = {_lua_literal(args.tag)}
-local context = {_lua_literal(args.context)}
+local tag = {_lua_literal(tag)}
+local context = {_lua_literal(context)}
 local ok, err = pcall(vim.api.nvim_cmd, {{
   cmd = "help",
   args = {{ tag }},
@@ -142,15 +176,25 @@ for index, line in ipairs(vim.api.nvim_buf_get_lines(buf, first, last, false)) d
   io.write(string.format("%d|%s\\n", first + index, line))
 end
 """.strip()
-  return _run_lua(lua_source, args.nvim_bin, with_config=args.with_config)
+  return _run_lua(lua_source, _nvim_bin, with_config=_with_config)
 
 
-def _tag_help(args: argparse.Namespace) -> int:
-  query = " ".join(args.query)
+@app.command(name="tags")
+def _tag_help(
+  *query: str,
+  limit: int = 80,
+  _nvim_bin: InjectedNvimBin = "nvim",
+  _with_config: InjectedWithConfig = False,
+) -> int:
+  """List matching help tags."""
+  if not query:
+    raise SystemExit("pass at least one query token")
+
+  rendered_query = " ".join(query)
 
   lua_source = f"""
-local query = {_lua_literal(query)}
-local limit = {_lua_literal(args.limit)}
+local query = {_lua_literal(rendered_query)}
+local limit = {_lua_literal(limit)}
 local matches = vim.fn.getcompletion(query, "help")
 if #matches == 0 then
   vim.api.nvim_err_writeln("No help tags: " .. query)
@@ -168,79 +212,27 @@ if limit > 0 and #matches > limit then
   io.write(string.format("... %d more tags\\n", #matches - limit))
 end
 """.strip()
-  return _run_lua(lua_source, args.nvim_bin, with_config=args.with_config)
+  return _run_lua(lua_source, _nvim_bin, with_config=_with_config)
 
 
-def _build_parser() -> argparse.ArgumentParser:
-  parser = argparse.ArgumentParser(description=SCRIPT_DESCRIPTION)
-  _ = parser.add_argument("--nvim-bin", default="nvim", help="Neovim binary to run")
-  _ = parser.add_argument(
-    "--with-config",
-    action="store_true",
-    help="load the user's config and plugin docs instead of isolated core docs",
-  )
-
-  subparsers = parser.add_subparsers(dest="command", required=True)
-
-  search = subparsers.add_parser(
-    "search",
-    help="search help lines with :helpgrep",
-    description="Search help lines with :helpgrep. Patterns are Vim regexps.",
-  )
-  _ = search.add_argument(
-    "pattern",
-    nargs="+",
-    help="search phrase or Vim regexp; slash delimiters are optional and stripped",
-  )
-  _ = search.add_argument(
-    "--case-sensitive",
-    action="store_true",
-    help="do not append \\c for case-insensitive helpgrep",
-  )
-  _ = search.add_argument(
-    "--limit",
-    type=int,
-    default=40,
-    help="maximum matches to print; 0 prints all",
-  )
-  search.set_defaults(handler=_search_help)
-
-  page = subparsers.add_parser(
-    "page",
-    help="print help text around a tag",
-    description="Open :help {tag} and print lines around the jumped-to tag.",
-  )
-  _ = page.add_argument("tag", help="help tag, e.g. :vertical, 'splitright', windows")
-  _ = page.add_argument(
-    "--context",
-    type=int,
-    default=80,
-    help="lines before/after the tag; 0 prints the whole help buffer",
-  )
-  page.set_defaults(handler=_page_help)
-
-  tags = subparsers.add_parser(
-    "tags",
-    help="complete help tags for a query",
-    description="List help tags via getcompletion({query}, 'help').",
-  )
-  _ = tags.add_argument("query", nargs="+", help="tag prefix or query")
-  _ = tags.add_argument(
-    "--limit",
-    type=int,
-    default=80,
-    help="maximum tags to print; 0 prints all",
-  )
-  tags.set_defaults(handler=_tag_help)
-
-  return parser
-
-
-def _main() -> int:
-  parser = _build_parser()
-  args = parser.parse_args()
-  return args.handler(args)
+@app.meta.default
+def _run_cli(
+  *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
+  nvim_bin: str = "nvim",
+  with_config: bool = False,
+) -> int:
+  command, bound, ignored = app.parse_args(tokens)
+  extra_kwargs: dict[str, object] = {}
+  if "_nvim_bin" in ignored:
+    extra_kwargs["_nvim_bin"] = nvim_bin
+  if "_with_config" in ignored:
+    extra_kwargs["_with_config"] = with_config
+  return command(*bound.args, **bound.kwargs, **extra_kwargs)
 
 
 if __name__ == "__main__":
-  raise SystemExit(_main())
+  try:
+    raise SystemExit(app.meta())
+  except CycloptsError as error:
+    print(error)
+    raise SystemExit(1)

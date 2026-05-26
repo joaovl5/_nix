@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from pathlib import Path
 
@@ -6,6 +6,7 @@ from frag import image_assets, profiles, runtime_contract
 
 
 def test_current_runtime_metadata_uses_process_identity(monkeypatch) -> None:
+  """Covers current runtime metadata uses process identity."""
   runtime_spec = image_assets.RuntimeSpec(
     image_ref="loaded:image",
     shared_assets_identity="shared-assets-123",
@@ -18,6 +19,7 @@ def test_current_runtime_metadata_uses_process_identity(monkeypatch) -> None:
     runtime_contract.os, "getgroups", lambda: [5678, 2001, 2001, 2002]
   )
 
+  # Verify the observed behavior matches the contract.
   assert runtime_contract.current_runtime_metadata(
     runtime_spec=runtime_spec
   ) == profiles.RuntimeProfileMetadata(
@@ -32,6 +34,7 @@ def test_current_runtime_metadata_uses_process_identity(monkeypatch) -> None:
 def test_runtime_environment_includes_profile_name_and_bootstrap_contract() -> (
   None
 ):
+  """Covers runtime environment includes profile name and bootstrap contract."""
   profile = profiles.Profile(
     name="Demo Profile",
     image="python:3.14",
@@ -46,6 +49,7 @@ def test_runtime_environment_includes_profile_name_and_bootstrap_contract() -> (
     supplementary_gids=(2001, 2002),
   )
 
+  # Verify the observed behavior matches the contract.
   assert runtime_contract.runtime_environment(
     profile=profile,
     runtime_metadata=runtime_metadata,
@@ -62,18 +66,23 @@ def test_runtime_environment_includes_profile_name_and_bootstrap_contract() -> (
 def test_bootstrap_contract_paths_are_shared_sources_of_truth(
   tmp_path: Path,
 ) -> None:
+  """Covers bootstrap contract paths are shared sources of truth."""
   state_profile = tmp_path / "profile-state"
 
+  # Verify the observed behavior matches the contract.
   assert runtime_contract.bootstrap_token_path(state_profile) == (
     state_profile / "meta" / "bootstrap-token"
   )
+  # Verify the observed behavior matches the contract.
   assert runtime_contract.bootstrap_status_path(state_profile) == (
     state_profile / "meta" / "bootstrap-status.json"
   )
+  # Verify the observed behavior matches the contract.
   assert (
     runtime_contract.BOOTSTRAP_TOKEN_CONTAINER_PATH
     == "/state/profile/meta/bootstrap-token"
   )
+  # Verify the observed behavior matches the contract.
   assert (
     runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH
     == "/state/profile/meta/bootstrap-status.json"
@@ -83,6 +92,7 @@ def test_bootstrap_contract_paths_are_shared_sources_of_truth(
 def test_canonical_path_expands_and_resolves_without_requiring_target(
   tmp_path: Path,
 ) -> None:
+  """Covers canonical path expands and resolves without requiring target."""
   home_dir = tmp_path / "home"
   workspace = home_dir / "workspace"
   workspace.mkdir(parents=True)
@@ -90,4 +100,5 @@ def test_canonical_path_expands_and_resolves_without_requiring_target(
     workspace / ".." / "workspace" / "missing"
   )
 
+  # Verify the observed behavior matches the contract.
   assert target == workspace / "missing"

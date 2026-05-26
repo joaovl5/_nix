@@ -1,6 +1,6 @@
-from __future__ import annotations
 
-from dataclasses import dataclass, field
+
+from attrs import Factory, define
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 
@@ -14,13 +14,11 @@ from vm_wrapper.nix_runner import (
 )
 
 
-@dataclass
+@define
 class FakeRun:
   stdout: str = ""
   returncode: int = 0
-  calls: list[tuple[list[str], dict[str, str] | None, Path | None, bool]] = (
-    field(default_factory=list)
-  )
+  calls: list[tuple[list[str], dict[str, str] | None, Path | None, bool]] = Factory(list)
 
   def __call__(
     self,
@@ -35,12 +33,10 @@ class FakeRun:
     )
 
 
-@dataclass
+@define
 class FakeRunVm:
   returncode: int = 0
-  calls: list[tuple[Path, dict[str, str] | None]] = field(
-    default_factory=list
-  )
+  calls: list[tuple[Path, dict[str, str] | None]] = Factory(list)
 
   def __call__(self, runner_path: Path, env: dict[str, str] | None) -> int:
     self.calls.append((runner_path, env))
@@ -74,7 +70,7 @@ def test_require_host_rejects_unknown_host() -> None:
   with pytest.raises(
     UserFacingError, match="Available nixosConfigurations: alpha, beta"
   ):
-    require_host("missing", ["beta", "alpha"])
+    require_host(host="missing", available_hosts=["beta", "alpha"])
 
 
 def test_build_vm_runner_uses_expected_installable(tmp_path: Path) -> None:

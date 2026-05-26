@@ -1,6 +1,5 @@
 """Nix execution helpers for the VM wrapper."""
 
-from __future__ import annotations
 
 import json
 import os
@@ -129,8 +128,11 @@ def _default_run_vm_command(
 
 
 def list_hosts(
-  repo_root: Path, run_command: RunCommand = _default_run_command
+  *,
+  repo_root: Path,
+  run_command: RunCommand = _default_run_command,
 ) -> list[str]:
+  """Return the available NixOS host names from the flake."""
   try:
     completed = run_command(
       [
@@ -167,7 +169,8 @@ def list_hosts(
   return hosts
 
 
-def require_host(host: str, available_hosts: Sequence[str]) -> None:
+def require_host(*, host: str, available_hosts: Sequence[str]) -> None:
+  """Raise when a requested host is missing from the flake outputs."""
   if host in available_hosts:
     return
 
@@ -180,8 +183,12 @@ def require_host(host: str, available_hosts: Sequence[str]) -> None:
 
 
 def build_vm_runner(
-  repo_root: Path, host: str, run_command: RunCommand = _default_run_command
+  *,
+  repo_root: Path,
+  host: str,
+  run_command: RunCommand = _default_run_command,
 ) -> Path:
+  """Build and resolve the VM runner executable for a host."""
   try:
     completed = run_command(
       [
@@ -213,12 +220,14 @@ def build_vm_runner(
 
 
 def run_vm(
+  *,
   runner_path: Path,
   bundle_dir: Path,
   cpu: int,
   ram: int,
   run_command: RunVmCommand = _default_run_vm_command,
 ) -> int:
+  """Run the VM launcher with the staged bundle environment."""
   return run_command(
     runner_path,
     _with_qemu_overrides(

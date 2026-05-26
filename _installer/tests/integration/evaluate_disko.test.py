@@ -1,6 +1,6 @@
 """Integration test for disko script building.
 
-MANUAL TEST — run with: pytest -m manual tests/integration/test_evaluate_disko.py -v
+MANUAL TEST — run with: pytest -m manual tests/integration/evaluate_disko.test.py -v
 
 Tests that the flake's diskoScript attribute can be built locally.
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-# path to the test flake fixture
+# Path to the test flake fixture used for manual nix builds.
 FIXTURE_DIR = Path(__file__).parent.parent / "fixtures" / "test_flake"
 
 _NIX_FLAGS = ["--option", "experimental-features", "nix-command flakes"]
@@ -19,7 +19,7 @@ _NIX_FLAGS = ["--option", "experimental-features", "nix-command flakes"]
 @pytest.mark.manual
 class TestBuildDiskoScript:
   def test_nix_build_produces_disko_script(self):
-    """Nix build produces a disko script store path."""
+    """Build the fixture flake's Disko script output."""
     flake_ref = f"{FIXTURE_DIR}#nixosConfigurations.test-host.config.system.build.diskoScript"
 
     result = subprocess.run(
@@ -35,6 +35,8 @@ class TestBuildDiskoScript:
       text=True,
     )
 
+    # Assert the fixture flake can build its Disko script successfully.
     assert result.returncode == 0, f"nix build failed:\n{result.stderr}"
     store_path = result.stdout.strip()
+    # Assert the build output is a realized Nix store path.
     assert store_path.startswith("/nix/store/")

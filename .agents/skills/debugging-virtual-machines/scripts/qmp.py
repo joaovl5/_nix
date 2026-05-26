@@ -1,11 +1,12 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.11"
-# dependencies = []
+# requires-python = ">=3.14"
+# dependencies = [
+#     "attrs",
+#     "cyclopts>=4.5.1",
+# ]
 # ///
-from __future__ import annotations
 
-import argparse
 import base64
 import json
 import re
@@ -14,9 +15,14 @@ import shlex
 import socket
 import sys
 import time
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Annotated, BinaryIO
+
+from attrs import define
+from cyclopts import App, CycloptsError, Parameter
+
+type JsonObject = dict[str, object]
+type QmpKey = dict[str, str]
 
 QMP_ABS_MAX = 0x7FFF
 SERIAL_MARKER_PREFIX = "__qmp_serial__"
@@ -114,26 +120,67 @@ ALLOWED_QCODES = {
   *(f"f{number}" for number in range(1, 13)),
 }
 
+app = App(
+  name="qmp",
+  result_action="return_value",
+  exit_on_error=False,
+  print_error=False,
+)
+mouse_app = App(name="mouse")
+app.command(mouse_app)
 
-@dataclass(frozen=True)
+
+@define(frozen=True)
 class SerialResult:
+  """Parsed serial output with an optional exit code."""
+
   output: str
   exit_code: int | None
 
 
 class QmpError(RuntimeError):
-  pass
+  """Raised when a QMP command or response is invalid."""
 
 
 class SerialTimeoutError(RuntimeError):
-  pass
+  """Raised when serial markers do not arrive before the timeout."""
+
+
+def _require_json_object(*, value: object, context: str) -> JsonObject:
+  if not isinstance(value, dict):
+    raise QmpError(f"{context} must be a JSON object")
+
+  normalized: JsonObject = {}
+  for key, item in value.items():
+    if not isinstance(key, str):
+      raise QmpError(f"{context} contains a non-string key")
+    normalized[key] = item
+  return normalized
+
+
+def _require_json_object_list(*, value: object, context: str) -> list[JsonObject]:
+  if not isinstance(value, list):
+    raise QmpError(f"{context} must be a JSON array")
+  return [
+    _require_json_object(value=item, context=context) for item in value
+  ]
+
+
+def _load_json_object(*, payload_text: str, context: str) -> JsonObject:
+  return _require_json_object(
+    value=json.loads(payload_text),
+    context=context,
+  )
 
 
 class QmpClient:
+  """Issue one QMP command per connection."""
+
   def __init__(self, socket_path: Path):
     self.socket_path = socket_path
 
-  def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+  def execute(self, payload: JsonObject) -> JsonObject:
+    """Send a payload and return the first QMP response frame."""
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.connect(str(self.socket_path))
     try:
@@ -148,34 +195,50 @@ class QmpClient:
     greeting = file_obj.readline()
     if not greeting:
       raise QmpError("No QMP greeting received")
-    json.loads(greeting.decode())
+    _ = json.loads(greeting.decode())
     self._write_payload(file_obj, {"execute": "qmp_capabilities"})
     response = self._read_response(file_obj)
     if "error" in response:
       raise QmpError(f"qmp_capabilities failed: {response}")
 
   @staticmethod
-  def _write_payload(file_obj: BinaryIO, payload: dict[str, Any]) -> None:
+  def _write_payload(file_obj: BinaryIO, payload: JsonObject) -> None:
     file_obj.write((json.dumps(payload) + "\r\n").encode())
 
   @staticmethod
-  def _read_response(file_obj: BinaryIO) -> dict[str, Any]:
+  def _read_response(file_obj: BinaryIO) -> JsonObject:
     while True:
       line = file_obj.readline()
       if not line:
         raise QmpError("QMP socket closed before a response was received")
-      payload = json.loads(line.decode())
+      payload = _load_json_object(
+        payload_text=line.decode(),
+        context="QMP response",
+      )
       if "return" in payload or "error" in payload:
         return payload
 
 
+@define(frozen=True)
+class QmpSession:
+  """Shared command context derived from the CLI socket path."""
+
+  socket_path: Path
+  client: QmpClient
+
+
+InjectedSession = Annotated[QmpSession, Parameter(parse=False, show=False)]
+
+
 def derive_serial_log_path(socket_path: Path) -> Path:
+  """Derive the default serial log path from a QMP socket path."""
   if socket_path.suffix == ".qmp":
     return socket_path.with_suffix(".serial.log")
   return socket_path.with_name(f"{socket_path.name}.serial.log")
 
 
 def normalize_qcode(token: str) -> str:
+  """Normalize one human key token into a QMP qcode."""
   lowered = token.strip().lower()
   lowered = QCODE_ALIASES.get(lowered, lowered)
   if lowered not in ALLOWED_QCODES:
@@ -183,7 +246,8 @@ def normalize_qcode(token: str) -> str:
   return lowered
 
 
-def chord_to_keys(chord: str) -> list[dict[str, str]]:
+def chord_to_keys(chord: str) -> list[QmpKey]:
+  """Convert a chord like ctrl-alt-f9 into send-key qcodes."""
   tokens = [token for token in chord.split("-") if token]
   if not tokens:
     raise ValueError("Key chord cannot be empty")
@@ -192,7 +256,8 @@ def chord_to_keys(chord: str) -> list[dict[str, str]]:
   ]
 
 
-def char_to_keys(char: str) -> list[dict[str, str]]:
+def char_to_keys(char: str) -> list[QmpKey]:
+  """Map one character into the qcodes needed to type it."""
   if char in BASE_KEY_CODES:
     return [{"type": "qcode", "data": BASE_KEY_CODES[char]}]
   if char in SHIFT_KEY_CODES:
@@ -203,34 +268,38 @@ def char_to_keys(char: str) -> list[dict[str, str]]:
   raise ValueError(f"Unsupported character for send-key mapping: {char!r}")
 
 
-def text_to_event_keys(text: str) -> list[list[dict[str, str]]]:
+def text_to_event_keys(text: str) -> list[list[QmpKey]]:
+  """Convert text into per-character QMP send-key events."""
   return [char_to_keys(char) for char in text]
 
 
 def build_send_key_payload(
-  keys: list[dict[str, str]], hold_ms: int | None = None
-) -> dict[str, Any]:
-  arguments: dict[str, Any] = {"keys": keys}
+  *, keys: list[QmpKey], hold_ms: int | None = None
+) -> JsonObject:
+  """Build a QMP send-key payload."""
+  arguments: JsonObject = {"keys": keys}
   if hold_ms is not None:
     arguments["hold-time"] = hold_ms
   return {"execute": "send-key", "arguments": arguments}
 
 
-def marker_line(tag: str, kind: str, value: str | None = None) -> str:
+def marker_line(*, tag: str, kind: str, value: str | None = None) -> str:
+  """Build one serial marker line for begin, status, or end markers."""
   line = f"{SERIAL_MARKER_PREFIX}:{tag}:{kind}"
   if value is not None:
     line = f"{line}:{value}"
   return line
 
 
-def build_serial_wrapper(command: str, tag: str) -> str:
+def build_serial_wrapper(*, command: str, tag: str) -> str:
+  """Build the shell wrapper that emits serial markers around a command."""
   quoted_command = shlex.quote(command)
   return "\n".join(
     [
       "#!/bin/sh",
-      f"begin={shlex.quote(marker_line(tag, 'begin'))}",
-      f"status_prefix={shlex.quote(marker_line(tag, 'status'))}",
-      f"end={shlex.quote(marker_line(tag, 'end'))}",
+      f"begin={shlex.quote(marker_line(tag=tag, kind='begin'))}",
+      f"status_prefix={shlex.quote(marker_line(tag=tag, kind='status'))}",
+      f"end={shlex.quote(marker_line(tag=tag, kind='end'))}",
       "{",
       "  printf '%s\\n' \"$begin\"",
       f"  /bin/sh -lc {quoted_command}",
@@ -244,8 +313,9 @@ def build_serial_wrapper(command: str, tag: str) -> str:
   )
 
 
-def build_serial_bootstrap_command(command: str, tag: str) -> tuple[str, str]:
-  script_text = build_serial_wrapper(command, tag)
+def build_serial_bootstrap_command(*, command: str, tag: str) -> tuple[str, str]:
+  """Encode the serial wrapper so it can be typed into the guest shell."""
+  script_text = build_serial_wrapper(command=command, tag=tag)
   encoded_script = base64.b64encode(script_text.encode()).decode()
   typed_command = (
     f"/run/current-system/sw/bin/printf '%s' '{encoded_script}'"
@@ -255,12 +325,14 @@ def build_serial_bootstrap_command(command: str, tag: str) -> tuple[str, str]:
 
 
 def strip_ansi(text: str) -> str:
+  """Strip ANSI escape sequences from serial output."""
   return ANSI_ESCAPE_RE.sub("", text)
 
 
-def extract_serial_result(text: str, tag: str) -> SerialResult | None:
-  begin = marker_line(tag, "begin")
-  end = marker_line(tag, "end")
+def extract_serial_result(*, text: str, tag: str) -> SerialResult | None:
+  """Extract the most recent serial marker block for the given tag."""
+  begin = marker_line(tag=tag, kind="begin")
+  end = marker_line(tag=tag, kind="end")
   start = text.rfind(begin)
   if start == -1:
     return None
@@ -268,7 +340,7 @@ def extract_serial_result(text: str, tag: str) -> SerialResult | None:
   if end_index == -1:
     return None
   segment = text[start + len(begin) : end_index]
-  status_prefix = f"{marker_line(tag, 'status')}:"
+  status_prefix = f"{marker_line(tag=tag, kind='status')}:"
   status_index = segment.rfind(status_prefix)
   if status_index == -1:
     return SerialResult(
@@ -286,11 +358,13 @@ def extract_serial_result(text: str, tag: str) -> SerialResult | None:
   output_segment = before_status + after_status_line
   output_lines = [line for line in output_segment.splitlines() if line]
   return SerialResult(
-    output="\n".join(output_lines), exit_code=int(code_text)
+    output="\n".join(output_lines),
+    exit_code=int(code_text),
   )
 
 
-def read_serial_text(serial_log: Path, offset: int) -> str:
+def read_serial_text(*, serial_log: Path, offset: int) -> str:
+  """Read serial log text starting at the requested byte offset."""
   try:
     with serial_log.open("rb") as handle:
       handle.seek(offset)
@@ -300,13 +374,17 @@ def read_serial_text(serial_log: Path, offset: int) -> str:
 
 
 def wait_for_serial_result(
-  serial_log: Path, offset: int, tag: str, timeout: float
+  *, serial_log: Path, offset: int, tag: str, timeout: float
 ) -> SerialResult:
+  """Wait for a tagged serial result block to appear in the log."""
   deadline = time.monotonic() + timeout
   saw_file = serial_log.exists()
   while time.monotonic() < deadline:
     saw_file = saw_file or serial_log.exists()
-    result = extract_serial_result(read_serial_text(serial_log, offset), tag)
+    result = extract_serial_result(
+      text=read_serial_text(serial_log=serial_log, offset=offset),
+      tag=tag,
+    )
     if result is not None:
       return result
     time.sleep(0.1)
@@ -317,36 +395,38 @@ def wait_for_serial_result(
   )
 
 
-def extract_pull_bytes(payload_text: str) -> bytes:
+def extract_pull_bytes(*, payload_text: str) -> bytes:
+  """Decode base64 file contents captured over serial."""
   return base64.b64decode("".join(payload_text.split()), validate=True)
 
 
 def current_serial_offset(serial_log: Path) -> int:
+  """Return the current byte size of the serial log."""
   try:
     return serial_log.stat().st_size
   except FileNotFoundError:
     return 0
 
 
-def require_ok(response: dict[str, Any], action: str) -> dict[str, Any]:
+def require_ok(*, response: JsonObject, action: str) -> JsonObject:
+  """Raise when a QMP response reports an error."""
   if "error" in response:
     raise QmpError(f"QMP {action} failed: {json.dumps(response)}")
   return response
 
 
-def query_mice(client: QmpClient) -> list[dict[str, Any]]:
+def query_mice(client: QmpClient) -> list[JsonObject]:
+  """Return the parsed query-mice response payload."""
   response = require_ok(
-    client.execute({"execute": "query-mice"}), "query-mice"
+    response=client.execute({"execute": "query-mice"}),
+    action="query-mice",
   )
   mice = response.get("return")
-  if not isinstance(mice, list):
-    raise QmpError(f"Unexpected query-mice response: {response}")
-  return mice
+  return _require_json_object_list(value=mice, context="query-mice return")
 
 
-def ensure_current_absolute_mouse(
-  mice: list[dict[str, Any]],
-) -> dict[str, Any]:
+def ensure_current_absolute_mouse(*, mice: list[JsonObject]) -> JsonObject:
+  """Return the active absolute mouse device or raise."""
   for mouse in mice:
     if mouse.get("current") and mouse.get("absolute"):
       return mouse
@@ -355,16 +435,18 @@ def ensure_current_absolute_mouse(
   )
 
 
-def validate_abs_coordinate(value: int, axis: str) -> None:
+def validate_abs_coordinate(*, value: int, axis: str) -> None:
+  """Validate one absolute pointer coordinate."""
   if not 0 <= value <= QMP_ABS_MAX:
     raise ValueError(
       f"Absolute {axis} coordinate must be in 0..{QMP_ABS_MAX}"
     )
 
 
-def mouse_move_abs_payload(x: int, y: int) -> dict[str, Any]:
-  validate_abs_coordinate(x, "x")
-  validate_abs_coordinate(y, "y")
+def mouse_move_abs_payload(*, x: int, y: int) -> JsonObject:
+  """Build a QMP payload for absolute mouse movement."""
+  validate_abs_coordinate(value=x, axis="x")
+  validate_abs_coordinate(value=y, axis="y")
   return {
     "execute": "input-send-event",
     "arguments": {
@@ -376,7 +458,8 @@ def mouse_move_abs_payload(x: int, y: int) -> dict[str, Any]:
   }
 
 
-def mouse_move_rel_payload(dx: int, dy: int) -> dict[str, Any]:
+def mouse_move_rel_payload(*, dx: int, dy: int) -> JsonObject:
+  """Build a QMP payload for relative mouse movement."""
   return {
     "execute": "input-send-event",
     "arguments": {
@@ -389,13 +472,15 @@ def mouse_move_rel_payload(dx: int, dy: int) -> dict[str, Any]:
 
 
 def normalize_button(button: str) -> str:
+  """Normalize and validate a mouse button name."""
   lowered = button.lower()
   if lowered not in {"left", "middle", "right"}:
     raise ValueError(f"Unsupported mouse button: {button!r}")
   return lowered
 
 
-def mouse_button_payload(button: str, down: bool) -> dict[str, Any]:
+def mouse_button_payload(*, button: str, down: bool) -> JsonObject:
+  """Build a QMP payload for mouse button state changes."""
   return {
     "execute": "input-send-event",
     "arguments": {
@@ -409,7 +494,8 @@ def mouse_button_payload(button: str, down: bool) -> dict[str, Any]:
   }
 
 
-def mouse_wheel_payload(direction: str) -> dict[str, Any]:
+def mouse_wheel_payload(*, direction: str) -> JsonObject:
+  """Build a QMP payload for one wheel tick."""
   if direction not in {"up", "down"}:
     raise ValueError(f"Unsupported wheel direction: {direction!r}")
   button = "wheel-up" if direction == "up" else "wheel-down"
@@ -425,9 +511,14 @@ def mouse_wheel_payload(direction: str) -> dict[str, Any]:
 
 
 def build_screendump_payload(
-  output: Path, image_format: str | None, device: str | None, head: int | None
-) -> dict[str, Any]:
-  arguments: dict[str, Any] = {"filename": str(output)}
+  *,
+  output: Path,
+  image_format: str | None,
+  device: str | None,
+  head: int | None,
+) -> JsonObject:
+  """Build a screendump payload."""
+  arguments: JsonObject = {"filename": str(output)}
   if image_format is not None:
     arguments["format"] = image_format
   if device is not None:
@@ -437,14 +528,19 @@ def build_screendump_payload(
   return {"execute": "screendump", "arguments": arguments}
 
 
-def run_type_command(client: QmpClient, text: str, delay: float) -> None:
+def run_type_command(*, client: QmpClient, text: str, delay: float) -> None:
+  """Type text into the guest with per-character send-key events."""
   for keys in text_to_event_keys(text):
-    require_ok(client.execute(build_send_key_payload(keys)), "send-key")
+    require_ok(
+      response=client.execute(build_send_key_payload(keys=keys)),
+      action="send-key",
+    )
     if delay:
       time.sleep(delay)
 
 
 def run_serial_command(
+  *,
   client: QmpClient,
   guest_command: str,
   serial_log: Path,
@@ -452,11 +548,20 @@ def run_serial_command(
   delay: float,
   keep_ansi: bool,
 ) -> int:
+  """Run a guest shell command and stream its serial output."""
   tag = secrets.token_hex(8)
   offset = current_serial_offset(serial_log)
-  typed_command, _ = build_serial_bootstrap_command(guest_command, tag)
-  run_type_command(client, typed_command, delay)
-  result = wait_for_serial_result(serial_log, offset, tag, timeout)
+  typed_command, _ = build_serial_bootstrap_command(
+    command=guest_command,
+    tag=tag,
+  )
+  run_type_command(client=client, text=typed_command, delay=delay)
+  result = wait_for_serial_result(
+    serial_log=serial_log,
+    offset=offset,
+    tag=tag,
+    timeout=timeout,
+  )
   output = result.output if keep_ansi else strip_ansi(result.output)
   if output:
     sys.stdout.write(output)
@@ -467,259 +572,303 @@ def run_serial_command(
   return result.exit_code
 
 
-def parse_args() -> argparse.Namespace:
-  parser = argparse.ArgumentParser(
-    description="QMP helper for live VM debugging"
-  )
-  parser.add_argument("socket_path", help="Path to the QMP unix socket")
-  subparsers = parser.add_subparsers(dest="command", required=True)
-
-  key_parser = subparsers.add_parser(
-    "key", help="Send a key chord with QMP send-key"
-  )
-  key_parser.add_argument("chord", help="Key chord such as ctrl-alt-f9")
-  key_parser.add_argument(
-    "--hold-ms", type=int, default=None, help="Hold time in milliseconds"
-  )
-
-  type_parser = subparsers.add_parser(
-    "type", help="Type text with QMP send-key"
-  )
-  type_parser.add_argument(
-    "text", help="Text to type; include literal newlines when needed"
-  )
-  type_parser.add_argument(
-    "--delay",
-    type=float,
-    default=0.02,
-    help="Delay in seconds between characters",
-  )
-
-  mouse_parser = subparsers.add_parser("mouse", help="Mouse operations")
-  mouse_subparsers = mouse_parser.add_subparsers(
-    dest="mouse_command", required=True
-  )
-  mouse_subparsers.add_parser("info", help="Show query-mice output")
-  mouse_abs_parser = mouse_subparsers.add_parser(
-    "move-abs", help="Move absolute pointer coordinates"
-  )
-  mouse_abs_parser.add_argument("x", type=int)
-  mouse_abs_parser.add_argument("y", type=int)
-  mouse_rel_parser = mouse_subparsers.add_parser(
-    "move-rel", help="Move relative pointer coordinates"
-  )
-  mouse_rel_parser.add_argument("dx", type=int)
-  mouse_rel_parser.add_argument("dy", type=int)
-  mouse_down_parser = mouse_subparsers.add_parser(
-    "down", help="Press a mouse button"
-  )
-  mouse_down_parser.add_argument("button")
-  mouse_up_parser = mouse_subparsers.add_parser(
-    "up", help="Release a mouse button"
-  )
-  mouse_up_parser.add_argument("button")
-  mouse_click_parser = mouse_subparsers.add_parser(
-    "click", help="Click a mouse button"
-  )
-  mouse_click_parser.add_argument("button")
-  mouse_wheel_parser = mouse_subparsers.add_parser(
-    "wheel", help="Send wheel events"
-  )
-  mouse_wheel_parser.add_argument("direction", choices=["up", "down"])
-  mouse_wheel_parser.add_argument("--steps", type=int, default=1)
-
-  screendump_parser = subparsers.add_parser(
-    "screendump", help="Capture a screendump"
-  )
-  screendump_parser.add_argument("output")
-  screendump_parser.add_argument(
-    "--format", dest="image_format", choices=["ppm", "png"], default=None
-  )
-  screendump_parser.add_argument("--device", default=None)
-  screendump_parser.add_argument("--head", type=int, default=None)
-
-  serial_parser = subparsers.add_parser(
-    "serial", help="Run a guest shell command and capture ttyS0 output"
-  )
-  serial_parser.add_argument("guest_command")
-  serial_parser.add_argument("--serial-log", default=None)
-  serial_parser.add_argument("--timeout", type=float, default=60.0)
-  serial_parser.add_argument("--delay", type=float, default=0.02)
-  serial_parser.add_argument("--keep-ansi", action="store_true")
-
-  pull_parser = subparsers.add_parser(
-    "pull", help="Copy a readable guest file over serial/base64"
-  )
-  pull_parser.add_argument("guest_path")
-  pull_parser.add_argument("output_path")
-  pull_parser.add_argument("--serial-log", default=None)
-  pull_parser.add_argument("--timeout", type=float, default=60.0)
-  pull_parser.add_argument("--delay", type=float, default=0.02)
-
-  hmp_parser = subparsers.add_parser(
-    "hmp", help="Escape hatch for human-monitor-command"
-  )
-  hmp_parser.add_argument("hmp_command")
-
-  raw_parser = subparsers.add_parser(
-    "raw", help="Escape hatch for raw QMP JSON"
-  )
-  raw_parser.add_argument("json_payload")
-  return parser.parse_args()
+def serial_log_from_args(*, socket_path: Path, override: str | None) -> Path:
+  """Resolve the serial log path from CLI options."""
+  return Path(override) if override is not None else derive_serial_log_path(socket_path)
 
 
-def serial_log_from_args(socket_path: Path, override: str | None) -> Path:
-  return (
-    Path(override)
-    if override is not None
-    else derive_serial_log_path(socket_path)
+def _session_from_socket_path(*, socket_path: Path) -> QmpSession:
+  return QmpSession(socket_path=socket_path, client=QmpClient(socket_path))
+
+
+@app.command(name="key")
+def _key_command(
+  chord: str,
+  *,
+  hold_ms: int | None = None,
+  _session: InjectedSession,
+) -> int:
+  """Send a key chord with QMP send-key."""
+  response = require_ok(
+    response=_session.client.execute(
+      build_send_key_payload(keys=chord_to_keys(chord), hold_ms=hold_ms)
+    ),
+    action="send-key",
   )
+  print(json.dumps(response))
+  return 0
 
 
-def main() -> int:
-  args = parse_args()
-  socket_path = Path(args.socket_path)
-  client = QmpClient(socket_path)
+@app.command(name="type")
+def _type_command(
+  text: str,
+  *,
+  delay: float = 0.02,
+  _session: InjectedSession,
+) -> int:
+  """Type text with QMP send-key."""
+  run_type_command(client=_session.client, text=text, delay=delay)
+  return 0
 
-  if args.command == "key":
+
+@mouse_app.command(name="info")
+def _mouse_info(*, _session: InjectedSession) -> int:
+  """Show query-mice output."""
+  print(json.dumps(query_mice(_session.client), indent=2, sort_keys=True))
+  return 0
+
+
+@mouse_app.command(name="move-abs")
+def _mouse_move_abs(
+  x: int,
+  y: int,
+  *,
+  _session: InjectedSession,
+) -> int:
+  """Move absolute pointer coordinates."""
+  ensure_current_absolute_mouse(mice=query_mice(_session.client))
+  response = require_ok(
+    response=_session.client.execute(mouse_move_abs_payload(x=x, y=y)),
+    action="input-send-event",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@mouse_app.command(name="move-rel")
+def _mouse_move_rel(
+  dx: int,
+  dy: int,
+  *,
+  _session: InjectedSession,
+) -> int:
+  """Move relative pointer coordinates."""
+  response = require_ok(
+    response=_session.client.execute(mouse_move_rel_payload(dx=dx, dy=dy)),
+    action="input-send-event",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@mouse_app.command(name="down")
+def _mouse_down(button: str, *, _session: InjectedSession) -> int:
+  """Press a mouse button."""
+  response = require_ok(
+    response=_session.client.execute(
+      mouse_button_payload(button=button, down=True)
+    ),
+    action="input-send-event",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@mouse_app.command(name="up")
+def _mouse_up(button: str, *, _session: InjectedSession) -> int:
+  """Release a mouse button."""
+  response = require_ok(
+    response=_session.client.execute(
+      mouse_button_payload(button=button, down=False)
+    ),
+    action="input-send-event",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@mouse_app.command(name="click")
+def _mouse_click(button: str, *, _session: InjectedSession) -> int:
+  """Click a mouse button."""
+  require_ok(
+    response=_session.client.execute(
+      mouse_button_payload(button=button, down=True)
+    ),
+    action="input-send-event",
+  )
+  response = require_ok(
+    response=_session.client.execute(
+      mouse_button_payload(button=button, down=False)
+    ),
+    action="input-send-event",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@mouse_app.command(name="wheel")
+def _mouse_wheel(
+  direction: str,
+  *,
+  steps: int = 1,
+  _session: InjectedSession,
+) -> int:
+  """Send wheel events."""
+  if steps < 1:
+    raise ValueError("--steps must be at least 1")
+  response: JsonObject | None = None
+  for _ in range(steps):
     response = require_ok(
-      client.execute(
-        build_send_key_payload(chord_to_keys(args.chord), args.hold_ms)
+      response=_session.client.execute(
+        mouse_wheel_payload(direction=direction)
       ),
-      "send-key",
+      action="input-send-event",
     )
-    print(json.dumps(response))
-    return 0
-  if args.command == "type":
-    run_type_command(client, args.text, args.delay)
-    return 0
-  if args.command == "mouse":
-    if args.mouse_command == "info":
-      print(json.dumps(query_mice(client), indent=2, sort_keys=True))
-      return 0
-    if args.mouse_command == "move-abs":
-      ensure_current_absolute_mouse(query_mice(client))
-      response = require_ok(
-        client.execute(mouse_move_abs_payload(args.x, args.y)),
-        "input-send-event",
+  print(json.dumps(response or {"return": {}}))
+  return 0
+
+
+@app.command(name="screendump")
+def _screendump_command(
+  output: Path,
+  *,
+  image_format: str | None = None,
+  device: str | None = None,
+  head: int | None = None,
+  _session: InjectedSession,
+) -> int:
+  """Capture a screendump."""
+  response = require_ok(
+    response=_session.client.execute(
+      build_screendump_payload(
+        output=output,
+        image_format=image_format,
+        device=device,
+        head=head,
       )
-      print(json.dumps(response))
-      return 0
-    if args.mouse_command == "move-rel":
-      response = require_ok(
-        client.execute(mouse_move_rel_payload(args.dx, args.dy)),
-        "input-send-event",
-      )
-      print(json.dumps(response))
-      return 0
-    if args.mouse_command == "down":
-      response = require_ok(
-        client.execute(mouse_button_payload(args.button, True)),
-        "input-send-event",
-      )
-      print(json.dumps(response))
-      return 0
-    if args.mouse_command == "up":
-      response = require_ok(
-        client.execute(mouse_button_payload(args.button, False)),
-        "input-send-event",
-      )
-      print(json.dumps(response))
-      return 0
-    if args.mouse_command == "click":
-      require_ok(
-        client.execute(mouse_button_payload(args.button, True)),
-        "input-send-event",
-      )
-      response = require_ok(
-        client.execute(mouse_button_payload(args.button, False)),
-        "input-send-event",
-      )
-      print(json.dumps(response))
-      return 0
-    if args.mouse_command == "wheel":
-      if args.steps < 1:
-        raise ValueError("--steps must be at least 1")
-      response: dict[str, Any] | None = None
-      for _ in range(args.steps):
-        response = require_ok(
-          client.execute(mouse_wheel_payload(args.direction)),
-          "input-send-event",
-        )
-      print(json.dumps(response or {"return": {}}))
-      return 0
-  if args.command == "screendump":
-    response = require_ok(
-      client.execute(
-        build_screendump_payload(
-          Path(args.output), args.image_format, args.device, args.head
-        )
-      ),
-      "screendump",
-    )
-    print(json.dumps(response))
-    return 0
-  if args.command == "serial":
-    serial_log = serial_log_from_args(socket_path, args.serial_log)
-    return run_serial_command(
-      client,
-      args.guest_command,
-      serial_log,
-      args.timeout,
-      args.delay,
-      args.keep_ansi,
-    )
-  if args.command == "pull":
-    serial_log = serial_log_from_args(socket_path, args.serial_log)
-    tag = secrets.token_hex(8)
-    offset = current_serial_offset(serial_log)
-    guest_command = (
-      "if [ -r "
-      + shlex.quote(args.guest_path)
-      + " ]; then /run/current-system/sw/bin/base64 -w0 -- "
-      + shlex.quote(args.guest_path)
-      + "; else printf 'File not readable: %s\\n' "
-      + shlex.quote(args.guest_path)
-      + "; exit 1; fi"
-    )
-    typed_command, _ = build_serial_bootstrap_command(guest_command, tag)
-    run_type_command(client, typed_command, args.delay)
-    result = wait_for_serial_result(serial_log, offset, tag, args.timeout)
-    if result.exit_code is None:
-      raise QmpError(f"Missing serial exit status marker in {serial_log}")
-    if result.exit_code != 0:
-      output = strip_ansi(result.output)
-      if output:
-        sys.stdout.write(output)
-        if not output.endswith("\n"):
-          sys.stdout.write("\n")
-      return result.exit_code
-    output_path = Path(args.output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_bytes(extract_pull_bytes(result.output))
-    print(output_path)
-    return 0
-  if args.command == "hmp":
-    response = require_ok(
-      client.execute(
-        {
-          "execute": "human-monitor-command",
-          "arguments": {"command-line": args.hmp_command},
-        }
-      ),
-      "human-monitor-command",
-    )
-    print(json.dumps(response))
-    return 0
-  if args.command == "raw":
-    payload = json.loads(args.json_payload)
-    if not isinstance(payload, dict):
-      raise ValueError("raw payload must decode to a JSON object")
-    response = client.execute(payload)
-    print(json.dumps(response))
-    return 0 if "error" not in response else 1
-  raise AssertionError(f"Unhandled command: {args.command}")
+    ),
+    action="screendump",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@app.command(name="serial")
+def _serial_command(
+  guest_command: str,
+  *,
+  serial_log: str | None = None,
+  timeout: float = 60.0,
+  delay: float = 0.02,
+  keep_ansi: bool = False,
+  _session: InjectedSession,
+) -> int:
+  """Run a guest shell command and capture ttyS0 output."""
+  return run_serial_command(
+    client=_session.client,
+    guest_command=guest_command,
+    serial_log=serial_log_from_args(
+      socket_path=_session.socket_path,
+      override=serial_log,
+    ),
+    timeout=timeout,
+    delay=delay,
+    keep_ansi=keep_ansi,
+  )
+
+
+@app.command(name="pull")
+def _pull_command(
+  guest_path: str,
+  output_path: Path,
+  *,
+  serial_log: str | None = None,
+  timeout: float = 60.0,
+  delay: float = 0.02,
+  _session: InjectedSession,
+) -> int:
+  """Copy a readable guest file over serial/base64."""
+  resolved_serial_log = serial_log_from_args(
+    socket_path=_session.socket_path,
+    override=serial_log,
+  )
+  tag = secrets.token_hex(8)
+  offset = current_serial_offset(resolved_serial_log)
+  guest_command = (
+    "if [ -r "
+    + shlex.quote(guest_path)
+    + " ]; then /run/current-system/sw/bin/base64 -w0 -- "
+    + shlex.quote(guest_path)
+    + "; else printf 'File not readable: %s\\n' "
+    + shlex.quote(guest_path)
+    + "; exit 1; fi"
+  )
+  typed_command, _ = build_serial_bootstrap_command(
+    command=guest_command,
+    tag=tag,
+  )
+  run_type_command(
+    client=_session.client,
+    text=typed_command,
+    delay=delay,
+  )
+  result = wait_for_serial_result(
+    serial_log=resolved_serial_log,
+    offset=offset,
+    tag=tag,
+    timeout=timeout,
+  )
+  if result.exit_code is None:
+    raise QmpError(f"Missing serial exit status marker in {resolved_serial_log}")
+  if result.exit_code != 0:
+    output = strip_ansi(result.output)
+    if output:
+      sys.stdout.write(output)
+      if not output.endswith("\n"):
+        sys.stdout.write("\n")
+    return result.exit_code
+
+  output_path.parent.mkdir(parents=True, exist_ok=True)
+  output_path.write_bytes(extract_pull_bytes(payload_text=result.output))
+  print(output_path)
+  return 0
+
+
+@app.command(name="hmp")
+def _hmp_command(hmp_command: str, *, _session: InjectedSession) -> int:
+  """Escape hatch for human-monitor-command."""
+  response = require_ok(
+    response=_session.client.execute(
+      {
+        "execute": "human-monitor-command",
+        "arguments": {"command-line": hmp_command},
+      }
+    ),
+    action="human-monitor-command",
+  )
+  print(json.dumps(response))
+  return 0
+
+
+@app.command(name="raw")
+def _raw_command(json_payload: str, *, _session: InjectedSession) -> int:
+  """Escape hatch for raw QMP JSON."""
+  payload = _load_json_object(
+    payload_text=json_payload,
+    context="raw payload",
+  )
+  response = _session.client.execute(payload)
+  print(json.dumps(response))
+  return 0 if "error" not in response else 1
+
+
+@app.meta.default
+def _run_cli(
+  socket_path: Path,
+  *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
+) -> int:
+  """Launch the QMP CLI with a shared socket path."""
+  session = _session_from_socket_path(socket_path=socket_path)
+  command, bound, ignored = app.parse_args(tokens)
+  extra_kwargs: JsonObject = {}
+  if "_session" in ignored:
+    extra_kwargs["_session"] = session
+  return command(*bound.args, **bound.kwargs, **extra_kwargs)
 
 
 if __name__ == "__main__":
-  raise SystemExit(main())
+  try:
+    raise SystemExit(app.meta())
+  except CycloptsError as error:
+    print(error)
+    raise SystemExit(1)

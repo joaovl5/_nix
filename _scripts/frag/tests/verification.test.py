@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import importlib.util
 import json
@@ -14,44 +14,60 @@ from frag import profiles, verification
 def test_create_verification_artifacts_uses_clear_namespace(
   tmp_path: Path,
 ) -> None:
+  """Covers create verification artifacts uses clear namespace."""
   artifacts = verification.create_verification_artifacts(
     purpose="smoke",
     workspace_root=tmp_path,
     token_factory=lambda: "abc12345",
   )
 
+  # Verify the observed behavior matches the contract.
   assert artifacts.label == "frag-verify-smoke-abc12345"
+  # Verify the observed behavior matches the contract.
   assert artifacts.profile_name == "frag-verify-smoke-abc12345"
+  # Verify the observed behavior matches the contract.
   assert artifacts.workspace_path == tmp_path / "frag-verify-smoke-abc12345"
 
 
 def test_cleanup_runs_when_verification_step_fails() -> None:
+  """Covers cleanup runs when verification step fails."""
   events: list[str] = []
   harness = verification.CleanupHarness()
-  harness.register("workspace", lambda: events.append("workspace"))
-  harness.register("profile", lambda: events.append("profile"))
-  harness.register("container", lambda: events.append("container"))
+  harness.register(
+    label="workspace",
+    callback=lambda: events.append("workspace"),
+  )
+  harness.register(
+    label="profile",
+    callback=lambda: events.append("profile"),
+  )
+  harness.register(
+    label="container",
+    callback=lambda: events.append("container"),
+  )
 
   with pytest.raises(RuntimeError, match="verification failed"), harness:
     events.append("body")
     raise RuntimeError("verification failed")
 
+  # Verify the observed behavior matches the contract.
   assert events == ["body", "container", "profile", "workspace"]
 
 
 def test_cleanup_tolerates_already_missing_resources(tmp_path: Path) -> None:
+  """Covers cleanup tolerates already missing resources."""
   harness = verification.CleanupHarness()
   workspace_path = tmp_path / "workspace"
 
   harness.register(
-    "profile",
-    lambda: (_ for _ in ()).throw(
+    label="profile",
+    callback=lambda: (_ for _ in ()).throw(
       profiles.ProfileNotFoundError("gone-profile")
     ),
   )
   harness.register(
-    "container",
-    lambda: (_ for _ in ()).throw(
+    label="container",
+    callback=lambda: (_ for _ in ()).throw(
       subprocess.CalledProcessError(
         1,
         ["docker", "stop", "gone-container"],
@@ -60,8 +76,8 @@ def test_cleanup_tolerates_already_missing_resources(tmp_path: Path) -> None:
     ),
   )
   harness.register(
-    "workspace",
-    lambda: verification.remove_workspace_if_present(
+    label="workspace",
+    callback=lambda: verification.remove_workspace_if_present(
       workspace_path=workspace_path
     ),
   )
@@ -70,10 +86,11 @@ def test_cleanup_tolerates_already_missing_resources(tmp_path: Path) -> None:
 
 
 def test_cleanup_does_not_swallow_missing_executable_errors() -> None:
+  """Covers cleanup does not swallow missing executable errors."""
   harness = verification.CleanupHarness()
   harness.register(
-    "container",
-    lambda: (_ for _ in ()).throw(
+    label="container",
+    callback=lambda: (_ for _ in ()).throw(
       FileNotFoundError(2, "No such file or directory", "docker")
     ),
   )
@@ -118,6 +135,7 @@ class TransientVolumeInUseOnRemoveBackend:
 def test_remove_profile_retries_transient_volume_in_use_cleanup_race() -> (
   None
 ):
+  """Covers remove profile retries transient volume in use cleanup race."""
   backend = TransientVolumeInUseOnRemoveBackend()
 
   verification.remove_profile_if_present(
@@ -125,10 +143,12 @@ def test_remove_profile_retries_transient_volume_in_use_cleanup_race() -> (
     profile_name="racy-profile",
   )
 
+  # Verify the observed behavior matches the contract.
   assert backend.removed_volumes == [
     "frag-profile-racy-profile",
     "frag-profile-racy-profile",
   ]
+  # Verify the observed behavior matches the contract.
   assert backend.remove_attempts == 2
 
 
@@ -139,7 +159,9 @@ def _load_smoke_verify_module() -> ModuleType:
   spec = importlib.util.spec_from_file_location(
     "frag_smoke_verify_test", script_path
   )
+  # Verify the observed behavior matches the contract.
   assert spec is not None
+  # Verify the observed behavior matches the contract.
   assert spec.loader is not None
   module = importlib.util.module_from_spec(spec)
   sys.modules[spec.name] = module
@@ -177,13 +199,13 @@ def _stub_smoke_cleanup_callbacks(
 
 
 def test_smoke_verify_parser_defaults_to_main_profile_image() -> None:
+  """Covers smoke verify parser defaults to main profile image."""
   smoke_verify = _load_smoke_verify_module()
-  parser = smoke_verify._build_parser()
-  default_args = parser.parse_args(["--frag-bin", "./result/bin/frag"])
 
-  assert default_args.profile_image == "main"
+  # Verify the cyclopts default remains the expected main image.
+  assert smoke_verify.run_smoke_verify.__kwdefaults__["profile_image"] == "main"
 
-  explicit_args = parser.parse_args(
+  _command, explicit_args, _ = smoke_verify.smoke_verify_app.parse_args(
     [
       "--frag-bin",
       "./result/bin/frag",
@@ -191,7 +213,8 @@ def test_smoke_verify_parser_defaults_to_main_profile_image() -> None:
       "custom",
     ]
   )
-  assert explicit_args.profile_image == "custom"
+  # Verify the explicit profile image value is parsed from the CLI.
+  assert explicit_args.arguments["profile_image"] == "custom"
 
 
 def test_smoke_verify_runs_checks_and_prints_timing_summary(
@@ -199,6 +222,7 @@ def test_smoke_verify_runs_checks_and_prints_timing_summary(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers smoke verify runs checks and prints timing summary."""
   smoke_verify = _load_smoke_verify_module()
   caller_cwd = tmp_path / "caller"
   caller_cwd.mkdir()
@@ -309,6 +333,7 @@ def test_smoke_verify_runs_checks_and_prints_timing_summary(
 
   monkeypatch.setattr(smoke_verify.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert (
     smoke_verify.main(
       [
@@ -322,7 +347,9 @@ def test_smoke_verify_runs_checks_and_prints_timing_summary(
   )
 
   enter_calls = [call for call in calls if call["command"][1] == "enter"]
+  # Verify the observed behavior matches the contract.
   assert {call["cwd"] for call in enter_calls} == {artifacts.workspace_path}
+  # Verify the observed behavior matches the contract.
   assert cleanup_calls == [
     ("container", artifacts.profile_name),
     ("container", artifacts.profile_name),
@@ -334,6 +361,7 @@ def test_smoke_verify_runs_checks_and_prints_timing_summary(
   summary = json.loads(
     captured.out.strip().split("timing_summary=", maxsplit=1)[1]
   )
+  # Verify the observed behavior matches the contract.
   assert summary == {
     "enter_pwd_seconds": 1.0,
     "enter_whoami_seconds": 1.0,
@@ -354,6 +382,7 @@ def test_smoke_verify_runs_checks_and_prints_timing_summary(
 def test_smoke_verify_resolves_relative_frag_bin_before_workspace_scoped_enters(
   tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+  """Covers smoke verify resolves relative frag bin before workspace scoped enters."""
   smoke_verify = _load_smoke_verify_module()
   caller_cwd = tmp_path / "caller"
   caller_cwd.mkdir()
@@ -465,6 +494,7 @@ def test_smoke_verify_resolves_relative_frag_bin_before_workspace_scoped_enters(
 
   monkeypatch.setattr(smoke_verify.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert (
     smoke_verify.main(
       [
@@ -478,10 +508,13 @@ def test_smoke_verify_resolves_relative_frag_bin_before_workspace_scoped_enters(
   )
 
   enter_calls = [call for call in calls if call["command"][1] == "enter"]
+  # Verify the observed behavior matches the contract.
   assert enter_calls
+  # Verify the observed behavior matches the contract.
   assert {call["command"][0] for call in enter_calls} == {
     str(expected_frag_bin)
   }
+  # Verify the observed behavior matches the contract.
   assert cleanup_calls == [
     ("container", artifacts.profile_name),
     ("container", artifacts.profile_name),
@@ -493,6 +526,7 @@ def test_smoke_verify_resolves_relative_frag_bin_before_workspace_scoped_enters(
 def test_smoke_verify_accepts_workspace_write_with_workspace_directory_gid(
   tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+  """Covers smoke verify accepts workspace write with workspace directory gid."""
   smoke_verify = _load_smoke_verify_module()
 
   artifacts = verification.VerificationArtifacts(
@@ -605,6 +639,7 @@ def test_smoke_verify_accepts_workspace_write_with_workspace_directory_gid(
 
   monkeypatch.setattr(smoke_verify.subprocess, "run", fake_run)
 
+  # Verify the observed behavior matches the contract.
   assert (
     smoke_verify.main(
       [
@@ -636,6 +671,7 @@ def test_smoke_verify_rejects_unexpected_enter_stdout(
   stdout: str,
   match: str,
 ) -> None:
+  """Covers smoke verify rejects unexpected enter stdout."""
   smoke_verify = _load_smoke_verify_module()
 
   artifacts = verification.VerificationArtifacts(
@@ -713,6 +749,7 @@ def test_smoke_verify_rejects_unexpected_enter_stdout(
 def test_smoke_verify_rejects_shared_asset_failure_without_read_only_evidence(
   tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+  """Covers smoke verify rejects shared asset failure without read only evidence."""
   smoke_verify = _load_smoke_verify_module()
 
   artifacts = verification.VerificationArtifacts(
@@ -813,6 +850,7 @@ def test_smoke_verify_rejects_shared_asset_failure_without_read_only_evidence(
 def test_smoke_verify_rejects_shared_asset_write_that_unexpectedly_succeeds(
   tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+  """Covers smoke verify rejects shared asset write that unexpectedly succeeds."""
   smoke_verify = _load_smoke_verify_module()
 
   artifacts = verification.VerificationArtifacts(

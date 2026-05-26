@@ -1,5 +1,3 @@
-# pyright: reportUnusedCallResult=false
-
 import pytest
 from coisas.repository import GitForge, RepositoryURI, URIType
 
@@ -50,7 +48,9 @@ _GET_URL_CASES: dict[str, tuple[str, str]] = {
 def test_parse(
   uri_str: str, expected_type: URIType, expected_forge: GitForge | None
 ):
+  """Parse repository references into the expected URI category."""
   uri = RepositoryURI.parse(uri_str)
+  # Assert parsing preserves the expected URI category and forge metadata.
   assert uri.type == expected_type
   assert uri.forge == expected_forge
 
@@ -59,6 +59,8 @@ def test_parse(
   "uri_str", _PARSE_ERRORS.values(), ids=_PARSE_ERRORS.keys()
 )
 def test_parse_errors(uri_str: str):
+  """Reject unsupported or empty repository references."""
+  # Assert invalid repository references raise ValueError.
   with pytest.raises(ValueError):
     RepositoryURI.parse(uri_str)
 
@@ -69,6 +71,8 @@ def test_parse_errors(uri_str: str):
   ids=_NEEDS_CLONE_CASES.keys(),
 )
 def test_needs_clone(uri_str: str, expected: bool):
+  """Report whether each repository reference requires cloning."""
+  # Assert local paths do not clone while remote references do.
   assert RepositoryURI.parse(uri_str).needs_clone() is expected
 
 
@@ -78,4 +82,6 @@ def test_needs_clone(uri_str: str, expected: bool):
   ids=_GET_URL_CASES.keys(),
 )
 def test_get_url(uri_str: str, expected_url: str):
+  """Resolve each repository reference into its cloneable URL or path."""
+  # Assert forge shorthands expand while direct URLs and paths stay stable.
   assert RepositoryURI.parse(uri_str).get_url() == expected_url

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 from pathlib import Path
 
@@ -18,10 +16,12 @@ BOOTSTRAP_STATUS_CONTAINER_PATH = "/state/profile/meta/bootstrap-status.json"
 
 
 def canonical_path(path: Path | str) -> Path:
+  """Expand and resolve a path without requiring the target to exist."""
   return Path(path).expanduser().resolve(strict=False)
 
 
 def current_supplementary_gids(*, primary_gid: int) -> tuple[int, ...]:
+  """Return the current process supplementary groups without duplicates."""
   supplementary_groups: list[int] = []
   for gid in os.getgroups():
     if gid == primary_gid or gid in supplementary_groups:
@@ -33,6 +33,7 @@ def current_supplementary_gids(*, primary_gid: int) -> tuple[int, ...]:
 def current_runtime_metadata(
   *, runtime_spec: RuntimeSpec
 ) -> profiles.RuntimeProfileMetadata:
+  """Capture runtime metadata for the current host identity and image state."""
   primary_gid = os.getgid()
   return profiles.RuntimeProfileMetadata(
     image_ref=runtime_spec.image_ref,
@@ -49,6 +50,7 @@ def runtime_environment(
   runtime_metadata: profiles.RuntimeProfileMetadata,
   bootstrap_token: str,
 ) -> dict[str, str]:
+  """Build the environment contract injected into the runtime container."""
   supplementary_gids = ",".join(
     str(gid) for gid in runtime_metadata.supplementary_gids
   )
@@ -62,8 +64,10 @@ def runtime_environment(
 
 
 def bootstrap_token_path(state_profile: Path | str) -> Path:
+  """Return the persisted bootstrap token path for a profile state root."""
   return Path(state_profile) / BOOTSTRAP_TOKEN_RELATIVE_PATH
 
 
 def bootstrap_status_path(state_profile: Path | str) -> Path:
+  """Return the persisted bootstrap status path for a profile state root."""
   return Path(state_profile) / BOOTSTRAP_STATUS_RELATIVE_PATH

@@ -1,26 +1,30 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+
+from attrs import define, field
 
 _STATE_SHARED_DESTINATION_PREFIX = "/state/shared/"
 
 
 class SharedAssetEntryType(StrEnum):
+  """Enumerate the supported shared asset entry kinds."""
+
   DIRECTORY = "directory"
   FILE = "file"
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class SharedPackagedAssetEntry:
+  """Describe a packaged shared asset exposed to the runtime and home view."""
+
   home_relative_path: Path
   packaged_asset_relative_path: Path
   runtime_destination: str
-  entry_type: SharedAssetEntryType
+  entry_type: SharedAssetEntryType = field(converter=SharedAssetEntryType)
 
   @property
   def state_shared_relative_path(self) -> Path:
+    """Return the state-relative path implied by the runtime destination."""
     if not self.runtime_destination.startswith(
       _STATE_SHARED_DESTINATION_PREFIX
     ):
@@ -32,11 +36,13 @@ class SharedPackagedAssetEntry:
     )
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class SharedHostOverrideEntry:
+  """Describe a host override that can replace a packaged shared asset."""
+
   host_relative_path: Path
   runtime_destination: str
-  entry_type: SharedAssetEntryType
+  entry_type: SharedAssetEntryType = field(converter=SharedAssetEntryType)
 
 
 SHARED_PACKAGED_ASSET_ENTRIES: tuple[SharedPackagedAssetEntry, ...] = (
@@ -220,6 +226,7 @@ SHARED_HOST_OVERRIDE_ENTRIES: tuple[SharedHostOverrideEntry, ...] = (
 
 
 def shared_home_view_mappings() -> tuple[tuple[Path, Path], ...]:
+  """Return home-path mappings for packaged shared assets."""
   return tuple(
     (entry.home_relative_path, entry.state_shared_relative_path)
     for entry in SHARED_PACKAGED_ASSET_ENTRIES
@@ -227,6 +234,7 @@ def shared_home_view_mappings() -> tuple[tuple[Path, Path], ...]:
 
 
 def shared_runtime_mount_specs() -> tuple[tuple[str, str, str], ...]:
+  """Return packaged shared asset mount specifications for the runtime."""
   return tuple(
     (
       str(entry.packaged_asset_relative_path),
@@ -238,6 +246,7 @@ def shared_runtime_mount_specs() -> tuple[tuple[str, str, str], ...]:
 
 
 def shared_host_override_specs() -> tuple[tuple[Path, str, str], ...]:
+  """Return host override specifications keyed by runtime destination."""
   return tuple(
     (
       entry.host_relative_path,

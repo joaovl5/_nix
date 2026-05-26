@@ -1,20 +1,19 @@
 """Bundle helpers for the VM wrapper."""
 
-from __future__ import annotations
-
 import os
 import shutil
 import stat
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
+
+from attrs import define
 
 
 class UserFacingError(RuntimeError):
   """Raised when user-provided inputs are invalid."""
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class ResolvedInputs:
   """Validated launcher inputs carried into bundle staging."""
 
@@ -24,11 +23,13 @@ class ResolvedInputs:
 
 
 def resolve_inputs(
+  *,
   host: str,
   home_dir: Path,
   age_key: Path | str | None,
   ssh_key: Path | str | None,
 ) -> ResolvedInputs:
+  """Resolve and validate launcher secret inputs."""
   resolved_age_key = (
     Path(age_key).expanduser()
     if age_key is not None
@@ -49,6 +50,7 @@ def resolve_inputs(
 
 
 def validate_secret_file(path: Path, label: str) -> None:
+  """Validate that a secret file exists and is locked down."""
   try:
     file_stat = path.stat(follow_symlinks=False)
   except FileNotFoundError as exc:
@@ -67,6 +69,7 @@ def validate_secret_file(path: Path, label: str) -> None:
 
 
 def copy_secret(source: Path, destination: Path) -> None:
+  """Copy a secret into place without following destination symlinks."""
   destination.parent.mkdir(parents=True, exist_ok=True)
   temp_fd, temp_name = tempfile.mkstemp(dir=destination.parent)
   temp_path = Path(temp_name)
@@ -80,7 +83,8 @@ def copy_secret(source: Path, destination: Path) -> None:
       temp_path.unlink()
 
 
-def stage_bundle(bundle_dir: Path, resolved: ResolvedInputs) -> None:
+def stage_bundle(*, bundle_dir: Path, resolved: ResolvedInputs) -> None:
+  """Stage validated secrets into the VM bundle layout."""
   copy_secret(resolved.age_key, bundle_dir / "age" / "key.txt")
 
   if resolved.ssh_key is not None:

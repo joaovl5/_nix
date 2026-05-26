@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import json
 import os
@@ -57,6 +57,7 @@ def _prepare_home_view(*, state_profile: Path, home: Path) -> None:
 def test_initialize_profile_state_creates_expected_directories_and_symlinks(
   tmp_path: Path,
 ) -> None:
+  """Covers initialize profile state creates expected directories and symlinks."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -86,52 +87,80 @@ def test_initialize_profile_state_creates_expected_directories_and_symlinks(
     metadata=metadata,
   )
 
+  # Verify the observed behavior matches the contract.
   assert (state_profile / "meta").is_dir()
+  # Verify the observed behavior matches the contract.
   assert (state_profile / "config").is_dir()
+  # Verify the observed behavior matches the contract.
   assert (state_profile / "notes").is_dir()
+  # Verify the observed behavior matches the contract.
   assert (state_profile / "home").is_dir()
+  # Verify the observed behavior matches the contract.
   assert _mode(state_profile / "meta") == 0o700
+  # Verify the observed behavior matches the contract.
   assert _mode(state_profile / "config") == 0o700
+  # Verify the observed behavior matches the contract.
   assert _mode(state_profile / "notes") == 0o700
+  # Verify the observed behavior matches the contract.
   assert _mode(state_profile / "home") == 0o700
 
   profile_json = state_profile / "meta" / "profile.json"
+  # Verify the observed behavior matches the contract.
   assert json.loads(profile_json.read_text()) == metadata
+  # Verify the observed behavior matches the contract.
   assert _mode(profile_json) == 0o600
 
   code_config = state_profile / "config" / "code" / "config.toml"
   omp_config = state_profile / "config" / "omp" / "mcp.json"
 
+  # Verify the observed behavior matches the contract.
   assert home.is_symlink()
+  # Verify the observed behavior matches the contract.
   assert home.resolve() == (state_profile / "home").resolve()
+  # Verify the observed behavior matches the contract.
   assert (home / ".cache").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".cache").readlink() == bootstrap._EPHEMERAL_CACHE_HOME
+  # Verify the observed behavior matches the contract.
   assert not str((home / ".cache").resolve()).startswith(
     str(state_profile.resolve())
   )
+  # Verify the observed behavior matches the contract.
   assert (home / ".code" / "config.toml").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".code" / "config.toml").resolve() == code_config.resolve()
+  # Verify the observed behavior matches the contract.
   assert (home / ".code" / "agents").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".code" / "agents").resolve() == (
     state_shared / "code" / "agents"
   ).resolve()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "agents" / "skills").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "agents" / "skills").resolve() == (
     state_shared / "config" / "agents" / "skills"
   ).resolve()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "opencode" / "skill").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "opencode" / "skill").resolve() == (
     state_shared / "opencode" / "skill"
   ).resolve()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "opencode" / "opencode.json").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (home / ".config" / "opencode" / "opencode.json").resolve() == (
     state_shared / "opencode" / "opencode.json"
   ).resolve()
+  # Verify the observed behavior matches the contract.
   assert (
     json.loads((home / ".config" / "opencode" / "opencode.json").read_text())
     == _EXPECTED_OPENCODE_CONFIG
   )
+  # Verify the observed behavior matches the contract.
   assert (home / ".omp" / "agent" / "mcp.json").is_symlink()
+  # Verify the observed behavior matches the contract.
   assert (
     home / ".omp" / "agent" / "mcp.json"
   ).resolve() == omp_config.resolve()
@@ -141,6 +170,7 @@ def test_main_initializes_environment_clears_stale_status_and_execs_keepalive(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main initializes environment clears stale status and execs keepalive."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -185,7 +215,9 @@ def test_main_initializes_environment_clears_stale_status_and_execs_keepalive(
       ]
     )
 
+  # Verify the observed behavior matches the contract.
   assert excinfo.value.code == 0
+  # Verify the observed behavior matches the contract.
   assert json.loads(
     (state_profile / "meta" / "profile.json").read_text()
   ) == {
@@ -196,10 +228,13 @@ def test_main_initializes_environment_clears_stale_status_and_execs_keepalive(
     "image_ref": "loaded:image",
     "shared_assets_identity": "shared-assets-123",
   }
+  # Verify the observed behavior matches the contract.
   assert (
     state_profile / "meta" / "bootstrap-token"
   ).read_text() == "token-123\n"
+  # Verify the observed behavior matches the contract.
   assert not stale_status.exists()
+  # Verify the observed behavior matches the contract.
   assert captured == {"program": "sleep", "args": ["sleep", "infinity"]}
 
 
@@ -207,6 +242,7 @@ def test_main_writes_token_scoped_bootstrap_failure_status(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main writes token scoped bootstrap failure status."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -241,6 +277,7 @@ def test_main_writes_token_scoped_bootstrap_failure_status(
       ]
     )
 
+  # Verify the observed behavior matches the contract.
   assert json.loads(status_path.read_text()) == {
     "bootstrap_token": "token-456",
     "message": "bootstrap ownership target must set both uid and gid",
@@ -253,6 +290,7 @@ def test_main_applies_target_ownership_to_profile_and_home(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main applies target ownership to profile and home."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -307,16 +345,27 @@ def test_main_applies_target_ownership_to_profile_and_home(
     for path, uid, gid, follow_symlinks in chown_calls
     if uid == 1234 and gid == 5678 and follow_symlinks is False
   }
+  # Verify the observed behavior matches the contract.
   assert state_profile in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert state_profile / "meta" / "profile.json" in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert state_profile / "home" in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert state_profile / "home" / ".code" in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert state_profile / "home" / ".code" / "config.toml" not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert runtime_identity_root not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert runtime_identity_root / "exec" not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert runtime_identity_root / "passwd" not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert runtime_identity_root / "group" not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert state_profile / "meta" / "bootstrap-token" in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert (
     state_profile / "meta" / "bootstrap-token"
   ).read_text() == "token-123\n"
@@ -326,6 +375,7 @@ def test_main_does_not_chown_persistent_home_separately(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main does not chown persistent home separately."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -374,6 +424,7 @@ def test_main_does_not_chown_persistent_home_separately(
       ]
     )
 
+  # Verify the observed behavior matches the contract.
   assert chown_tree_roots == [
     (state_profile, 1234, 5678),
     (ephemeral_cache.parent, 1234, 5678),
@@ -384,6 +435,7 @@ def test_main_applies_target_ownership_to_ephemeral_cache_root(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main applies target ownership to ephemeral cache root."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -438,8 +490,11 @@ def test_main_applies_target_ownership_to_ephemeral_cache_root(
     for path, uid, gid, follow_symlinks in chown_calls
     if uid == 1234 and gid == 5678 and follow_symlinks is False
   }
+  # Verify the observed behavior matches the contract.
   assert ephemeral_cache.parent in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert ephemeral_cache in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert (home / ".cache").readlink() == ephemeral_cache
 
 
@@ -447,6 +502,7 @@ def test_main_recursively_repairs_profile_when_existing_profile_roots_match_requ
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers main recursively repairs profile when existing profile roots match requested owner."""
   state_profile = tmp_path / "state" / "profile"
   state_shared = tmp_path / "state" / "shared"
   home = tmp_path / "home" / "agent"
@@ -513,6 +569,7 @@ def test_main_recursively_repairs_profile_when_existing_profile_roots_match_requ
       ]
     )
 
+  # Verify the observed behavior matches the contract.
   assert chown_tree_roots == [
     (state_profile, target_uid, target_gid),
     (ephemeral_cache.parent, target_uid, target_gid),
@@ -523,6 +580,7 @@ def test_write_identity_overlay_contract_activates_passwd_group_overlay(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers write identity overlay contract activates passwd group overlay."""
   state_profile = tmp_path / "state" / "profile"
   runtime_identity_root = tmp_path / "run" / "frag" / "identity"
 
@@ -535,15 +593,22 @@ def test_write_identity_overlay_contract_activates_passwd_group_overlay(
 
   exec_script = (runtime_identity_root / "exec").read_text()
   passwd_text = (runtime_identity_root / "passwd").read_text()
+  # Verify the observed behavior matches the contract.
   assert exec_script.startswith("#!/sw/bin/sh\n")
+  # Verify the observed behavior matches the contract.
   assert "export NSS_WRAPPER_PASSWD=/run/frag/identity/passwd" in exec_script
+  # Verify the observed behavior matches the contract.
   assert "export NSS_WRAPPER_GROUP=/run/frag/identity/group" in exec_script
+  # Verify the observed behavior matches the contract.
   assert 'export LD_PRELOAD="/sw/lib/libnss_wrapper.so' in exec_script
+  # Verify the observed behavior matches the contract.
   assert (
     'setpriv --reuid 1234 --regid 5678 --groups 2001,2002 -- "$@"'
     in exec_script
   )
+  # Verify the observed behavior matches the contract.
   assert "--clear-groups" not in exec_script
+  # Verify the observed behavior matches the contract.
   assert "/sw/bin/fish" in passwd_text
 
 
@@ -551,6 +616,7 @@ def test_container_root_matches_requested_owner_for_rootless_maps(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers container root matches requested owner for rootless maps."""
   uid_map = tmp_path / "proc" / "self" / "uid_map"
   gid_map = tmp_path / "proc" / "self" / "gid_map"
   uid_map.parent.mkdir(parents=True)
@@ -571,13 +637,16 @@ def test_container_root_matches_requested_owner_for_rootless_maps(
 
   monkeypatch.setattr(bootstrap, "Path", fake_path)
 
+  # Verify the observed behavior matches the contract.
   assert bootstrap._container_root_matches_requested_owner(1000, 100) is True
+  # Verify the observed behavior matches the contract.
   assert bootstrap._container_root_matches_requested_owner(1234, 100) is False
 
 
 def test_requested_owner_from_env_rejects_non_numeric_values(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers requested owner from env rejects non numeric values."""
   monkeypatch.setenv(runtime_contract.TARGET_UID_ENV, "nope")
   monkeypatch.setenv(runtime_contract.TARGET_GID_ENV, "5678")
 
@@ -591,8 +660,10 @@ def test_requested_owner_from_env_rejects_non_numeric_values(
 def test_requested_supplementary_gids_from_env_returns_empty_for_blank(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers requested supplementary gids from env returns empty for blank."""
   monkeypatch.setenv(runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, "   ")
 
+  # Verify the observed behavior matches the contract.
   assert (
     bootstrap._requested_supplementary_gids_from_env(primary_gid=5678) == ()
   )
@@ -601,11 +672,13 @@ def test_requested_supplementary_gids_from_env_returns_empty_for_blank(
 def test_requested_supplementary_gids_from_env_skips_primary_and_duplicates(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers requested supplementary gids from env skips primary and duplicates."""
   monkeypatch.setenv(
     runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV,
     " 2001, 5678,2002,2001, 2002 ",
   )
 
+  # Verify the observed behavior matches the contract.
   assert bootstrap._requested_supplementary_gids_from_env(
     primary_gid=5678
   ) == (
@@ -617,6 +690,7 @@ def test_requested_supplementary_gids_from_env_skips_primary_and_duplicates(
 def test_requested_supplementary_gids_from_env_rejects_non_numeric_values(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers requested supplementary gids from env rejects non numeric values."""
   monkeypatch.setenv(
     runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, "2001,nope"
   )
@@ -632,6 +706,7 @@ def test_chown_tree_skips_symlinks_during_recursive_walk(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers chown tree skips symlinks during recursive walk."""
   root = tmp_path / "tree"
   real_dir = root / "real-dir"
   real_file = real_dir / "file.txt"
@@ -658,10 +733,15 @@ def test_chown_tree_skips_symlinks_during_recursive_walk(
     for path, uid, gid, follow_symlinks in chown_calls
     if uid == 1234 and gid == 5678 and follow_symlinks is False
   }
+  # Verify the observed behavior matches the contract.
   assert root in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert real_dir in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert real_file in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert symlinked_dir not in chowned_paths
+  # Verify the observed behavior matches the contract.
   assert symlinked_file not in chowned_paths
 
 
@@ -669,6 +749,7 @@ def test_write_identity_overlay_contract_uses_container_root_for_rootless_owner(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers write identity overlay contract uses container root for rootless owner."""
   state_profile = tmp_path / "state" / "profile"
   runtime_identity_root = tmp_path / "run" / "frag" / "identity"
 
@@ -687,8 +768,11 @@ def test_write_identity_overlay_contract_uses_container_root_for_rootless_owner(
   exec_script = (runtime_identity_root / "exec").read_text()
   passwd_text = (runtime_identity_root / "passwd").read_text()
 
+  # Verify the observed behavior matches the contract.
   assert "setpriv" not in exec_script
+  # Verify the observed behavior matches the contract.
   assert exec_script.rstrip().endswith('exec "$@"')
+  # Verify the observed behavior matches the contract.
   assert "agent:x:0:0:Frag Agent:/home/agent:/sw/bin/fish" in passwd_text
 
 
@@ -696,6 +780,7 @@ def test_write_identity_overlay_contract_rootless_owner_keeps_supplementary_grou
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers write identity overlay contract rootless owner keeps supplementary groups."""
   state_profile = tmp_path / "state" / "profile"
   runtime_identity_root = tmp_path / "run" / "frag" / "identity"
 
@@ -713,7 +798,9 @@ def test_write_identity_overlay_contract_rootless_owner_keeps_supplementary_grou
 
   exec_script = (runtime_identity_root / "exec").read_text()
 
+  # Verify the observed behavior matches the contract.
   assert 'setpriv --groups 2001,2002 -- "$@"' in exec_script
+  # Verify the observed behavior matches the contract.
   assert exec_script.rstrip().endswith('setpriv --groups 2001,2002 -- "$@"')
 
 
@@ -721,6 +808,7 @@ def test_write_identity_overlay_contract_keeps_overlay_root_owned_but_readable(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers write identity overlay contract keeps overlay root owned but readable."""
   state_profile = tmp_path / "state" / "profile"
   runtime_identity_root = tmp_path / "run" / "frag" / "identity"
 
@@ -735,7 +823,11 @@ def test_write_identity_overlay_contract_keeps_overlay_root_owned_but_readable(
   group_path = runtime_identity_root / "group"
   exec_path = runtime_identity_root / "exec"
 
+  # Verify the observed behavior matches the contract.
   assert _mode(runtime_identity_root) == 0o755
+  # Verify the observed behavior matches the contract.
   assert _mode(passwd_path) == 0o644
+  # Verify the observed behavior matches the contract.
   assert _mode(group_path) == 0o644
+  # Verify the observed behavior matches the contract.
   assert _mode(exec_path) == 0o700

@@ -1,12 +1,12 @@
-from __future__ import annotations
-
 import re
 import secrets
 import shutil
 import subprocess
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
+from typing import Self
+
+from attrs import define
 
 from frag import docker_runtime, profiles
 
@@ -14,27 +14,35 @@ CleanupCallback = Callable[[], None]
 _VERIFICATION_NAMESPACE = "frag-verify"
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class VerificationArtifacts:
+  """Describe the isolated resources created for verification runs."""
+
   label: str
   profile_name: str
   workspace_path: Path
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class CleanupAction:
+  """Capture a cleanup step and the callback that performs it."""
+
   label: str
   callback: CleanupCallback
 
 
 class CleanupHarness:
+  """Run registered cleanup actions in reverse order, even on failure."""
+
   def __init__(self) -> None:
     self._actions: list[CleanupAction] = []
 
-  def register(self, label: str, callback: CleanupCallback) -> None:
+  def register(self, *, label: str, callback: CleanupCallback) -> None:
+    """Register a cleanup action that should run during teardown."""
     self._actions.append(CleanupAction(label=label, callback=callback))
 
   def run_cleanup(self) -> None:
+    """Run every registered cleanup action and re-raise the first real error."""
     first_error: BaseException | None = None
     for action in reversed(self._actions):
       try:
@@ -47,13 +55,16 @@ class CleanupHarness:
     self._actions.clear()
     if first_error is not None:
       raise first_error
-
-  def __enter__(self) -> CleanupHarness:
+  def __enter__(self) -> Self:
+    """Return the active cleanup harness for context-manager use."""
     return self
+
 
   def __exit__(
     self, exc_type: object, exc: BaseException | None, _tb: object
   ) -> bool:
+    """Run registered cleanup actions when leaving the context manager."""
+
     try:
       self.run_cleanup()
     except BaseException as cleanup_error:
@@ -70,6 +81,7 @@ def create_verification_artifacts(
   workspace_root: Path | str,
   token_factory: Callable[[], str] | None = None,
 ) -> VerificationArtifacts:
+  """Create deterministic names for verification resources."""
   token = _normalize_slug((token_factory or _default_token_factory)())
   purpose_slug = _normalize_slug(purpose)
   label = f"{_VERIFICATION_NAMESPACE}-{purpose_slug}-{token}"
@@ -83,9 +95,13 @@ def create_verification_artifacts(
 def remove_profile_if_present(
   *, docker_backend: profiles.DockerBackend, profile_name: str
 ) -> None:
+  """Remove a profile while tolerating a single transient volume race."""
   for attempt in range(2):
     try:
-      profiles.remove_profile(docker_backend, profile_name)
+      profiles.remove_profile(
+        docker_backend=docker_backend,
+        name=profile_name,
+      )
       return
     except profiles.DockerBackendError as error:
       if attempt == 0 and _is_transient_volume_in_use_cleanup_error(
@@ -97,6 +113,7 @@ def remove_profile_if_present(
 
 
 def stop_profile_container_if_present(*, profile_name: str) -> None:
+  """Stop a profile container and surface docker failures to callers."""
   command = [
     "docker",
     "stop",
@@ -113,6 +130,7 @@ def stop_profile_container_if_present(*, profile_name: str) -> None:
 
 
 def remove_workspace_if_present(*, workspace_path: Path | str) -> None:
+  """Remove a verification workspace when it still exists."""
   try:
     shutil.rmtree(Path(workspace_path))
   except FileNotFoundError:

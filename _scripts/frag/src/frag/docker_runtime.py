@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import os
 import re
@@ -17,14 +15,13 @@ from frag.image_assets import ImageAssets, RuntimeSpec
 _WORKSPACE_ROOT_IN_CONTAINER = "/workspace-root"
 _IDENTITY_OVERLAY_EXEC_PATH = "/run/frag/identity/exec"
 
-
 _BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE = 42
 _BOOTSTRAP_WAIT_NOT_READY_SENTINEL = "frag-bootstrap-not-ready"
 _BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE = 43
 
 
 class WorkspacePathError(DockerRuntimeError):
-  pass
+  """Report that a requested cwd does not live under the profile workspace."""
 
 
 def _slugify_profile_name(name: str) -> str:
@@ -37,6 +34,7 @@ def _slugify_profile_name(name: str) -> str:
 
 
 def container_name_for_profile(name: str) -> str:
+  """Return the deterministic Docker container name for a profile."""
   return f"frag-{_slugify_profile_name(name)}"
 
 
@@ -68,6 +66,7 @@ def _root_exec_user_option() -> str:
 def container_workdir_for_cwd(
   *, profile: profiles.Profile, cwd: Path | str, workspace_root: Path | str
 ) -> str:
+  """Map the current host cwd into the container workspace path."""
   del profile
   workspace_path = runtime_contract.canonical_path(workspace_root)
   cwd_path = runtime_contract.canonical_path(cwd)
@@ -82,9 +81,7 @@ def container_workdir_for_cwd(
   return str(Path(_WORKSPACE_ROOT_IN_CONTAINER, *relative.parts).as_posix())
 
 
-def _workspace_root_mount_matches(
-  *, mounts: object, workspace_root: Path
-) -> bool:
+def _workspace_root_mount_matches(*, mounts: object, workspace_root: Path) -> bool:
   if not isinstance(mounts, list):
     return False
   for mount in mounts:
@@ -185,6 +182,7 @@ def is_container_running(
   *,
   runtime_metadata: profiles.RuntimeProfileMetadata | None = None,
 ) -> bool:
+  """Return whether the named profile container is running with matching metadata."""
   return any(
     _container_is_running(container)
     and _container_matches_profile(
@@ -251,8 +249,9 @@ def _docker_result_is_container_name_conflict(
 
 
 def load_profile_image(
-  profile: profiles.Profile, image_assets: ImageAssets
+  *, profile: profiles.Profile, image_assets: ImageAssets
 ) -> str:
+  """Load the runtime image for a profile and return its resolved reference."""
   image_ref = image_assets.load_image(profile=profile).strip()
   if not image_ref:
     raise DockerRuntimeError(
@@ -262,12 +261,13 @@ def load_profile_image(
 
 
 def resolve_runtime_spec(
+  *,
   profile: profiles.Profile,
   workspace_root: Path | str,
   image_assets: ImageAssets,
-  *,
   loaded_image_ref: str | None = None,
 ) -> RuntimeSpec:
+  """Resolve and validate the runtime specification for a profile."""
   workspace_path = runtime_contract.canonical_path(workspace_root)
   runtime_spec = image_assets.build_runtime_spec(
     profile=profile,
@@ -294,9 +294,7 @@ def resolve_runtime_spec(
   )
 
 
-def _start_command_with_runtime_metadata(
-  *, runtime_spec: RuntimeSpec
-) -> list[str]:
+def _start_command_with_runtime_metadata(*, runtime_spec: RuntimeSpec) -> list[str]:
   command = list(runtime_spec.start_command)
   if not command or command[0] != "frag-bootstrap":
     return command
@@ -381,6 +379,7 @@ def _build_start_container_command(
 
 
 def bootstrap_token_for_profile(profile: profiles.Profile) -> str:
+  """Generate a fresh bootstrap token for a profile startup attempt."""
   del profile
   return secrets.token_urlsafe(32)
 
@@ -407,15 +406,13 @@ def _build_bootstrap_wait_command(
       f"cat {runtime_contract.BOOTSTRAP_STATUS_CONTAINER_PATH}; "
       f"exit {_BOOTSTRAP_WAIT_STATUS_AVAILABLE_EXIT_CODE}; "
       "fi; "
-      f'printf "%s\\n" "{_BOOTSTRAP_WAIT_NOT_READY_SENTINEL}"; '
+      f'printf "%s\n" "{_BOOTSTRAP_WAIT_NOT_READY_SENTINEL}"; '
       f"exit {_BOOTSTRAP_WAIT_NOT_READY_EXIT_CODE}"
     ),
   ]
 
 
-def _build_bootstrap_status_command(
-  *, profile: profiles.Profile
-) -> list[str]:
+def _build_bootstrap_status_command(*, profile: profiles.Profile) -> list[str]:
   return [
     "docker",
     "exec",
@@ -508,8 +505,6 @@ def _read_persisted_bootstrap_failure(
   except FileNotFoundError:
     return None
   except OSError:
-    # Rootless Docker volume mountpoints may be unreadable from the host even
-    # while the container is healthy; fall back to in-container status/logs.
     return None
   if not raw_status.strip():
     return None
@@ -554,9 +549,7 @@ def _read_container_logs(profile: profiles.Profile) -> str | None:
   )
   if result.returncode != 0:
     return None
-  logs = "".join(
-    part for part in (result.stdout, result.stderr) if part
-  ).strip()
+  logs = "".join(part for part in (result.stdout, result.stderr) if part).strip()
   if not logs:
     return None
   return logs
@@ -569,6 +562,7 @@ def start_profile_container(
   runtime_spec: RuntimeSpec,
   bootstrap_token: str,
 ) -> None:
+  """Start a profile container with the resolved runtime contract."""
   workspace_path = runtime_contract.canonical_path(workspace_root)
   runtime_metadata = runtime_contract.current_runtime_metadata(
     runtime_spec=runtime_spec
@@ -641,6 +635,7 @@ def wait_for_profile_bootstrap(
   timeout_seconds: float = 10.0,
   poll_interval_seconds: float = 0.25,
 ) -> None:
+  """Poll bootstrap readiness until the token matches or a failure is reported."""
   command = _build_bootstrap_wait_command(
     profile=profile,
     bootstrap_token=bootstrap_token,
@@ -693,6 +688,7 @@ def _should_allocate_tty() -> bool:
 def exec_in_profile_container(
   *, profile: profiles.Profile, workdir: str, command: Sequence[str]
 ) -> int:
+  """Exec a command inside the running profile container."""
   tty_flag = "-it" if _should_allocate_tty() else "-i"
   result = _run_docker_command(
     [
@@ -713,6 +709,7 @@ def exec_in_profile_container(
 
 
 def stop_profile_container(profile: profiles.Profile) -> None:
+  """Stop the running container for a profile."""
   _check_docker_result(
     _run_docker_command(
       ["docker", "stop", container_name_for_profile(profile.name)],

@@ -3,7 +3,9 @@ from logging import getLogger
 from octodns.processor.base import BaseProcessor
 from octodns.record import Record
 
-log = getLogger("VhostPolicyProcessor")
+# Keep stdlib logging here: octoDNS loads this plugin into its own runtime, so
+# adding a loguru dependency would couple the plugin to an extra import contract.
+logger = getLogger("VhostPolicyProcessor")
 
 
 class VhostPolicyProcessor(BaseProcessor):
@@ -30,13 +32,14 @@ class VhostPolicyProcessor(BaseProcessor):
     return "pihole" in target.id.lower()
 
   def process_source_and_target_zones(self, desired, existing, target):
+    """Filter and rewrite records for public-facing DNS targets."""
     if self._is_pihole(target):
       return desired, existing
 
     # All vhost subdomains from the source zone (excluding bare domain)
     managed_names = {r.name for r in desired.records if r.name != ""}
 
-    log.debug(
+    logger.debug(
       "managed_names=%s public_vhosts=%s",
       managed_names,
       self.public_vhosts,

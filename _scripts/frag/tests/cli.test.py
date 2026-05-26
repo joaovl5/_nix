@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 import json
 import subprocess
@@ -98,7 +98,7 @@ def _create_installed_frag_layout(tmp_path: Path) -> tuple[Path, object]:
   anchor = (
     package_root
     / "lib"
-    / "python3.13"
+    / "python3.14"
     / "site-packages"
     / "frag"
     / "image_assets.py"
@@ -123,6 +123,7 @@ def test_build_image_assets_anchors_resolution_to_invoked_entrypoint(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers build image assets anchors resolution to invoked entrypoint."""
   package_assets = object()
   captured: list[object] = []
 
@@ -146,6 +147,7 @@ def test_build_image_assets_anchors_resolution_to_invoked_entrypoint(
 
   cli.build_image_assets()
 
+  # Verify the observed behavior matches the contract.
   assert captured == [wrapper_path, package_assets]
 
 
@@ -153,6 +155,7 @@ def test_build_image_assets_resolves_bare_argv0_via_path(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers build image assets resolves bare argv0 via path."""
   package_assets = object()
   captured: list[object] = []
 
@@ -177,6 +180,7 @@ def test_build_image_assets_resolves_bare_argv0_via_path(
 
   cli.build_image_assets()
 
+  # Verify the observed behavior matches the contract.
   assert captured == [resolved_path, package_assets]
 
 
@@ -184,11 +188,13 @@ def test_resolve_entrypoint_anchor_returns_none_for_missing_path_lookup(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers resolve entrypoint anchor returns none for missing path lookup."""
   (tmp_path / "frag").mkdir()
   monkeypatch.chdir(tmp_path)
   monkeypatch.setattr(cli.shutil, "which", lambda name: None)
   monkeypatch.setattr(sys, "argv", ["frag"])
 
+  # Verify the observed behavior matches the contract.
   assert cli._resolve_entrypoint_anchor() is None
 
 
@@ -196,6 +202,7 @@ def test_build_image_assets_prefers_frag_package_root_env(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers build image assets prefers frag package root env."""
   package_assets = object()
   captured: list[object] = []
 
@@ -221,6 +228,7 @@ def test_build_image_assets_prefers_frag_package_root_env(
 
   cli.build_image_assets()
 
+  # Verify the observed behavior matches the contract.
   assert captured == [package_root, package_assets]
 
 
@@ -228,6 +236,7 @@ def test_build_image_assets_uses_installed_package_assets(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers build image assets uses installed package assets."""
   package_assets = object()
   captured: list[object] = []
 
@@ -246,14 +255,17 @@ def test_build_image_assets_uses_installed_package_assets(
 
   cli.build_image_assets()
 
+  # Verify the observed behavior matches the contract.
   assert captured == [package_assets]
 
 
 def test_resolve_installed_package_assets_uses_frag_package_layout(
   tmp_path: Path,
 ) -> None:
+  """Covers resolve installed package assets uses frag package layout."""
   _package_root, package_assets = _create_installed_frag_layout(tmp_path)
 
+  # Verify the observed behavior matches the contract.
   assert (
     package_assets.shared_assets_root
     == tmp_path
@@ -264,6 +276,7 @@ def test_resolve_installed_package_assets_uses_frag_package_layout(
     / "frag"
     / "shared-assets"
   )
+  # Verify the observed behavior matches the contract.
   assert (
     package_assets.catalog_path
     == tmp_path
@@ -274,6 +287,7 @@ def test_resolve_installed_package_assets_uses_frag_package_layout(
     / "frag"
     / "catalog.json"
   )
+  # Verify the observed behavior matches the contract.
   assert (
     package_assets.helpers_dir
     == tmp_path
@@ -289,6 +303,7 @@ def test_resolve_installed_package_assets_uses_frag_package_layout(
 def test_resolve_installed_package_assets_uses_wrapper_path_parents(
   tmp_path: Path,
 ) -> None:
+  """Covers resolve installed package assets uses wrapper path parents."""
   outer_root = tmp_path / "nix" / "store" / "frag-wrapper-0.1.0"
   runtime_root = tmp_path / "nix" / "store" / "frag-runtime-0.1.0"
   wrapper_path = outer_root / "bin" / "frag"
@@ -309,19 +324,23 @@ def test_resolve_installed_package_assets_uses_wrapper_path_parents(
     wrapper_path
   )
 
+  # Verify the observed behavior matches the contract.
   assert package_assets.shared_assets_root == shared_assets_dir
+  # Verify the observed behavior matches the contract.
   assert package_assets.catalog_path == catalog_path
+  # Verify the observed behavior matches the contract.
   assert package_assets.helpers_dir == helpers_dir
 
 
 def test_resolve_installed_package_assets_requires_share_helper_dir(
   tmp_path: Path,
 ) -> None:
+  """Covers resolve installed package assets requires share helper dir."""
   anchor = (
     tmp_path
     / "pkg"
     / "lib"
-    / "python3.13"
+    / "python3.14"
     / "site-packages"
     / "frag"
     / "image_assets.py"
@@ -339,6 +358,7 @@ def test_resolve_installed_package_assets_requires_share_helper_dir(
 def test_resolve_installed_package_assets_rejects_wrong_shared_asset_types(
   tmp_path: Path,
 ) -> None:
+  """Covers resolve installed package assets rejects wrong shared asset types."""
   package_root, _package_assets = _create_installed_frag_layout(tmp_path)
   wrong_dir = (
     package_root / "share" / "frag" / "shared-assets" / ".agents/skills"
@@ -353,7 +373,7 @@ def test_resolve_installed_package_assets_rejects_wrong_shared_asset_types(
     cli.image_assets.resolve_installed_package_assets(
       package_root
       / "lib"
-      / "python3.13"
+      / "python3.14"
       / "site-packages"
       / "frag"
       / "image_assets.py"
@@ -363,6 +383,7 @@ def test_resolve_installed_package_assets_rejects_wrong_shared_asset_types(
 def test_load_image_runs_bundled_helper_and_returns_loaded_ref(
   tmp_path: Path,
 ) -> None:
+  """Covers load image runs bundled helper and returns loaded ref."""
   package_root, package_assets = _create_installed_frag_layout(tmp_path)
   helper_path = (
     package_root / "share" / "frag" / "helpers" / "load-image-main"
@@ -401,11 +422,14 @@ def test_load_image_runs_bundled_helper_and_returns_loaded_ref(
     )
   )
 
+  # Verify the observed behavior matches the contract.
   assert loaded_image == "frag-main:latest"
+  # Verify the observed behavior matches the contract.
   assert marker_path.read_text() == "invoked\n"
 
 
 def test_load_image_rejects_unknown_catalog_key(tmp_path: Path) -> None:
+  """Covers load image rejects unknown catalog key."""
   _package_root, package_assets = _create_installed_frag_layout(tmp_path)
   provider = cli.image_assets.DirectProfileImageAssets(
     package_assets=package_assets
@@ -427,6 +451,7 @@ def test_load_image_rejects_unknown_catalog_key(tmp_path: Path) -> None:
 def test_profile_list_dispatches_to_handler(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile list dispatches to handler."""
   called: list[bool] = []
 
   monkeypatch.setattr(
@@ -435,13 +460,16 @@ def test_profile_list_dispatches_to_handler(
 
   result = cli.main(["profile", "list"])
 
+  # Verify the observed behavior matches the contract.
   assert result == 0
+  # Verify the observed behavior matches the contract.
   assert called == [True]
 
 
 def test_profile_new_accepts_optional_arguments(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers profile new accepts optional arguments."""
   captured: dict[str, object] = {}
 
   def fake_handle_profile_new(
@@ -469,7 +497,9 @@ def test_profile_new_accepts_optional_arguments(
     ]
   )
 
+  # Verify the observed behavior matches the contract.
   assert result == 0
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "name": "demo",
     "image": "python:3.14",
@@ -481,6 +511,7 @@ def test_handle_profile_new_normalizes_catalog_image_key(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers handle profile new normalizes catalog image key."""
   _package_root, package_assets = _create_installed_frag_layout(tmp_path)
   package_assets.catalog_path.write_text(
     json.dumps(
@@ -527,6 +558,7 @@ def test_handle_profile_new_normalizes_catalog_image_key(
 
   monkeypatch.setattr(cli.profiles, "create_profile", fake_create_profile)
 
+  # Verify the observed behavior matches the contract.
   assert (
     cli.handle_profile_new(
       name="demo",
@@ -535,6 +567,7 @@ def test_handle_profile_new_normalizes_catalog_image_key(
     )
     == 0
   )
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "name": "demo",
     "image": "main",
@@ -546,6 +579,7 @@ def test_profile_new_returns_nonzero_for_unknown_catalog_image_key(
   monkeypatch: pytest.MonkeyPatch,
   tmp_path: Path,
 ) -> None:
+  """Covers profile new returns nonzero for unknown catalog image key."""
   _package_root, package_assets = _create_installed_frag_layout(tmp_path)
   package_assets.catalog_path.write_text(
     json.dumps(
@@ -576,6 +610,7 @@ def test_profile_new_returns_nonzero_for_unknown_catalog_image_key(
       AssertionError("create_profile should not be called")
     ),
   )
+  # Verify the observed behavior matches the contract.
   assert (
     cli.main(
       [
@@ -596,6 +631,7 @@ def test_profile_new_returns_nonzero_for_unknown_catalog_image_key(
 def test_enter_accepts_optional_profile_and_command_tail(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+  """Covers enter accepts optional profile and command tail."""
   captured: dict[str, object] = {}
 
   def fake_handle_enter(
@@ -610,7 +646,9 @@ def test_enter_accepts_optional_profile_and_command_tail(
     ["enter", "--profile", "demo", "--", "fish", "-lc", "pwd"]
   )
 
+  # Verify the observed behavior matches the contract.
   assert result == 0
+  # Verify the observed behavior matches the contract.
   assert captured == {
     "profile": "demo",
     "command": ("fish", "-lc", "pwd"),
@@ -620,10 +658,14 @@ def test_enter_accepts_optional_profile_and_command_tail(
 def test_invalid_flag_returns_parse_error_code_and_stderr(
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers invalid flag returns parse error code and stderr."""
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "list", "--bogus"]) == 2
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert captured.err.strip()
+  # Verify the observed behavior matches the contract.
   assert "bogus" in captured.err
 
 
@@ -631,17 +673,20 @@ def test_enter_missing_profile_prints_actionable_error(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter missing profile prints actionable error."""
   backend = object()
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, _name: None,
+    lambda _backend, *, name: None,
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--profile", "missing-profile"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "missing-profile" in captured.err
 
 
@@ -649,17 +694,20 @@ def test_profile_rm_missing_profile_prints_actionable_error(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers profile rm missing profile prints actionable error."""
   backend = object()
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, _name: None,
+    lambda _backend, *, name: None,
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "rm", "missing-profile"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "missing-profile" in captured.err
 
 
@@ -667,17 +715,20 @@ def test_profile_stop_missing_profile_prints_actionable_error(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers profile stop missing profile prints actionable error."""
   backend = object()
   monkeypatch.setattr(cli, "build_docker_backend", lambda: backend)
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, _name: None,
+    lambda _backend, *, name: None,
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["profile", "stop", "missing-profile"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "missing-profile" in captured.err
 
 
@@ -685,6 +736,7 @@ def test_enter_workspace_mismatch_prints_actionable_error(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter workspace mismatch prints actionable error."""
   backend = object()
   demo_profile = profiles.Profile(
     name="demo",
@@ -696,7 +748,7 @@ def test_enter_workspace_mismatch_prints_actionable_error(
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, _name: demo_profile,
+    lambda _backend, *, name: demo_profile,
   )
   monkeypatch.setattr(
     cli.docker_runtime,
@@ -708,9 +760,11 @@ def test_enter_workspace_mismatch_prints_actionable_error(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--profile", "demo"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "outside workspace root" in captured.err
 
 
@@ -719,6 +773,7 @@ def test_enter_cold_start_renders_rich_phase_messages(
   tmp_path: Path,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter cold start renders rich phase messages."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   nested = workspace_root / "nested"
@@ -735,7 +790,7 @@ def test_enter_cold_start_renders_rich_phase_messages(
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, name: (
+    lambda _backend, *, name: (
       runtime_profile if name == "Demo Profile" else None
     ),
   )
@@ -770,7 +825,7 @@ def test_enter_cold_start_renders_rich_phase_messages(
   monkeypatch.setattr(
     cli.docker_runtime,
     "load_profile_image",
-    lambda _profile, _assets: loaded_image_ref,
+    lambda *, profile, image_assets: loaded_image_ref,
   )
   monkeypatch.setattr(
     cli.docker_runtime,
@@ -795,13 +850,19 @@ def test_enter_cold_start_renders_rich_phase_messages(
   )
   monkeypatch.chdir(nested)
 
+  # Verify the observed behavior matches the contract.
   assert cli.handle_enter(profile="Demo Profile", command=()) == 0
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert captured.out == ""
+  # Verify the observed behavior matches the contract.
   assert "Loading runtime image" in captured.err
+  # Verify the observed behavior matches the contract.
   assert "Starting container" in captured.err
+  # Verify the observed behavior matches the contract.
   assert "Waiting for bootstrap" in captured.err
+  # Verify the observed behavior matches the contract.
   assert started["runtime_spec"].image_ref == loaded_image_ref
 
 
@@ -810,6 +871,7 @@ def test_enter_hot_path_reports_container_reuse(
   tmp_path: Path,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter hot path reports container reuse."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   nested = workspace_root / "nested"
@@ -826,7 +888,7 @@ def test_enter_hot_path_reports_container_reuse(
   monkeypatch.setattr(
     cli.profiles,
     "get_profile",
-    lambda _backend, name: (
+    lambda _backend, *, name: (
       runtime_profile if name == "Demo Profile" else None
     ),
   )
@@ -858,10 +920,13 @@ def test_enter_hot_path_reports_container_reuse(
   )
   monkeypatch.chdir(nested)
 
+  # Verify the observed behavior matches the contract.
   assert cli.handle_enter(profile="Demo Profile", command=()) == 0
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert captured.out == ""
+  # Verify the observed behavior matches the contract.
   assert "Reusing running container" in captured.err
 
 
@@ -869,6 +934,7 @@ def test_enter_runtime_failures_still_print_to_stderr(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter runtime failures still print to stderr."""
   monkeypatch.setattr(
     cli,
     "handle_enter",
@@ -877,10 +943,13 @@ def test_enter_runtime_failures_still_print_to_stderr(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--profile", "demo"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert captured.out == ""
+  # Verify the observed behavior matches the contract.
   assert "runtime [exploded]" in captured.err
 
 
@@ -888,6 +957,7 @@ def test_enter_legacy_runtime_refusal_uses_legacy_schema_renderer(
   monkeypatch: pytest.MonkeyPatch,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers enter legacy runtime refusal uses legacy schema renderer."""
   monkeypatch.setattr(
     cli,
     "handle_enter",
@@ -898,10 +968,13 @@ def test_enter_legacy_runtime_refusal_uses_legacy_schema_renderer(
     ),
   )
 
+  # Verify the observed behavior matches the contract.
   assert cli.main(["enter", "--profile", "demo"]) == 1
 
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert captured.out == ""
+  # Verify the observed behavior matches the contract.
   assert (
     "schema upgrade required for 'Demo Profile'; remove it and recreate the profile"
     in captured.err
@@ -909,9 +982,11 @@ def test_enter_legacy_runtime_refusal_uses_legacy_schema_renderer(
 
 
 def test_pyproject_defines_bootstrap_console_entrypoint() -> None:
+  """Covers pyproject defines bootstrap console entrypoint."""
   pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
   scripts = tomllib.loads(pyproject.read_text())["project"]["scripts"]
 
+  # Verify the observed behavior matches the contract.
   assert scripts["frag-bootstrap"] == "frag.bootstrap:main"
 
 
@@ -920,6 +995,7 @@ def test_profile_new_returns_nonzero_for_invalid_profile_name(
   tmp_path: Path,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers profile new returns nonzero for invalid profile name."""
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
 
@@ -930,6 +1006,7 @@ def test_profile_new_returns_nonzero_for_invalid_profile_name(
   monkeypatch.setattr(cli.prompts, "require_non_blank", lambda value: value)
   monkeypatch.setattr(cli, "build_image_assets", lambda: FakeImageAssets())
 
+  # Verify the observed behavior matches the contract.
   assert (
     cli.main(
       [
@@ -945,7 +1022,9 @@ def test_profile_new_returns_nonzero_for_invalid_profile_name(
     == 1
   )
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "Traceback" not in captured.err
+  # Verify the observed behavior matches the contract.
   assert (
     "profile name must contain at least one alphanumeric character"
     in captured.err
@@ -957,6 +1036,7 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
   tmp_path: Path,
   capsys: pytest.CaptureFixture[str],
 ) -> None:
+  """Covers profile new returns nonzero when docker command fails."""
   result = subprocess.CompletedProcess(
     ["docker", "volume", "create", "frag-profile-demo"],
     1,
@@ -978,6 +1058,7 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
     lambda *_args, **_kwargs: result,
   )
 
+  # Verify the observed behavior matches the contract.
   assert (
     cli.main(
       [
@@ -994,4 +1075,5 @@ def test_profile_new_returns_nonzero_when_docker_command_fails(
     == 1
   )
   captured = capsys.readouterr()
+  # Verify the observed behavior matches the contract.
   assert "backend failed" in captured.err
