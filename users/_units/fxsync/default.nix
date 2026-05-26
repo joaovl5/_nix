@@ -157,6 +157,7 @@ in
                 RETRIES=10
                 while [ $RETRIES -gt 0 ]; do
                   ${pkgs.mariadb}/bin/mysql \
+                    --ssl=0 \
                     --host=127.0.0.1 \
                     --port=${toString db_port_tokenserver} \
                     --user=${db_user} \
