@@ -5,15 +5,25 @@ description: Use when editing/writing/debugging Python code/files
 
 # Python Development
 
-- Python 3.14 and above is expected in this workspace. Do not write
-  compatibility code for older versions.
+- Python 3.14 and above is expected. Do not write compatibility code for older
+  versions.
 - We use `uv` for Python tooling
-  - Run apps with `uv run`
+  - Run apps and scripts with `uv run`
+  - Make scripts abiding by a `uv run --script` shebang:
+
+```python
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.14"
+# dependencies = []
+# ///
+```
 
 ## Typing
 
 - We use **strongly-typed** Python with **3.14** as baseline
-  - Never add `from __future__ import annotations`
+  - Never add `from __future__ import annotations` unless it solves a real
+    import issue
   - Pattern matching with `match` when it makes variant handling clearer than
     plain `if`
 - Keep strict typing intact
@@ -135,8 +145,10 @@ description: Use when editing/writing/debugging Python code/files
     clearly.
   - **Every** non-trivial assertion should have a comment above it explaining
     what is being asserted
-- Tests **MUST** sit next to their modules, within a `tests/` folder and
+- Tests **MUST** sit next to their modules, within a `./tests/` folder and
   having a `*.test.py` format
+  - **Example:** for a module `./parsers/`, its tests should go at
+    `./parsers/tests/*.test.py`
 
 ## Other Rules
 
@@ -144,18 +156,7 @@ description: Use when editing/writing/debugging Python code/files
   consider splitting it into a dedicated package - this decision should be
   made by the user, but bring that up explicitly.
 - For writing one-off scripts, do not use a raw Python shebang - instead use
-  a uv script like the following:
-
-    ```python
-    #!/usr/bin/env -S uv run --script
-    # /// script
-    # requires-python = ">=3.13"
-    # dependencies = [
-    #     "cyclopts>=4.5.1",
-    # ]
-    # ///
-    ```
-
+  a uv script.
 - Use the following choices for picking libraries:
   - `cyclopts` instead of argparse
   - `rich` instead of print or pprint
