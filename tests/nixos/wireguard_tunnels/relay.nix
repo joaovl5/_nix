@@ -12,10 +12,10 @@ _: {
   wireguard_host_ipv6 = "fd11:1::1";
 in {
   imports = [
-    ../base_node.nix
-    ../../_modules/options.nix
-    ../_sops_stub.nix
-    ../../users/_units/wireguard/default.nix
+    ../../common/base_node.nix
+    ../../../_modules/options.nix
+    ../../common/_sops_stub.nix
+    ../../../users/_units/wireguard/default.nix
   ];
 
   system = {

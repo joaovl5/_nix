@@ -5,17 +5,14 @@
   dependencies    = ["nix-machine-protocol"]
 
 [build-system]
-  requires      = ["setuptools>=69"]
-  build-backend = "setuptools.build_meta"
+  requires      = ["uv_build>=0.10.0,<0.12.0"]
+  build-backend = "uv_build"
 
-[tool.setuptools]
-  package-dir = { "" = "src" }
-
-  [tool.setuptools.packages.find]
-    where = ["src"]
-
-  [tool.setuptools.package-data]
-    my_nix_tests = ["py.typed"]
+[tool.uv.build-backend]
+  module-name    = ["nixos", "common"]
+  module-root    = ""
+  source-exclude = ["*.nix"]
+  wheel-exclude  = ["*.nix"]
 
 [tool.uv.sources]
   nix-machine-protocol = { git = "https://github.com/Gastove/nix-machine-protocol" }

@@ -8,12 +8,16 @@ or assertion patterns
 - **Flake entrypoint:** `tests/default.nix` exposes suites as flake checks
 - **Wrapper definition:** `_lib/tests/default.nix` defines
   `mylib.tests.mk_test`
-- **Suite file:** `tests/<suite>/default.nix` calls `mylib.tests.mk_test`
-- **Fixture nodes:** `tests/<suite>/*.nix` holds substantial node setup
-- **Python package:** `tests/scripts/` builds the `my-nix-tests` package
-- **Driver module:** `tests/scripts/src/my_nix_tests/<suite>.py` contains
-  orchestration
-- **Import checks:** `tests/scripts/default.nix` registers modules through
+- **Suite entrypoint:** `tests/nixos/<suite>/default.nix` calls
+  `mylib.tests.mk_test`
+- **Fixture files:** `tests/nixos/<suite>/*.nix` hold substantial node setup
+- **Driver module:** `tests/nixos/<suite>/script.py` contains orchestration
+- **Suite package marker:** `tests/nixos/<suite>/__init__.py` keeps the suite
+  importable
+- **Shared helpers:** `tests/common/` holds reusable Nix and Python helpers
+- **Python packaging:** `tests/pyproject.toml` builds the test package with
+  `uv_build`
+- **Import checks:** `_lib/tests/default.nix` registers driver imports through
   `pythonImportsCheck`
 
 ## `mylib.tests.mk_test` contract
@@ -28,12 +32,12 @@ mylib.tests.mk_test {
 }
 ```
 
-The wrapper adds the repo Python package to `extraPythonPackages` and
+The wrapper keeps the public selector `python_module_name = "example"` and
 generates:
 
 ```python
-from my_nix_tests.<python_module_name> import run
-run(globals())
+from nixos.example.script import run
+run(driver_globals=globals())
 ```
 
 Keep these facts true:
@@ -41,25 +45,28 @@ Keep these facts true:
 - **Driver function:** the Python file defines
   `run(driver_globals: dict[str, object]) -> None` or an equivalent signature
 - **Module contract:** `python_module_name = "example"` means
-  `from my_nix_tests.example import run`
-- **Per-suite module:** each suite needs its own module unless
-  `python_module_name` intentionally reuses one
+  `from nixos.example.script import run`
+- **Per-suite package:** each suite needs `tests/nixos/<suite>/__init__.py`
 - **Named nodes:** read named NixOS nodes from `driver_globals`, for example
   `driver_globals["relay"]`
-- **Import registration:** add new Python modules to
-  `tests/scripts/default.nix` `pythonImportsCheck`
+- **Import registration:** add new driver imports to `_lib/tests/default.nix`
+  `pythonImportsCheck`
+- **Shared helpers:** keep reusable helpers in `tests/common/` instead of
+  copying them between suites
 
 ## New-suite checklist
 
-- **Suite file:** create `tests/<suite>/default.nix`
-- **Fixture files:** add `tests/<suite>/*.nix` when setup is substantial
-- **Driver module:** add `tests/scripts/src/my_nix_tests/<suite>.py` defining
-  `run(...)`
-- **Import check:** register the Python import in `tests/scripts/default.nix`
+- **Suite entrypoint:** create `tests/nixos/<suite>/default.nix`
+- **Fixture files:** add `tests/nixos/<suite>/*.nix` when setup is substantial
+- **Driver module:** add `tests/nixos/<suite>/script.py` defining `run(...)`
+- **Suite package marker:** add `tests/nixos/<suite>/__init__.py`
+- **Import check:** register the new driver in `_lib/tests/default.nix`
+  `pythonImportsCheck`
+- **Shared helpers:** put reusable cross-suite helpers in `tests/common/`
 - **Deterministic inputs:** materialize generated files or secrets inside the
   VM and keep them deterministic
 - **Syntax check:** run
-  `uv run python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py`
+  `uv run --project tests python -m py_compile tests/nixos/<suite>/script.py`
 - **Flake visibility:** stage new suite files before flake-backed `nix eval`
   or `nix build`
 - **Targeted build:** run `nix build .#checks.x86_64-linux.<test_name>` for
@@ -67,7 +74,7 @@ Keep these facts true:
 
 ## Minimal complex-suite template
 
-`tests/example/default.nix`:
+`tests/nixos/example/default.nix`:
 
 ```nix
 {mylib, ...} @ args:
@@ -82,7 +89,7 @@ mylib.tests.mk_test {
 }
 ```
 
-`tests/example/server.nix`:
+`tests/nixos/example/server.nix`:
 
 ```nix
 _: {pkgs, ...}: let
@@ -113,7 +120,7 @@ in {
 }
 ```
 
-`tests/example/client.nix`:
+`tests/nixos/example/client.nix`:
 
 ```nix
 _: {pkgs, ...}: {
@@ -122,7 +129,12 @@ _: {pkgs, ...}: {
 }
 ```
 
-`tests/scripts/src/my_nix_tests/example.py`:
+`tests/nixos/example/__init__.py`:
+
+```python
+```
+
+`tests/nixos/example/script.py`:
 
 ```python
 """Integration test: one-sentence topology and behavior contract"""

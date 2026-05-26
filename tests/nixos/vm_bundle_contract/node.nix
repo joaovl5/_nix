@@ -10,7 +10,7 @@ _: {
     };
   };
 
-  vm_bundle_contract = import ../../_modules/_vm_bundle_contract.nix;
+  vm_bundle_contract = import ../../../_modules/_vm_bundle_contract.nix;
 
   vm_bundle_fixture = pkgs.runCommand "vm-bundle-fixture" {} ''
     mkdir -p "$out/age" "$out/ssh"
@@ -20,10 +20,10 @@ _: {
 in {
   imports = [
     sops_stub
-    ../base_node.nix
-    ../../_modules/options.nix
-    ../../hardware/_modules/nvidia.nix
-    ../../_modules/vm.nix
+    ../../common/base_node.nix
+    ../../../_modules/options.nix
+    ../../../hardware/_modules/nvidia.nix
+    ../../../_modules/vm.nix
   ];
 
   my.nvidia.enable = false;

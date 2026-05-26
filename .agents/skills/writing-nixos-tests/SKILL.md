@@ -3,9 +3,9 @@ name: writing-nixos-tests
 description: Use when adding, editing, reviewing, or debugging this repo's NixOS VM and integration tests under tests/, including Python drivers, mylib.tests.mk_test wiring, fixture nodes, network assertions, and fail-closed checks
 ---
 
-Use this for repo NixOS tests in `tests/` and Python drivers in
-`tests/scripts/src/my_nix_tests/`. Keep repo contract details here and load
-references for API semantics or fuller templates
+Use this for repo NixOS tests in `tests/nixos/`, shared helpers in
+`tests/common/`, and wrapper details in `_lib/tests/default.nix`. Keep repo
+contract details here and load references for API semantics or fuller templates
 
 ## Core principle
 
@@ -14,8 +14,9 @@ why any negative claim is trustworthy
 
 ## First moves
 
-- **Read repo contract:** check `tests/<suite>/default.nix`,
-  `_lib/tests/default.nix`, `tests/scripts/`, and `tests/scripts/default.nix`
+- **Read repo contract:** check `tests/nixos/<suite>/default.nix`,
+  `tests/nixos/<suite>/*.nix`, `tests/nixos/<suite>/script.py`,
+  `tests/common/`, `_lib/tests/default.nix`, and `tests/pyproject.toml`
   before editing
 - **Verify driver semantics:** load `references/nixos-test-driver-api.md` when
   method behavior matters
@@ -28,16 +29,19 @@ why any negative claim is trustworthy
 
 ## New-suite wiring
 
-- **Suite entrypoint:** add `tests/<suite>/default.nix` with
+- **Suite entrypoint:** add `tests/nixos/<suite>/default.nix` with
   `mylib.tests.mk_test`
-- **Python module:** add `tests/scripts/src/my_nix_tests/<suite>.py` defining
-  `run(...)`; every suite needs a module unless `python_module_name`
-  intentionally reuses one
+- **Fixture files:** keep substantial node setup in `tests/nixos/<suite>/*.nix`
+- **Python driver:** add `tests/nixos/<suite>/script.py` defining `run(...)`
+- **Suite package marker:** add `tests/nixos/<suite>/__init__.py` for every
+  new driver suite
 - **Contract:** `python_module_name = "foo"` imports `run` from
-  `my_nix_tests.foo`
-- **Import check:** register new modules in `tests/scripts/default.nix`
+  `nixos.foo.script`
+- **Import check:** if you add a driver, update `_lib/tests/default.nix`
   `pythonImportsCheck`
-- **Fixture files:** put substantial node setup in `tests/<suite>/*.nix`
+- **Shared helpers:** put reusable Nix or Python helpers under `tests/common/`
+- **Packaging:** keep Python packaging in `tests/pyproject.toml` with
+  `uv_build`
 - **Guest tools:** add required tools and packages to node fixtures explicitly
 - **More detail:** load `references/repo-test-framework.md` for wrapper facts
   and a copyable template
@@ -68,7 +72,7 @@ why any negative claim is trustworthy
 Use the narrowest command that proves the current claim first
 
 ```bash
-uv run python -m py_compile tests/scripts/src/my_nix_tests/<suite>.py
+uv run --project tests python -m py_compile tests/nixos/<suite>/script.py
 nix build .#checks.x86_64-linux.<test_name>
 ```
 
@@ -77,7 +81,7 @@ Then follow `AGENTS.md` when the task calls for broader checks
 ## Common mistakes
 
 - **Missing import check:** adding a driver but forgetting
-  `pythonImportsCheck`
+  `_lib/tests/default.nix` `pythonImportsCheck`
 - **Weak denial proof:** treating `curl` failure alone as proof of a blocked
   path
 - **Weak absence proof:** treating an empty log alone as proof that nothing

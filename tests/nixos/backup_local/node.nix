@@ -3,24 +3,23 @@ _: {
   config,
   self,
   mylib,
-  test_ssh_key,
   pkgs,
   ...
 }: let
   my = mylib.use config;
   o = my.options;
-  sops_stub = import ../_sops_stub.nix;
+  sops_stub = import ../../common/_sops_stub.nix;
 in {
   imports = [
     sops_stub
-    ../../_modules/options.nix
-    ../../users/_units/backup
+    ../../../_modules/options.nix
+    ../../../users/_units/backup
   ];
 
   nixpkgs.overlays = self._channels.overlays;
 
   my.nix = o.def {
-    hostname = "coordinator";
+    hostname = "machine";
     username = "tester";
     name = "tester";
     email = "testbox@trll.ing";
@@ -29,40 +28,22 @@ in {
   system = {
     stateVersion = "25.11";
     activationScripts = {
+      # Materialize a fixed password file inside the VM because the backup units
+      # read the secret at runtime and the test must stay deterministic.
       "backup-test-secrets" = lib.stringAfter ["specialfs"] ''
         mkdir -p /run/secrets
         printf '%s' 'test-password-a' > /run/secrets/backup_restic_password_A
-        printf '%s' 'test-password-b' > /run/secrets/backup_restic_password_B
         chmod 444 /run/secrets/backup_restic_password_A
-        chmod 444 /run/secrets/backup_restic_password_B
-
-        # The promotion test connects to the storage node over SFTP as root.
-        mkdir -p /root/.ssh
-        cp ${test_ssh_key}/id_ed25519 /root/.ssh/id_ed25519_backup
-        chmod 600 /root/.ssh/id_ed25519_backup
-        cat > /root/.ssh/config <<'EOF'
-        Host storage
-          User backup-user
-          IdentityFile /root/.ssh/id_ed25519_backup
-          StrictHostKeyChecking no
-          UserKnownHostsFile /dev/null
-        EOF
-        chmod 600 /root/.ssh/config
       '';
 
-      "backup-repos-dir" = lib.stringAfter ["users"] ''
+      "backup-repos-init" = lib.stringAfter ["users" "backup-test-secrets"] ''
         mkdir -p /var/lib/backups/repos
-        chmod 777 /var/lib/backups/repos
       '';
     };
   };
 
-  environment.systemPackages = [
-    pkgs.postgresql
-    pkgs.restic
-  ];
+  environment.systemPackages = [pkgs.postgresql pkgs.restic];
 
-  # A local PostgreSQL service keeps the postgres_dump fixture test-local.
   services.postgresql = {
     enable = true;
     ensureDatabases = ["testdb"];
@@ -80,17 +61,9 @@ in {
         key = "restic_a_password";
       };
     };
-    destinations.B = {
-      enable = true;
-      backend = "sftp";
-      repository_template = "sftp://backup-user@storage:59222//var/lib/backups/repos/{host}";
-      password_secret = {
-        name = "backup_restic_password_B";
-        file = "backups.yaml";
-        key = "restic_b_password";
-      };
-    };
     policies.test = {
+      # Disable automatic timers so the test controls exactly when backup, forget,
+      # prune, and check units run.
       timerConfig = {
         OnCalendar = "yearly";
         Persistent = "false";
@@ -111,19 +84,23 @@ in {
         OnCalendar = "yearly";
         Persistent = "false";
       };
-      promote_to = ["B"];
+      promote_to = [];
       forget = ["--keep-last 2" "--group-by host"];
     };
     host_items = {
-      # Path snapshots are rotated on repo B to prove item-scoped forget.
       "my-path" = {
         kind = "path";
         policy = "test";
         path.paths = ["/test-data"];
       };
-
-      # Postgres snapshots share the promotion policy so the test can prove
-      # remote forget/prune leaves unrelated item tags restorable.
+      "my-custom" = {
+        kind = "custom";
+        policy = "test";
+        custom = {
+          command = "printf 'backup-custom-data'";
+          stdin_filename = "custom.dat";
+        };
+      };
       "my-postgres" = {
         kind = "postgres_dump";
         policy = "test";

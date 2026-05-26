@@ -116,14 +116,14 @@ _: {
   '';
 in {
   imports = [
-    ../base_node.nix
-    ../_sops_stub.nix
-    ../../_modules/options.nix
+    ../../common/base_node.nix
+    ../../common/_sops_stub.nix
+    ../../../_modules/options.nix
     inputs.nixos-dns.nixosModules.dns
-    ../../systems/_modules/dns/default.nix
-    ../../users/_units/reverse-proxy/default.nix
-    ../../users/_units/pihole/default.nix
-    ../../users/_units/octodns/default.nix
+    ../../../systems/_modules/dns/default.nix
+    ../../../users/_units/reverse-proxy/default.nix
+    ../../../users/_units/pihole/default.nix
+    ../../../users/_units/octodns/default.nix
   ];
 
   system.stateVersion = "25.11";

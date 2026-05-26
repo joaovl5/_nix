@@ -5,7 +5,7 @@ _: {
   ...
 }: {
   imports = [
-    ../../_modules/options.nix
+    ../../../_modules/options.nix
   ];
 
   nixpkgs.overlays = self._channels.overlays;

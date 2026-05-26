@@ -138,8 +138,8 @@ _: {pkgs, ...}: let
   };
 in {
   imports = [
-    ../base_node.nix
-    ../../_modules/options.nix
+    ../../common/base_node.nix
+    ../../../_modules/options.nix
   ];
 
   system.stateVersion = "25.11";

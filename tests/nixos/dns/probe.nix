@@ -7,8 +7,8 @@ _: {
   ca_cert = pkgs.writeText "dns-test-ca.pem" tls_cert;
 in {
   imports = [
-    ../base_node.nix
-    ../../_modules/options.nix
+    ../../common/base_node.nix
+    ../../../_modules/options.nix
   ];
 
   system.stateVersion = "25.11";

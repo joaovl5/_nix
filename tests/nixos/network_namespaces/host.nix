@@ -86,9 +86,9 @@ _: {pkgs, ...}: let
   };
 in {
   imports = [
-    ../base_node.nix
-    ../../_modules/options.nix
-    ../../users/_units/network_namespaces/default.nix
+    ../../common/base_node.nix
+    ../../../_modules/options.nix
+    ../../../users/_units/network_namespaces/default.nix
   ];
 
   system.stateVersion = "25.11";
@@ -132,7 +132,7 @@ in {
   ];
 
   # Listener names, log files, and configured ports are a contract with the Python
-  # driver. Keep these in sync with tests/scripts/src/my_nix_tests/network_namespaces.py.
+  # driver. Keep these in sync with tests/nixos/network_namespaces/script.py.
   systemd.services = {
     ns-source-v4 = source_probe "source-v4" "http://${probe_primary_ipv4}:18081/source-v4";
     ns-source-v6 = source_probe "source-v6" "http://[${probe_primary_ipv6}]:18081/source-v6";
