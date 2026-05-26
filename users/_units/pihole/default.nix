@@ -3,6 +3,7 @@
   config,
   globals,
   pkgs,
+  lib,
   ...
 }: let
   my = mylib.use config;
@@ -41,7 +42,6 @@ in
     target_log_link = "${computed_data_dir}/logs";
     target_state_link = "${computed_data_dir}/lib";
 
-    pihole_ftl = config.systemd.services.pihole-ftl.serviceConfig;
     wait_for_pihole_setup = pkgs.writeShellScript "wait-pihole-ftl-setup-ready" ''
       set -euo pipefail
       api_url="http://127.0.0.1:${toString opts.endpoint.port}/api/"
@@ -106,25 +106,19 @@ in
     '';
 
     systemd = {
-      services.pihole-pwhash = {
-        description = "Initialize Pi-hole API password";
-        requiredBy = ["pihole-ftl.service"];
-        before = ["pihole-ftl.service"];
-        serviceConfig = {
-          Type = "simple";
-          User = user;
-          Group = group;
-          ExecStart = pkgs.writeShellScript "exec_pihole_password" ''
-            ${pkg}/bin/pihole-FTL --config webserver.api.password "$(${pkgs.coreutils}/bin/cat ${s.secret_path "pihole_password"})"
-          '';
-
-          inherit (pihole_ftl) AmbientCapabilities;
-        };
+      services.pihole-ftl.serviceConfig = {
+        ExecStart = lib.mkForce (pkgs.writeShellScript "exec_pihole_ftl" ''
+          export FTLCONF_webserver_api_pwhash="$(${pkgs.coreutils}/bin/cat "$CREDENTIALS_DIRECTORY/pihole_password_hash")"
+          exec ${pkg}/bin/pihole-FTL no-daemon
+        '');
+        LoadCredential = [
+          "pihole_password_hash:${s.secret_path "pihole_password_hash"}"
+        ];
       };
 
       services.pihole-ftl-setup = {
-        after = ["pihole-ftl.service" "pihole-pwhash.service"];
-        requires = ["pihole-ftl.service" "pihole-pwhash.service"];
+        after = ["pihole-ftl.service"];
+        requires = ["pihole-ftl.service"];
         serviceConfig = {
           # Pi-hole can report the unit as started before its API/database are ready for setup.
           # Wait until the lists API responds cleanly so the oneshot setup succeeds in one activation.
