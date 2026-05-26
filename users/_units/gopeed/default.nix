@@ -206,11 +206,38 @@ in
             base="$(${pkgs.coreutils}/bin/basename -- "$file")"
             target="$dir/$base"
             if [ -e "$target" ]; then
-              stem="''${base%.torrent}"
-              target="$dir/$stem-$(${pkgs.coreutils}/bin/date +%s).torrent"
+              if [[ "$base" == *.* ]]; then
+                stem="''${base%.*}"
+                extension=".''${base##*.}"
+              else
+                stem="$base"
+                extension=""
+              fi
+              target="$dir/$stem-$(${pkgs.coreutils}/bin/date +%s)$extension"
             fi
             ${pkgs.coreutils}/bin/mv -- "$file" "$target"
             printf '%s\n' "$target"
+          }
+
+          request_url_for() {
+            file="$1"
+            case "$file" in
+              *.magnet)
+                magnet_url=""
+                IFS= read -r magnet_url < "$file" || true
+                case "$magnet_url" in
+                  magnet:*)
+                    printf '%s\n' "$magnet_url"
+                    ;;
+                  *)
+                    return 1
+                    ;;
+                esac
+                ;;
+              *)
+                printf '%s\n' "$file"
+                ;;
+            esac
           }
 
           wait_for_api() {
@@ -229,38 +256,44 @@ in
             exit 1
           fi
 
-          for torrent in ${dirs.incoming}/*.torrent; do
-            if ! wait_for_stable_file "$torrent"; then
-              move_to_dir "$torrent" ${dirs.failed} >/dev/null
+          for request_file in ${dirs.incoming}/*.torrent ${dirs.incoming}/*.magnet; do
+            if ! wait_for_stable_file "$request_file"; then
+              move_to_dir "$request_file" ${dirs.failed} >/dev/null
               status=1
               continue
             fi
 
-            work_name="$(${pkgs.python3}/bin/python3 - "$torrent" "${app}" <<'PY'
+            work_name="$(${pkgs.python3}/bin/python3 - "$request_file" "${app}" <<'PY'
           import hashlib
           import pathlib
           import re
           import sys
 
-          torrent = pathlib.Path(sys.argv[1])
+          request_file = pathlib.Path(sys.argv[1])
           app = sys.argv[2]
-          safe_name = re.sub(r"[^A-Za-z0-9._-]+", "-", torrent.stem).strip("-")[:80] or app
-          digest = hashlib.sha256(torrent.read_bytes()).hexdigest()[:12]
+          safe_name = re.sub(r"[^A-Za-z0-9._-]+", "-", request_file.stem).strip("-")[:80] or app
+          digest = hashlib.sha256(request_file.read_bytes()).hexdigest()[:12]
           print(f"{safe_name}-{digest}")
           PY
             )"
             work_dir="${dirs.work}/$work_name"
             ${pkgs.coreutils}/bin/mkdir -p -- "$work_dir"
-            stable_torrent="$(move_to_dir "$torrent" ${dirs.submitted})"
+            stable_request="$(move_to_dir "$request_file" ${dirs.submitted})"
 
-            payload="$(${pkgs.python3}/bin/python3 - "$stable_torrent" "$work_dir" "${app}" <<'PY'
+            if ! request_url="$(request_url_for "$stable_request")"; then
+              move_to_dir "$stable_request" ${dirs.failed} >/dev/null
+              status=1
+              continue
+            fi
+
+            payload="$(${pkgs.python3}/bin/python3 - "$request_url" "$work_dir" "${app}" <<'PY'
           import json
           import sys
 
-          torrent, work_dir, app = sys.argv[1:4]
+          request_url, work_dir, app = sys.argv[1:4]
           print(json.dumps({
               "req": {
-                  "url": torrent,
+                  "url": request_url,
                   "labels": {
                       "source": f"{app}-blackhole",
                   },
@@ -278,7 +311,7 @@ in
               --header "X-Api-Token: $api_token" \
               --data "$payload" \
               "$api_url")"; then
-              move_to_dir "$stable_torrent" ${dirs.failed} >/dev/null
+              move_to_dir "$stable_request" ${dirs.failed} >/dev/null
               status=1
               continue
             fi
@@ -291,7 +324,7 @@ in
           if response.get("code") != 0:
               raise SystemExit(response.get("msg") or "Gopeed task creation failed")
           PY
-              move_to_dir "$stable_torrent" ${dirs.failed} >/dev/null
+              move_to_dir "$stable_request" ${dirs.failed} >/dev/null
               status=1
               continue
             fi
@@ -335,7 +368,7 @@ in
         fields = {
           torrentFolder = dirs.incoming;
           watchFolder = dirs.completed;
-          saveMagnetFiles = false;
+          saveMagnetFiles = true;
           magnetFileExtension = ".magnet";
           readOnly = true;
         };
