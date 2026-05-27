@@ -1,15 +1,16 @@
 """Integration test: WireGuard relay ingress, confinement, DNS, and fail-closed assertions."""
 
 import itertools
-import shlex
-from collections.abc import Callable
-from typing import Literal, Protocol, runtime_checkable
+from typing import Literal
 
-from nix_machine_protocol import Machine as _MachineProtocol
-
-@runtime_checkable
-class Machine(_MachineProtocol, Protocol):
-  """Runtime-checkable view of the NixOS VM driver protocol."""
+from common import (  # pyright: ignore[reportImplicitRelativeImport]
+  Machine,
+  fail,
+  q,
+  repeat_until_succeeds,
+  require_machine,
+  succeed,
+)
 
 Family = Literal["4", "6"]
 
@@ -147,69 +148,11 @@ TOY_LISTENER_UNITS = [
 _TOKEN_COUNTER = itertools.count(1)
 
 
-def _require_machine(globals_dict: dict[str, object], key: str) -> Machine:
-  """Return a required VM driver object from the driver globals."""
-  value = globals_dict[key]
-  assert isinstance(value, Machine), (
-    f"Expected Machine for {key}, got {type(value)!r}"
-  )
-  return value
-
-
-def _q(value: str) -> str:
-  """Shell-quote a value for guest command execution."""
-  return shlex.quote(value)
-
-
-def _require_callable(obj: object, name: str) -> Callable[..., object]:
-  """Return a named callable from a runtime object."""
-  method = getattr(obj, name, None)
-  assert callable(method), f"Machine is missing required method {name}()"
-  return method
-
-
-def _start_machine(machine: Machine) -> None:
-  """Start a VM through the driver."""
-  _require_callable(machine, "start")()
-
-
-def _shutdown_machine(machine: Machine) -> None:
-  """Shut down a VM through the driver."""
-  _require_callable(machine, "shutdown")()
-
-
-def _wait_until_succeeds(
-  machine: Machine, command: str, message: str
-) -> None:
-  """Wait for a command to start succeeding, surfacing driver errors clearly."""
-  try:
-    machine.wait_until_succeeds(command)
-  except Exception as exc:  # pragma: no cover - integration-driver surface
-    raise AssertionError(f"{message}: {command}") from exc
-
-
-def _succeed(machine: Machine, command: str, message: str) -> str:
-  """Run a command and reframe driver failures as assertion failures."""
-  try:
-    return machine.succeed(command).strip()
-  except Exception as exc:  # pragma: no cover - integration-driver surface
-    raise AssertionError(f"{message}: {command}") from exc
-
-
-def _fail(machine: Machine, command: str, message: str) -> str:
-  """Run a command and assert that it fails."""
-  status, output = machine.execute(command)
-  assert status != 0, (
-    f"{message}. Command unexpectedly succeeded: {command}\n{output}"
-  )
-  return output.strip()
-
-
 def _command_prefix(namespace: str | None = None) -> str:
   """Return the optional namespace command prefix."""
   if namespace is None:
     return ""
-  return f"ip netns exec {_q(namespace)} "
+  return f"ip netns exec {q(namespace)} "
 
 
 def _family_flag(family: Family) -> str:
@@ -240,12 +183,12 @@ def _log_path(name: str) -> str:
 
 def _clear_log(machine: Machine, path: str) -> None:
   """Create or truncate a fixture log file."""
-  _succeed(machine, f": > {_q(path)}", f"Failed to clear log {path}")
+  succeed(machine, f": > {q(path)}", f"Failed to clear log {path}")
 
 
 def _log_has_token(machine: Machine, path: str, token: str) -> bool:
   """Return whether a fixture log contains a token."""
-  status, _ = machine.execute(f"grep -F {_q(token)} {_q(path)} >/dev/null")
+  status, _ = machine.execute(f"grep -F {q(token)} {q(path)} >/dev/null")
   return status == 0
 
 
@@ -272,7 +215,7 @@ def _assert_log_has_entry(
 ) -> None:
   """Assert that a fixture log contains an exact token/source entry."""
   entry = f"{token} {source}"
-  status, _ = machine.execute(f"grep -Fx {_q(entry)} {_q(path)} >/dev/null")
+  status, _ = machine.execute(f"grep -Fx {q(entry)} {q(path)} >/dev/null")
   assert status == 0, f"{message}: entry {entry!r} missing from {path}"
 
 
@@ -287,9 +230,9 @@ def _http_get(
 ) -> str:
   """Issue an HTTP GET from the requested network context."""
   url = _literal_url(address, port, path)
-  return _succeed(
+  return succeed(
     machine,
-    f"{_command_prefix(namespace)}curl --fail --silent --show-error {_family_flag(family)} --max-time {HTTP_TIMEOUT} {_q(url)}",
+    f"{_command_prefix(namespace)}curl --fail --silent --show-error {_family_flag(family)} --max-time {HTTP_TIMEOUT} {q(url)}",
     f"HTTP GET failed for {url} on IPv{family}",
   )
 
@@ -326,9 +269,9 @@ def _assert_http_fails(
 ) -> None:
   """Assert that an HTTP endpoint is unreachable."""
   url = _literal_url(address, port, path)
-  _fail(
+  fail(
     machine,
-    f"{_command_prefix(namespace)}curl --fail --silent --show-error {_family_flag(family)} --max-time {HTTP_TIMEOUT} {_q(url)}",
+    f"{_command_prefix(namespace)}curl --fail --silent --show-error {_family_flag(family)} --max-time {HTTP_TIMEOUT} {q(url)}",
     message,
   )
 
@@ -381,7 +324,7 @@ def _python_network_command(
     ]
   )
   script = "\n".join(script_lines) + "\n"
-  return f"python3 -c {_q(script)}"
+  return f"python3 -c {q(script)}"
 
 
 def _tcp_roundtrip(
@@ -396,7 +339,7 @@ def _tcp_roundtrip(
   source_address: str | None = None,
 ) -> str:
   """Run a TCP exchange against a listener under test."""
-  return _succeed(
+  return succeed(
     machine,
     _command_prefix(namespace)
     + _python_network_command(
@@ -424,7 +367,7 @@ def _udp_roundtrip(
   source_address: str | None = None,
 ) -> str:
   """Run a UDP exchange against a listener under test."""
-  return _succeed(
+  return succeed(
     machine,
     _command_prefix(namespace)
     + _python_network_command(
@@ -444,21 +387,21 @@ def _run_service_capture(
   machine: Machine, service: str, output_path: str
 ) -> str:
   """Start a service and capture its output file."""
-  _succeed(
+  succeed(
     machine,
-    f"rm -f {_q(output_path)}",
+    f"rm -f {q(output_path)}",
     f"Failed to remove stale output {output_path}",
   )
-  _succeed(
-    machine, f"systemctl start {_q(service)}", f"Failed to start {service}"
+  succeed(
+    machine, f"systemctl start {q(service)}", f"Failed to start {service}"
   )
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     machine,
-    f"test -s {_q(output_path)}",
+    f"test -s {q(output_path)}",
     f"Timed out waiting for {output_path}",
   )
-  return _succeed(
-    machine, f"cat {_q(output_path)}", f"Failed to read {output_path}"
+  return succeed(
+    machine, f"cat {q(output_path)}", f"Failed to read {output_path}"
   )
 
 
@@ -479,17 +422,17 @@ def _assert_confined_source_observer_fail_closed(
   observer_failure: str,
 ) -> None:
   """Assert that a confined source observer fails closed during outage."""
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     probe,
-    f"curl --fail --silent --show-error {_family_flag(observer_family)} --max-time {HTTP_TIMEOUT} {_q(_literal_url(observer_address, SOURCE_OBSERVER_PORT, f'/_preflight?token={observer_token}-preflight'))} >/dev/null",
+    f"curl --fail --silent --show-error {_family_flag(observer_family)} --max-time {HTTP_TIMEOUT} {q(_literal_url(observer_address, SOURCE_OBSERVER_PORT, f'/_preflight?token={observer_token}-preflight'))} >/dev/null",
     f"Remote source observer {label} did not become ready before {outage}",
   )
   _clear_log(probe, observer_log_path)
-  _succeed(
-    isolated, f"rm -f {_q(output_path)}", f"Failed to clear {output_path}"
+  succeed(
+    isolated, f"rm -f {q(output_path)}", f"Failed to clear {output_path}"
   )
-  _fail(isolated, f"systemctl start {_q(service)}", message)
-  status, _ = isolated.execute(f"test -s {_q(output_path)}")
+  fail(isolated, f"systemctl start {q(service)}", message)
+  status, _ = isolated.execute(f"test -s {q(output_path)}")
   assert status != 0, output_failure
   _assert_log_lacks_token(
     probe, observer_log_path, observer_token, observer_failure
@@ -510,12 +453,12 @@ def _assert_denied_listener_preflight(
   """Assert that the allowed path works before the denied path is tested."""
   blocked_on = machine if blocked_machine is None else blocked_machine
   _clear_log(machine, log_path)
-  _succeed(machine, control_command, f"{message}: control preflight failed")
+  succeed(machine, control_command, f"{message}: control preflight failed")
   _assert_log_has_token(
     machine, log_path, control_token, f"{message}: control token missing"
   )
   _clear_log(machine, log_path)
-  _fail(blocked_on, blocked_command, f"{message}: blocked command must fail")
+  fail(blocked_on, blocked_command, f"{message}: blocked command must fail")
   _assert_log_lacks_token(
     machine, log_path, blocked_token, f"{message}: blocked token leaked"
   )
@@ -528,9 +471,9 @@ def _dig_query(
   query_name = f"{token}{DNS_SUFFIX}"
   dig_family = "-4" if family == "4" else "-6"
   qtype = "A" if family == "4" else "AAAA"
-  return _succeed(
+  return succeed(
     machine,
-    f"{_command_prefix(WG_NAMESPACE)}dig +short +time=2 +tries=1 {dig_family} @{_q(server)} {_q(query_name)} {qtype}",
+    f"{_command_prefix(WG_NAMESPACE)}dig +short +time=2 +tries=1 {dig_family} @{q(server)} {q(query_name)} {qtype}",
     f"Confined dig failed against {server}",
   )
 
@@ -546,11 +489,11 @@ def _assert_route(
 ) -> None:
   """Assert that namespace route selection matches the expected path."""
   command = (
-    f"{_command_prefix(WG_NAMESPACE)}ip -6 route get {_q(address)}"
+    f"{_command_prefix(WG_NAMESPACE)}ip -6 route get {q(address)}"
     if family == "6"
-    else f"{_command_prefix(WG_NAMESPACE)}ip route get {_q(address)}"
+    else f"{_command_prefix(WG_NAMESPACE)}ip route get {q(address)}"
   )
-  route = _succeed(machine, command, f"Failed to inspect route for {address}")
+  route = succeed(machine, command, f"Failed to inspect route for {address}")
   for needle in expected_present:
     assert needle in route, (
       f"{message}: expected {needle!r} in route output {route!r}"
@@ -565,9 +508,9 @@ def _assert_service_inactive(
   machine: Machine, service: str, message: str
 ) -> None:
   """Assert that a service is not active."""
-  output = _succeed(
+  output = succeed(
     machine,
-    f"systemctl show {_q(service)} --property=ActiveState,SubState,Result --value --no-pager",
+    f"systemctl show {q(service)} --property=ActiveState,SubState,Result --value --no-pager",
     f"Failed to inspect {service}",
   )
   states = [line.strip() for line in output.splitlines() if line.strip()]
@@ -580,9 +523,9 @@ def _assert_service_failed(
   machine: Machine, service: str, message: str
 ) -> None:
   """Assert that a service failed with exit-code."""
-  output = _succeed(
+  output = succeed(
     machine,
-    f"systemctl show {_q(service)} --property=ActiveState,Result --value --no-pager",
+    f"systemctl show {q(service)} --property=ActiveState,Result --value --no-pager",
     f"Failed to inspect {service}",
   )
   states = [line.strip() for line in output.splitlines() if line.strip()]
@@ -595,12 +538,12 @@ def _assert_failed_wg_backend_state_absent(
   isolated: Machine, *, context: str
 ) -> None:
   """Assert that failed backend setup left no residual state."""
-  _fail(
+  fail(
     isolated,
     f"test -e /run/netns/{FAILED_WG_NAMESPACE}",
     f"{context}: stale /run/netns/{FAILED_WG_NAMESPACE} must be removed",
   )
-  netns_lines = _succeed(
+  netns_lines = succeed(
     isolated, "ip netns list", "Failed to inspect network namespaces"
   ).splitlines()
   assert not any(
@@ -614,38 +557,38 @@ def _assert_failed_wg_backend_state_absent(
     (FAILED_WG_NAMESPACE_VETH, "namespace veth"),
     (FAILED_WG_INTERFACE, "backend WireGuard interface"),
   ]:
-    _fail(
+    fail(
       isolated,
-      f"ip link show {_q(interface)}",
+      f"ip link show {q(interface)}",
       f"{context}: {description} {interface!r} must be absent",
     )
   for tool, family in [("iptables", "IPv4"), ("ip6tables", "IPv6")]:
-    _fail(
+    fail(
       isolated,
       f"{tool} -t nat -S {FAILED_WG_NAT_CHAIN}",
       f"{context}: {family} host NAT chain {FAILED_WG_NAT_CHAIN} must be absent",
     )
-    _fail(
+    fail(
       isolated,
       f"{tool} -t filter -S {FAILED_WG_FORWARD_CHAIN}",
       f"{context}: {family} host forward chain {FAILED_WG_FORWARD_CHAIN} must be absent",
     )
-    _fail(
+    fail(
       isolated,
       f"{tool} -t nat -S PREROUTING | grep -F -- '-j {FAILED_WG_NAT_CHAIN}'",
       f"{context}: {family} PREROUTING jump into {FAILED_WG_NAT_CHAIN} must be absent",
     )
-    _fail(
+    fail(
       isolated,
       f"{tool} -t nat -S OUTPUT | grep -F -- '-j {FAILED_WG_NAT_CHAIN}'",
       f"{context}: {family} OUTPUT jump into {FAILED_WG_NAT_CHAIN} must be absent",
     )
-    _fail(
+    fail(
       isolated,
       f"{tool} -t filter -S FORWARD | grep -F -- '-i {FAILED_WG_HOST_VETH} -j {FAILED_WG_FORWARD_CHAIN}'",
       f"{context}: {family} FORWARD ingress jump for {FAILED_WG_HOST_VETH} must be absent",
     )
-    _fail(
+    fail(
       isolated,
       f"{tool} -t filter -S FORWARD | grep -F -- '-o {FAILED_WG_HOST_VETH} -j {FAILED_WG_FORWARD_CHAIN}'",
       f"{context}: {family} FORWARD egress jump for {FAILED_WG_HOST_VETH} must be absent",
@@ -677,40 +620,40 @@ def _assert_failed_wg_backend_cleanup(isolated: Machine) -> None:
     "PersistentKeepalive = 25\n"
     "EOF"
   )
-  _succeed(
+  succeed(
     isolated,
     recovery_config,
     "Failed to install recovery WireGuard config for wgfail fixture",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"systemctl reset-failed {_q(FAILED_WG_UNIT)}",
+    f"systemctl reset-failed {q(FAILED_WG_UNIT)}",
     "Failed to reset failed wgfail namespace service",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"systemctl start {_q(FAILED_WG_UNIT)}",
+    f"systemctl start {q(FAILED_WG_UNIT)}",
     "Failed to restart wgfail namespace service after installing recovery config",
   )
   isolated.wait_for_unit(FAILED_WG_UNIT)
-  _succeed(
+  succeed(
     isolated,
-    f"ip netns exec {_q(FAILED_WG_NAMESPACE)} ip link show {_q(FAILED_WG_INTERFACE)}",
+    f"ip netns exec {q(FAILED_WG_NAMESPACE)} ip link show {q(FAILED_WG_INTERFACE)}",
     "Recovered wgfail namespace did not create its backend WireGuard interface",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"ip netns exec {_q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_DNS_CHAIN}",
+    f"ip netns exec {q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_DNS_CHAIN}",
     "Recovered wgfail namespace did not recreate its DNS chain",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"ip netns exec {_q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_VPN_CHAIN}",
+    f"ip netns exec {q(FAILED_WG_NAMESPACE)} iptables -S {FAILED_WG_VPN_CHAIN}",
     "Recovered wgfail namespace did not recreate its VPN input chain",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"systemctl stop {_q(FAILED_WG_UNIT)}",
+    f"systemctl stop {q(FAILED_WG_UNIT)}",
     "Failed to stop recovered wgfail namespace service",
   )
   _assert_failed_wg_backend_state_absent(
@@ -726,36 +669,36 @@ def _wait_for_wg_recovery(
   relay.wait_for_unit(WG_HOST_UNIT)
   isolated.wait_for_unit(WG_HOST_UNIT)
   isolated.wait_for_unit(WG_NAMESPACE_UNIT)
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     relay,
-    f"wg show {_q(WG_HOST_INTERFACE)} peers | grep -q .",
+    f"wg show {q(WG_HOST_INTERFACE)} peers | grep -q .",
     "Relay WireGuard host interface never gained a peer",
   )
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     isolated,
-    f"wg show {_q(WG_HOST_INTERFACE)} peers | grep -q .",
+    f"wg show {q(WG_HOST_INTERFACE)} peers | grep -q .",
     "Isolated WireGuard host interface never gained a peer",
   )
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     isolated,
     f"{_command_prefix(WG_NAMESPACE)}wg show | grep -q '^peer: '",
     "WireGuard namespace never gained a peer",
   )
   for service in TOY_LISTENER_UNITS:
-    _succeed(
+    succeed(
       isolated,
-      f"systemctl restart {_q(service)}",
+      f"systemctl restart {q(service)}",
       f"Failed to restart recovered toy listener {service}",
     )
     isolated.wait_for_unit(service)
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     probe,
-    f"curl --fail --silent --show-error --ipv4 --max-time {HTTP_TIMEOUT} {_q(_literal_url(RELAY_SHARED_V4, RELAY_TCP_PORT))} >/dev/null",
+    f"curl --fail --silent --show-error --ipv4 --max-time {HTTP_TIMEOUT} {q(_literal_url(RELAY_SHARED_V4, RELAY_TCP_PORT))} >/dev/null",
     "Relay TCP ingress did not become functionally ready over IPv4",
   )
-  _wait_until_succeeds(
+  repeat_until_succeeds(
     isolated,
-    f"{_command_prefix(WG_NAMESPACE)}dig +short +time=2 +tries=1 -4 @{_q(PROBE_PRIMARY_V4)} ready{DNS_SUFFIX} >/dev/null",
+    f"{_command_prefix(WG_NAMESPACE)}dig +short +time=2 +tries=1 -4 @{q(PROBE_PRIMARY_V4)} ready{DNS_SUFFIX} >/dev/null",
     "Confined DNS did not become functionally ready over IPv4",
   )
 
@@ -765,7 +708,7 @@ def _assert_no_duplicate_state(
 ) -> None:
   """Assert that restart and recovery did not duplicate namespace or firewall state."""
   if namespace is not None:
-    _succeed(
+    succeed(
       machine,
       f'test "$(ip netns list | awk \'$1 == "{namespace}" {{ count++ }} END {{ print count + 0 }}\')" -le 1',
       "Duplicate WireGuard namespace entries detected",
@@ -777,7 +720,7 @@ def _assert_no_duplicate_state(
     f"{HOST_DENIED_TCP_PORT}|{HOST_DENIED_UDP_PORT}|{OPEN_VPN_DENIED_TCP_PORT}|{OPEN_VPN_DENIED_UDP_PORT}|"
     f"{DNS_PORT}|{DOT_PORT}|{DOH_PORT}"
   )
-  _succeed(
+  succeed(
     machine,
     "python3 - <<'PY'\n"
     "import subprocess, sys\n"
@@ -1669,7 +1612,7 @@ def _assert_open_vpn_ports(
       f"Open-VPN {mode}/IPv{family} shared-LAN negative preflight missing",
     )
     _clear_log(isolated, log_path)
-    _fail(
+    fail(
       probe,
       _python_network_command(
         protocol=mode,
@@ -1803,9 +1746,9 @@ def _assert_open_vpn_ports(
 
 def _assert_dns(isolated: Machine, probe: Machine) -> None:
   """Assert the confined DNS allowlist and leak prevention policy."""
-  resolv_conf = _succeed(
+  resolv_conf = succeed(
     isolated,
-    f"cat /etc/netns/{_q(WG_NAMESPACE)}/resolv.conf",
+    f"cat /etc/netns/{q(WG_NAMESPACE)}/resolv.conf",
     "Failed to read namespace resolv.conf",
   )
   assert f"nameserver {PROBE_PRIMARY_V4}" in resolv_conf, (
@@ -2099,7 +2042,7 @@ def _assert_midflight_outage(
   relay: Machine, isolated: Machine, probe: Machine
 ) -> None:
   """Assert that a live relay outage fails closed and then recovers."""
-  _shutdown_machine(relay)
+  relay.shutdown()
   for label, (service, output_path) in CONFINED_SOURCE_SERVICES.items():
     observer_address, observer_family, observer_log_path, observer_token = (
       REMOTE_SOURCE_OBSERVERS[label]
@@ -2137,7 +2080,7 @@ def _assert_midflight_outage(
     family="6",
     message="Relay TCP ingress must fail closed during relay outage",
   )
-  _start_machine(relay)
+  relay.start()
   relay.wait_for_unit("multi-user.target")
   _wait_for_wg_recovery(relay, isolated, probe)
   _assert_relay_baseline(probe, isolated)
@@ -2146,9 +2089,9 @@ def _assert_midflight_outage(
 
 def _restart_service(machine: Machine, service: str) -> None:
   """Restart a service and wait for it to become active."""
-  _succeed(
+  succeed(
     machine,
-    f"systemctl restart {_q(service)}",
+    f"systemctl restart {q(service)}",
     f"Failed to restart {service}",
   )
   machine.wait_for_unit(service)
@@ -2176,13 +2119,13 @@ def _assert_restart_idempotency(
 
 def run(*, driver_globals: dict[str, object]) -> None:
   """Run the reviewed WireGuard relay ingress and confinement assertions."""
-  relay = _require_machine(driver_globals, "relay")
-  isolated = _require_machine(driver_globals, "isolated")
-  probe = _require_machine(driver_globals, "probe")
+  relay = require_machine(driver_globals, "relay")
+  isolated = require_machine(driver_globals, "isolated")
+  probe = require_machine(driver_globals, "probe")
 
   # Startup must fail closed while the relay peer and upstream path are absent.
-  _start_machine(probe)
-  _start_machine(isolated)
+  probe.start()
+  isolated.start()
 
   probe.wait_for_unit("multi-user.target")
   isolated.wait_for_unit("multi-user.target")
@@ -2193,16 +2136,16 @@ def run(*, driver_globals: dict[str, object]) -> None:
 
   # Once the relay appears, recover the namespace in place and wait for the tunnel to become
   # functionally usable again.
-  _start_machine(relay)
+  relay.start()
   relay.wait_for_unit("multi-user.target")
-  _succeed(
+  succeed(
     isolated,
-    f"systemctl reset-failed {_q(WG_NAMESPACE_UNIT)}",
+    f"systemctl reset-failed {q(WG_NAMESPACE_UNIT)}",
     "Failed to reset failed namespace service",
   )
-  _succeed(
+  succeed(
     isolated,
-    f"systemctl restart {_q(WG_NAMESPACE_UNIT)}",
+    f"systemctl restart {q(WG_NAMESPACE_UNIT)}",
     "Failed to restart namespace service after relay start",
   )
   _wait_for_wg_recovery(relay, isolated, probe)

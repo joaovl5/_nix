@@ -5,6 +5,7 @@ from typing import Protocol, runtime_checkable
 
 from nix_machine_protocol import Machine as _MachineProtocol
 
+
 @runtime_checkable
 class Machine(_MachineProtocol, Protocol):
   """Runtime-checkable view of the NixOS VM driver protocol."""
@@ -305,7 +306,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
       f"{label} path restore content mismatch: {restored_content!r}"
     )
 
-  _start(service="backup_forget_machine_my_path_on_a.service", machine=machine)
+  _start(
+    service="backup_forget_machine_my_path_on_a.service", machine=machine
+  )
 
   remaining_path_snapshots = _snapshots(machine=machine, tag=_PATH_TAG)
   remaining_path_snapshot_ids = {
