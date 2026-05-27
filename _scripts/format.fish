@@ -2,7 +2,7 @@
 
 source (dirname (status current-filename))/_utils.fish
 
-set emacs_config_dir users/_modules/desktop/apps/editor/emacs/config
+set emacs_config_dir modules/aspects/desktop/desktop/apps/editor/emacs/config
 set rumdl rumdl
 
 function format_markdown

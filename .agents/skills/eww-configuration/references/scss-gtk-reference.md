@@ -16,8 +16,9 @@ Sources: official Eww styling docs, widget docs, and linked GTK CSS docs
 
 ## Current repo constraints
 
-- **Reset rule:** `users/_modules/desktop/widgets/eww/config/bar/eww.scss`
-  starts with `* { all: unset; }`
+- **Reset rule:**
+  `modules/aspects/desktop/desktop/widgets/eww/config/bar/eww.scss` starts
+  with `* { all: unset; }`
 - **Consequence:** new widgets can look invisible or tiny until color,
   spacing, borders, and fonts are styled again
 - **Selector proof:** check `.bar` with `eww inspector` before treating it as

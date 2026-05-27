@@ -16,7 +16,9 @@ from typing import TextIO
 from cyclopts import App, CycloptsError
 
 SCRIPT_DESCRIPTION = "Run arbitrary Lua inside the repo Neovim config."
-CONFIG_PATH = Path("users/_modules/desktop/apps/editor/neovim/config")
+CONFIG_PATH = Path(
+  "modules/aspects/desktop/desktop/apps/editor/neovim/config"
+)
 
 app = App(
   name="nvim-lua",

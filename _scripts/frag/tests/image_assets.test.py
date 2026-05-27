@@ -30,7 +30,7 @@ let
     overlays = outputs._channels.overlays;
     config.allowUnfree = true;
   };
-  local = import ./packages {
+  local = import ./modules/_packages {
     inherit pkgs;
     inputs = outputs.inputs;
   };
@@ -47,7 +47,7 @@ let
     config.allowUnfree = true;
   };
 in
-  import ./packages/frag/terminal_assets.nix {
+  import ./modules/_packages/frag/terminal_assets.nix {
     inherit pkgs;
   }
 """
@@ -61,7 +61,7 @@ let
     overlays = outputs._channels.overlays;
     config.allowUnfree = true;
   };
-  local = import ./packages {
+  local = import ./modules/_packages {
     inherit pkgs;
     inputs = outputs.inputs;
   };

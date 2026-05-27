@@ -4,7 +4,7 @@ description: Use when adding, editing, reviewing, or debugging this repo's NixOS
 ---
 
 Use this for repo NixOS tests in `tests/nixos/`, shared helpers in
-`tests/common/`, and wrapper details in `_lib/tests/default.nix`. Keep repo
+`tests/common/`, and wrapper details in `lib/tests/default.nix`. Keep repo
 contract details here and load references for API semantics or fuller
 templates
 
@@ -17,7 +17,7 @@ why any negative claim is trustworthy
 
 - **Read repo contract:** check `tests/nixos/<suite>/default.nix`,
   `tests/nixos/<suite>/*.nix`, `tests/nixos/<suite>/script.py`,
-  `tests/common/`, `_lib/tests/default.nix`, and `tests/pyproject.toml`
+  `tests/common/`, `lib/tests/default.nix`, and `tests/pyproject.toml`
   before editing
 - **Verify driver semantics:** load `references/nixos-test-driver-api.md` when
   method behavior matters
@@ -39,7 +39,7 @@ why any negative claim is trustworthy
   new driver suite
 - **Contract:** `python_module_name = "foo"` imports `run` from
   `nixos.foo.script`
-- **Import check:** if you add a driver, update `_lib/tests/default.nix`
+- **Import check:** if you add a driver, update `lib/tests/default.nix`
   `pythonImportsCheck`
 - **Shared helpers:** put reusable Nix or Python helpers under `tests/common/`
 - **Packaging:** keep Python packaging in `tests/pyproject.toml` with
@@ -83,7 +83,7 @@ Then follow `AGENTS.md` when the task calls for broader checks
 ## Common mistakes
 
 - **Missing import check:** adding a driver but forgetting
-  `_lib/tests/default.nix` `pythonImportsCheck`
+  `lib/tests/default.nix` `pythonImportsCheck`
 - **Weak denial proof:** treating `curl` failure alone as proof of a blocked
   path
 - **Weak absence proof:** treating an empty log alone as proof that nothing

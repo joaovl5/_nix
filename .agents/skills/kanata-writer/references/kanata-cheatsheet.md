@@ -5,8 +5,10 @@ details against the pinned Kanata version when behavior matters.
 
 ## Sources
 
-- **Repo config:** `users/_modules/desktop/services/kanata/config/config.kbd`
-- **Repo service:** `users/_modules/desktop/services/kanata/default.nix`
+- **Repo config:**
+  `modules/aspects/desktop/desktop/services/kanata/config/config.kbd`
+- **Repo service:**
+  `modules/aspects/desktop/desktop/services/kanata/default.nix`
 - **Upstream guide:**
   <https://github.com/jtroo/kanata/blob/main/docs/config.adoc>
 - **Upstream README:** <https://github.com/jtroo/kanata/blob/main/README.md>

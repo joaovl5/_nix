@@ -1,6 +1,4 @@
-# Non-host specific settings go here for defining units
-# They should not be enabled here, otherwise they'd be enabled for every host.
-# These reference units declared at `../users/_units`
+# Shared defaults for unit options. Host-specific enablement lives in globals/hosts.nix.
 {lib, ...}: {
   my = {
     "unit.octodns" = {
@@ -16,13 +14,14 @@
     };
 
     "unit.fail2ban" = {
-      enable = true;
     };
 
     "unit.backup" = {
       enable = lib.mkDefault false;
       state_dir = lib.mkDefault "/var/lib/backups";
-      destinations = {
+      destinations = let
+        default_extra_options = ["--retry-lock" "1h"];
+      in {
         A = {
           enable = lib.mkDefault false;
           backend = lib.mkDefault "filesystem";
@@ -32,7 +31,7 @@
             file = "backups.yaml";
             key = "restic_a_password";
           };
-          extra_options = lib.mkDefault [];
+          extra_options = lib.mkDefault default_extra_options;
         };
         B = {
           enable = lib.mkDefault false;
@@ -48,7 +47,7 @@
             file = "backups.yaml";
             key = "restic_b_env";
           };
-          extra_options = lib.mkDefault [];
+          extra_options = lib.mkDefault default_extra_options;
         };
         C = {
           enable = lib.mkDefault false;
@@ -64,7 +63,7 @@
             file = "backups.yaml";
             key = "restic_c_env";
           };
-          extra_options = lib.mkDefault [];
+          extra_options = lib.mkDefault default_extra_options;
         };
       };
       policies = {

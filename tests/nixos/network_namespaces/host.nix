@@ -87,8 +87,8 @@ _: {pkgs, ...}: let
 in {
   imports = [
     ../../common/base_node.nix
-    ../../../_modules/options.nix
-    ../../../users/_units/network_namespaces/default.nix
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
+    (import ../../../modules/aspects/server/units/network_namespaces/default.nix {}).den.aspects.server.nixos
   ];
 
   system.stateVersion = "25.11";

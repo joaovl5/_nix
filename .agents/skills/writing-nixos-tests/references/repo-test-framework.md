@@ -6,7 +6,7 @@ or assertion patterns
 ## Files involved
 
 - **Flake entrypoint:** `tests/default.nix` exposes suites as flake checks
-- **Wrapper definition:** `_lib/tests/default.nix` defines
+- **Wrapper definition:** `lib/tests/default.nix` defines
   `mylib.tests.mk_test`
 - **Suite entrypoint:** `tests/nixos/<suite>/default.nix` calls
   `mylib.tests.mk_test`
@@ -17,12 +17,12 @@ or assertion patterns
 - **Shared helpers:** `tests/common/` holds reusable Nix and Python helpers
 - **Python packaging:** `tests/pyproject.toml` builds the test package with
   `uv_build`
-- **Import checks:** `_lib/tests/default.nix` registers driver imports through
+- **Import checks:** `lib/tests/default.nix` registers driver imports through
   `pythonImportsCheck`
 
 ## `mylib.tests.mk_test` contract
 
-`_lib/tests/default.nix` wraps a test with:
+`lib/tests/default.nix` wraps a test with:
 
 ```nix
 mylib.tests.mk_test {
@@ -49,7 +49,7 @@ Keep these facts true:
 - **Per-suite package:** each suite needs `tests/nixos/<suite>/__init__.py`
 - **Named nodes:** read named NixOS nodes from `driver_globals`, for example
   `driver_globals["relay"]`
-- **Import registration:** add new driver imports to `_lib/tests/default.nix`
+- **Import registration:** add new driver imports to `lib/tests/default.nix`
   `pythonImportsCheck`
 - **Shared helpers:** keep reusable helpers in `tests/common/` instead of
   copying them between suites
@@ -60,7 +60,7 @@ Keep these facts true:
 - **Fixture files:** add `tests/nixos/<suite>/*.nix` when setup is substantial
 - **Driver module:** add `tests/nixos/<suite>/script.py` defining `run(...)`
 - **Suite package marker:** add `tests/nixos/<suite>/__init__.py`
-- **Import check:** register the new driver in `_lib/tests/default.nix`
+- **Import check:** register the new driver in `lib/tests/default.nix`
   `pythonImportsCheck`
 - **Shared helpers:** put reusable cross-suite helpers in `tests/common/`
 - **Deterministic inputs:** materialize generated files or secrets inside the

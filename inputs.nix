@@ -50,5 +50,6 @@ let
 in
   inputs
   // {
+    home-manager = inputs.hm;
     nixpkgs = inputs.unstable;
   }

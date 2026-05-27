@@ -24,7 +24,7 @@ function usage
         "" \
         "Notes:" \
         "  Sizes must be integer K/M/G/T values, matching btrfs filesystem mkswapfile." \
-        "  After a live resize, update hardware/_disko/lavpc_v2.nix for future installs."
+        "  After a live resize, update modules/aspects/hardware/lavpc/_disko.nix for future installs."
 end
 
 function die
@@ -315,4 +315,4 @@ end
 echo "Swap resize finished. Current swap devices:"
 swapon --show
 
-echo "Reminder: update hardware/_disko/lavpc_v2.nix to sz = \"$new_size\" for future installs."
+echo "Reminder: update modules/aspects/hardware/lavpc/_disko.nix to sz = \"$new_size\" for future installs."

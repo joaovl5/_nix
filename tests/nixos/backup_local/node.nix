@@ -9,11 +9,12 @@ _: {
   my = mylib.use config;
   o = my.options;
   sops_stub = import ../../common/_sops_stub.nix;
+  backup_module = (import ../../../modules/aspects/server/units/backup/default.nix {}).den.aspects.server.nixos;
 in {
   imports = [
     sops_stub
-    ../../../_modules/options.nix
-    ../../../users/_units/backup
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
+    backup_module
   ];
 
   nixpkgs.overlays = self._channels.overlays;

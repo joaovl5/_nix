@@ -13,9 +13,10 @@ _: {
 in {
   imports = [
     ../../common/base_node.nix
-    ../../../_modules/options.nix
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
     ../../common/_sops_stub.nix
-    ../../../users/_units/wireguard/default.nix
+    (import ../../../modules/aspects/server/units/wireguard/default.nix {}).den.aspects.server.nixos
+    (import ../../../modules/aspects/server/units/network_namespaces/default.nix {}).den.aspects.server.nixos
   ];
 
   system = {

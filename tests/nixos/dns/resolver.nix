@@ -118,12 +118,13 @@ in {
   imports = [
     ../../common/base_node.nix
     ../../common/_sops_stub.nix
-    ../../../_modules/options.nix
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
     inputs.nixos-dns.nixosModules.dns
-    ../../../systems/_modules/dns/default.nix
-    ../../../users/_units/reverse-proxy/default.nix
-    ../../../users/_units/pihole/default.nix
-    ../../../users/_units/octodns/default.nix
+    (import ../../../modules/aspects/base/dns.nix {}).den.aspects.base-dns.nixos
+    (import ../../../modules/aspects/server/reverse-proxy.nix {}).den.aspects.server.nixos
+    (import ../../../modules/aspects/server/units/pihole/default.nix {}).den.aspects.server.nixos
+    (import ../../../modules/aspects/server/units/octodns/default.nix {}).den.aspects.server.nixos
+    (import ../../../modules/aspects/server/units/traefik/default.nix {}).den.aspects.server.nixos
   ];
 
   system.stateVersion = "25.11";

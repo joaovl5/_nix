@@ -7,6 +7,10 @@ in rec {
     ssh_user = "lav";
     ssh_port = default_ssh_port;
     fast_connection = true;
+    units = [
+      "backup"
+      "fail2ban"
+    ];
     config = {
       my = {
         desktop.enable = true;
@@ -39,6 +43,27 @@ in rec {
     host_ip = "192.168.15.13";
     ssh_user = "tyrant";
     ssh_port = default_ssh_port;
+    units = [
+      "actual-budget"
+      "backup"
+      "degoog"
+      "fail2ban"
+      "forgejo"
+      "fxsync"
+      "gopeed"
+      "hermes-agent"
+      "hister"
+      "kaneo"
+      "nixarr"
+      "octodns"
+      "pihole"
+      "postgres"
+      "qbittorrent"
+      "slskd"
+      "syncthing"
+      "traefik"
+      "wireguard"
+    ];
     config = let
       interface_name = "enp3s0f1";
     in {
@@ -211,6 +236,10 @@ in rec {
     host_ip = "89.167.107.74";
     ssh_user = "temperance";
     ssh_port = default_ssh_port;
+    units = [
+      "fail2ban"
+      "wireguard"
+    ];
     config = {
       my = {
         server.enable = true;

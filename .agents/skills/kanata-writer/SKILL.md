@@ -1,17 +1,17 @@
 ---
 name: kanata-writer
-description: Use when editing or reviewing this repo's Kanata keyboard config under `users/_modules/desktop/services/kanata/`, including layers, aliases, tap-hold behavior, mouse actions, live reload, and key-name syntax
+description: Use when editing or reviewing this repo's Kanata keyboard config under `modules/aspects/desktop/desktop/services/kanata/`, including layers, aliases, tap-hold behavior, mouse actions, live reload, and key-name syntax
 ---
 
 Use this skill for repo-managed Kanata config under
-`users/_modules/desktop/services/kanata/`
+`modules/aspects/desktop/desktop/services/kanata/`
 
 ## Repo scope
 
 - **Entry point:** start at
-  `users/_modules/desktop/services/kanata/default.nix`
+  `modules/aspects/desktop/desktop/services/kanata/default.nix`
 - **Config source:** edit
-  `users/_modules/desktop/services/kanata/config/config.kbd`
+  `modules/aspects/desktop/desktop/services/kanata/config/config.kbd`
 - **Linked runtime path:** `hybrid-links.links.kanata` links `./config` to
   `~/.config/kanata`
 - **User service:** `kanata-internalKeyboard` runs Kanata with

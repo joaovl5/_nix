@@ -1,14 +1,15 @@
 ---
 name: eww-configuration
-description: Use when editing or debugging this repo's Eww, Yuck, or GTK SCSS under `users/_modules/desktop/widgets/eww/`, including bar widgets, magic vars, selector mismatches, or Eww runtime commands
+description: Use when editing or debugging this repo's Eww, Yuck, or GTK SCSS under `modules/aspects/desktop/desktop/widgets/eww/`, including bar widgets, magic vars, selector mismatches, or Eww runtime commands
 ---
 
 Use this skill for repo-managed Eww config under
-`users/_modules/desktop/widgets/eww/`
+`modules/aspects/desktop/desktop/widgets/eww/`
 
 ## Repo scope
 
-- **Entry point:** start at `users/_modules/desktop/widgets/eww/default.nix`
+- **Entry point:** start at
+  `modules/aspects/desktop/desktop/widgets/eww/default.nix`
 - **Config root:** the module links `./config` to `~/.config/eww`, so edit
   repo files, not generated config
 - **Active bar files:** current bar files live under `config/bar/`
