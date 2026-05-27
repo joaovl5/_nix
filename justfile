@@ -9,24 +9,11 @@ basedpyright := "basedpyright --warnings"
 # exclude emacs straight.el pkgs that have .nix files
 emacs_vendored_nix := "**/emacs/config/**.nix"
 
-[script("fish")]
 check: fmt
-    statix check \
-        -o errfmt \
-        -i {{ emacs_vendored_nix }}
-    {{ rumdl }} check \
-        --no-cache \
-        --silent \
-        --fail-on warning \
-        --output-format concise
-    {{ ruff }} check \
-        --no-cache
-    {{ basedpyright }}
-    {{ nix_build }} checks.x86_64-linux
+    _scripts/checks.fish
 
 fmt:
-    echo "..."
+    _scripts/format.fish
 
-[script("fish")]
 deploy: check
     deploy --skip-checks
