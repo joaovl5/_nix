@@ -1,4 +1,5 @@
 nix_raw := "nix --quiet --log-format raw"
+nix_build := nix_raw + " build --no-link --file . "
 rumdl := nix_raw + " run '.#rumdl' --"
 
 ruff := "ruff --quiet"
@@ -21,7 +22,7 @@ check: fmt
     {{ ruff }} check \
         --no-cache
     {{ basedpyright }}
-    {{ nix_raw }} flake check
+    {{ nix_build }} checks.x86_64-linux
 
 fmt:
     echo "..."
