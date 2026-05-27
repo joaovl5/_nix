@@ -20,4 +20,4 @@
 
 [tool.pytest.ini_options]
   python_files = ["*.test.py"]
-  addopts = ["--import-mode=importlib"]
+  addopts      = ["--import-mode=importlib"]

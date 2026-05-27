@@ -1,7 +1,6 @@
 (local M {})
 (local {: v/fs-stat : v/stdpath} (require :lib/nvim))
 
-
 (fn table? [value]
   (= (type value) :table))
 

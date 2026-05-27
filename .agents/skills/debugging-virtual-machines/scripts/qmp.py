@@ -158,12 +158,12 @@ def _require_json_object(*, value: object, context: str) -> JsonObject:
   return normalized
 
 
-def _require_json_object_list(*, value: object, context: str) -> list[JsonObject]:
+def _require_json_object_list(
+  *, value: object, context: str
+) -> list[JsonObject]:
   if not isinstance(value, list):
     raise QmpError(f"{context} must be a JSON array")
-  return [
-    _require_json_object(value=item, context=context) for item in value
-  ]
+  return [_require_json_object(value=item, context=context) for item in value]
 
 
 def _load_json_object(*, payload_text: str, context: str) -> JsonObject:
@@ -313,7 +313,9 @@ def build_serial_wrapper(*, command: str, tag: str) -> str:
   )
 
 
-def build_serial_bootstrap_command(*, command: str, tag: str) -> tuple[str, str]:
+def build_serial_bootstrap_command(
+  *, command: str, tag: str
+) -> tuple[str, str]:
   """Encode the serial wrapper so it can be typed into the guest shell."""
   script_text = build_serial_wrapper(command=command, tag=tag)
   encoded_script = base64.b64encode(script_text.encode()).decode()
@@ -574,7 +576,11 @@ def run_serial_command(
 
 def serial_log_from_args(*, socket_path: Path, override: str | None) -> Path:
   """Resolve the serial log path from CLI options."""
-  return Path(override) if override is not None else derive_serial_log_path(socket_path)
+  return (
+    Path(override)
+    if override is not None
+    else derive_serial_log_path(socket_path)
+  )
 
 
 def _session_from_socket_path(*, socket_path: Path) -> QmpSession:
@@ -809,7 +815,9 @@ def _pull_command(
     timeout=timeout,
   )
   if result.exit_code is None:
-    raise QmpError(f"Missing serial exit status marker in {resolved_serial_log}")
+    raise QmpError(
+      f"Missing serial exit status marker in {resolved_serial_log}"
+    )
   if result.exit_code != 0:
     output = strip_ansi(result.output)
     if output:

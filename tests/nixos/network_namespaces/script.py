@@ -7,6 +7,7 @@ from typing import Literal, Protocol, runtime_checkable
 
 from nix_machine_protocol import Machine as _MachineProtocol
 
+
 @runtime_checkable
 class Machine(_MachineProtocol, Protocol):
   """Runtime-checkable view of the NixOS VM driver protocol."""
@@ -368,6 +369,7 @@ def _assert_service_attachment(*, host: Machine, probe: Machine) -> None:
     source=NAMESPACE_V6,
     message="Probe observer did not see namespace IPv6 source",
   )
+
 
 def _assert_dns_policy(*, host: Machine, probe: Machine) -> None:
   """Assert that the namespace DNS policy allows only the approved resolver path."""

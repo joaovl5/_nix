@@ -11,7 +11,6 @@
   zlib,
   ...
 }:
-
 stdenv.mkDerivation (final_attrs: {
   pname = "lidarr-plugins";
   version = "3.1.2.4938";
@@ -33,13 +32,13 @@ stdenv.mkDerivation (final_attrs: {
       --add-flags "$out/share/lidarr-${final_attrs.version}/Lidarr.dll" \
       --chdir "$out/share/lidarr-${final_attrs.version}" \
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [
-        curl
-        icu
-        openssl
-        sqlite
-        stdenv.cc.cc.lib
-        zlib
-      ]}
+      curl
+      icu
+      openssl
+      sqlite
+      stdenv.cc.cc.lib
+      zlib
+    ]}
 
     runHook postInstall
   '';

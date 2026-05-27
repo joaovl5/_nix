@@ -1,6 +1,6 @@
 ruleDirs:
-- /home/lav/my_nix/.astgrep/rules
+  - /home/lav/my_nix/.astgrep/rules
 testConfigs:
-- testDir: /home/lav/my_nix/.astgrep/rule-tests
+  - testDir: /home/lav/my_nix/.astgrep/rule-tests
 utilDirs:
-- /home/lav/my_nix/.astgrep/utils
+  - /home/lav/my_nix/.astgrep/utils

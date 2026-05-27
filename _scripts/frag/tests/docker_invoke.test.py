@@ -1,5 +1,3 @@
-
-
 import subprocess
 
 import pytest
@@ -11,6 +9,7 @@ def test_run_docker_command_raises_selected_missing_binary_error(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers run docker command raises selected missing binary error."""
+
   def raise_missing_binary(*_args: object, **_kwargs: object) -> object:
     raise FileNotFoundError("docker")
 
@@ -30,6 +29,7 @@ def test_run_docker_command_preserves_nonzero_results_when_requested(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers run docker command preserves nonzero results when requested."""
+
   def fake_run(
     command: list[str], **_kwargs: object
   ) -> subprocess.CompletedProcess[str]:

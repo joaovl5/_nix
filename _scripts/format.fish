@@ -1,89 +1,142 @@
-#!/run/current-system/sw/bin/env fish
+#!/run/current-system/sw/bin/env -S fish --no-config
 
-set emacs_vendored_nix **/emacs/config/**.nix
-set nix_raw nix --quiet --log-format raw
-set rumdl $nix_raw run '.#rumdl' --
+source (dirname (status current-filename))/_utils.fish
 
-function with_files
-    set -g files (git ls-files $argv)
-    test (count $files) -gt 0
-end
+set emacs_config_dir users/_modules/desktop/apps/editor/emacs/config
+set rumdl rumdl
 
-if with_files '*.md'
-    $rumdl fmt \
+function format_markdown
+    set -l files (tracked_files '*.md')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet $rumdl fmt \
         --no-cache \
         --silent
 end
 
-if with_files '*.nix'
-    alejandra \
-        --exclude $emacs_vendored_nix \
+function format_nix
+    set -l files (tracked_files '*.nix')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet alejandra \
+        --exclude $emacs_config_dir \
         -q -q \
+        -- \
         $files
-    deadnix \
+    or return $status
+
+    run_quiet deadnix \
         -_ \
         -L \
         --edit \
-        --exclude $emacs_vendored_nix \
+        --exclude $emacs_config_dir \
+        -- \
         $files
-    statix fix --ignore $emacs_vendored_nix -- .
+    or return $status
+
+    run_quiet statix fix --ignore $emacs_config_dir -- .
 end
 
-if with_files '*.fnl'
-    fnlfmt --fix $files
+function format_fennel
+    set -l files (tracked_files '*.fnl')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet fnlfmt --fix $files
 end
 
-if with_files '*.py' '*.pyi'
-    ruff format $files
+function format_python
+    set -l files (tracked_files '*.py' '*.pyi')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet ruff format $files
 end
 
-if with_files '*.js' '*.ts' '*.mjs' '*.mts' '*.cjs' '*.cts' '*.jsx' '*.tsx' '*.d.ts' '*.d.cts' '*.d.mts' '*.json' '*.jsonc' '*.css'
-    biome format \
-        --write \
-        --no-errors-on-unmatched \
-        --config-path biome.json \
-        --skip-parse-errors \
-        --diagnostic-level=warn \
-        $files
+function format_web_and_json
+    set -l biome_files (tracked_files '*.js' '*.ts' '*.mjs' '*.mts' '*.cjs' '*.cts' '*.jsx' '*.tsx' '*.d.ts' '*.d.cts' '*.d.mts' '*.json' '*.jsonc' '*.css')
+    if test (count $biome_files) -gt 0
+        run_quiet biome format \
+            --write \
+            --no-errors-on-unmatched \
+            --config-path biome.json \
+            --skip-parse-errors \
+            --diagnostic-level=warn \
+            $biome_files
+        or return $status
+    end
+
+    set -l json_files (tracked_files '*.json')
+    test (count $json_files) -eq 0; and return 0
+
+    run_quiet jsonfmt -w $json_files
 end
 
-# fish and sh
-if with_files '*.fish'
-    fish_indent --write $files
-end
+function format_shells
+    set -l fish_files (tracked_files '*.fish')
+    if test (count $fish_files) -gt 0
+        run_quiet fish_indent --write $fish_files
+        or return $status
+    end
 
-if with_files '*.sh' '*.bash' '*.envrc' '*.envrc.*'
-    shfmt \
+    set -l sh_files (tracked_files '*.sh' '*.bash' '*.envrc' '*.envrc.*')
+    test (count $sh_files) -eq 0; and return 0
+
+    run_quiet shfmt \
         -w \
         -i 2 \
         -s \
-        $files
+        $sh_files
 end
 
-if with_files '*.toml'
-    taplo format $files
+function format_toml
+    set -l files (tracked_files '*.toml')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet taplo format $files
 end
 
-if with_files '*.yaml' "*.yml"
-    yamlfmt $files
+function format_yaml
+    set -l files (tracked_files '*.yaml' '*.yml')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet yamlfmt $files
 end
 
-if with_files '*.json'
-    jsonfmt -w $files
-end
+function format_kdl
+    set -l files (tracked_files '*.kdl')
+    test (count $files) -eq 0; and return 0
 
-if with_files '*.kdl'
-    kdlfmt format \
+    run_quiet kdlfmt format \
         --kdl-version v1 \
         $files
 end
 
-if with_files '*.sql'
-    sqruff fix $files
+function format_sql
+    set -l files (tracked_files '*.sql')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet sqruff fix $files
 end
 
-if with_files
-    keep-sorted $files
+job_pool_init
+job_pool_start format_markdown
+job_pool_start format_nix
+job_pool_start format_fennel
+job_pool_start format_python
+job_pool_start format_web_and_json
+job_pool_start format_shells
+job_pool_start format_toml
+job_pool_start format_yaml
+job_pool_start format_kdl
+job_pool_start format_sql
+
+job_pool_wait
+or exit $status
+
+set -l files (tracked_files)
+if test (count $files) -gt 0
+    run_quiet keep-sorted $files
+    or exit $status
 end
 
-just --fmt
+run_quiet just --fmt
+or exit $status

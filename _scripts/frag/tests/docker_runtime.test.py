@@ -1,5 +1,3 @@
-
-
 import json
 import subprocess
 from pathlib import Path
@@ -714,7 +712,9 @@ def test_start_profile_container_uses_runtime_spec_mounts_and_command(
   monkeypatch.setattr(
     docker_runtime.os, "getgroups", lambda: [1000, 2001, 2002, 2001]
   )
-  monkeypatch.setattr(image_assets.Path, "home", lambda: tmp_path / "empty-home")
+  monkeypatch.setattr(
+    image_assets.Path, "home", lambda: tmp_path / "empty-home"
+  )
   workspace_root = tmp_path / "workspace"
   workspace_root.mkdir()
   shared_root = tmp_path / "shared-home"
@@ -2247,6 +2247,7 @@ def test_stop_profile_container_surfaces_docker_stop_failures(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers stop profile container surfaces docker stop failures."""
+
   def fake_run(
     command: list[str], **_kwargs: object
   ) -> subprocess.CompletedProcess[str]:

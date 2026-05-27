@@ -136,7 +136,6 @@
   (icollect [_ spec (ipairs (M.specs ...))]
     (apply-mode mode spec)))
 
-
 (fn M.register-plugin-icons! []
   "Register icon metadata collected from lazy plugin key specs."
   (when (and _G.which_key_plugin_icon_specs

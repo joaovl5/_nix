@@ -1,7 +1,5 @@
 """Repository URI parsing for git forge, SSH, HTTPS, and local paths."""
 
-
-
 from enum import Enum
 
 from attrs import define

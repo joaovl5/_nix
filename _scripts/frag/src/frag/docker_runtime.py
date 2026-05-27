@@ -81,7 +81,9 @@ def container_workdir_for_cwd(
   return str(Path(_WORKSPACE_ROOT_IN_CONTAINER, *relative.parts).as_posix())
 
 
-def _workspace_root_mount_matches(*, mounts: object, workspace_root: Path) -> bool:
+def _workspace_root_mount_matches(
+  *, mounts: object, workspace_root: Path
+) -> bool:
   if not isinstance(mounts, list):
     return False
   for mount in mounts:
@@ -294,7 +296,9 @@ def resolve_runtime_spec(
   )
 
 
-def _start_command_with_runtime_metadata(*, runtime_spec: RuntimeSpec) -> list[str]:
+def _start_command_with_runtime_metadata(
+  *, runtime_spec: RuntimeSpec
+) -> list[str]:
   command = list(runtime_spec.start_command)
   if not command or command[0] != "frag-bootstrap":
     return command
@@ -412,7 +416,9 @@ def _build_bootstrap_wait_command(
   ]
 
 
-def _build_bootstrap_status_command(*, profile: profiles.Profile) -> list[str]:
+def _build_bootstrap_status_command(
+  *, profile: profiles.Profile
+) -> list[str]:
   return [
     "docker",
     "exec",
@@ -549,7 +555,9 @@ def _read_container_logs(profile: profiles.Profile) -> str | None:
   )
   if result.returncode != 0:
     return None
-  logs = "".join(part for part in (result.stdout, result.stderr) if part).strip()
+  logs = "".join(
+    part for part in (result.stdout, result.stderr) if part
+  ).strip()
   if not logs:
     return None
   return logs

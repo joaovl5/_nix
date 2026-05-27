@@ -1,5 +1,3 @@
-
-
 from attrs import Factory, define
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
@@ -18,7 +16,9 @@ from vm_wrapper.nix_runner import (
 class FakeRun:
   stdout: str = ""
   returncode: int = 0
-  calls: list[tuple[list[str], dict[str, str] | None, Path | None, bool]] = Factory(list)
+  calls: list[tuple[list[str], dict[str, str] | None, Path | None, bool]] = (
+    Factory(list)
+  )
 
   def __call__(
     self,

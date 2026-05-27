@@ -19,4 +19,4 @@
 [tool.pytest.ini_options]
   # Test files use *.test.py naming convention instead of default test_*.py
   python_files = ["*.test.py"]
-  addopts = ["--import-mode=importlib"]
+  addopts      = ["--import-mode=importlib"]

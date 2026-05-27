@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -186,7 +185,9 @@ def test_main_checks_host_before_staging_bundle(
   home_dir.mkdir()
 
   def require_missing_host(
-    *, host: str, available_hosts: list[str]  # noqa: ARG001
+    *,
+    host: str,
+    available_hosts: list[str],  # noqa: ARG001
   ) -> None:
     raise UserFacingError("missing host")
 

@@ -8,8 +8,8 @@
 
 - **npins/flake-compat:**
   - `npins/sources.json` is the source of truth for pinned external inputs.
-  - `inputs.nix` adapts those pins through `flake-compat` into the flake-shaped
-    `inputs` set consumed by the repo.
+  - `inputs.nix` adapts those pins through `flake-compat` into the
+    flake-shaped `inputs` set consumed by the repo.
   - `flake.nix` is a thin shim over `default.nix`; keep it thin and do not
     treat it as the input source of truth.
   - `mysecrets` updates should use `npins update mysecrets` and stage

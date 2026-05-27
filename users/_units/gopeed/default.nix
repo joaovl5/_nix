@@ -120,10 +120,11 @@ in
         }
 
         ${concatStringsSep "\n" (map (app: let
-          dirs = app_dirs.${app};
-        in ''
-          move_completed_root ${app} ${dirs.work} ${dirs.completed}
-        '') enabled_blackhole_apps)}
+            dirs = app_dirs.${app};
+          in ''
+            move_completed_root ${app} ${dirs.work} ${dirs.completed}
+          '')
+          enabled_blackhole_apps)}
       '';
       gopeed_config = pkgs.writeText "gopeed-config.json" (builtins.toJSON {
         address = "127.0.0.1";
@@ -425,14 +426,16 @@ in
             };
           };
 
-          systemd.tmpfiles.rules = [
-            "d '${opts.state_dir}' 0750 ${user} ${media_group} - -"
-            "d '${opts.storage_dir}' 0750 ${user} ${media_group} - -"
-            "d '${opts.download_dir}' 2775 ${user} ${media_group} - -"
-            "d '${opts.blackhole.root}' 2775 ${user} ${media_group} - -"
-            "d '/srv/torrents' 0755 root root - -"
-            "d '${opts.qbittorrent_archive_dir}' 2775 ${user} ${media_group} - -"
-          ] ++ tmpfiles_blackhole_rules;
+          systemd.tmpfiles.rules =
+            [
+              "d '${opts.state_dir}' 0750 ${user} ${media_group} - -"
+              "d '${opts.storage_dir}' 0750 ${user} ${media_group} - -"
+              "d '${opts.download_dir}' 2775 ${user} ${media_group} - -"
+              "d '${opts.blackhole.root}' 2775 ${user} ${media_group} - -"
+              "d '/srv/torrents' 0755 root root - -"
+              "d '${opts.qbittorrent_archive_dir}' 2775 ${user} ${media_group} - -"
+            ]
+            ++ tmpfiles_blackhole_rules;
 
           systemd.services.gopeed = {
             description = "Gopeed Web download service";

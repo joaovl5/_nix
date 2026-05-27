@@ -1,5 +1,3 @@
-
-
 from attrs import Factory, define
 
 import pytest
@@ -634,6 +632,7 @@ def test_required_profile_prompts_reject_blank_text_answers(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers required profile prompts reject blank text answers."""
+
   class FakePrompt:
     def __init__(self, answer: object) -> None:
       self.answer = answer
@@ -689,6 +688,7 @@ def test_prompt_profile_image_rejects_cancelled_selection(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers prompt profile image rejects cancelled selection."""
+
   class FakePrompt:
     def ask(self) -> object:
       return None
@@ -893,6 +893,7 @@ def test_prompt_enter_profile_action_treats_colliding_label_as_existing(
   monkeypatch: pytest.MonkeyPatch,
 ) -> None:
   """Covers prompt enter profile action treats colliding label as existing."""
+
   class FakePrompt:
     def __init__(self, selected: object) -> None:
       self.selected = selected

@@ -763,8 +763,9 @@ hister list-urls
   `libvirtd.service` failed.
 - The unit had been socket/wanted started during activation, then after about
   two minutes logged `Make forcefull daemon shutdown` and exited status `1`.
-- `libvirtd.socket`, `libvirtd-ro.socket`, and `libvirtd-admin.socket` remained
-  active/listening, so later socket activation could reproduce the failed state.
+- `libvirtd.socket`, `libvirtd-ro.socket`, and `libvirtd-admin.socket`
+  remained active/listening, so later socket activation could reproduce the
+  failed state.
 
 ### Root cause
 
@@ -774,8 +775,9 @@ hister list-urls
 - The libvirt enablement was inherited from the shared host bootstrap:
   `systems/_bootstrap/host.nix` enables `virtualisation.libvirtd` for all
   hosts.
-- `temperance` does not explicitly need libvirt in its host config, so this was
-  inherited default noise rather than an intentional service for that host.
+- `temperance` does not explicitly need libvirt in its host config, so this
+  was inherited default noise rather than an intentional service for that
+  host.
 
 ### Fix used in this repo
 
@@ -792,13 +794,13 @@ hister list-urls
 - `nix fmt`, targeted `prek --files`, and `nix flake check --all-systems`
   passed after the Nix change.
 - A full `deploy --skip-checks` activated and confirmed `temperance`, but then
-  failed later on unrelated `tyrant` `kaneo-api.service` auto-restart state and
-  revoked the earlier success.
+  failed later on unrelated `tyrant` `kaneo-api.service` auto-restart state
+  and revoked the earlier success.
 - Targeted `deploy --skip-checks .#temperance --log-dir logs --debug-logs
   --confirm-timeout 1800 --activation-timeout 1800` then completed
   successfully and confirmed activation.
-- Post-deploy `temperance` checks reported zero failed units, and libvirt units
-  (`libvirtd.service`, `libvirtd*.socket`, `libvirt-guests.service`,
+- Post-deploy `temperance` checks reported zero failed units, and libvirt
+  units (`libvirtd.service`, `libvirtd*.socket`, `libvirt-guests.service`,
   `virtlockd.socket`, `virtlogd.socket`) all had `LoadState=not-found` /
   `ActiveState=inactive`.
 
@@ -876,10 +878,10 @@ hister list-urls
 - Those probes did not force public-key-only batch auth. When the raw
   IP-based invocation did not immediately complete with the expected key path,
   OpenSSH was allowed to fall back to keyboard-interactive/PAM.
-- `temperance` logs showed repeated `Failed keyboard-interactive/pam` attempts,
-  an exceeded `LoginGraceTime`, and fail2ban blocked the client IP. The
-  observed `Connection refused` was therefore ban/firewall fallout, not proof
-  that sshd or deployment had failed.
+- `temperance` logs showed repeated `Failed keyboard-interactive/pam`
+  attempts, an exceeded `LoginGraceTime`, and fail2ban blocked the client IP.
+  The observed `Connection refused` was therefore ban/firewall fallout, not
+  proof that sshd or deployment had failed.
 
 ### Rule for future agents
 
@@ -935,10 +937,10 @@ hister list-urls
 
 ### Symptom
 
-- After the containment deploy, `torrent.trll.ing` showed the qBittorrent login
-  form. A normal login attempt failed, and a browser refresh coincided with
-  another `qbittorrent-nox` `SIGSEGV`. The service recovered due to the new
-  `Restart=on-failure` policy.
+- After the containment deploy, `torrent.trll.ing` showed the qBittorrent
+  login form. A normal login attempt failed, and a browser refresh coincided
+  with another `qbittorrent-nox` `SIGSEGV`. The service recovered due to the
+  new `Restart=on-failure` policy.
 
 ### Evidence
 
@@ -958,19 +960,18 @@ hister list-urls
 - The rejected login is likely credentials/config drift: credentials are not
   declared in Nix, and the NixOS module rewrites `qBittorrent.conf` from
   `services.qbittorrent.serverConfig` on service start.
-- The crash is a separate upstream qBittorrent/Qt HTTP parsing bug triggered by
-  WebUI requests, not Transmission, Traefik, or bad user credentials.
+- The crash is a separate upstream qBittorrent/Qt HTTP parsing bug triggered
+  by WebUI requests, not Transmission, Traefik, or bad user credentials.
 
 ### Candidate fixes
 
-- Best targeted fix: patch/override qBittorrent with upstream PR `#24286` until
-  nixpkgs carries a fixed release.
-- Temporary mitigation: disable VueTorrent and use qBittorrent's built-in WebUI,
-  but this may only reduce request patterns rather than fix the vulnerable
-  `Accept-Encoding` parser.
+- Best targeted fix: patch/override qBittorrent with upstream PR `#24286`
+  until nixpkgs carries a fixed release.
+- Temporary mitigation: disable VueTorrent and use qBittorrent's built-in
+  WebUI, but this may only reduce request patterns rather than fix the
+  vulnerable `Accept-Encoding` parser.
 - Separate auth cleanup: declare a stable `WebUI\Username` and
   `WebUI\Password_PBKDF2` in Nix or via a secret-backed config mechanism.
-
 
 ## Implementation note: Gopeed qBittorrent replacement
 
@@ -984,11 +985,12 @@ hister list-urls
 - The qBittorrent payload archive target is
   `/srv/torrents/qbittorrent-archive`; this is intentionally outside the
   `/home/tyrant` backup snapshot.
-- Radarr and Sonarr are declaratively configured with Torrent Blackhole clients
-  pointing at Gopeed-managed incoming/completed folders. Lidarr has matching
-  Gopeed directories/watcher support available through the module, but the
-  current nixarr revision has no Lidarr settings-sync module, so adding the
-  Lidarr download client remains a manual or future custom API-seeding step.
+- Radarr and Sonarr are declaratively configured with Torrent Blackhole
+  clients pointing at Gopeed-managed incoming/completed folders. Lidarr has
+  matching Gopeed directories/watcher support available through the module,
+  but the current nixarr revision has no Lidarr settings-sync module, so
+  adding the Lidarr download client remains a manual or future custom
+  API-seeding step.
 
 ## Operational incident: Gopeed blackhole magnet drops not appearing
 
@@ -996,23 +998,24 @@ hister list-urls
   Blackhole, but Gopeed's task list stayed empty and the blackhole path units
   had no recent work.
 - Runtime evidence on `tyrant` showed the deployed Sonarr/Radarr download
-  clients still had `saveMagnetFiles = false`, even though the repo had already
-  been updated to set it to `true`.
+  clients still had `saveMagnetFiles = false`, even though the repo had
+  already been updated to set it to `true`.
 - Root cause: magnet-only releases do not create a `.torrent` file. With
   `saveMagnetFiles = false`, the *arr blackhole client had nothing for the
-  systemd path unit or Gopeed submit script to consume, so no Gopeed task could
-  be created.
+  systemd path unit or Gopeed submit script to consume, so no Gopeed task
+  could be created.
 - Fix used: deploy the updated Gopeed/*arr config so Sonarr/Radarr save
   `.magnet` files, and have the Gopeed blackhole submitter consume both
   `.torrent` and `.magnet` files.
-- Important deployment lesson: after changing declarative settings-sync values,
-  verify the target host's live API state, not only local Nix evaluation.
-  Useful probes:
+- Important deployment lesson: after changing declarative settings-sync
+  values, verify the target host's live API state, not only local Nix
+  evaluation. Useful probes:
   - inspect `systemctl cat gopeed-blackhole-sonarr.{path,service}` and the
     matching Radarr units,
   - query `/api/v3/downloadclient` on Sonarr/Radarr and confirm
     `saveMagnetFiles = true`,
-  - inspect `/var/lib/gopeed/blackhole/<app>/{incoming,submitted,work,failed}`,
+  - inspect
+    `/var/lib/gopeed/blackhole/<app>/{incoming,submitted,work,failed}`,
   - drop a disposable `.magnet` into `incoming` and confirm
     `GET /api/v1/tasks` on Gopeed shows a new task.
 - Verification after deploy: Sonarr and Radarr both reported
@@ -1022,20 +1025,21 @@ hister list-urls
 
 ## Operational incident: Sonarr infinite loading after Gopeed migration
 
-- Symptom: `sonarr.trll.ing` loaded the login page, but the authenticated UI/API
-  path could hang indefinitely.
+- Symptom: `sonarr.trll.ing` loaded the login page, but the authenticated
+  UI/API path could hang indefinitely.
 - Production evidence on `tyrant`: `sonarr.service` was active, local `/`
   returned HTTP 302, but `/api/v3/queue/status` timed out after 20 seconds.
-- Sonarr still had a stale enabled `Transmission` download client (`id=1`) in its
-  database alongside the new `Gopeed Sonarr Blackhole` client. Sonarr health
-  reported `Unable to communicate with Transmission`, and journals showed
-  repeated `TransmissionProxy` timeouts even though Transmission is disabled.
-- Remediation: deleted the stale Sonarr Transmission download client through the
-  local Sonarr API and restarted `sonarr.service` to clear the cached client
-  state.
+- Sonarr still had a stale enabled `Transmission` download client (`id=1`) in
+  its database alongside the new `Gopeed Sonarr Blackhole` client. Sonarr
+  health reported `Unable to communicate with Transmission`, and journals
+  showed repeated `TransmissionProxy` timeouts even though Transmission is
+  disabled.
+- Remediation: deleted the stale Sonarr Transmission download client through
+  the local Sonarr API and restarted `sonarr.service` to clear the cached
+  client state.
 - Verification: the only remaining Sonarr download client is
-  `Gopeed Sonarr Blackhole`; `/api/v3/queue/status` now returns promptly; public
-  `https://sonarr.trll.ing` returns the Sonarr login page.
+  `Gopeed Sonarr Blackhole`; `/api/v3/queue/status` now returns promptly;
+  public `https://sonarr.trll.ing` returns the Sonarr login page.
 
 ## Implementation note: Lidarr Tubifarry plugin support
 

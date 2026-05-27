@@ -9,14 +9,15 @@
   ...
 }: let
   src = inputs.rumdl-src.outPath;
-  tag = inputs.rumdl-src.version or "v0.1.91";
-  version = lib.removePrefix "v" tag;
+  cargo_toml = builtins.fromTOML (builtins.readFile "${src}/Cargo.toml");
+  version = cargo_toml.package.version;
+  tag = inputs.rumdl-src.version or (inputs.rumdl-src.branch or "v${version}");
 in
   rustPlatform.buildRustPackage {
     pname = "rumdl";
     inherit src version;
 
-    cargoHash = "sha256-OUzZ2CLda5VqNLFX6hzd4+MPXcUPsTWerWravZDJJfU=";
+    cargoHash = "sha256-FDwy+6va0nPFoUYwXcy5jeLo7aBq3CMOp0TKVMeGSp8=";
 
     cargoBuildFlags = [
       "--bin=rumdl"

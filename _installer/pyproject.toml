@@ -17,10 +17,10 @@
   dev = ["pytest>=8.0.0"]
 
 [tool.pytest.ini_options]
-  testpaths     = ["tests"]
-  python_files  = ["*.test.py"]
-  markers       = ["manual: tests that must be run manually (not in CI)"]
-  addopts       = "--import-mode=importlib -m 'not manual'"
+  testpaths    = ["tests"]
+  python_files = ["*.test.py"]
+  markers      = ["manual: tests that must be run manually (not in CI)"]
+  addopts      = "--import-mode=importlib -m 'not manual'"
 
 [tool.basedpyright]
   # Installer steps intentionally rely on raised failures rather than consuming

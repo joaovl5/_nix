@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 
 from frag import bootstrap, image_assets, shared_assets_contract

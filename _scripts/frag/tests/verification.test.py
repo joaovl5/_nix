@@ -1,5 +1,3 @@
-
-
 import importlib.util
 import json
 import subprocess
@@ -203,7 +201,9 @@ def test_smoke_verify_parser_defaults_to_main_profile_image() -> None:
   smoke_verify = _load_smoke_verify_module()
 
   # Verify the cyclopts default remains the expected main image.
-  assert smoke_verify.run_smoke_verify.__kwdefaults__["profile_image"] == "main"
+  assert (
+    smoke_verify.run_smoke_verify.__kwdefaults__["profile_image"] == "main"
+  )
 
   _command, explicit_args, _ = smoke_verify.smoke_verify_app.parse_args(
     [

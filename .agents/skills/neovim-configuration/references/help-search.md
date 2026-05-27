@@ -41,8 +41,8 @@ uv run skill://neovim-configuration/scripts/nvim-help.py --with-config search 'v
 ## Runtime Lua probes
 
 Use `scripts/nvim-lua.py` when help research needs live config state, plugin
-internals, mappings, or scheduled startup state. It loads this repo config with
-the same runtimepath/local.lua wrapper used by manual headless probes.
+internals, mappings, or scheduled startup state. It loads this repo config
+with the same runtimepath/local.lua wrapper used by manual headless probes.
 
 ```sh
 # Run a small immediate Lua probe
@@ -92,13 +92,14 @@ nvim --headless -u NONE +'help :vertical' \
 
 ## Pitfalls
 
-- **No `/pattern/` delimiters:** `:helpgrep /foo/` searches for literal slashes;
-  use `:helpgrep foo`. The helper strips one outer slash pair for convenience
+- **No `/pattern/` delimiters:** `:helpgrep /foo/` searches for literal
+  slashes; use `:helpgrep foo`. The helper strips one outer slash pair for
+  convenience
 - **Vim regexps:** `:helpgrep` uses Vim regexp syntax, not PCRE. The helper is
-  case-insensitive by default by appending `\c`; pass `--case-sensitive` to keep
-  raw helpgrep behavior
-- **No command chaining:** `:helpgrep` consumes the rest of the command line as
-  the pattern. Use Lua, or the helper, when collecting quickfix results
+  case-insensitive by default by appending `\c`; pass `--case-sensitive` to
+  keep raw helpgrep behavior
+- **No command chaining:** `:helpgrep` consumes the rest of the command line
+  as the pattern. Use Lua, or the helper, when collecting quickfix results
 - **Config isolation:** prefer default `-u NONE` for core docs. Use
   `--with-config` only when plugin docs are needed or runtimepath differences
   matter

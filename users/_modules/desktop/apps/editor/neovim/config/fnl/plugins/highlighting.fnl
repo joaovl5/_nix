@@ -28,7 +28,7 @@
 
 (let [filetypes (accumulate [res [] _ lang (ipairs languages)]
                   (v/extend res
-                                   (vim.treesitter.language.get_filetypes lang)))]
+                            (vim.treesitter.language.get_filetypes lang)))]
   (v/autocmd :FileType
              {:pattern filetypes
               :callback (fn [ev]

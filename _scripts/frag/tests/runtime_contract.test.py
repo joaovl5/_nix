@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 
 from frag import image_assets, profiles, runtime_contract

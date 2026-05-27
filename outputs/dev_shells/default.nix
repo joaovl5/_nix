@@ -8,7 +8,37 @@
 in {
   devShells = each_supported_system (pkgs: rec {
     main = pkgs.mkShell {
-      packages = [
+      packages = with pkgs; [
+        # things
+        keep-sorted
+        inputs.self.packages.${system}.rumdl
+
+        # le nixes
+        alejandra
+        deadnix
+        statix
+
+        # snakes
+        ruff
+        basedpyright
+
+        # shells and stuff
+        fish
+        shfmt
+        just
+
+        # things
+        taplo
+        yamlfmt
+        jsonfmt
+        kdlfmt
+        sqruff
+
+        # js
+        biome
+
+        # le lisps
+        inputs.self.packages.${system}.sane_fnlfmt
       ];
 
       shellHook = ''

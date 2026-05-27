@@ -5,7 +5,6 @@
   unzip,
   ...
 }:
-
 stdenvNoCC.mkDerivation (final_attrs: {
   pname = "gopeed-web";
   version = "1.9.3";

@@ -1,7 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 (local {: v/$} (require :lib/nvim))
 
-
 (let [zox_ev_action (fn [sel]
                       (v/$.cd sel.path)
                       (MiniFiles.open sel.path))

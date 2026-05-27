@@ -33,9 +33,9 @@
   (let [callback (fn []
                    (vim.api.nvim_buf_delete bufnr))]
     (v/autocmd :BufWritePost
-                  {:buffer bufnr
-                   :once true
-                   :callback (vim.schedule_wrap callback)})))
+               {:buffer bufnr
+                :once true
+                :callback (vim.schedule_wrap callback)})))
 
 (fn flatten_setup []
   (var saved-terminal nil)

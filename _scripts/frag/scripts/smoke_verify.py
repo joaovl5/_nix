@@ -70,7 +70,9 @@ def _require_read_only_failure(
   result: subprocess.CompletedProcess[str], *, path_description: str
 ) -> None:
   detail = (result.stderr or result.stdout).strip().lower()
-  if not any(fragment in detail for fragment in _READ_ONLY_FAILURE_SUBSTRINGS):
+  if not any(
+    fragment in detail for fragment in _READ_ONLY_FAILURE_SUBSTRINGS
+  ):
     raise RuntimeError(
       f"{path_description} failed for an unexpected reason: {detail or result.returncode}"
     )
@@ -201,9 +203,13 @@ def run_smoke_verify(
       cwd=artifacts.workspace_path,
     )
 
-    workspace_write_path = artifacts.workspace_path / "smoke-workspace-write.txt"
+    workspace_write_path = (
+      artifacts.workspace_path / "smoke-workspace-write.txt"
+    )
     stat_result = workspace_write_path.stat()
-    if stat_result.st_uid != os.getuid() or stat_result.st_gid != workspace_gid:
+    if (
+      stat_result.st_uid != os.getuid() or stat_result.st_gid != workspace_gid
+    ):
       raise RuntimeError(
         "workspace write did not preserve host ownership: "
         f"expected uid/gid {os.getuid()}:{workspace_gid}, "

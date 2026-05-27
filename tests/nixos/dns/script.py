@@ -7,6 +7,7 @@ from typing import Protocol, runtime_checkable
 
 from nix_machine_protocol import Machine as _MachineProtocol
 
+
 @runtime_checkable
 class Machine(_MachineProtocol, Protocol):
   """Runtime-checkable view of the NixOS VM driver protocol."""
@@ -312,12 +313,8 @@ def run(*, driver_globals: dict[str, object]) -> None:
   _assert_pihole_api_auth(resolver=resolver)
 
   # Phase 4: prove the declared vhosts resolve through Pi-hole/OctoDNS and undeclared names do not.
-  _assert_dns_answer(
-    probe=probe, hostname=ALPHA_HOST, expected=RESOLVER_IP
-  )
-  _assert_dns_answer(
-    probe=probe, hostname=BETA_HOST, expected=RESOLVER_IP
-  )
+  _assert_dns_answer(probe=probe, hostname=ALPHA_HOST, expected=RESOLVER_IP)
+  _assert_dns_answer(probe=probe, hostname=BETA_HOST, expected=RESOLVER_IP)
   _assert_missing_name(probe=probe)
 
   # Phase 5: prove Traefik serves the expected backend over verified HTTPS for each vhost.

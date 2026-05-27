@@ -53,7 +53,9 @@ def _read_lua_source(*, file: Path | None, lua: tuple[str, ...]) -> str:
   return " ".join(lua)
 
 
-def _wrapped_lua_source(source: str, *, defer_ms: int, auto_quit: bool) -> str:
+def _wrapped_lua_source(
+  source: str, *, defer_ms: int, auto_quit: bool
+) -> str:
   body = f"""
 local function __skill_body()
 {source}

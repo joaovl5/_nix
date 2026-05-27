@@ -31,7 +31,6 @@ Use this for Fennel language work and repo Fennel tooling such as
 - **Private helpers:** keep implementation helpers as plain locals and only
   attach intentionally public names to `M`
 
-
 ## Macros
 
 - **When to use:** use macros for compile-time transformation; prefer

@@ -19,9 +19,12 @@ description: Use when adding, updating, reviewing, or debugging npins-managed in
 
 - We **do not** want transitive dependencies in `npins/sources.json`
   - do not mirror upstream `inputs`, `follows`, lock graphs, or helper pins
-  - do not add an upstream dependency just because a pinned flake depends on it
-  - add a pin only when this repo imports, builds, updates, or patches it directly
-- Let `flake-compat` consume an upstream flake's own lock when loading that flake
+  - do not add an upstream dependency just because a pinned flake depends on
+    it
+  - add a pin only when this repo imports, builds, updates, or patches it
+    directly
+- Let `flake-compat` consume an upstream flake's own lock when loading that
+  flake
 - Do **not** reintroduce `flake-file`, `unflake`, or `with-inputs`
 - Do **not** hand-edit generated npins files
 
@@ -36,15 +39,15 @@ description: Use when adding, updating, reviewing, or debugging npins-managed in
   - update: `npins update NAME`
 - Prefer the existing mirror style when a mirror already exists in
   `npins/sources.json`
-- Stage only `npins/sources.json` for pure pin changes unless adapter or package
-  code also changed
+- Stage only `npins/sources.json` for pure pin changes unless adapter or
+  package code also changed
 
 ## Wiring pins
 
 - If a pin should behave as `inputs.<name>` flake outputs, leave it out of
   `raw_inputs` in `inputs.nix`
-- Add a pin to `raw_inputs` only when repo code needs the fetched source path or
-  metadata, not flake outputs
+- Add a pin to `raw_inputs` only when repo code needs the fetched source path
+  or metadata, not flake outputs
 - Keep `inputs.nix` small and mechanical
   - import `./npins`
   - import `flake-compat`

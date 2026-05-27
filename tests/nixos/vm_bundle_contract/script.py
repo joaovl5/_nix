@@ -4,6 +4,7 @@ from typing import Protocol, runtime_checkable
 
 from nix_machine_protocol import Machine as _MachineProtocol
 
+
 @runtime_checkable
 class Machine(_MachineProtocol, Protocol):
   """Runtime-checkable view of the NixOS VM driver protocol."""

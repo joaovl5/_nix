@@ -156,9 +156,7 @@ class GitHelper:
       args=["commit", "-m", msg], repo_path=self.repo_path, config=self.config
     )
 
-  def push(
-    self, *, remote: str = "origin", ref: str = "HEAD"
-  ) -> GitCommand:
+  def push(self, *, remote: str = "origin", ref: str = "HEAD") -> GitCommand:
     """Build a git push command."""
     return GitCommand(
       args=["push", "-u", remote, ref], repo_path=self.repo_path

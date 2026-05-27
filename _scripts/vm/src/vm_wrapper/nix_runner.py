@@ -1,6 +1,5 @@
 """Nix execution helpers for the VM wrapper."""
 
-
 import json
 import os
 from collections.abc import Callable, Mapping, Sequence

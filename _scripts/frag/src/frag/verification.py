@@ -55,10 +55,10 @@ class CleanupHarness:
     self._actions.clear()
     if first_error is not None:
       raise first_error
+
   def __enter__(self) -> Self:
     """Return the active cleanup harness for context-manager use."""
     return self
-
 
   def __exit__(
     self, exc_type: object, exc: BaseException | None, _tb: object

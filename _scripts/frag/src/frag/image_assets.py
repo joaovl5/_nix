@@ -85,7 +85,9 @@ class ImageAssets(Protocol):
     ...
 
 
-def _shared_asset_entry_has_expected_type(path: Path, entry_type: str) -> bool:
+def _shared_asset_entry_has_expected_type(
+  path: Path, entry_type: str
+) -> bool:
   if entry_type == "directory":
     return path.is_dir()
   if entry_type == "file":
@@ -105,7 +107,9 @@ def _missing_required_shared_assets(
   )
 
 
-def _resolve_host_override_source(host_home: Path, relative_path: Path) -> Path:
+def _resolve_host_override_source(
+  host_home: Path, relative_path: Path
+) -> Path:
   return (host_home / relative_path).expanduser().resolve(strict=False)
 
 
@@ -256,7 +260,9 @@ def resolve_installed_package_assets(
   package_anchor: Path | str | None = None,
 ) -> InstalledPackageAssets:
   """Resolve packaged frag assets from an installed wrapper or package path."""
-  search_anchor = Path(package_anchor or Path(__file__).resolve()).expanduser()
+  search_anchor = Path(
+    package_anchor or Path(__file__).resolve()
+  ).expanduser()
   if not search_anchor.is_absolute():
     search_anchor = Path.cwd() / search_anchor
   search_start = (

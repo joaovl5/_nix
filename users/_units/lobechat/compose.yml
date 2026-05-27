@@ -11,7 +11,6 @@ services:
     command: tail -f /dev/null
     networks:
       - lobe-network
-
   postgresql:
     image: paradedb/paradedb:latest-pg17
     container_name: lobe-postgres
@@ -30,7 +29,6 @@ services:
     restart: always
     networks:
       - lobe-network
-
   redis:
     image: redis:7-alpine
     container_name: lobe-redis
@@ -47,7 +45,6 @@ services:
     restart: always
     networks:
       - lobe-network
-
   rustfs:
     image: rustfs/rustfs:latest
     container_name: lobe-rustfs
@@ -59,23 +56,11 @@ services:
     volumes:
       - rustfs-data:/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://localhost:9000/health >/dev/null 2>&1 || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/health >/dev/null 2>&1 || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 30
-    command:
-      [
-        "--access-key",
-        "${RUSTFS_ACCESS_KEY}",
-        "--secret-key",
-        "${RUSTFS_SECRET_KEY}",
-        "/data",
-      ]
-
+    command: ["--access-key", "${RUSTFS_ACCESS_KEY}", "--secret-key", "${RUSTFS_SECRET_KEY}", "/data"]
   rustfs-init:
     image: minio/mc:latest
     container_name: lobe-rustfs-init
@@ -89,7 +74,6 @@ services:
     restart: "no"
     networks:
       - lobe-network
-
   searxng:
     image: searxng/searxng
     container_name: lobe-searxng
@@ -102,7 +86,6 @@ services:
       - lobe-network
     env_file:
       - .env
-
   lobe:
     image: lobehub/lobehub
     container_name: lobehub
@@ -136,7 +119,6 @@ services:
     env_file:
       - .env
     restart: always
-
 volumes:
   data:
     driver: local
@@ -144,7 +126,6 @@ volumes:
     driver: local
   rustfs-data:
     driver: local
-
 networks:
   lobe-network:
     driver: bridge

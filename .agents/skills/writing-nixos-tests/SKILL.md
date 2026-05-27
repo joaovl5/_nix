@@ -5,7 +5,8 @@ description: Use when adding, editing, reviewing, or debugging this repo's NixOS
 
 Use this for repo NixOS tests in `tests/nixos/`, shared helpers in
 `tests/common/`, and wrapper details in `_lib/tests/default.nix`. Keep repo
-contract details here and load references for API semantics or fuller templates
+contract details here and load references for API semantics or fuller
+templates
 
 ## Core principle
 
@@ -31,7 +32,8 @@ why any negative claim is trustworthy
 
 - **Suite entrypoint:** add `tests/nixos/<suite>/default.nix` with
   `mylib.tests.mk_test`
-- **Fixture files:** keep substantial node setup in `tests/nixos/<suite>/*.nix`
+- **Fixture files:** keep substantial node setup in
+  `tests/nixos/<suite>/*.nix`
 - **Python driver:** add `tests/nixos/<suite>/script.py` defining `run(...)`
 - **Suite package marker:** add `tests/nixos/<suite>/__init__.py` for every
   new driver suite

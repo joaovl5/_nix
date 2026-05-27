@@ -61,7 +61,9 @@ _PROFILE_HOME_VIEW_MAPPINGS: tuple[tuple[Path, MappingKind, Path], ...] = (
 )
 
 
-def _shared_home_view_mappings() -> tuple[tuple[Path, MappingKind, Path], ...]:
+def _shared_home_view_mappings() -> tuple[
+  tuple[Path, MappingKind, Path], ...
+]:
   return tuple(
     (destination_relative, MappingKind.SHARED, state_shared_relative)
     for destination_relative, state_shared_relative in shared_assets_contract.shared_home_view_mappings()
@@ -222,7 +224,9 @@ def _write_identity_overlay_contract(
   passwd_path = _RUNTIME_IDENTITY_ROOT / "passwd"
   group_path = _RUNTIME_IDENTITY_ROOT / "group"
   exec_path = _RUNTIME_IDENTITY_ROOT / "exec"
-  passwd_overlay_path = (_RUNTIME_IDENTITY_CONTAINER_ROOT / "passwd").as_posix()
+  passwd_overlay_path = (
+    _RUNTIME_IDENTITY_CONTAINER_ROOT / "passwd"
+  ).as_posix()
   group_overlay_path = (_RUNTIME_IDENTITY_CONTAINER_ROOT / "group").as_posix()
   _ensure_directory(passwd_path.parent)
   passwd_path.parent.chmod(0o755)
@@ -300,8 +304,14 @@ def initialize_profile_environment(
   persistent_home = _persistent_home_root(state_profile)
   _ensure_home_alignment(home=home, persistent_home=persistent_home)
   _ensure_ephemeral_cache(persistent_home)
-  for destination_relative, mapping_kind, source_relative in _home_view_mappings():
-    root = state_profile if mapping_kind == MappingKind.PROFILE else state_shared
+  for (
+    destination_relative,
+    mapping_kind,
+    source_relative,
+  ) in _home_view_mappings():
+    root = (
+      state_profile if mapping_kind == MappingKind.PROFILE else state_shared
+    )
     _symlink_view_entry(
       persistent_home / destination_relative,
       root / source_relative,
@@ -321,8 +331,12 @@ def _requested_owner_from_env() -> tuple[int, int] | None:
     raise RuntimeError("bootstrap ownership target must be numeric") from exc
 
 
-def _requested_supplementary_gids_from_env(*, primary_gid: int) -> tuple[int, ...]:
-  raw_gids = os.environ.get(runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, "")
+def _requested_supplementary_gids_from_env(
+  *, primary_gid: int
+) -> tuple[int, ...]:
+  raw_gids = os.environ.get(
+    runtime_contract.TARGET_SUPPLEMENTARY_GIDS_ENV, ""
+  )
   if not raw_gids.strip():
     return ()
   supplementary_gids: list[int] = []
@@ -357,7 +371,9 @@ def _chown_tree(root: Path, *, uid: int, gid: int) -> None:
       os.chown(file_path, uid, gid, follow_symlinks=False)
 
 
-def _normalize_keepalive_tokens(argv: Sequence[str] | None) -> list[str] | None:
+def _normalize_keepalive_tokens(
+  argv: Sequence[str] | None,
+) -> list[str] | None:
   if argv is None:
     return None
   tokens = list(argv)
