@@ -8,10 +8,7 @@
     ["x86_64-linux"]
     (system:
       f nixpkgs.legacyPackages.${system});
-
-  treefmt = import ./treefmt inputs;
 in {
-  formatter = treefmt.format;
   checks = each_supported_system (
     pkgs: let
       extra_args = self._utils.hosts.mk_extra_args {inherit pkgs;};
@@ -31,12 +28,8 @@ in {
       deploy_contract_checks = import ./deploy.nix {
         inherit self pkgs;
       };
-      formatting_checks = {
-        formatting = treefmt.format_check pkgs;
-      };
     in
-      formatting_checks
-      // backup_checks
+      backup_checks
       // test_checks
       // deploy_contract_checks
       // deploy_checks

@@ -1,3 +1,0 @@
-_: {
-  projectRootFile = "default.nix";
-}
