@@ -50,14 +50,14 @@ Use this for Fennel language work and repo Fennel tooling such as
 ## Repo fennel-ls / flsproject rules
 
 - **Source of truth:**
-  `users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl` is
-  authoritative; `flsproject.lua` is generated
+  `modules/aspects/desktop/desktop/apps/editor/neovim/config/flsproject.fnl`
+  is authoritative; `flsproject.lua` is generated
 - **Generated file:** never hand-edit `flsproject.lua`; edit `flsproject.fnl`
   and regenerate
 - **What it controls:** `flsproject.fnl` sets Lua version, Fennel path, macro
   path, Neovim library hints, and extra globals
 - **Macro marker:**
-  `users/_modules/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
+  `modules/aspects/desktop/desktop/apps/editor/neovim/config/fnl/lib/init-macros.fnl`
   must keep `;; fennel-ls: macro-file` as the exact first line
 - **Project root:** this repo roots `fennel-ls` by searching upward for
   `flsproject.fnl`; moving that file changes project rooting

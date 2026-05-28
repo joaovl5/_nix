@@ -11,8 +11,8 @@ eww open <window_name>
 
 - **Config flag:** official docs say every Eww command should include
   `--config /path/to/config/dir` when using a non-default config dir
-- **Repo caveat:** this repo links `users/_modules/desktop/widgets/eww/config`
-  to `~/.config/eww`
+- **Repo caveat:** this repo links
+  `modules/aspects/desktop/desktop/widgets/eww/config` to `~/.config/eww`
 - **Live file:** the live Yuck file still sits under `bar/`
 - **Launch unknown:** no repo-local launcher or service command was found
 - **Verification:** prove the real `bar` launch command with `eww --help`, the
@@ -86,11 +86,13 @@ eww inspector
 
 ### Current repo evidence
 
-- **Module entry:** `users/_modules/desktop/widgets/eww/default.nix`
-- **Bar Yuck:** `users/_modules/desktop/widgets/eww/config/bar/eww.yuck`
-- **Bar SCSS:** `users/_modules/desktop/widgets/eww/config/bar/eww.scss`
+- **Module entry:** `modules/aspects/desktop/desktop/widgets/eww/default.nix`
+- **Bar Yuck:**
+  `modules/aspects/desktop/desktop/widgets/eww/config/bar/eww.yuck`
+- **Bar SCSS:**
+  `modules/aspects/desktop/desktop/widgets/eww/config/bar/eww.scss`
 - **Workspace script:**
-  `users/_modules/desktop/widgets/eww/config/bar/scripts/niri-workspaces.sh`
+  `modules/aspects/desktop/desktop/widgets/eww/config/bar/scripts/niri-workspaces.sh`
 
 ## Unknowns to re-check later
 

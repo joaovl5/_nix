@@ -5,7 +5,7 @@ _: {
   ...
 }: {
   imports = [
-    ../../../_modules/options.nix
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
   ];
 
   nixpkgs.overlays = self._channels.overlays;

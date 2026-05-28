@@ -5,11 +5,12 @@ description: Use BEFORE starting work/research on this repo's Neovim config or n
 
 # Neovim Configuration
 
-- **Use this when:** editing `users/_modules/desktop/apps/editor/neovim/` or
-  researching Neovim behavior from installed help
+- **Use this when:** editing
+  `modules/aspects/desktop/desktop/apps/editor/neovim/` or researching Neovim
+  behavior from installed help
 - **Pairing:** for Fennel work, also load `fennel-development`
 - **Path base:** paths below are relative to
-  `users/_modules/desktop/apps/editor/neovim/`
+  `modules/aspects/desktop/desktop/apps/editor/neovim/`
 
 ## First rule
 
@@ -92,7 +93,7 @@ description: Use BEFORE starting work/research on this repo's Neovim config or n
 - **Repo root:** the helper is skill-local and finds the repo root by
   searching upward for `flake.nix`, so caller cwd does not matter
 - **Project anchor:** the default anchor is
-  `users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl`
+  `modules/aspects/desktop/desktop/apps/editor/neovim/config/flsproject.fnl`
 - **nfnl root:** from that anchor, the helper finds the nearest parent with
   `.nfnl.fnl`
 - **Compile action:** it opens a Fennel buffer, calls

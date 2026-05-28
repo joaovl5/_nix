@@ -1,7 +1,7 @@
 (import spork/argparse :as argparse)
 (import spork/sh :as sh)
 
-(def emacs-vendored-nix-root "users/_modules/desktop/apps/editor/emacs/config")
+(def emacs-vendored-nix-root "modules/aspects/desktop/desktop/apps/editor/emacs/config")
 (def cli-options
   (or (argparse/argparse
         "Format repository files."

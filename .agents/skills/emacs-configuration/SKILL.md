@@ -1,16 +1,17 @@
 ---
 name: emacs-configuration
-description: Use when editing this repo's Emacs config under users/_modules/desktop/apps/editor/emacs
+description: Use when editing this repo's Emacs config under modules/aspects/desktop/desktop/apps/editor/emacs
 ---
 
 # Emacs Configuration
 
-Use this when editing `users/_modules/desktop/apps/editor/emacs/`
+Use this when editing `modules/aspects/desktop/desktop/apps/editor/emacs/`
 
 For Nix-layer changes like packages or services, also check the repo's
 AGENTS.md for required checks
 
-Below, paths are relative to `users/_modules/desktop/apps/editor/emacs/`
+Below, paths are relative to
+`modules/aspects/desktop/desktop/apps/editor/emacs/`
 
 ## First checks
 

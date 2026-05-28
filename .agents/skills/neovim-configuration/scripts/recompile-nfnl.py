@@ -15,7 +15,7 @@ from pathlib import Path
 from cyclopts import App, CycloptsError
 
 DEFAULT_ANCHOR = Path(
-  "users/_modules/desktop/apps/editor/neovim/config/flsproject.fnl"
+  "modules/aspects/desktop/desktop/apps/editor/neovim/config/flsproject.fnl"
 )
 
 app = App(
@@ -245,7 +245,7 @@ def main(
     print("Hints:")
     print("- Make sure `nvim` is the repo's configured Neovim on PATH.")
     print(
-      "- Trust `users/_modules/desktop/apps/editor/neovim/config/.nfnl.fnl` once in interactive Neovim before using this script."
+      "- Trust `modules/aspects/desktop/desktop/apps/editor/neovim/config/.nfnl.fnl` once in interactive Neovim before using this script."
     )
     print(
       "- The script opens a Fennel buffer first so nfnl and its filetype hooks are loaded."

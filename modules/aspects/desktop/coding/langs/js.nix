@@ -1,0 +1,35 @@
+_: {
+  den.aspects.coding.homeManager = {pkgs, ...}: let
+    node_pkg = pkgs.nodejs;
+  in {
+    # programs.npm = {
+    # TODO: ^1
+    #   enable = true;
+    #   package = node_pkg;
+    #   settings = {
+    #     color = true;
+    #     maxsockets = 30;
+    #     prefer-offline = true;
+    #     fetch-retries = 3;
+    #     fetch-retry-mintimeout = 15000; # 15s
+    #     fetch-retry-maxtimeout = 90000; # 1m30s
+    #   };
+    # };
+    programs.bun = {
+      enable = true;
+    };
+    home.packages = with pkgs; [
+      # keep-sorted start
+      biome
+      eslint
+      eslint_d
+      node_pkg
+      nodejs
+      typescript
+      typescript-language-server
+      vscode-js-debug
+
+      # keep-sorted end
+    ];
+  };
+}

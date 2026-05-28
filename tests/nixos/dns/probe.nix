@@ -8,7 +8,7 @@ _: {
 in {
   imports = [
     ../../common/base_node.nix
-    ../../../_modules/options.nix
+    (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
   ];
 
   system.stateVersion = "25.11";

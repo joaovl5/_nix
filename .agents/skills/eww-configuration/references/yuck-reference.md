@@ -9,7 +9,7 @@ docs
   styling
 - **Official layout:** docs show one config dir with `eww.yuck` and `eww.scss`
 - **Repo caveat:** this repo keeps the active bar under
-  `users/_modules/desktop/widgets/eww/config/bar/`, so prove the real
+  `modules/aspects/desktop/desktop/widgets/eww/config/bar/`, so prove the real
   `--config` target before running commands
 - **Includes:** use `(include "./path/file.yuck")` to split config, but
   current repo files do not use it
