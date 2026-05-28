@@ -1,4 +1,5 @@
 {
+  den,
   globals,
   inputs,
   self,
@@ -15,9 +16,13 @@
       inherit globals inputs pkgs;
       inherit (pkgs) lib;
     };
-    inherit globals inputs system;
+    inherit globals inputs;
   };
   host_units = name: globals.hosts.${name}.units or [];
+  server_home_user = {
+    classes = ["homeManager"];
+    aspect = den.aspects.server-home-user;
+  };
   instantiate_nixos = args:
     inputs.nixpkgs.lib.nixosSystem (
       args
@@ -27,25 +32,25 @@
       }
     );
 in {
+  den.aspects.server-home-user = {};
+
   den.hosts.${system} = {
     lavpc = {
-      collisionPolicy = "class-wins";
       instantiate = instantiate_nixos;
       units = host_units "lavpc";
       users.lav.classes = ["homeManager"];
     };
     tyrant = {
-      collisionPolicy = "class-wins";
       instantiate = instantiate_nixos;
       units = host_units "tyrant";
+      users.tyrant = server_home_user;
     };
     temperance = {
-      collisionPolicy = "class-wins";
       instantiate = instantiate_nixos;
       units = host_units "temperance";
+      users.temperance = server_home_user;
     };
     iso = {
-      collisionPolicy = "class-wins";
       instantiate = instantiate_nixos;
     };
   };

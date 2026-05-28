@@ -4,7 +4,6 @@
   ...
 }: {
   den.aspects.system-minimal-base = {
-    meta.collisionPolicy = "class-wins";
     includes = [
       den.aspects.base-security
       den.aspects.service-ntp

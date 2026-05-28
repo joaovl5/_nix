@@ -20,7 +20,7 @@
     (aspect_nixos ../aspects/base/secrets.nix {} "base-secrets")
     (aspect_nixos ../aspects/base/vm.nix {} "base-vm")
     (aspect_nixos ../aspects/base/boot-grub.nix {} "base-boot-grub")
-    (aspect_nixos ../aspects/base/home-manager.nix {inherit lav;} "base-home-manager")
+    (aspect_nixos ../aspects/base/home-manager.nix {inherit lav;} "base-home-manager-compat")
     (aspect_nixos ../aspects/base/nix.nix {} "base-nix")
     (aspect_nixos ../aspects/base/lix.nix {} "base-lix")
     (aspect_nixos ../aspects/base/shell.nix {} "base-shell")

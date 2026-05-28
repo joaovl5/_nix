@@ -6,6 +6,7 @@ _: {
     pkgs,
     inputs,
     options,
+    system,
     config,
     ...
   }: let

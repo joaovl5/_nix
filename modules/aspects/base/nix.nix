@@ -1,5 +1,4 @@
 _: {
-  den.aspects.base-nix.meta.collisionPolicy = "class-wins";
   den.aspects.base-nix.nixos = {
     lib,
     config,

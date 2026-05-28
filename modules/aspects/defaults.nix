@@ -10,7 +10,6 @@
       den.aspects.provider-disko
       den.aspects.provider-sops
       den.aspects.provider-nixos-dns
-      den.aspects.provider-home-manager
       den.aspects.base-options
       den.aspects.base-secrets
       den.aspects.base-vm
@@ -31,7 +30,6 @@
     in {
       _module.args = {
         inherit globals inputs;
-        inherit (host) system;
         mylib = import ../../lib {
           inherit globals inputs;
           pkgs = legacy_pkgs;
