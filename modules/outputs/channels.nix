@@ -38,9 +38,11 @@
           });
         };
     })
-    (_: prev: {
-      zjstatus = inputs.zjstatus.packages.${prev.system}.default;
-      inherit (inputs.zjstatus.packages.${prev.system}) zjframes;
+    (_: prev: let
+      system = prev.stdenv.hostPlatform.system;
+    in {
+      zjstatus = inputs.zjstatus.packages.${system}.default;
+      inherit (inputs.zjstatus.packages.${system}) zjframes;
     })
   ];
   mk_pkgs = system: let

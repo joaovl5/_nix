@@ -38,7 +38,7 @@ in {
     lavpc = {
       instantiate = instantiate_nixos;
       units = host_units "lavpc";
-      users.lav.classes = ["homeManager"];
+      users.lav.classes = ["homeManager" "hjem"];
     };
     tyrant = {
       instantiate = instantiate_nixos;

@@ -56,7 +56,7 @@
             dev = {enable = o.def true;};
             man = {
               enable = o.def true;
-              generateCaches = o.def true;
+              cache.enable = o.def true;
             };
           };
 

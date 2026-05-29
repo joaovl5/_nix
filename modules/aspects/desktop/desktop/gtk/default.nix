@@ -25,6 +25,8 @@ _: {
         package = pkgs.kanagawa-gtk-theme;
       };
 
+      gtk4.theme = config.gtk.theme;
+
       gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
       gtk2.force = true;
     };

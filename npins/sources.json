@@ -149,6 +149,20 @@
       "url": null,
       "hash": "sha256-6+laKzygw0FLDfYRv681nvFfTv7l3J496MBgVmEP52o="
     },
+    "hjem": {
+      "type": "Git",
+      "repository": {
+        "type": "Forgejo",
+        "server": "https://git.trll.ing/",
+        "owner": "mirrors",
+        "repo": "hjem"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "77bf113e3ce91c6632def66222198561437853dc",
+      "url": "https://git.trll.ing/mirrors/hjem/archive/77bf113e3ce91c6632def66222198561437853dc.tar.gz",
+      "hash": "sha256-Zh9+WMsxDbLVWwhccXjLW+PYO/5ZyUFQLZdYydycbx8="
+    },
     "hm": {
       "type": "Git",
       "repository": {

@@ -85,6 +85,8 @@ _: {
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+      withPython3 = true;
+      withRuby = true;
 
       plugins = lib.attrValues plugins_set;
 

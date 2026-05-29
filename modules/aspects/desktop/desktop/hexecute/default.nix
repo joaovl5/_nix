@@ -10,7 +10,7 @@ _: {
     };
 
     home.packages = [
-      inputs.hexecute.packages.${pkgs.system}.default
+      inputs.hexecute.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 }

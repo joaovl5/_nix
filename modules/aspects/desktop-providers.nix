@@ -9,8 +9,6 @@
         type = lib.types.listOf lib.types.raw;
         default = [];
       };
-
-      config.hm_modules = [inputs.nur.modules.homeManager.default];
     };
   };
 }

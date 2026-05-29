@@ -14,9 +14,10 @@ in {
   flake.checks = each_supported_system (
     pkgs: let
       extra_args = self._utils.hosts.mk_extra_args {inherit pkgs;};
+      system = pkgs.stdenv.hostPlatform.system;
       deploy_checks =
-        if builtins.hasAttr pkgs.system deploy-rs.lib
-        then deploy-rs.lib.${pkgs.system}.deployChecks self.deploy
+        if builtins.hasAttr system deploy-rs.lib
+        then deploy-rs.lib.${system}.deployChecks self.deploy
         else {};
       test_checks = import ../../tests (extra_args
         // {
