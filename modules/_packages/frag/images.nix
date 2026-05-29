@@ -1,6 +1,7 @@
 {
   pkgs,
   frag_runtime,
+  llm_agents,
   lib ? pkgs.lib,
   ...
 }: let
@@ -17,7 +18,7 @@
   runtimePackages = with pkgs; [
     runtimeFrag
     bashInteractive
-    bun
+    llm_agents.bun
     cacert
     coreutils
     findutils
@@ -27,9 +28,9 @@
     gnused
     jq
     less
-    llm-agents.claude-code
-    llm-agents.oh-my-claudecode
-    llm-agents.omp
+    llm_agents.claude-code
+    llm_agents.oh-my-claudecode
+    llm_agents.omp
     nodejs
     nss_wrapper
     perl

@@ -1,11 +1,12 @@
 let
   inputs = (import ./inputs.nix) // {inherit self;};
   globals = import ./globals;
+  import_tree = import inputs.import-tree;
   outputs = let
     inherit (inputs.nixpkgs) lib;
   in
     (lib.evalModules {
-      modules = [(inputs.import-tree ./modules)];
+      modules = [(import_tree ./modules)];
       specialArgs = {
         inherit globals inputs;
         inherit (inputs) self;

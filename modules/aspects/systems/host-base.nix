@@ -79,6 +79,8 @@
                   hostName = lib.mkForce cfg.hostname;
                 };
 
+                boot.zfs.forceImportRoot = false;
+
                 sops.secrets.${root_pw_secret} =
                   s.mk_secret "${s.dir}/${opts.password.sops_filename}" opts.password.sops_key
                   {neededForUsers = true;};

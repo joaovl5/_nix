@@ -2,7 +2,6 @@
   den,
   globals,
   inputs,
-  self,
   ...
 }: {
   den.default = {
@@ -29,8 +28,6 @@
           inherit (pkgs) lib;
         };
       };
-
-      nixpkgs.overlays = self._channels.overlays;
     };
   };
 }

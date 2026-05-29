@@ -1,7 +1,6 @@
 _: {
   lib,
   config,
-  self,
   mylib,
   test_ssh_key,
   pkgs,
@@ -17,8 +16,6 @@ in {
     (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
     backup_module
   ];
-
-  nixpkgs.overlays = self._channels.overlays;
 
   my.nix = o.def {
     hostname = "coordinator";

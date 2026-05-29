@@ -1,5 +1,4 @@
 {
-  self,
   config,
   mylib,
   ...
@@ -7,8 +6,6 @@
   my = mylib.use config;
   o = my.options;
 in {
-  nixpkgs.overlays = self._channels.overlays;
-
   my.nix = o.def {
     hostname = "testbox";
     username = "tester";

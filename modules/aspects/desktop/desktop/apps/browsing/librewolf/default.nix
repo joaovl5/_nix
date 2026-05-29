@@ -8,7 +8,11 @@ _: {
     ...
   }: let
     profile_name = "lav";
-    librewolf_pkg = inputs.self.pkgs.${pkgs.stdenv.hostPlatform.system}."unstable-small".librewolf;
+    unstable_small_pkgs = import inputs.unstable-small {
+      system = pkgs.stdenv.hostPlatform.system;
+      config.allowUnfree = true;
+    };
+    librewolf_pkg = unstable_small_pkgs.librewolf;
 
     allowed_sites = [
       "https://discord.com"

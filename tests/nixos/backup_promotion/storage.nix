@@ -1,6 +1,5 @@
 _: {
   lib,
-  self,
   test_ssh_key,
   ...
 }: {
@@ -8,7 +7,6 @@ _: {
     (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
   ];
 
-  nixpkgs.overlays = self._channels.overlays;
   system.stateVersion = "25.11";
 
   my.nix.hostname = "storage";

@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  llm_agents ? pkgs.callPackage ../llm-agents {inherit inputs;},
   lib ? pkgs.lib,
   ...
 }: let
@@ -28,7 +29,7 @@
   };
 
   images = import ./images.nix {
-    inherit pkgs frag_runtime;
+    inherit pkgs frag_runtime llm_agents;
   };
   zjstatus = inputs.zjstatus.packages.${pkgs.stdenv.hostPlatform.system}.default;
 

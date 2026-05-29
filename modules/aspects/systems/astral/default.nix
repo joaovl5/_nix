@@ -2,13 +2,13 @@
   den.aspects.system-astral = {
     includes = [den.aspects.system-desktop-base];
 
-    nixos = {mylib, ...}: {
+    nixos = {globals, ...}: {
       my = {
         host.title_file = ./assets/title.txt;
       };
 
       imports = [
-        (mylib.hosts.host_config "lavpc")
+        globals.hosts.lavpc.config
       ];
 
       users = {
