@@ -1,6 +1,7 @@
 {
   pkgs,
   modulesPath,
+  llm_agents,
   ...
 }: {
   imports = [
@@ -36,9 +37,9 @@
     gnugrep
     gnused
     less
-    llm-agents.omp
-    llm-agents.claude-code
-    llm-agents.oh-my-claudecode
+    llm_agents.omp
+    llm_agents.claude-code
+    llm_agents.oh-my-claudecode
     nss_wrapper
     procps
     starship
@@ -50,7 +51,7 @@
     # deps
     perl
     nodejs
-    bun
+    llm_agents.bun
     python314
     jq
     git

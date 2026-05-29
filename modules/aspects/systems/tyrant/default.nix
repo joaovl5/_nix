@@ -5,9 +5,9 @@
       den.aspects.base-storage-server
     ];
 
-    nixos = {mylib, ...}: {
+    nixos = {globals, ...}: {
       imports = [
-        (mylib.hosts.host_config "tyrant")
+        globals.hosts.tyrant.config
       ];
 
       my = {

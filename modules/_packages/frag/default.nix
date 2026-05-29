@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  llm_agents ? pkgs.callPackage ../llm-agents {inherit inputs;},
   lib ? pkgs.lib,
   ...
 }: let
@@ -28,11 +29,12 @@
   };
 
   images = import ./images.nix {
-    inherit pkgs frag_runtime;
+    inherit pkgs frag_runtime llm_agents;
   };
+  zjstatus = inputs.zjstatus.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   terminal_assets = import ./terminal_assets.nix {
-    inherit pkgs lib;
+    inherit pkgs lib zjstatus;
   };
 
   opencode_json = pkgs.writeText "opencode.json" (builtins.toJSON {

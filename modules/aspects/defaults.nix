@@ -2,7 +2,6 @@
   den,
   globals,
   inputs,
-  self,
   ...
 }: {
   den.default = {
@@ -21,23 +20,14 @@
       den.aspects.base-dns
     ];
 
-    nixos = {host, ...}: let
-      legacy_pkgs = import inputs.nixpkgs {
-        inherit (host) system;
-        overlays = self._channels.overlays;
-        config.allowUnfree = true;
-      };
-    in {
+    nixos = {pkgs, ...}: {
       _module.args = {
         inherit globals inputs;
         mylib = import ../../lib {
-          inherit globals inputs;
-          pkgs = legacy_pkgs;
-          inherit (legacy_pkgs) lib;
+          inherit globals inputs pkgs;
+          inherit (pkgs) lib;
         };
       };
-
-      nixpkgs.overlays = self._channels.overlays;
     };
   };
 }

@@ -64,18 +64,6 @@
       "url": null,
       "hash": "sha256-wuOkjI6pRiN4sEn/EPBRnNW5cmcpvd7xtIM8y5LooAs="
     },
-    "emacs-bleeding-edge": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/emacs-overlay.git"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "c0ee65d473ebdd79e27ae32636054ea89ec990a8",
-      "url": null,
-      "hash": "sha256-nTvPl9e2jnBNsiuQ0I5wq1VOpvVQcJuIynLMssO0LtQ="
-    },
     "fenix": {
       "type": "Git",
       "repository": {
@@ -191,18 +179,6 @@
       "url": "https://api.github.com/repos/denful/import-tree/tarball/refs/tags/v0.2.0",
       "hash": "sha256-Jjuz5CmSkur8KvLDoGa+vylEp+RkQtv4mt/qcMznpH0="
     },
-    "jcode": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/lav/jcode"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "a8c772ca7b0a8085a5bc9eddba6561fb78e50b45",
-      "url": null,
-      "hash": "sha256-Y57eDjJSW+9t4SwZ01pK2Naaw8IqrfU4c63pYFObAsI="
-    },
     "kaneo-src": {
       "type": "Git",
       "repository": {
@@ -238,18 +214,6 @@
       "revision": "98f05f7b1e3e30800e6f8509f5f49e0d2a905d22",
       "url": null,
       "hash": "sha256-JBiig+kI2X6SZhEb5mAiacLiMI5nIU0klWlBCBFshMo="
-    },
-    "microvm": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/microvm.nix.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "9755fd345bd64d1c75ba12b63089c926dd5d886e",
-      "url": null,
-      "hash": "sha256-slQySSmaIewOxdZXF0/g0GSiVg7vJy209Yjs7fDNms8="
     },
     "musnix": {
       "type": "Git",
@@ -456,18 +420,6 @@
       "revision": "af53b4c35d6faa3b4ba7c317fb795a6eb679b42a",
       "url": null,
       "hash": "sha256-+7EiIkcSe4raApw1H1iQJC2aILLdSrM7Y3tAswbCO1o="
-    },
-    "treefmt-nix": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/treefmt-nix.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "790751ff7fd3801feeaf96d7dc416a8d581265ba",
-      "url": null,
-      "hash": "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0="
     },
     "unstable": {
       "type": "Git",

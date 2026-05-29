@@ -1,6 +1,7 @@
 {
   pkgs,
   frag_runtime,
+  llm_agents,
   lib ? pkgs.lib,
   ...
 }: let
@@ -14,46 +15,78 @@
     doCheck = false;
   });
 
-  runtimeSystem = import "${pkgs.path}/nixos" {
-    system = null;
-    configuration = {modulesPath, ...}: {
-      imports = [
-        ./runtime-system.nix
-        "${modulesPath}/misc/nixpkgs/read-only.nix"
-      ];
-      nixpkgs.pkgs = pkgs;
-      environment.systemPackages = [runtimeFrag];
-    };
-  };
+  runtimePackages = with pkgs; [
+    runtimeFrag
+    bashInteractive
+    llm_agents.bun
+    cacert
+    coreutils
+    findutils
+    fish
+    git
+    gnugrep
+    gnused
+    jq
+    less
+    llm_agents.claude-code
+    llm_agents.oh-my-claudecode
+    llm_agents.omp
+    nodejs
+    nss_wrapper
+    perl
+    procps
+    python314
+    starship
+    tmux
+    util-linux
+    which
+    zellij
+  ];
 
-  runtimeSystemPath = runtimeSystem.config.system.path;
-  runtimeTarball = runtimeSystem.config.system.build.tarball;
+  runtimeSystemPath = pkgs.buildEnv {
+    name = "system-path";
+    paths = runtimePackages;
+    pathsToLink = [
+      "/bin"
+      "/etc"
+      "/lib"
+      "/libexec"
+      "/share"
+    ];
+    postBuild = ''
+      mkdir -p "$out/bin"
+      if [ ! -e "$out/bin/sh" ]; then
+        ln -s ${pkgs.runtimeShell} "$out/bin/sh"
+      fi
+    '';
+  };
+  runtimeClosure = pkgs.closureInfo {
+    rootPaths = [runtimeSystemPath];
+  };
   runtimeRootfs =
     pkgs.runCommand "frag-runtime-rootfs.tar" {
       nativeBuildInputs = [
         pkgs.gnutar
-        pkgs.xz
       ];
     } ''
       mkdir -p "$TMPDIR/runtime-root"
-      tar -xJf ${runtimeTarball}/tarball/*.tar.xz -C "$TMPDIR/runtime-root"
-
-      rm -rf \
-        "$TMPDIR/runtime-root/home/agent" \
-        "$TMPDIR/runtime-root/sw" \
-        "$TMPDIR/runtime-root/bin/sh" \
-        "$TMPDIR/runtime-root/usr/bin/env"
+      while IFS= read -r store_path; do
+        cp -a --parents "$store_path" "$TMPDIR/runtime-root"
+      done < ${runtimeClosure}/store-paths
 
       mkdir -p \
+        "$TMPDIR/runtime-root/bin" \
+        "$TMPDIR/runtime-root/etc/ssl/certs" \
         "$TMPDIR/runtime-root/home" \
         "$TMPDIR/runtime-root/state/profile/home" \
         "$TMPDIR/runtime-root/usr/bin"
 
-      chmod u+w "$TMPDIR/runtime-root/bin"
       ln -s /state/profile/home "$TMPDIR/runtime-root/home/agent"
       ln -s ${runtimeSystemPath} "$TMPDIR/runtime-root/sw"
       ln -s /sw/bin/sh "$TMPDIR/runtime-root/bin/sh"
       ln -s /sw/bin/env "$TMPDIR/runtime-root/usr/bin/env"
+      ln -s /sw/etc/ssl/certs/ca-bundle.crt "$TMPDIR/runtime-root/etc/ssl/certs/ca-bundle.crt"
+      ln -s /sw/etc/ssl/certs/ca-bundle.crt "$TMPDIR/runtime-root/etc/ssl/certs/ca-certificates.crt"
 
       tar -cf "$out" -C "$TMPDIR/runtime-root" .
     '';

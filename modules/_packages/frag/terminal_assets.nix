@@ -1,6 +1,7 @@
 {
   pkgs,
   lib ? pkgs.lib,
+  zjstatus,
 }: let
   starship_toml = (pkgs.formats.toml {}).generate "frag-starship.toml" ((import ../../aspects/desktop/cli/starship/settings.nix {}).lav.cli.starship.settings {inherit lib;});
 
@@ -30,7 +31,7 @@ in
 
     cp -r ${../../aspects/desktop/cli/multiplexer/zellij/config}/. \
       "$shared_root/.config/zellij"
-    cp ${pkgs.zjstatus}/bin/zjstatus.wasm \
+    cp ${zjstatus}/bin/zjstatus.wasm \
       "$shared_root/.local/share/zellij/plugins/zjstatus.wasm"
 
     cp ${tmux_config} "$shared_root/.config/tmux/tmux.conf"

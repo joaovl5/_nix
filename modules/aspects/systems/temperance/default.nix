@@ -7,14 +7,14 @@
     includes = [den.aspects.system-server-base];
 
     nixos = {
+      globals,
       lib,
-      mylib,
       ...
     }: let
       public_data = lav.public {};
     in {
       imports = [
-        (mylib.hosts.host_config "temperance")
+        globals.hosts.temperance.config
       ];
 
       # TODO: check why these public consts is defined here and at globals

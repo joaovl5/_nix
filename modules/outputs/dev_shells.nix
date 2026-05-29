@@ -1,25 +1,28 @@
 {inputs, ...}: let
   system = "x86_64-linux";
   pkgs = inputs.nixpkgs.legacyPackages.${system};
+  local_packages = import ../_packages {inherit pkgs inputs;};
   main = pkgs.mkShell {
     packages = with pkgs; [
-      keep-sorted
-      inputs.self.packages.${system}.rumdl
+      # keep-sorted start
       alejandra
-      deadnix
-      statix
-      ruff
       basedpyright
+      biome
+      deadnix
       fish
-      shfmt
+      jsonfmt
       just
+      kdlfmt
+      keep-sorted
+      local_packages.rumdl
+      local_packages.sane_fnlfmt
+      ruff
+      shfmt
+      sqruff
+      statix
       taplo
       yamlfmt
-      jsonfmt
-      kdlfmt
-      sqruff
-      biome
-      inputs.self.packages.${system}.sane_fnlfmt
+      # keep-sorted end
     ];
   };
 in {

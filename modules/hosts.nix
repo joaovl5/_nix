@@ -2,19 +2,14 @@
   den,
   globals,
   inputs,
-  self,
   ...
 }: let
   system = "x86_64-linux";
-  pkgs = import inputs.nixpkgs {
-    inherit system;
-    overlays = self._channels.overlays;
-    config.allowUnfree = true;
-  };
   mk_extra_args = {
     mylib = import ../lib {
-      inherit globals inputs pkgs;
-      inherit (pkgs) lib;
+      inherit globals inputs;
+      lib = inputs.nixpkgs.lib;
+      pkgs = null;
     };
     inherit globals inputs;
   };

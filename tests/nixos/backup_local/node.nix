@@ -1,7 +1,6 @@
 _: {
   lib,
   config,
-  self,
   mylib,
   pkgs,
   ...
@@ -16,8 +15,6 @@ in {
     (import ../../../modules/aspects/base/options.nix {}).den.aspects.base-options.nixos
     backup_module
   ];
-
-  nixpkgs.overlays = self._channels.overlays;
 
   my.nix = o.def {
     hostname = "machine";

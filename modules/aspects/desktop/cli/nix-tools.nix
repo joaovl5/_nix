@@ -1,13 +1,10 @@
 _: {
   den.aspects.cli.homeManager = {
     nixos_config,
-    nixos_options,
     lib,
     pkgs,
     inputs,
-    options,
     system,
-    config,
     ...
   }: let
     inherit (lib) mkMerge mkIf;
@@ -42,66 +39,23 @@ _: {
 
       # options search
       optnix = let
-        optnix_lib = inputs.optnix.mkLib pkgs;
-        excluded = [
-          "hjem"
-          "musnix.kernel.packages"
-          "virtualisation.vmVariant.musnix.kernel.packages"
-        ];
-        nixos_options_for_optnix = optnix_lib.removeNestedAttrs excluded nixos_options;
-        hjem_options = let
-          placeholder_user = "‹username›";
-          eval = inputs.nixpkgs.lib.nixosSystem {
-            inherit system;
-            modules = [
-              inputs.hjem.nixosModules.default
-              {
-                users.users.${placeholder_user} = {
-                  isNormalUser = true;
-                  home = "/home/placeholder";
-                };
-              }
-            ];
-          };
-        in
-          optnix_lib.mkOptionsList {
-            options = eval.options.hjem;
-            excluded = ["_module"];
-            transform = o:
-              o
-              // {
-                name = lib.removePrefix "hjem." o.name;
-              };
-          };
+        options_list_cmd = scope: "nix eval --json --impure --file ${lib.escapeShellArg cfg.repo_location} _utils.optnix.${scope}";
       in {
         enable = true;
         settings = {
           scopes."nx" = {
             description = "NixOS";
-            options-list-file = optnix_lib.mkOptionsList {
-              options = nixos_options_for_optnix;
-              inherit excluded;
-            };
+            options-list-cmd = options_list_cmd "nx";
           };
           scopes."hj" = {
             description = "Hjem";
             evaluator = "";
-            options-list-file = hjem_options;
+            options-list-cmd = options_list_cmd "hj";
           };
           scopes."hm" = {
             description = "Home-Manager";
             evaluator = "";
-            options-list-file = optnix_lib.mkOptionsList {
-              inherit
-                options
-                excluded
-                ;
-              transform = o:
-                o
-                // {
-                  name = lib.removePrefix "home-manager.users.${config.home.username}." o.name;
-                };
-            };
+            options-list-cmd = options_list_cmd "hm";
           };
         };
       };

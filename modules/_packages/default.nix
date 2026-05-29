@@ -6,7 +6,8 @@
   beads-ui = pkgs.callPackage ./beads-ui {inherit inputs;};
   beads-web = pkgs.callPackage ./beads-web {};
   degoog = pkgs.callPackage ./degoog {inherit inputs;};
-  frag = pkgs.callPackage ./frag {inherit inputs;};
+  llm_agents = pkgs.callPackage ./llm-agents {inherit inputs;};
+  frag = pkgs.callPackage ./frag {inherit inputs llm_agents;};
   gopeed-web = pkgs.callPackage ./gopeed-web {};
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins {};
   kaneo = pkgs.callPackage ./kaneo {inherit inputs;};
@@ -28,6 +29,7 @@ in {
     gopeed-web
     lidarr-plugins
     kaneo
+    llm_agents
     mardi-gras
     pihole6api
     octodns-pihole

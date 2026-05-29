@@ -1,12 +1,14 @@
 let
-  sources = builtins.removeAttrs (import ./npins) ["__functor"];
+  sources = removeAttrs (import ./npins) ["__functor"];
   flake_compat = import sources.flake-compat;
 
   raw_inputs = [
+    # keep-sorted start
     "all-systems"
     "degoog-src"
     "fennel-ls-nvim-docs"
     "flake-compat"
+    "import-tree"
     "kaneo-src"
     "mardi-gras-src"
     "mysecrets"
@@ -15,8 +17,11 @@ let
     "pihole6api-src"
     "rumdl-src"
     "sane-fnlfmt-src"
+    "stable"
     "superpowers"
     "tree-sitter-kanata"
+    "unstable-small"
+    # keep-sorted end
   ];
 
   normalize_source = source:
