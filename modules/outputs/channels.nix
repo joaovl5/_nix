@@ -3,7 +3,6 @@
   overlays = with inputs; [
     (_o nur {})
     (_o deploy-rs {})
-    (_o niri {attr = "niri";})
     (_o fenix {})
     (_o emacs-bleeding-edge {})
     (final: prev: {

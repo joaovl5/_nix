@@ -275,18 +275,6 @@
       "url": null,
       "hash": "sha256-qFItjP082LeOETdLguSob+gViFT3X0puFQm9Q48kjkw="
     },
-    "niri": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/niri-flake.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "f539bec9083f42a406db82e3d974162281e69d12",
-      "url": null,
-      "hash": "sha256-A8MBNRY+FDLVJ64HWjrcdbtahlAey3fvca/hu9q07yA="
-    },
     "nix-flatpak": {
       "type": "Git",
       "repository": {

@@ -1,23 +1,12 @@
 _: {
-  den.aspects.desktop.homeManager = {
-    inputs,
-    pkgs,
-    ...
-  }: {
-    imports = [
-      inputs.niri.homeModules.niri
-    ];
-
+  den.aspects.desktop.homeManager = {pkgs, ...}: {
     hybrid-links.links.niri = {
       from = ./config;
       to = "~/.config/niri";
     };
 
-    programs.niri = {
-      enable = true;
-    };
-
     services = {
+      gnome-keyring.enable = true;
       swaync = {
         enable = true;
       };
@@ -43,7 +32,7 @@ _: {
   den.aspects.desktop.nixos = {pkgs, ...}: {
     programs.niri = {
       enable = true;
-      package = pkgs.niri-stable;
+      package = pkgs.niri;
     };
   };
 }
