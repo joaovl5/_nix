@@ -1,5 +1,10 @@
 _: {
-  den.aspects.cli.homeManager = {pkgs, ...}: let
+  den.aspects.cli.homeManager = {
+    inputs,
+    pkgs,
+    ...
+  }: let
+    zjstatus = inputs.zjstatus.packages.${pkgs.stdenv.hostPlatform.system}.default;
     yazi_zellij_live_cwd = pkgs.writeShellApplication {
       name = "yazi-zellij-live-cwd";
       runtimeInputs = [
@@ -39,7 +44,7 @@ _: {
     programs.zellij.enable = true;
 
     xdg.dataFile."zellij/plugins/zjstatus.wasm" = {
-      source = "${pkgs.zjstatus}/bin/zjstatus.wasm";
+      source = "${zjstatus}/bin/zjstatus.wasm";
     };
   };
 }

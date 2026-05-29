@@ -30,9 +30,10 @@
   images = import ./images.nix {
     inherit pkgs frag_runtime;
   };
+  zjstatus = inputs.zjstatus.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   terminal_assets = import ./terminal_assets.nix {
-    inherit pkgs lib;
+    inherit pkgs lib zjstatus;
   };
 
   opencode_json = pkgs.writeText "opencode.json" (builtins.toJSON {

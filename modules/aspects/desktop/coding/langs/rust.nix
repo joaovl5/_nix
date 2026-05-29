@@ -4,7 +4,9 @@ _: {
     pkgs,
     ...
   }: {
-    home.packages = with pkgs; [
+    home.packages = let
+      fenix = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system};
+    in [
       (
         fenix.complete.withComponents [
           "cargo"
@@ -14,7 +16,7 @@ _: {
           "rustfmt"
         ]
       )
-      rust-analyzer-nightly
+      fenix.rust-analyzer
     ];
   };
 }

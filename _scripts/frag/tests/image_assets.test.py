@@ -49,6 +49,7 @@ let
 in
   import ./modules/_packages/frag/terminal_assets.nix {
     inherit pkgs;
+    zjstatus = outputs.inputs.zjstatus.packages.x86_64-linux.default;
   }
 """
 
@@ -717,8 +718,9 @@ def test_packaged_terminal_shared_assets_cover_runtime_contract() -> None:
     terminal_paths[".config/zellij/config.kdl"].read_text()
     == (
       REPO_ROOT
-      / "users"
-      / "_modules"
+      / "modules"
+      / "aspects"
+      / "desktop"
       / "cli"
       / "multiplexer"
       / "zellij"

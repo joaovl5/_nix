@@ -1,10 +1,6 @@
 {inputs, ...}: let
   _o = obj: {attr ? "default"}: obj.overlays.${attr};
   overlays = with inputs; [
-    (_o nur {})
-    (_o deploy-rs {})
-    (_o fenix {})
-    (_o emacs-bleeding-edge {})
     (final: prev: {
       bun =
         if prev.stdenv.hostPlatform.system == "x86_64-linux"
@@ -36,12 +32,6 @@
               old.buildPhase;
           });
         };
-    })
-    (_: prev: let
-      system = prev.stdenv.hostPlatform.system;
-    in {
-      zjstatus = inputs.zjstatus.packages.${system}.default;
-      inherit (inputs.zjstatus.packages.${system}) zjframes;
     })
   ];
   mk_pkgs = system: let

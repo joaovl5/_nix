@@ -15,8 +15,10 @@ let
     "pihole6api-src"
     "rumdl-src"
     "sane-fnlfmt-src"
+    "stable"
     "superpowers"
     "tree-sitter-kanata"
+    "unstable-small"
   ];
 
   normalize_source = source:
