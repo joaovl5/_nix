@@ -15,6 +15,8 @@ _: {
     hybrid-links.links.emacs = {
       from = ./config;
       to = "~/.config/emacs";
+      # Keep this hybrid. A normal store-backed link would copy the whole
+      # Emacs config tree, including ignored runtime state like `straight/`.
     };
 
     services.emacs = {
