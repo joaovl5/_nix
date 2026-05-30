@@ -7,7 +7,6 @@
   beads-web = pkgs.callPackage ./beads-web {};
   degoog = pkgs.callPackage ./degoog {inherit inputs;};
   llm_agents = pkgs.callPackage ./llm-agents {inherit inputs;};
-  frag = pkgs.callPackage ./frag {inherit inputs llm_agents;};
   gopeed-web = pkgs.callPackage ./gopeed-web {};
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins {};
   kaneo = pkgs.callPackage ./kaneo {inherit inputs;};
@@ -19,13 +18,11 @@
   rumdl = pkgs.callPackage ./rumdl {inherit inputs;};
   sane_fnlfmt = pkgs.callPackage ./sane_fnlfmt {inherit inputs;};
   tubifarry = pkgs.callPackage ./tubifarry {};
-  vm_launcher = pkgs.callPackage ./vm-launcher {};
 in {
   inherit
     beads-ui
     beads-web
     degoog
-    frag
     gopeed-web
     lidarr-plugins
     kaneo
@@ -36,6 +33,5 @@ in {
     rumdl
     sane_fnlfmt
     tubifarry
-    vm_launcher
     ;
 }

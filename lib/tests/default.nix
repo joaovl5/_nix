@@ -25,7 +25,6 @@
       pythonImportsCheck = [
         "nixos"
         "common"
-        "nixos.vm_bundle_contract.script"
         "nixos.backup_local.script"
         "nixos.backup_promotion.script"
         "nixos.network_namespaces.script"

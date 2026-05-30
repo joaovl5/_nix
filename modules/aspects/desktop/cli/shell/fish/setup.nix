@@ -3,12 +3,10 @@
     programs.fish = {
       enable = true;
       shellInit = ''
-        ${lib.readFile ./src/container_safe_vars.fish}
         ${lib.readFile ./src/vars.fish}
         ${lav.cli.shell.fish.secrets args}
       '';
       interactiveShellInit = ''
-        ${lib.readFile ./src/container_safe_functions.fish}
         ${lib.readFile ./src/functions.fish}
         bind ctrl-e __yazi_zellij_ctrl_e
       '';

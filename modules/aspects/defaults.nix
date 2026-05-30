@@ -11,7 +11,6 @@
       den.aspects.provider-nixos-dns
       den.aspects.base-options
       den.aspects.base-secrets
-      den.aspects.base-vm
       den.aspects.base-boot-grub
       den.aspects.base-home-manager
       den.aspects.base-nix

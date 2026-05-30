@@ -18,13 +18,6 @@ _: {
       "$character"
     ];
 
-    env_var = {
-      variable = "FRAG_PROFILE_NAME";
-      default = "";
-      format = "[$env_value]($style)";
-      style = "cyan";
-    };
-
     directory.style = "blue";
     character = {
       success_symbol = "[❯](purple)";
