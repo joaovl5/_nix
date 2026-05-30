@@ -15,7 +15,8 @@
       den.aspects.base-boot-grub
       den.aspects.base-home-manager
       den.aspects.base-nix
-      den.aspects.base-lix
+      den.aspects.cpp-nix
+      # den.aspects.base-lix
       den.aspects.base-shell
       den.aspects.base-dns
     ];
