@@ -37,6 +37,7 @@ keybinds clear-defaults=true {
     }
     bind "Alt ," {
       SwitchToMode "RenameTab"
+      TabNameInput 0
     }
     bind "Alt ." {
       LaunchOrFocusPlugin "session-manager" {
@@ -71,6 +72,7 @@ keybinds clear-defaults=true {
     }
     bind "," {
       SwitchToMode "RenameTab"
+      TabNameInput 0
     }
     bind "d" {
       Detach
