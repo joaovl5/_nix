@@ -116,8 +116,9 @@
       {:render :wrapped-compact
        :minimum_width 40
        :stages :static})
-    (set vim.notify notify)
-    (setup-lsp-status-updates)))
+    (set vim.notify notify)))
+
+; (setup-lsp-status-updates)))
 
 (p! :rcarriga/nvim-notify
     (lazy false)

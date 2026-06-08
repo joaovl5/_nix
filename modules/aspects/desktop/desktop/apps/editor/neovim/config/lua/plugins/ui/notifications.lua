@@ -106,7 +106,7 @@ local function setup_notify()
   local notify = require("notify")
   notify.setup({render = "wrapped-compact", minimum_width = 40, stages = "static"})
   vim.notify = notify
-  return setup_lsp_status_updates()
+  return nil
 end
 local _11_ = require("lib.plugins")
 local _12_ = require("lib.keys")

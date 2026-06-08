@@ -1,5 +1,5 @@
 -- [nfnl] fnl/plugins/lsp/languages/rust.fnl
-vim.g.rustaceanvim = {tools = {enable_clippy = false}, server = {lspmux = {enable = true}, default_settings = {["rust-analyzer"] = {cargo = {targetDir = true, buildScripts = {enable = true}}, procMacro = {enable = true}, checkOnSave = false}}}}
+vim.g.rustaceanvim = {tools = {enable_clippy = true}, server = {lspmux = {enable = true}, default_settings = {["rust-analyzer"] = {checkOnSave = true, cargo = {targetDir = true, buildScripts = {enable = true}}, procMacro = {enable = true}}}}}
 local function _3_(...)
   local _1_ = require("lib.plugins")
   local _2_ = require("lib.keys")

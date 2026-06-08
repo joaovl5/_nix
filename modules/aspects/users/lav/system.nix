@@ -57,6 +57,9 @@
               ## tui
               systemctl-tui
               gdu # ncdu alternative (MUCH faster on SSDs)
+              dua # same as gdu but rusty
+              dysk
+              procs # 'ps' replacement
 
               # gui
               waylock ## locker

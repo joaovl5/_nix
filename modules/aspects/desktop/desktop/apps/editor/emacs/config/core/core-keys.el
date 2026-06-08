@@ -1,4 +1,4 @@
-;; --- window-related plugins
+;; --- window-related plugins  -*- lexical-binding: t; -*-
 
 ;; windows resize automatically per golden ratio
 (straight-use-package
@@ -8,149 +8,183 @@
 (golden-ratio-mode 1)
 
 
-(defun my-meow-visual-line-smart-bol ()
+(declare-function citre-peek-abort "citre")
+(declare-function eldoc-box-quit-frame "eldoc-box")
+(declare-function my-dired-current-file-directory "core-views")
+(declare-function my-dired-project-directory "core-views")
+(declare-function evil-force-normal-state "evil")
+(declare-function evil-global-set-key "evil")
+(declare-function evil-mode "evil")
+(declare-function evil-record-macro "evil")
+(declare-function evil-set-initial-state "evil")
+(declare-function evil-collection-init "evil-collection")
+(declare-function pixel-scroll-precision-interpolate "pixel-scroll")
+(defvar citre-peek--mode)
+(defvar eldoc-box--frame)
+
+(defun my-close-transient-ui ()
+  "Close transient overlay/child-frame UI when one is active."
+  (cond
+    ((and (bound-and-true-p citre-peek--mode)
+       (fboundp 'citre-peek-abort))
+      (citre-peek-abort)
+      t)
+    ((and (boundp 'eldoc-box--frame)
+       (eq (selected-frame) eldoc-box--frame)
+       (fboundp 'eldoc-box-quit-frame))
+      (eldoc-box-quit-frame)
+      t)
+    (t nil)))
+
+(defun my-evil-record-macro-or-close ()
+  "Close transient UI before falling back to Evil macro recording."
   (interactive)
-  (let* ((visual_line_start (save-excursion
-                              (beginning-of-visual-line)
-                              (point)))
-         (visual_line_end (save-excursion
-                            (end-of-visual-line)
-                            (point)))
-         (first_text_point (save-excursion
-                             (goto-char visual_line_start)
-                             (if (re-search-forward "[^ \t]" visual_line_end t)
-                                 (match-beginning 0)
-                               visual_line_start))))
-    (goto-char (if (= (point) first_text_point)
-                   visual_line_start
-                 first_text_point))))
+  (unless (my-close-transient-ui)
+    (call-interactively #'evil-record-macro)))
 
-(defun meow-setup ()
-  (let ((shared-binds
-         '(;; keep-sorted start
-           ("$" . end-of-visual-line)
-           ("," . meow-inner-of-thing)
-           ("." . meow-bounds-of-thing)
-           ("0" . meow-expand-0)
-           ("1" . meow-expand-1)
-           ("2" . meow-expand-2)
-           ("3" . meow-expand-3)
-           ("4" . meow-expand-4)
-           ("5" . meow-expand-5)
-           ("6" . meow-expand-6)
-           ("7" . meow-expand-7)
-           ("8" . meow-expand-8)
-           ("9" . meow-expand-9)
-           (":" . meow-M-x)
-           (";" . meow-reverse)
-           ("<escape>" . ignore)
-           ("B" . meow-back-symbol)
-           ("E" . meow-next-symbol)
-           ("H" . meow-left-expand)
-           ("J" . meow-next-expand)
-           ("K" . meow-prev-expand)
-           ("L" . meow-right-expand)
-           ("W" . meow-mark-symbol)
-           ("[" . meow-beginning-of-thing)
-           ("\\ w" . visual-line-mode)
-           ("]" . meow-end-of-thing)
-           ("_" . my-meow-visual-line-smart-bol)
-           ("b" . meow-back-word)
-           ("e" . meow-next-word)
-           ("h" . meow-left)
-           ("j" . meow-next)
-           ("k" . meow-prev)
-           ("l" . meow-right)
-           ("m" . meow-join)
-           ("w" . meow-mark-word)
-           ("x" . meow-line)
-           ("y" . meow-save))))
-           ;; keep-sorted end
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (apply #'meow-motion-define-key shared-binds)
-    (meow-leader-define-key
-     ;; Use SPC (0-9) for digit arguments.
-     ;; keep-sorted start
-     '("/" . meow-keypad-describe-key)
-     '("0" . meow-digit-argument)
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("?" . meow-cheatsheet))
-    ;; keep-sorted end
-    (apply #'meow-normal-define-key
-           (append
-            shared-binds
-            '(;;keep-sorted start
-              ("'" . repeat)
-              ("-" . negative-argument)
-              ("A" . meow-open-below)
-              ("D" . meow-backward-delete)
-              ("G" . meow-grab)
-              ("I" . meow-open-above)
-              ("O" . meow-to-block)
-              ("Q" . meow-goto-line)
-              ("R" . meow-swap-grab)
-              ("U" . meow-undo-in-selection)
-              ("X" . meow-goto-line)
-              ("Y" . meow-sync-grab)
-              ("a" . meow-append)
-              ("c" . meow-change)
-              ("d" . meow-delete)
-              ("f" . meow-find)
-              ("g" . meow-cancel-selection)
-              ("i" . meow-insert)
-              ("n" . meow-search)
-              ("o" . meow-block)
-              ("p" . meow-yank)
-              ("q" . meow-quit)
-              ("r" . meow-replace)
-              ("s" . meow-kill)
-              ("t" . meow-till)
-              ("u" . meow-undo)
-              ("v" . meow-visit)
-              ("z" . meow-pop-selection))))))
-;; keep-sorted end
-
-(defun handle-meow ()
-  (require 'meow)
-  (meow-setup)
-  (meow-global-mode 1)
-  (setq meow-expand-exclude-mode-list
-        (delq 'org-mode meow-expand-exclude-mode-list))
-  (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
-  (add-to-list 'meow-mode-state-list '(sly-mrepl-mode . insert))
-  (add-to-list 'meow-mode-state-list '(inferior-emacs-lisp-mode . insert))
-  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
-  (add-to-list 'meow-mode-state-list '(erc-mode . insert)))
-
-(use meow
-     :ensure t
-     :custom
-     (meow-use-clipboard t)
-     :init (handle-meow))
-
-(defun my-quit-emacs ()
-  "Save all buffers and quit Emacs without confirmation."
+(defun my-evil-force-normal-state-or-close ()
+  "Close transient UI before falling back to Evil normal-state behavior."
   (interactive)
-  (save-some-buffers t)
-  (kill-emacs))
+  (unless (my-close-transient-ui)
+    (call-interactively #'evil-force-normal-state)))
 
-(defun my-scroll-half-down ()
-  "Scroll down half a page."
-  (interactive)
-  (scroll-up (/ (window-height) 2)))
+(defun my-evil-setup ()
+  "Configure Evil bindings and initial states."
+  (defalias 'ek 'evil-global-set-key)
+  (dolist (state '(normal motion visual))
+    (ek state
+      (kbd "<escape>")
+      #'my-evil-force-normal-state-or-close))
+  (dolist (state '(normal motion visual))
+    (ek state
+      (kbd "C-b")
+      #'my-scroll-page-up)
+    (ek state
+      (kbd "C-d")
+      #'my-scroll-half-down)
+    (ek state
+      (kbd "C-e")
+      #'my-scroll-line-down)
+    (ek state
+      (kbd "C-f")
+      #'my-scroll-page-down)
+    (ek state
+      (kbd "C-u")
+      #'my-scroll-half-up)
+    (ek state
+      (kbd "C-y")
+      #'my-scroll-line-up))
+  (ek 'normal (kbd "K") #'eldoc-box-help-at-point)
+  (ek 'normal (kbd "M-L") #'completion-at-point)
+  (ek 'normal (kbd "SPC e") #'my-dired-current-file-directory)
+  (ek 'normal (kbd "SPC E") #'my-dired-project-directory)
+  (ek 'normal (kbd "SPC SPC") #'consult-fd)
+  (ek 'normal (kbd "SPC /") #'consult-ripgrep)
+  (ek 'normal (kbd "SPC g d") #'citre-peek)
+  (ek 'normal (kbd "SPC g r") #'citre-peek-reference)
+  (ek 'normal (kbd "SPC g u") #'citre-update-this-tags-file)
+  (ek 'normal (kbd "SPC x x") #'my-flymake-show-diagnostics)
+  (ek 'normal (kbd "g d") #'citre-peek)
+  (ek 'normal (kbd "g r") #'citre-peek-reference)
+  (ek 'normal (kbd "q") #'my-evil-record-macro-or-close)
+  (evil-set-initial-state 'vterm-mode 'emacs)
+  (evil-set-initial-state 'sly-mrepl-mode 'emacs)
+  (evil-set-initial-state 'inferior-emacs-lisp-mode 'emacs)
+  (evil-set-initial-state 'eat-mode 'emacs)
+  (evil-set-initial-state 'erc-mode 'emacs))
 
-(defun my-scroll-half-up ()
-  "Scroll up half a page."
-  (interactive)
-  (scroll-down (/ (window-height) 2)))
+(use evil
+  :ensure t
+  :demand t
+  :init
+  (setq evil-respect-visual-line-mode t)
+  (setq evil-undo-system 'undo-redo)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (my-evil-setup)
+  (evil-mode 1))
+
+(use evil-collection
+  :ensure t
+  :demand t
+  :after evil
+  :config
+  (evil-collection-init))
+
+
+(defun my-scroll--count (&optional count)
+  "Return COUNT as a positive number, defaulting to 1."
+  (max 1 (prefix-numeric-value (or count 1))))
+
+(defun my-scroll--line-pixels (&optional count)
+  "Return pixel distance for COUNT lines."
+  (* (my-scroll--count count)
+    (frame-char-height)))
+
+(defun my-scroll--window-pixels (&optional count)
+  "Return pixel distance for COUNT windows."
+  (* (my-scroll--count count)
+    (window-text-height nil t)))
+
+(defun my-scroll--half-window-pixels (&optional count)
+  "Return pixel distance for COUNT lines, or half the window."
+  (if count
+    (my-scroll--line-pixels count)
+    (/ (window-text-height nil t) 2)))
+
+(defun my-scroll--smooth-pixels (delta)
+  "Scroll the selected window by DELTA pixels with animation."
+  (unless (fboundp 'pixel-scroll-precision-interpolate)
+    (require 'pixel-scroll nil t))
+  (condition-case error
+    (if (fboundp 'pixel-scroll-precision-interpolate)
+      (pixel-scroll-precision-interpolate delta nil 1)
+      (if (< delta 0)
+        (scroll-up (/ (window-body-height) 2))
+        (scroll-down (/ (window-body-height) 2))))
+    (beginning-of-buffer
+      (message "%s" (error-message-string error)))
+    (end-of-buffer
+      (message "%s" (error-message-string error)))))
+
+(defun my-scroll-half-down (&optional count)
+  "Smoothly scroll down by COUNT lines, or half a window."
+  (interactive "P")
+  (my-scroll--smooth-pixels (- (my-scroll--half-window-pixels count))))
+
+(defun my-scroll-half-up (&optional count)
+  "Smoothly scroll up by COUNT lines, or half a window."
+  (interactive "P")
+  (my-scroll--smooth-pixels (my-scroll--half-window-pixels count)))
+
+(defun my-scroll-line-down (&optional count)
+  "Smoothly scroll down by COUNT lines."
+  (interactive "P")
+  (my-scroll--smooth-pixels (- (my-scroll--line-pixels count))))
+
+(defun my-scroll-line-up (&optional count)
+  "Smoothly scroll up by COUNT lines."
+  (interactive "P")
+  (my-scroll--smooth-pixels (my-scroll--line-pixels count)))
+
+(defun my-scroll-page-down (&optional count)
+  "Smoothly scroll down by COUNT windows."
+  (interactive "P")
+  (my-scroll--smooth-pixels (- (my-scroll--window-pixels count))))
+
+(defun my-scroll-page-up (&optional count)
+  "Smoothly scroll up by COUNT windows."
+  (interactive "P")
+  (my-scroll--smooth-pixels (my-scroll--window-pixels count)))
+
+(put 'my-scroll-half-down 'scroll-command t)
+(put 'my-scroll-half-up 'scroll-command t)
+(put 'my-scroll-line-down 'scroll-command t)
+(put 'my-scroll-line-up 'scroll-command t)
+(put 'my-scroll-page-down 'scroll-command t)
+(put 'my-scroll-page-up 'scroll-command t)
 
 
 ;; keep-sorted start
@@ -165,14 +199,12 @@
 (global-set-key (kbd "C-c |") 'split-window-right)
 (global-set-key (kbd "C-l") 'completion-at-point)
 (global-set-key (kbd "M-<tab>") 'other-window)
-(global-set-key (kbd "M-d") 'my-scroll-half-down)
 (global-set-key (kbd "M-h") 'windmove-left)
 (global-set-key (kbd "M-j") 'windmove-down)
 (global-set-key (kbd "M-k") 'windmove-up)
 (global-set-key (kbd "M-l") 'windmove-right)
 (global-set-key (kbd "M-m") 'view-echo-area-messages)
 (global-set-key (kbd "M-s") 'save-buffer)
-(global-set-key (kbd "M-u") 'my-scroll-half-up)
 ;; keep-sorted end
 
 

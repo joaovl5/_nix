@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (setq package-enable-at-startup nil)
 
 (push '(undecorated . t) default-frame-alist)
@@ -26,9 +28,12 @@
   inhibit-startup-buffer-menu t)
 
 (setq
-  mode-line-format nil
+  auto-save-default nil
+  auto-save-list-file-prefix nil
+  backup-directory-alist '((".*" . "~/.local/share/Trash/files"))
+  create-lockfiles nil
   make-backup-files nil
-  backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
+  mode-line-format nil)
 
 (setq load-prefer-newer t)
 

@@ -2,6 +2,7 @@
 *.egg-info
 *.qcow2
 *.qcow2.*
+.banks
 .claude
 .deploy-gc
 .direnv

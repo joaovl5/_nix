@@ -48,7 +48,8 @@ Below, paths are relative to
   `:bind` in the relevant module
 - **Theme or fonts:** edit `config/core/core-ui.el`, especially `handle-theme`
   and `handle-fonts`
-- **Modal editing:** edit `config/core/core-keys.el`, especially `meow-setup`
+- **Modal editing:** edit `config/core/core-keys.el`, especially
+  `my-evil-setup`
 - **New module:** add `config/modules/mod-*.el` and require it from
   `config/init.el`
 - **Org behavior:** edit `config/modules/mod-org.el`
@@ -68,7 +69,8 @@ Below, paths are relative to
 - **Deferred loading:** `use-package-always-defer t` is set in
   `config/early-init.el`, so `:init`, `:config`, and `:after` do not load a
   package by themselves
-- **Modal stack:** this config uses Meow in `core-keys.el`, not Evil
+- **Modal stack:** this config uses Evil plus evil-collection in
+  `core-keys.el`
 - **Aliases:** `use` means `use-package`, `sup` means `straight-use-package`
 
 ## Common mistakes

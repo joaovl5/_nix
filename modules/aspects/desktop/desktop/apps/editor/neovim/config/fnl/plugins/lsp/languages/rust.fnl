@@ -1,11 +1,11 @@
 (import-macros {: p!} :./lib/init-macros)
 
 (set vim.g.rustaceanvim
-     {:tools {:enable_clippy false}
+     {:tools {:enable_clippy true}
       :server {:lspmux {:enable true}
                :default_settings
                {:rust-analyzer
-                {:checkOnSave false
+                {:checkOnSave true
                  :cargo {:targetDir true
                          :buildScripts {:enable true}}
                  :procMacro {:enable true}}}}})

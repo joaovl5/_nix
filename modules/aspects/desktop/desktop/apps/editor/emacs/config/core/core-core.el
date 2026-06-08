@@ -1,4 +1,4 @@
-;; --- functions
+;; --- functions  -*- lexical-binding: t; -*-
 
 (defun prelude-buffer-mode (buffer-or-name)
   "Retrieve the `major-mode' of BUFFER-OR-NAME."
@@ -37,8 +37,25 @@ PROMPT sets the `read-string prompt."
 
 ;; --- opts/modes
 
+(editorconfig-mode 1)
 (savehist-mode 1)
 (save-place-mode 1)
+
+;; Keep Emacs recovery artifacts out of project trees.
+;; `no-littering' sets a session prefix, so clear it after packages load.
+(setq auto-save-list-file-name nil
+      auto-save-list-file-prefix nil)
+
+(use autorevert
+  :straight nil
+  :ensure nil
+  :custom
+  (auto-revert-interval 1)
+  (auto-revert-verbose nil)
+  (global-auto-revert-non-file-buffers t)
+  (revert-without-query '(".*"))
+  :init
+  (global-auto-revert-mode 1))
 
 
 (provide 'core-core)

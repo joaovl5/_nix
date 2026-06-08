@@ -1,0 +1,17 @@
+[actions.run]
+  command = "nix run {replace:s/\\/ /#/g}"
+  mode    = "fork"
+
+[actions.shell]
+  command = "nix shell {replace:s/\\/ /#/g}"
+  mode    = "execute"
+
+[metadata]
+  description = "Search nix options and packages"
+  name        = "nix-search-tv"
+
+[preview]
+  command = "nix-search-tv preview \"{}\""
+
+[source]
+  command = "nix-search-tv print"

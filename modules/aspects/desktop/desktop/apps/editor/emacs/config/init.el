@@ -1,4 +1,4 @@
-;; Set-language-environment sets default-input-method, which is unwanted.
+;; Set-language-environment sets default-input-method, which is unwanted.  -*- lexical-binding: t; -*-
 (setq default-input-method nil)
 
 ;; By default, Emacs "updates" its ui more often than it needs to
@@ -22,6 +22,7 @@
 (setq-default indicate-buffer-boundaries nil)
 (setq-default indicate-empty-lines nil)
 
+
 ;; Continue wrapped lines at whitespace rather than breaking in the
 ;; middle of a word.
 (setq-default word-wrap t)
@@ -42,7 +43,6 @@
 ;; compilation
 (setq comp-deferred-compilation t)
 (setq warning-suppress-log-types '((comp)))
-
 
 ;; Perf: Reduce command completion overhead.
 (setq read-extended-command-predicate #'command-completion-default-include-p)

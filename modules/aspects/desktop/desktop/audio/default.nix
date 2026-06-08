@@ -4,6 +4,7 @@ _: {
 
     home.packages = with pkgs; [
       qpwgraph
+      coppwr
     ];
   };
 }

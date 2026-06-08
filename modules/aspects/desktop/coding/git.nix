@@ -24,16 +24,24 @@ _: {
       git = {
         enable = true;
         settings = {
+          pull.rebase = false;
+          fetch.prune = true; # autoremove branches deleted from upstream
+          gc.autoDetach = false;
+          rebase.autoStash = true;
           checkout = {workers = 0;};
-          color = {ui = "auto";};
-          diff = {
-            algorithm = "histogram";
-            colorMoved = true;
-            external = lib.getExe pkgs.difftastic;
+          color = {
+            ui = true;
+            branch = "auto";
+            interactive = "auto";
+            pager = true;
           };
           gpg = {format = "ssh";};
-          init = {defaultBranch = "main";};
-          push = {autoSetupRemote = true;};
+          init = {
+            defaultBranch = "main";
+          };
+          push = {
+            autoSetupRemote = true;
+          };
           merge.mergiraf = {
             name = "mergiraf";
             driver = "${lib.getExe pkgs.mergiraf} merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L";
@@ -45,6 +53,11 @@ _: {
           user = {
             inherit (cfg) email name;
             signingKey = signing_key_path;
+          };
+          diff = {
+            algorithm = "histogram";
+            colorMoved = true;
+            external = lib.getExe pkgs.difftastic;
           };
         };
         attributes = [
@@ -76,6 +89,7 @@ _: {
       worktrunk # worktree manager
       git-cliff # actual changelogs
       difftastic
+      mergiraf
       gh
     ];
   };

@@ -1,6 +1,72 @@
-;; get doom emacs theme pack!
+;; get doom emacs theme pack!  -*- lexical-binding: t; -*-
 
 
+(declare-function posframe-poshandler-frame-bottom-center "posframe")
+(declare-function which-key-mode "which-key")
+(declare-function which-key-posframe-mode "which-key-posframe")
+
+(defvar which-key-allow-imprecise-window-fit)
+(defvar which-key-custom-popup-max-dimensions-function)
+(defvar which-key-idle-delay)
+(defvar which-key-idle-secondary-delay)
+(defvar which-key-max-description-length)
+(defvar which-key-max-display-columns)
+(defvar which-key-min-display-lines)
+(defvar which-key-popup-type)
+(defvar which-key-side-window-location)
+(defvar which-key-side-window-max-height)
+(defvar which-key-side-window-max-width)
+(defvar which-key-sort-order)
+(defvar which-key-unicode-correction)
+(defvar which-key-posframe-border-width)
+(defvar which-key-posframe-poshandler)
+
+(defconst my-which-key-popup-height 8
+  "Fixed height, in lines, for the which-key popup.")
+
+(defconst my-which-key-popup-max-width 0.82
+  "Maximum which-key popup width as a fraction of the frame width.")
+
+(defun my-which-key-popup-max-dimensions (_window-width)
+  "Return fixed-height max dimensions for the which-key popup."
+  (let* ((frame-width (max 1 (- (frame-width) which-key-unicode-correction)))
+         (max-width (round (* frame-width my-which-key-popup-max-width))))
+    (cons my-which-key-popup-height
+          (max 20 (min frame-width max-width)))))
+
+(defun my-which-key-setup-side-window ()
+  "Use a terminal-safe bottom side window for which-key."
+  (when (fboundp 'which-key-posframe-mode)
+    (which-key-posframe-mode -1))
+  (setq which-key-allow-imprecise-window-fit t
+        which-key-popup-type 'side-window
+        which-key-side-window-location 'bottom
+        which-key-side-window-max-height my-which-key-popup-height
+        which-key-side-window-max-width my-which-key-popup-max-width))
+
+(defun my-which-key-setup-posframe ()
+  "Use a centered graphical posframe for which-key."
+  (straight-use-package 'which-key-posframe)
+  (require 'which-key-posframe)
+  (setq which-key-posframe-border-width 1
+        which-key-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
+  (which-key-posframe-mode 1)
+  (setq which-key-custom-popup-max-dimensions-function
+        #'my-which-key-popup-max-dimensions))
+
+(defun my-which-key-setup-style ()
+  "Configure which-key sizing, columns, and placement."
+  (require 'which-key)
+  (setq which-key-idle-delay 0
+        which-key-idle-secondary-delay 0
+        which-key-max-description-length 35
+        which-key-max-display-columns nil
+        which-key-min-display-lines my-which-key-popup-height
+        which-key-sort-order 'which-key-key-order-alpha)
+  (if (and (display-graphic-p)
+           (window-system))
+      (my-which-key-setup-posframe)
+    (my-which-key-setup-side-window)))
 ;; keep-sorted start
 
 (blink-cursor-mode -1)
@@ -93,7 +159,8 @@
   (global-set-key (kbd "C-c h h") #'helpful-at-point)
   (global-set-key (kbd "C-c h k") #'helpful-key)
   (global-set-key (kbd "C-c h v") #'helpful-variable)
-  (global-set-key (kbd "C-c h x") #'helpful-command))
+  (global-set-key (kbd "C-c h x") #'helpful-command)
+  (global-set-key (kbd "C-k") #'helpful-at-point))
   ;; keep-sorted end
 
 (defun handle-links ()
@@ -111,7 +178,35 @@
 (defun handle-scroll ()
   (sup 'beacon)
   (beacon-mode 1)
-  (pixel-scroll-precision-mode t))
+  (use pixel-scroll
+       :straight nil
+       :ensure nil
+       :bind (([remap scroll-up-command] . pixel-scroll-interpolate-down)
+              ([remap scroll-down-command] . pixel-scroll-interpolate-up))
+       :custom
+       (pixel-scroll-precision-interpolate-page t)
+       (pixel-scroll-precision-interpolation-total-time 0.25)
+       :init
+       (pixel-scroll-precision-mode 1))
+  (use scroll-on-jump
+       :ensure t
+       :custom
+       (scroll-on-jump-curve 'smooth-out)
+       (scroll-on-jump-duration 0.4)
+       :config
+       (with-eval-after-load 'evil
+         (scroll-on-jump-advice-add evil-ex-search-next)
+         (scroll-on-jump-advice-add evil-ex-search-previous)
+         (scroll-on-jump-advice-add evil-goto-mark)
+         (scroll-on-jump-advice-add evil-goto-mark-line)
+         (scroll-on-jump-advice-add evil-jump-backward)
+         (scroll-on-jump-advice-add evil-jump-forward)
+         (scroll-on-jump-advice-add evil-jump-item)
+         (scroll-on-jump-with-scroll-advice-add evil-goto-line)
+         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-bottom)
+         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-center)
+         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-top)))
+)
 
 
 ;; keep-sorted start
@@ -124,6 +219,7 @@
 (handle-theme)
 ;; keep-sorted end
 
+
 ;; NOTE(@lerax): dom 01 jun 2025 12:42:24
 ;; helm-descbinds became incompatible with which-key-mode ins 202402XX version
 ;; Using prelude, calling which-key-mode as hook in
@@ -131,7 +227,9 @@
 ;; this function prevents to this happen
 (defun prelude-safe-which-key-mode ()
   (condition-case err
-      (which-key-mode +1)
+      (progn
+        (my-which-key-setup-style)
+        (which-key-mode +1))
     (error
      (let ((error-message (cadr err)))
        (with-temp-message "" ;; don't print to minibuffer

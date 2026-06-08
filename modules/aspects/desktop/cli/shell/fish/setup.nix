@@ -9,6 +9,7 @@
       interactiveShellInit = ''
         ${lib.readFile ./src/functions.fish}
         bind ctrl-e __yazi_zellij_ctrl_e
+        source $HOME/.config/television/shell/integration.fish
       '';
     };
 

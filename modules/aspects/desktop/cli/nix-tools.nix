@@ -37,25 +37,50 @@ _: {
         nix-direnv.enable = true;
       };
 
+      nix-search-tv = {
+        enable = true;
+        settings = {
+          indexes = ["nixpkgs" "nixos" "home-manager" "noogle" "nur"];
+        };
+      };
+
+      nix-your-shell = {
+        enable = true;
+        nix-output-monitor.enable = true;
+        enableFishIntegration = true;
+        enableNushellIntegration = true;
+      };
+
+      nix-init = {
+        enable = true;
+        settings = {
+          nixpkgs = "nixpkgs";
+          commit = "true";
+          maintainers = ["lav"];
+        };
+      };
+
       # options search
       optnix = let
         options_list_cmd = scope: "nix eval --json --impure --file ${lib.escapeShellArg cfg.repo_location} _utils.optnix.${scope}";
       in {
         enable = true;
         settings = {
-          scopes."nx" = {
-            description = "NixOS";
-            options-list-cmd = options_list_cmd "nx";
-          };
-          scopes."hj" = {
-            description = "Hjem";
-            evaluator = "";
-            options-list-cmd = options_list_cmd "hj";
-          };
-          scopes."hm" = {
-            description = "Home-Manager";
-            evaluator = "";
-            options-list-cmd = options_list_cmd "hm";
+          scopes = {
+            "nx" = {
+              description = "NixOS";
+              options-list-cmd = options_list_cmd "nx";
+            };
+            "hj" = {
+              description = "Hjem";
+              evaluator = "";
+              options-list-cmd = options_list_cmd "hj";
+            };
+            "hm" = {
+              description = "Home-Manager";
+              evaluator = "";
+              options-list-cmd = options_list_cmd "hm";
+            };
           };
         };
       };
@@ -67,10 +92,13 @@ _: {
       "+d" = "deploy";
       "+D" = "deploy --skip-checks";
       "+c" = "nh clean all --elevation-program run0";
+      "+ea" = "direnv allow";
+      "+er" = "direnv reload";
       "?" = "nps --color=always -e=true --truncate=true";
       "?nx" = "optnix -s nx";
       "?hm" = "optnix -s hm";
       "?hj" = "optnix -s hj";
+      "?tvn" = "television nix-search-tv";
     };
 
     # faster direnv
@@ -87,6 +115,17 @@ _: {
       nps
       # manage source pins
       npins
+      # better 'nix' with pretty things
+      nix-output-monitor
+      # inspect things
+      nix-du
+      nix-diff
+      dix
+      nvd
+      nix-tree
+      # do some things
+      nix-update
+      nurl
     ];
   };
   den.aspects.cli.nixos = {
@@ -95,6 +134,30 @@ _: {
     ...
   }: {
     documentation.nixos.options.warningsAreErrors = false;
+
+    services = {
+      angrr = {
+        enable = true;
+        settings = {
+          temporary-root-policies = {
+            direnv = {
+              path-regex = "/\\.direnv/";
+              period = "3d";
+            };
+            result = {
+              path-regex = "result[^/]*$";
+              period = "3d";
+            };
+          };
+          profile-policies.system = {
+            profile-paths = ["/nix/var/nix/profiles/system"];
+            keep-since = "14d";
+            keep-latest-n = 5;
+          };
+        };
+      };
+    };
+
     systemd.timers."refresh-nps-cache" = {
       wantedBy = ["timers.target"];
       timerConfig = {

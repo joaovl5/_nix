@@ -61,6 +61,7 @@
                                                :reportUnknownParameterType false
                                                :reportExplicitAny false}}}}
          :ruff {:server_capabilities {:hoverProvider false}}
+         ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
          :biome {}
          :janet_lsp {}
@@ -81,7 +82,7 @@
             :formatting {:command [:alejandra]}
             :options {:home-manager {;; In case of using home-manager standalone, replace to:
                                      ;;  "expr": "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.<name>.options"
-                                     :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.<name>.options.home-manager.users.type.getSubOptions []"}
+                                     :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.lav.options.home-manager.users.type.getSubOptions []"}
                       :nixos {:expr (let [nixos_hostname :lavpc]
                                       (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
                                           nixos_hostname
@@ -94,7 +95,7 @@
                :filetypes [:nix]
                :root_markers [:flake.nix :.git]
                :settings {:nil {:nix {:flake {:autoArchive true
-                                              :autoEvalInputs true
+                                              :autoEvalInputs false
                                               :nixpkgsInputName :nixpkgs}}}}}}]
     (each [server config (pairs servers)]
       (vim.lsp.config server config)

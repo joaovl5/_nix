@@ -8,9 +8,11 @@
                            :nvim-mini/mini.nvim]
             :ft fts
             :opts {:completions {:lsp {:enabled true}}
-                   :render_modes [:n :i :c :t]
+                   :file_types fts
+                   :overrides {:buftype {"" {:enabled false}}}
+                   :render_modes [:n]
                    :debounce 50
-                   :preset :obsidian
+                   :preset :none
                    :restart_highlighter true
                    :code {:sign false
                           :border :hide}

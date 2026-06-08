@@ -1,10 +1,11 @@
 (import-macros {: do-req : let-req : plugin : p! : key} :./lib/init-macros)
 
-[(p!
-   :zeioth/garbage-day.nvim
-   (event :VeryLazy)
-   (opts {:wakeup_delay 500
-          :grace_period (* 60 10)}))
+[; stuff
+ ; (p!
+ ;   :zeioth/garbage-day.nvim
+ ;   (event :VeryLazy)
+ ;   (opts {:wakeup_delay 500
+ ;          :grace_period (* 60 10)}))
  {:dir _G.plugin_dirs.blink-pairs
   :name :blink.pairs
   :event :VeryLazy

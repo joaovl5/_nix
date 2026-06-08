@@ -41,12 +41,14 @@ _: {
                   "https://cache.nixos.org/"
                   "https://cache.garnix.io"
                   "https://hyprland.cachix.org"
+                  "https://cache.numtide.com"
                 ];
                 trusted-public-keys = [
                   "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
                   "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
                   "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
                   "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+                  "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
                 ];
               };
 
@@ -79,17 +81,6 @@ _: {
 
           environment.variables.NIX_REMOTE = "daemon";
         }
-
-        (o.when (!is_darwin) {
-          services.angrr = {
-            enable = true;
-            settings.period = "7d";
-          };
-
-          # environment.variables.LD_LIBRARY_PATH = lib.mkForce [
-          #   "/run/current-system/sw/lib"
-          # ];
-        })
 
         (o.when (!is_darwin && opts.x86.enable) {
           boot.binfmt.emulatedSystems = ["aarch64-linux"];

@@ -1,22 +1,15 @@
 _: {
   den.aspects.desktop.homeManager = {pkgs, ...}: let
     pkg = pkgs.emacs;
-    # pkg = pkgs.emacs-unstable-pgtk.overrideAttrs (old: {
-    #   configureFlags =
-    #     old.configureFlags
-    #     ++ [
-    #       # "--with-imagemagick"
-    #       "--with-json"
-    #       "--with-native-compilation=aot"
-    #       # ''CFLAGS="-O2 -mtune=native -fomit-frame-pointer"''
-    #     ];
-    # });
+    citre_tools = pkgs.runCommand "citre-tools" {} ''
+      mkdir -p $out/bin
+      ln -s ${pkgs.universal-ctags}/bin/readtags $out/bin/readtags
+      ln -s ${pkgs.universal-ctags}/bin/universal-ctags $out/bin/universal-ctags
+    '';
   in {
     hybrid-links.links.emacs = {
       from = ./config;
       to = "~/.config/emacs";
-      # Keep this hybrid. A normal store-backed link would copy the whole
-      # Emacs config tree, including ignored runtime state like `straight/`.
     };
 
     services.emacs = {
@@ -31,11 +24,13 @@ _: {
       extraPackages = epkgs:
         with epkgs; [
           org-roam
-          parinfer-rust-mode
+          # parinfer-rust-mode
         ];
     };
 
     home.packages = with pkgs; [
+      citre_tools
+      global
       poppler-utils
       vips
     ];

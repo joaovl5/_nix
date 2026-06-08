@@ -503,8 +503,6 @@
            (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
      (setq org-roam-completion-everywhere t)
      (org-roam-db-autosync-mode)
-     (meow-normal-define-key
-       '("M-L" . completion-at-point))
      (require 'org-roam-protocol))
 
 (use org-download

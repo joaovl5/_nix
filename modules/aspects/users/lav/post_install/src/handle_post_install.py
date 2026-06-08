@@ -1,12 +1,4 @@
-#! /usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.14"
-# dependencies = [
-#     "cyclopts>=4.5.1",
-#     "rich",
-# ]
-# ///
-
+# deps are loaded via nix later
 import subprocess
 from pathlib import Path
 

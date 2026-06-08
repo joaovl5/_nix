@@ -12,7 +12,8 @@ _: {
     user_home = config.users.users.${username}.home;
 
     install_script = pkgs.writeScript "my_post_install" ''
-      ${lib.readFile ./post_install/src/handle_post_install.py}
+      #! /usr/bin/env python
+      ${lib.readFile ./src/handle_post_install.py}
     '';
   in
     o.module "post_install" (with o; {
@@ -24,7 +25,8 @@ _: {
           systemd.services.my_post_install = {
             wantedBy = ["multi-user.target"];
             path = with pkgs; [
-              uv
+              (python3.withPackages
+                (ps: with ps; [cyclopts rich]))
             ];
             serviceConfig = {
               Type = "simple";

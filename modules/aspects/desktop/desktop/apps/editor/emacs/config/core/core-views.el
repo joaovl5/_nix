@@ -1,5 +1,53 @@
-; dired config
+; dired config  -*- lexical-binding: t; -*-
+(require 'project)
+(declare-function dirvish-override-dired-mode "dirvish")
+(declare-function evil-define-key "evil")
+
+(defun my-dired-open-directory (directory)
+  "Open DIRECTORY with plain Dired, bypassing Dirvish's Dired override."
+  (let ((dirvish-was-enabled (bound-and-true-p dirvish-override-dired-mode)))
+    (unwind-protect
+        (progn
+          (when (and dirvish-was-enabled
+                     (fboundp 'dirvish-override-dired-mode))
+            (dirvish-override-dired-mode -1))
+          (dired directory))
+      (when (and dirvish-was-enabled
+                 (fboundp 'dirvish-override-dired-mode))
+        (dirvish-override-dired-mode 1)))))
+
+(defun my-dired-current-file-directory ()
+  "Open Dired in the directory of the current buffer file."
+  (interactive)
+  (my-dired-open-directory
+   (file-name-as-directory
+    (expand-file-name
+     (or (and buffer-file-name
+              (file-name-directory buffer-file-name))
+         default-directory)))))
+
+(defun my-dired-project-directory ()
+  "Open Dired in the current project root, falling back to `default-directory'."
+  (interactive)
+  (my-dired-open-directory
+   (file-name-as-directory
+    (expand-file-name
+     (or (when-let ((project (project-current nil)))
+           (project-root project))
+         default-directory)))))
+
 (defun handle-dired ()
+  (use dired
+       :straight nil
+       :ensure nil
+       :hook (dired-mode . auto-revert-mode)
+       :custom
+       (dired-listing-switches "-alh --group-directories-first")
+       :config
+       (with-eval-after-load 'evil
+         (evil-define-key 'normal dired-mode-map
+           (kbd "h") #'dired-up-directory
+           (kbd "l") #'dired-find-file)))
   (straight-use-package 'dirvish)
   (require 'dirvish)
   (dirvish-override-dired-mode)
@@ -53,7 +101,7 @@
        (corfu-popupinfo-mode t))
   (use emacs
        :custom
-       (tab-always-indent complete)
+       (tab-always-indent 'complete)
        (text-mode-ispell-word-completion nil)))
 
 (defun my-vertico-next-page (&optional n)
@@ -76,13 +124,13 @@
      :bind
      (:map vertico-map
            ;; keep-sorted start
-           ("M-d" . my-vertico-next-page)
+           ("C-d" . my-vertico-next-page)
+           ("C-u" . my-vertico-previous-page)
            ("M-j" . vertico-next)
-           ("M-k" . vertico-previous)
-           ("M-u" . my-vertico-previous-page))
+           ("M-k" . vertico-previous))
            ;; keep-sorted end
      :custom
-     (vertico-count 20)
+     (vertico-count 10)
      (vertico-cycle t)
      :init
      (vertico-mode)

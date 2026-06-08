@@ -30,5 +30,9 @@ _: {
         equicord.enable = lib.mkForce true;
       };
     };
+
+    home.packages = with pkgs; [
+      discordo
+    ];
   };
 }

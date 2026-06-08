@@ -1,15 +1,13 @@
 {lav, ...}: {
   den.aspects.ai.homeManager = {
     inputs,
+    system,
     pkgs,
     lib,
     ...
   }: let
     mcp_servers = lav.ai.mcp.servers {
       inherit pkgs lib;
-    };
-    llm_agents = import ../../../../../_packages/llm-agents {
-      inherit pkgs inputs;
     };
     omp_mcp_config = pkgs.writeText "omp-mcp.json" (builtins.toJSON {
       "$schema" = "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json";
@@ -19,7 +17,7 @@
     prompt_skills = "${inputs.self.outPath}/modules/aspects/desktop/ai/_prompts/skills";
     system_prompt = "${inputs.self.outPath}/modules/aspects/desktop/ai/_prompts/general/system.md";
   in {
-    home.packages = [llm_agents.omp];
+    home.packages = [inputs.llm-agents.packages.${system}.omp];
     hybrid-links = {
       links = {
         omp_agents = {

@@ -1,4 +1,4 @@
-;; init straight.el
+;; init straight.el  -*- lexical-binding: t; -*-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -14,6 +14,9 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
+
+;; Ensure straight's Org is registered before packages that may pull in built-in Org.
+(straight-use-package 'org)
 
 (defun my/straight-update-all ()
  (message "Starting update...")

@@ -33,8 +33,26 @@
  (p!
    :NeogitOrg/neogit
    (cmd :Neogit)
-   (deps [:esmuellert/codediff.nvim
-          :m00qek/baleia.nvim])
+   (deps [:m00qek/baleia.nvim
+          (p!
+            :esmuellert/codediff.nvim
+            (opts
+              {:diff {:layout :inline
+                      :cycle_next_hunk false
+                      :cycle_next_file false}
+               :explorer {:width 50
+                          :view_mode :tree
+                          :focus_on_select true}
+               :keymaps {:view {:next_hunk "J"
+                                :prev_hunk "K"
+                                :next_file "L"
+                                :prev_file "H"
+                                :toggle_stage "-"
+                                :stage_hunk "<A-s>"
+                                :unstage_hunk "<A-u>"
+                                :discard_hunk "<A-0>"
+                                :align_move "<C-o>"
+                                :toggle_layout "<C-t>"}}}))])
    (keys
      (group
        :git
@@ -45,8 +63,7 @@
      ; TODO: change to kitty after migratinf off of foot to wezterm
      {:graph_style :unicode
       :process_spinner true
-      :commit_editor {:staged_diff_split_kind :auto}})
-   {:enabled false})
+      :commit_editor {:staged_diff_split_kind :auto}}))
  (p!
    :lewis6991/gitsigns.nvim
    (opts {})
