@@ -3,6 +3,7 @@ _: {
     mylib,
     config,
     inputs,
+    lib,
     pkgs,
     ...
   }: let
@@ -10,6 +11,7 @@ _: {
     o = my.options;
     u = my.units;
     inherit (o) t;
+    inherit (lib) mkIf mkMerge;
     local_packages = import ../../../../_packages {inherit pkgs inputs;};
     install_tubifarry_plugin = pkgs.writeShellScript "install-tubifarry-plugin" ''
       set -euo pipefail
@@ -79,76 +81,90 @@ _: {
           target = "bazarr";
         };
       };
-    }) {imports = _: [inputs.nixarr.nixosModules.default];} (opts: (o.when opts.enable {
-      my.vhosts = {
-        jellyfin = {inherit (opts.jellyfin.endpoint) target sources;};
-        prowlarr = {inherit (opts.prowlarr.endpoint) target sources;};
-        lidarr = {inherit (opts.lidarr.endpoint) target sources;};
-        radarr = {inherit (opts.radarr.endpoint) target sources;};
-        sonarr = {inherit (opts.sonarr.endpoint) target sources;};
-        bazarr = {inherit (opts.bazarr.endpoint) target sources;};
-      };
+    }) {imports = _: [inputs.nixarr.nixosModules.default];} (opts:
+      mkMerge [
+        (mkIf opts.enable {
+          my.vhosts = {
+            jellyfin = {inherit (opts.jellyfin.endpoint) target sources;};
+            prowlarr = {inherit (opts.prowlarr.endpoint) target sources;};
+            lidarr = {inherit (opts.lidarr.endpoint) target sources;};
+            radarr = {inherit (opts.radarr.endpoint) target sources;};
+            sonarr = {inherit (opts.sonarr.endpoint) target sources;};
+            bazarr = {inherit (opts.bazarr.endpoint) target sources;};
+          };
 
-      nixarr = {
-        enable = true;
+          nixarr = {
+            enable = true;
 
-        vpn = {
-          inherit (opts.vpn) enable;
-        };
-        # Torrents
-        transmission = {
-          enable = false;
-        };
+            vpn = {
+              inherit (opts.vpn) enable;
+            };
+            # Torrents
+            transmission = {
+              enable = false;
+            };
 
-        # Jellyfin
-        jellyfin = {
-          enable = true;
-        };
+            # Jellyfin
+            jellyfin = {
+              enable = true;
+            };
 
-        # -arrs
-        lidarr = {
-          enable = true;
-          inherit (opts.lidarr.endpoint) port;
-          package = local_packages.lidarr-plugins;
-        };
+            # -arrs
+            lidarr = {
+              enable = true;
+              inherit (opts.lidarr.endpoint) port;
+              package = local_packages.lidarr-plugins;
+            };
 
-        radarr = {
-          enable = true;
-          inherit (opts.radarr.endpoint) port;
-        };
+            radarr = {
+              enable = true;
+              inherit (opts.radarr.endpoint) port;
+            };
 
-        sonarr = {
-          enable = true;
-          inherit (opts.sonarr.endpoint) port;
-        };
+            sonarr = {
+              enable = true;
+              inherit (opts.sonarr.endpoint) port;
+            };
 
-        prowlarr = {
-          enable = true;
-          inherit (opts.prowlarr.endpoint) port;
-        };
+            prowlarr = {
+              enable = true;
+              inherit (opts.prowlarr.endpoint) port;
+            };
 
-        bazarr = {
-          enable = true;
-          inherit (opts.bazarr.endpoint) port;
-        };
-      };
+            bazarr = {
+              enable = true;
+              inherit (opts.bazarr.endpoint) port;
+            };
+          };
 
-      systemd.services.lidarr-install-tubifarry = {
-        description = "Install the Tubifarry Lidarr plugin";
-        before = ["lidarr.service"];
-        requiredBy = ["lidarr.service"];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = install_tubifarry_plugin;
-        };
-      };
+          systemd.services.lidarr-install-tubifarry = {
+            description = "Install the Tubifarry Lidarr plugin";
+            before = ["lidarr.service"];
+            requiredBy = ["lidarr.service"];
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = install_tubifarry_plugin;
+            };
+          };
 
-      services = {
-        flaresolverr = {
-          inherit (opts.flaresolverr) enable;
-        };
-        jellyfin = {
-        };
-      };
-    }));
+          services = {
+            flaresolverr = {
+              inherit (opts.flaresolverr) enable;
+            };
+            jellyfin = {
+            };
+          };
+        })
+        (mkIf (opts.enable && config.my.storage.server.enable) {
+          fileSystems."${config.my.storage.server.shared_root}/media" = {
+            device = config.nixarr.mediaDir;
+            fsType = "none";
+            options = ["bind"];
+          };
+
+          systemd.tmpfiles.rules = [
+            "d '${config.my.storage.server.shared_root}/media' 0755 root root - -"
+          ];
+        })
+      ]);
 }

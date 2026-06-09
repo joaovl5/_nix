@@ -12,6 +12,9 @@ in rec {
       "fail2ban"
     ];
     config = {
+      users.groups.media.gid = 169;
+      users.users.lav.extraGroups = ["media"];
+
       my = {
         desktop.enable = true;
         storage.client.enable = true;
