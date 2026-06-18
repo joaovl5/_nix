@@ -65,4 +65,30 @@
   - Exploration of a codebase is more efficient via the 'explore' subagents,
     use them.
 
-### MCPs
+### POLICY ON AUTOMATED TESTS
+
+_**STRONGLY PREFER** manual verification instead of automated permanent tests
+for every single thing._ This should be strictly obeyed and only make tests
+permanent if they will serve substantial, long-term meaning that wouldn't be
+gotten through other means.
+
+Don't:
+
+- Write a unit a test if you were asked to fix a simple bug, or perform a
+  simple tweak
+- Write a unit test that mocks entirely the underlying functionality and/or
+  has no meanigful assertions, like asserting that `1 == 1` with extra steps.
+- Write unit tests that deal with private/internal behavior instead of
+  performing input vs. output handling (special cases may warrant exceptions
+  for this rule, but they're rare)
+
+Do:
+
+- Run manual verification commands, or write one-off scripts to be deleted
+  later, for checking things.
+- When necessary, write small but strong tests that are clearly well-defined
+  and useful, without handling internal logic and avoiding too many mocked
+  behavior.
+
+I, THE USER, DO NOT CARE IF YOUR SYSTEM OR SKILL INSTRUCTS YOU OTHERWISE, DO
+NOT SPAM

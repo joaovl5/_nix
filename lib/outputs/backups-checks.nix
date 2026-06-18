@@ -172,7 +172,6 @@
         }
       ];
     }).config.my."unit.qbittorrent".backup.items.invalid.kind;
-  fxsync_mariadb_secret_owner_eval = builtins.tryEval tyrant.sops.secrets.fxsync_mariadb_password.owner;
   postgres_item = builtins.elemAt synthetic_resolved.local_to_a 0;
   mysql_item = builtins.elemAt synthetic_resolved.local_to_a 1;
   custom_item = builtins.elemAt synthetic_resolved.local_to_a 2;
@@ -213,8 +212,6 @@ in {
   assert builtins.length synthetic_collected.unit_owned_items == 1;
   assert builtins.length synthetic_collected.collected_items == 2;
   assert !invalid_unit_owned_item_eval.success;
-  assert fxsync_mariadb_secret_owner_eval.success;
-  assert fxsync_mariadb_secret_owner_eval.value == tyrant.my.nix.username;
   assert collected_unit_item.unit_name == "db";
   assert collected_unit_item.item_name == "postgres";
   assert custom_item.paths == [];
@@ -225,11 +222,8 @@ in {
   assert tyrant.services.restic.backups ? tyrant_pihole_state_to_a;
   assert tyrant.services.restic.backups ? tyrant_traefik_acme_to_a;
   assert tyrant.services.restic.backups ? tyrant_actual_budget_state_to_a;
-  assert tyrant.services.restic.backups ? tyrant_fxsync_syncstorage_db_to_a;
-  assert tyrant.services.restic.backups ? tyrant_fxsync_tokenserver_db_to_a;
   assert !(tyrant.services.restic.backups ? tyrant_qbittorrent_to_a);
   assert !(tyrant.services.restic.backups ? tyrant_nixarr_to_a);
-  assert lib.elem "unit:fxsync" tyrant.services.restic.backups.tyrant_fxsync_syncstorage_db_to_a.extraBackupArgs;
   assert tyrant.services.restic.backups ? tyrant_shared_docs_core_to_a;
   assert tyrant.services.restic.backups.tyrant_shared_docs_core_to_a.paths == ["/srv/shared/docs/core"];
   assert tyrant.systemd.services ? backup_promote_tyrant_home_snapshot_to_b;

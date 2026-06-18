@@ -44,21 +44,21 @@ _: {
       style = "bright-black";
     };
     nix_shell = {
-      format = ''[$symbol$state$name]($style)'';
+      format = ''[ $symbol$state $name]($style)'';
       style = "cyan";
       heuristic = false;
     };
     shell = {
       disabled = false;
       style = "bright-black";
-      format = ''[$indicator]($style)'';
+      format = ''[ $indicator]($style)'';
     };
     cmd_duration = {
-      format = "[$duration]($style)";
+      format = "[ $duration]($style)";
       style = "yellow";
     };
     python = {
-      format = "[$virtualenv]($style)";
+      format = "[ $virtualenv]($style)";
       style = "bright-black";
       detect_extensions = [];
       detect_files = [];

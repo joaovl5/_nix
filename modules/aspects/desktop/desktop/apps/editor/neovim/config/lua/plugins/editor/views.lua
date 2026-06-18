@@ -9,7 +9,7 @@ do
       spec_24_auto[key_27_auto] = value_28_auto
     end
   end
-  spec_24_auto[1] = "dnhlc/glance.nvim"
+  spec_24_auto[1] = "dnlhc/glance.nvim"
   _3_ = spec_24_auto
 end
 local function _6_(...)
@@ -24,4 +24,4 @@ local function _6_(...)
   spec_24_auto[1] = "SmiteshP/nvim-navbuddy"
   return spec_24_auto
 end
-return {{"dnlhc/glance.nvim", cmd = "Glance"}, _3_, _6_(...)}
+return {_3_, _6_(...)}

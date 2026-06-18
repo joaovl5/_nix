@@ -48,11 +48,11 @@ in rec {
     ssh_port = default_ssh_port;
     units = [
       "actual-budget"
+      "akkoma"
       "backup"
       "degoog"
       "fail2ban"
       "forgejo"
-      "fxsync"
       "gopeed"
       "hermes-agent"
       "hister"
@@ -94,10 +94,6 @@ in rec {
           };
         };
 
-        "unit.fxsync" = {
-          enable = true;
-        };
-
         "unit.nixarr" = {
           enable = true;
           vpn.enable = false; # our wireguard unit handles VPN
@@ -105,6 +101,23 @@ in rec {
 
         "unit.actual-budget" = {
           enable = true;
+        };
+
+        "unit.akkoma" = {
+          enable = true;
+          endpoint = {
+            port = 4010;
+            target = "i";
+          };
+          instance = {
+            name = "i.trll.ing";
+            description = "le trll";
+            email = "lav@trll.ing";
+            upload_limit_bytes = 100 * 1024 * 1024;
+            registrations_open = false;
+            invites_enabled = true;
+            federating = true;
+          };
         };
 
         "unit.postgres" = {

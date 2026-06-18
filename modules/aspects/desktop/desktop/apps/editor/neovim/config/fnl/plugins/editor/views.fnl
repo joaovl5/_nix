@@ -1,9 +1,8 @@
 (import-macros {: do-req : let-req : plugin : p! : key} :./lib/init-macros)
 
 [; glance (peek references etc)
- (plugin :dnlhc/glance.nvim {:cmd :Glance})
  (p!
-   :dnhlc/glance.nvim
+   :dnlhc/glance.nvim
    (cmd :Glance)
    (keys
      (bind :gI (cmd "Glance implementations") (desc "Implementations"))

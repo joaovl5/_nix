@@ -84,6 +84,11 @@
             ];
           };
         }
+        (o.when config.virtualisation.libvirtd.enable {
+          environment.systemPackages = with pkgs; [
+            quickemu
+          ];
+        })
       ])));
   };
 }

@@ -1,16 +1,26 @@
-_: {
+_: let
+  permitted_insecure_packages = [
+    "librewolf-151.0.2-1"
+    "librewolf-unwrapped-151.0.2-1"
+  ];
+in {
+  den.default.nixos = {
+    nixpkgs.config.permittedInsecurePackages = permitted_insecure_packages;
+  };
   den.aspects.desktop.homeManager = {
     inputs,
     pkgs,
     lib,
     nixos_config,
-    globals,
     ...
   }: let
     profile_name = "lav";
     unstable_small_pkgs = import inputs.unstable-small {
       system = pkgs.stdenv.hostPlatform.system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+        permittedInsecurePackages = permitted_insecure_packages;
+      };
     };
     librewolf_pkg = unstable_small_pkgs.librewolf;
 
@@ -60,13 +70,10 @@ _: {
       };
     };
 
-    fxsync_cfg = nixos_config.my."unit.fxsync";
     gpu_enable = nixos_config.my.nvidia.enable;
-    inherit (globals.dns) tld;
 
     settings = {
       "browser.toolbars.bookmarks.visibility" = "never";
-      "identity.sync.tokenserver.uri" = "https://${fxsync_cfg.endpoint.target}.${tld}/1.0/sync/1.5";
       "dom.webgpu.enabled" = gpu_enable;
 
       # firefox optimizations

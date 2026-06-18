@@ -13,7 +13,7 @@ in
     inherit src version;
 
     subPackages = ["cmd/mg"];
-    vendorHash = "sha256-FuXR6Cq+BLJ7h5UqFEDJ/BVlWIUpye7GOpiqbhjv6aM=";
+    vendorHash = "sha256-GE1fG7OugQy783e4JZG19DvZ6DDU6vjAr/cbgAncZmA=";
 
     ldflags = [
       "-s"

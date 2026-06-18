@@ -4,8 +4,9 @@
 
 (vim.filetype.add {:extension {:kbd :kanata}})
 
-; keep-sorted start
-(local languages [:css
+(local languages [; keep-sorted start
+                  :css
+                  :dhall
                   :fennel
                   :html
                   :javascript
@@ -13,7 +14,9 @@
                   :kanata
                   :lua
                   :markdown
+                  :nix
                   :python
+                  :rust
                   :scss
                   :tsx
                   :typescript
@@ -34,4 +37,5 @@
               :callback (fn [ev]
                           (vim.treesitter.start ev.buf))}))
 
-[(plugin :m-demare/hlargs.nvim {:event :VeryLazy :opts {}})]
+[(plugin :auipga/hmts.nvim {:branch :patch-1})
+ (plugin :m-demare/hlargs.nvim {:event :VeryLazy :opts {}})]

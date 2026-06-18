@@ -1,6 +1,6 @@
 rec {
   tld = "trll.ing";
-  public_vhosts = ["jellyfin" "hermes-telegram-webhook"];
+  public_vhosts = ["jellyfin" "hermes-telegram-webhook" "i"];
   nameservers = [
     "aaron.ns.cloudflare.com"
     "bella.ns.cloudflare.com"

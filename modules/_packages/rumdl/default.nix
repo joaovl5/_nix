@@ -9,7 +9,7 @@
   ...
 }: let
   src = inputs.rumdl-src.outPath;
-  cargo_toml = builtins.fromTOML (builtins.readFile "${src}/Cargo.toml");
+  cargo_toml = fromTOML (builtins.readFile "${src}/Cargo.toml");
   version = cargo_toml.package.version;
   tag = inputs.rumdl-src.version or (inputs.rumdl-src.branch or "v${version}");
 in
@@ -17,7 +17,7 @@ in
     pname = "rumdl";
     inherit src version;
 
-    cargoHash = "sha256-FDwy+6va0nPFoUYwXcy5jeLo7aBq3CMOp0TKVMeGSp8=";
+    cargoHash = "sha256-GME+X2yO+6W+vSv7hK4l+VNYqopvOrkUUNISchjxRLY=";
 
     cargoBuildFlags = [
       "--bin=rumdl"

@@ -3,7 +3,7 @@ local _local_1_ = require("lib/nvim")
 local v_2fautocmd = _local_1_["v/autocmd"]
 local v_2fextend = _local_1_["v/extend"]
 vim.filetype.add({extension = {kbd = "kanata"}})
-local languages = {"css", "fennel", "html", "javascript", "jsx", "kanata", "lua", "markdown", "python", "scss", "tsx", "typescript", "vimdoc"}
+local languages = {"css", "dhall", "fennel", "html", "javascript", "jsx", "kanata", "lua", "markdown", "nix", "python", "rust", "scss", "tsx", "typescript", "vimdoc"}
 do
   local ts = require("nvim-treesitter.config")
   ts.setup({auto_install = false})
@@ -23,4 +23,4 @@ do
   end
   v_2fautocmd("FileType", {pattern = filetypes, callback = _2_})
 end
-return {{"m-demare/hlargs.nvim", event = "VeryLazy", opts = {}}}
+return {{"auipga/hmts.nvim", branch = "patch-1"}, {"m-demare/hlargs.nvim", event = "VeryLazy", opts = {}}}

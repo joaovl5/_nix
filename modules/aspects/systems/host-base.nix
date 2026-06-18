@@ -138,7 +138,12 @@
 
                 # daemon.settings.dns only affects containers; registry pulls from the
                 # rootless daemon itself use dockerd's resolver inside rootlesskit.
-                systemd.user.services.docker.environment.DOCKERD = docker_rootless_dockerd;
+                # Keep the rootlesskit netns attached so the DOCKERD wrapper can
+                # rewrite the namespace-local /etc/resolv.conf.
+                systemd.user.services.docker.environment = {
+                  DOCKERD = docker_rootless_dockerd;
+                  DOCKERD_ROOTLESS_ROOTLESSKIT_DETACH_NETNS = "false";
+                };
 
                 environment.systemPackages = with pkgs; [
                   # virtualisation

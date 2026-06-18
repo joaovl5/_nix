@@ -9,8 +9,9 @@ _: {
       };
 
       sudo.enable = false;
+      run0.enable = true;
       run0.enableSudoAlias = true;
-      soteria.enable = true;
+      soteria.enable = false;
     };
 
     # Systemd Hardening/tweaks
