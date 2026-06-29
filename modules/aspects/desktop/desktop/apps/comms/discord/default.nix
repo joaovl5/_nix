@@ -9,6 +9,7 @@ _: {
       discordo
       inputs.concord.packages.${system}.default
       goofcord
+      equibop
     ];
   };
 }

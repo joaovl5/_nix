@@ -12,7 +12,7 @@ local function transform_items(k_icon, k_name)
   end
   return _1_
 end
-local sources = {"lsp", "path", "snippets", "buffer", "env", "git", "conv_commit", "grep"}
+local sources = {"grep", "path", "lsp", "snippets", "buffer", "env", "git", "conv_commit"}
 local debug_sources
 do
   local result = {"dap"}

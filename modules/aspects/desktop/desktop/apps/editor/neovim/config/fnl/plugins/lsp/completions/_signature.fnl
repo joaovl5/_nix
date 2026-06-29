@@ -1,4 +1,4 @@
-{:enabled true
+{:enabled false
  :trigger {:show_on_keyword true
            :show_on_insert true}
  :window {:min_width 1

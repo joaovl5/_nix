@@ -10,6 +10,7 @@ _: {
       glfw
       wineWow64Packages.full
       winetricks
+      me3
     ];
   };
   den.aspects.desktop.nixos = {pkgs, ...}: {

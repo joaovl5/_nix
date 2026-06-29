@@ -22,6 +22,12 @@
                                 :github_dark_high_contrast
                                 :github_dark_dimmed]}
                        {:source :Aejkatappaja/sora :names [:sora]}
+                       {:source :EdenEast/nightfox.nvim
+                        :names [:duskfox :carbonfox]}
+                       {:source :tiagovla/tokyodark.nvim :names [:tokyodark]}
+                       {:source :dgox16/oldworld.nvim :names [:oldworld]}
+                       {:source :yorumicolors/yorumi.nvim :names [:yorumi]}
+                       {:source :ThorstenRhau/token :names [:token]}
                        {:source :everviolet/nvim
                         :names [:evergarden :evergarden-winter]}
                        {:source :uhs-robert/oasis.nvim
