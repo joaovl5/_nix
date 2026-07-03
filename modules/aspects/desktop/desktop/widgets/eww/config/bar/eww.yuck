@@ -43,7 +43,7 @@
          :halign "center"
          :valign "start"
          :spacing 0
-      (for wsp in {jq(niri_workspaces, 'map(select(.output == "HDMI-A-1" and .name != null)) | sort_by(.idx)')}
+      (for wsp in {jq(niri_workspaces, 'map(select(.output == "HDMI-A-2" and .name != null)) | sort_by(.idx)')}
         (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
                 :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
           {wsp.name ?: wsp.idx})))
@@ -53,11 +53,10 @@
          :halign "center"
          :valign "start"
          :spacing 0
-      (for wsp in {jq(niri_workspaces, 'map(select(.output == "DP-1" and .name != null)) | sort_by(.idx)')}
+      (for wsp in {jq(niri_workspaces, 'map(select(.output == "DP-4" and .name != null)) | sort_by(.idx)')}
         (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
                 :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
           {wsp.name ?: wsp.idx})))))
-
 
 (defwidget metric [label value onchange]
   (box :orientation "v"
@@ -70,19 +69,13 @@
            :value value
            :onchange onchange)))
 
-
-
-
-
 (deflisten niri_workspaces :initial "[]"
   "bash scripts/niri-workspaces.sh")
-
 
 (defpoll time :interval "10s"
   "date '+%H:%M'")
 (defpoll date :interval "10s"
   "date '+%d.%m'")
-
 
 (defwindow bar
   :monitor 0

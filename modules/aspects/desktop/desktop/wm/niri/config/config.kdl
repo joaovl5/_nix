@@ -19,14 +19,14 @@ input {
   }
   workspace-auto-back-and-forth
 }
-output "DP-1" {
+output "DP-4" {
   scale 1.333333
   focus-at-startup
   transform "normal"
   position x=1080 y=396
   mode "3840x2160@240.080000"
 }
-output "HDMI-A-1" {
+output "HDMI-A-2" {
   scale 1.0
   transform "90"
   position x=0 y=240
@@ -316,34 +316,34 @@ binds {
   }
 }
 workspace "A" {
-  open-on-output "DP-1"
+  open-on-output "DP-4"
 }
 workspace "B" {
-  open-on-output "DP-1"
+  open-on-output "DP-4"
 }
 workspace "C" {
-  open-on-output "DP-1"
+  open-on-output "DP-4"
 }
 workspace "D" {
-  open-on-output "DP-1"
+  open-on-output "DP-4"
 }
 workspace "E" {
-  open-on-output "DP-1"
+  open-on-output "DP-4"
 }
 workspace "F" {
-  open-on-output "HDMI-A-1"
+  open-on-output "HDMI-A-2"
 }
 workspace "G" {
-  open-on-output "HDMI-A-1"
+  open-on-output "HDMI-A-2"
 }
 workspace "H" {
-  open-on-output "HDMI-A-1"
+  open-on-output "HDMI-A-2"
 }
 workspace "I" {
-  open-on-output "HDMI-A-1"
+  open-on-output "HDMI-A-2"
 }
 workspace "J" {
-  open-on-output "HDMI-A-1"
+  open-on-output "HDMI-A-2"
 }
 spawn-sh-at-startup "systemctl --user start ironbar"
 spawn-sh-at-startup "eww -c ~/.config/eww/bar daemon"
@@ -356,3 +356,4 @@ gestures {
 xwayland-satellite {
   path "xwayland-satellite"
 }
+
