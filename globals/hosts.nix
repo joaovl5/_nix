@@ -20,6 +20,10 @@ in rec {
         storage.client.enable = true;
         storage.client.server = tyrant.hostname;
         host.password.sops_key = "main";
+        "azure-vpn" = {
+          enable = true;
+          connection.start_action = "none";
+        };
 
         "unit.backup" = {
           enable = true;

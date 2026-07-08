@@ -4,5 +4,6 @@
     guix
     system-astral
     service-ollama
+    desktop
   ];
 }
