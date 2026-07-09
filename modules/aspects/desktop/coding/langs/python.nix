@@ -14,6 +14,7 @@ _: {
     };
     home.packages = with pkgs; [
       basedpyright
+      pyrefly
       ruff
       ty
       (python3.withPackages (

@@ -61,6 +61,7 @@
                                                :reportUnknownParameterType false
                                                :reportExplicitAny false}}}}
          :ruff {:server_capabilities {:hoverProvider false}}
+         :pyrefly {}
          ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
          :biome {}
