@@ -7,5 +7,5 @@ description: |
 
 # Knowledge Base
 
-The knowledge-base can be accessed at `~/bot-kb/` - load `~/bot-kb/AGENTS.md`
-and follow its instructions religiously for operating with it.
+Load `~/bot-kb/AGENTS.md` and follow its instructions religiously for
+operating with the knowledge base.
