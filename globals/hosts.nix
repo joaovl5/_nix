@@ -150,6 +150,10 @@ in rec {
 
         "unit.forgejo" = {
           enable = true;
+          actions_runner.enable = true;
+          actions_runner.uuid = "39663966-6239-6239-3932-303733666133";
+          omp_updater_runner.enable = true;
+          omp_updater_runner.uuid = "628b75fd-9a9a-44a3-83cb-db8349de0f2b";
         };
         "unit.syncthing" = {
           enable = true;

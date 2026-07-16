@@ -260,9 +260,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "cd461961e0b648af109520d4f45244d69a1c78de",
+      "revision": "0d5ecc66a3c5820934fbaf5bfa49e588b054b19e",
       "url": null,
-      "hash": "sha256-I4wJuuz+0leVxgrA2xc0jj1aXN/HrAjfXyytn/YHrD4="
+      "hash": "sha256-oo8H9xgk5KGtGYQ8jCDsFYfVIn+PiQFa8WfVGip3t3s="
     },
     "nix-flatpak": {
       "type": "Git",
