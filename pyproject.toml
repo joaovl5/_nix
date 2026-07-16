@@ -8,7 +8,7 @@
   nix-machine-protocol = { git = "https://github.com/Gastove/nix-machine-protocol" }
 
 [tool.ruff]
-  line-length    = 78
+  line-length    = 70
   indent-width   = 2
   target-version = "py314"
   [tool.ruff.format]

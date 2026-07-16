@@ -62,12 +62,14 @@
                                                :reportExplicitAny false}}}}
          :ruff {:server_capabilities {:hoverProvider false}}
          :pyrefly {}
+         :glsl_analyzer {}
          ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
          :biome {}
          :janet_lsp {}
          ; :rust_analyzer {}
          :nim_langserver {}
+         ; :nimls {}
          :lua_ls {:cmd [:lua-language-server]
                   :settings {:Lua {:completion {:callSnippet :Replace}}}}
          :fennel_ls {:cmd [:fennel-ls]

@@ -21,7 +21,7 @@ in {
     inherit pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-SLqFrLh0d1DKXYg7VgQg0pssgUeLYtRi2DIxQak0ToY=";
+    hash = "sha256-/txbTrE1ILwwV9Tgv8gunWBx/HIuhCIUcSkWyfDnI08=";
   };
 
   nativeBuildInputs = [

@@ -75,6 +75,10 @@
     "branch": "main",
     "commit": "72527798e75b5e34757491947c2cb853ce21dc0e"
   },
+  "follow-md-links.nvim": {
+    "branch": "main",
+    "commit": "9beb299bf0fd1d742388d4bb39c111dae0166272"
+  },
   "github-nvim-theme": {
     "branch": "main",
     "commit": "c106c9472154d6b2c74b74565616b877ae8ed31d"
@@ -86,10 +90,6 @@
   "glance.nvim": {
     "branch": "master",
     "commit": "bf86d8b79dce808e65fdb6e9269d0b4ed6d2eefc"
-  },
-  "graft.nvim": {
-    "branch": "main",
-    "commit": "f4654c8e1e56909ff2b41d774710e04b4d68c8eb"
   },
   "graph_view_toml_parser": {
     "branch": "main",

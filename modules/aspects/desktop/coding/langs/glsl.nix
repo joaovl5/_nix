@@ -1,11 +1,7 @@
 _: {
   den.aspects.coding.homeManager = {pkgs, ...}: {
     home.packages = with pkgs; [
-      nim
-      nimlangserver
-      nimlsp
-      nimble
-      nph
+      glsl_analyzer
     ];
   };
 }

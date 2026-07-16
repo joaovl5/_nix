@@ -1,8 +1,11 @@
-(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(import-macros {: do-req : let-req : plugin : p! : key} :./lib/init-macros)
 
 (let [fts [:markdown
            :codecompanion]]
-  [(plugin :satozawa/graft.nvim {:ft fts :opts {}})
+  [; adijad
+   ; (plugin :satozawa/graft.nvim {:ft fts :opts {}})
+   (p! :joaovl5/follow-md-links.nvim
+       (lazy false))
    (plugin :MeanderingProgrammer/render-markdown.nvim
            {:dependencies [:nvim-treesitter/nvim-treesitter
                            :nvim-mini/mini.nvim]
