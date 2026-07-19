@@ -1,6 +1,8 @@
 ---
 name: textual-tui
-description: Use when building Python terminal user interfaces with the Textual framework: TUI apps, widgets, Textual CSS/TCSS, DOM queries, reactivity, messages/events, key bindings, workers, screens, testing, or Rich renderables.
+description: |
+  Use when dealing with Python terminal user interfaces with the
+  Textual framework for TUIs
 ---
 
 # Textual TUI Framework
