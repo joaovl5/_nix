@@ -2,8 +2,8 @@
 
 ## What they are
 
-Aspects are Den behavior units. They combine one or more Nix class modules
-with an include graph.
+Aspects are Den behavior units. They combine one or more Nix class
+modules with an include graph.
 
 ```nix
 den.aspects.editor = {
@@ -30,8 +30,8 @@ den.aspects.hostname = { host, ... }: {
 
 ## Includes
 
-`includes` forms the aspect DAG. Use real references, policies, or parametric
-functions.
+`includes` forms the aspect DAG. Use real references, policies, or
+parametric functions.
 
 ```nix
 den.aspects.workstation.includes = [
@@ -42,8 +42,9 @@ den.aspects.workstation.includes = [
 ];
 ```
 
-Including aspect `A` includes `A`'s own class configs and `A.includes`. It
-does not automatically include arbitrary child aspect keys.
+Including aspect `A` includes `A`'s own class configs and
+`A.includes`. It does not automatically include arbitrary child aspect
+keys.
 
 ## Child aspects and `._`
 
@@ -59,17 +60,18 @@ or `provides` children:
 den.aspects.tools.provides.editors.homeManager.programs.helix.enable = true;
 ```
 
-Den forwards `provides` children, so `den.aspects.tools.editors` resolves.
+Den forwards `provides` children, so `den.aspects.tools.editors`
+resolves.
 
-`A._` is a synthetic aspect that includes all immediate regular child aspects
-of `A`:
+`A._` is a synthetic aspect that includes all immediate regular child
+aspects of `A`:
 
 ```nix
 den.aspects.user.includes = [ den.aspects.tools._ ];
 ```
 
-`A._` skips structural keys, class keys, registered quirk keys, Den internals,
-forwarded `provides` children, and grandchildren.
+`A._` skips structural keys, class keys, registered quirk keys, Den
+internals, forwarded `provides` children, and grandchildren.
 
 Use nested `._` for grandchildren:
 
@@ -114,20 +116,21 @@ den.aspects.base.options.nixos = { ... };
 den.aspects.base-options.includes = [ den.aspects.base.options ];
 ```
 
-Remove the wrapper only after searches and targeted evals prove no references
-remain.
+Remove the wrapper only after searches and targeted evals prove no
+references remain.
 
 ### Preserve host behavior during refactors
 
-For host-affecting aspect changes, compare or eval the affected outputs:
+For host-affecting aspect changes, compare or eval the affected
+outputs:
 
 ```bash
 nix eval --raw .#nixosConfigurations.lavpc.config.system.build.toplevel.drvPath
 nix eval --raw .#nixosConfigurations.tyrant.config.system.build.toplevel.drvPath
 ```
 
-For deployment-sensitive changes, explicitly check service enablement paths
-instead of relying on structure alone.
+For deployment-sensitive changes, explicitly check service enablement
+paths instead of relying on structure alone.
 
 ## Source anchors
 

@@ -9,7 +9,11 @@ from rich.panel import Panel
 
 REPOS = [
   ("git@github.com:joaovl5/_nix.git", "my_nix", "nix config"),
-  ("git@github.com:joaovl5/__secrets.git", "my_secrets", "nix secrets"),
+  (
+    "git@github.com:joaovl5/__secrets.git",
+    "my_secrets",
+    "nix secrets",
+  ),
 ]
 
 console = Console()
@@ -69,10 +73,14 @@ def copy_all(
 ) -> None:
   """Copy regular files from one directory into another."""
   console.rule(f"[bold cyan]{description}")
-  print(f"From [magenta]{src_dir}[/magenta] to [magenta]{dest_dir}[/magenta]")
+  print(
+    f"From [magenta]{src_dir}[/magenta] to [magenta]{dest_dir}[/magenta]"
+  )
 
   if not src_dir.is_dir():
-    print("[yellow]Source directory does not exist, skipping.[/yellow]")
+    print(
+      "[yellow]Source directory does not exist, skipping.[/yellow]"
+    )
     return
 
   ensure_dir(dest_dir)
@@ -95,7 +103,9 @@ def clone_repo(
   *, repo_uri: str, repo_description: str, target_dir: Path, user: str
 ) -> None:
   """Clone a repository into the target directory when it is missing."""
-  console.rule(f"[bold cyan]Cloning repository {target_dir}[/bold cyan]")
+  console.rule(
+    f"[bold cyan]Cloning repository {target_dir}[/bold cyan]"
+  )
 
   if target_dir.exists():
     print(
@@ -143,7 +153,9 @@ def main(base_dir: Path, *, user: str) -> int:
       user=user,
     )
 
-  console.print(Panel("Post-install setup finished", style="bold green"))
+  console.print(
+    Panel("Post-install setup finished", style="bold green")
+  )
   return 0
 
 

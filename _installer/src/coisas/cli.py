@@ -15,7 +15,9 @@ from coisas.command import Command
 class AppendLineFn(Protocol):
   """Append a rendered line to the active panel."""
 
-  def __call__(self, line: str | Text, style: str | None = None) -> int: ...
+  def __call__(
+    self, line: str | Text, style: str | None = None
+  ) -> int: ...
 
 
 class SetFailedFn(Protocol):
@@ -113,16 +115,25 @@ class CLI:
       visible = lines
       if not show_all and len(lines) > effective_max:
         hidden = len(lines) - effective_max
-        text.append(f"... ({hidden} more lines above)\n", style="dim italic")
+        text.append(
+          f"... ({hidden} more lines above)\n", style="dim italic"
+        )
         visible = lines[-effective_max:]
       for line in visible:
         text.append(line)
         text.append("\n")
       live.update(
-        Panel(text, title=title, border_style=border_style, box=current_box)
+        Panel(
+          text,
+          title=title,
+          border_style=border_style,
+          box=current_box,
+        )
       )
 
-    def append_line(line: str | Text, style: str | None = None) -> int:
+    def append_line(
+      line: str | Text, style: str | None = None
+    ) -> int:
       if isinstance(line, Text):
         lines.append(line)
       else:
@@ -212,7 +223,9 @@ class CLI:
       return returncode
 
     with self.panel_session(title=title, prelude=[]) as panel_writer:
-      command_index = panel_writer.append_line(command_line, style="dim")
+      command_index = panel_writer.append_line(
+        command_line, style="dim"
+      )
       if process.stdout is not None:
         for line in process.stdout:
           formatted = self._format_panel_line(line)
@@ -270,7 +283,9 @@ class CLI:
       )
     except Exception as exc:
       if writer is not None:
-        writer.append_line(f"Failed to run command: {exc}", style="red")
+        writer.append_line(
+          f"Failed to run command: {exc}", style="red"
+        )
         writer.set_failed()
         if error_msg is not None:
           raise error_cls(error_msg) from exc

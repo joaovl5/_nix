@@ -8,8 +8,9 @@ wg genkey > privatekey
 wg pubkey < privatekey > publickey
 ```
 
-Each peer needs a unique keypair. Store private keys with correct permissions
-(not world-readable). Use `privateKeyFile` over inline `privateKey`.
+Each peer needs a unique keypair. Store private keys with correct
+permissions (not world-readable). Use `privateKeyFile` over inline
+`privateKey`.
 
 With agenix:
 
@@ -31,15 +32,16 @@ Auto-generate option:
 - `192.168.26.0/24` - subnet
 - `fd31:bf08:57cb::9/128` - single IPv6 peer
 - `0.0.0.0/0` + `::/0` - proxy all traffic
-- Must be unique per peer (overlapping = only one peer receives traffic)
+- Must be unique per peer (overlapping = only one peer receives
+  traffic)
 - Some modules auto-configure routes from AllowedIPs
 
 ## NixOS Configuration Methods
 
 ### 1. `networking.wireguard.interfaces`
 
-Does NOT auto-configure routes. Manual `ip route add` or postSetup scripts
-needed.
+Does NOT auto-configure routes. Manual `ip route add` or postSetup
+scripts needed.
 
 **Peer:**
 
@@ -84,8 +86,8 @@ needed.
 }
 ```
 
-**Proxy client:** Set `allowedIPs = [ "0.0.0.0/0" "::/0" ]` and specify
-endpoint.
+**Proxy client:** Set `allowedIPs = [ "0.0.0.0/0" "::/0" ]` and
+specify endpoint.
 
 ### 2. `networking.wg-quick.interfaces`
 
@@ -120,7 +122,8 @@ Higher-level, uses `wg-quick` tool. Manages routes automatically.
 
 ### 3. `systemd.network` (systemd-networkd)
 
-Most powerful. Native route/policy rule management. Dual-stack friendly.
+Most powerful. Native route/policy rule management. Dual-stack
+friendly.
 
 **Peer:**
 
@@ -234,7 +237,8 @@ Client-only. Import wg-quick config:
 
 ### Architecture
 
-Client -> Server A (relay, good connection) -> Server B (desired exit IP)
+Client -> Server A (relay, good connection) -> Server B (desired exit
+IP)
 
 Server A has two WireGuard interfaces:
 
@@ -301,22 +305,22 @@ Architecture: 3 systemd services + Prometheus smokeping probers.
 
 **Components:**
 
-1. `wg-select` - picks initial server (from state file or random), runs before
-   wg.service
-2. `wg-failover` - queries Prometheus for packet loss per server, switches to
-   lowest-loss alternative
-3. `wg-health-check` - timer (1min), checks tunnel quality, triggers failover
-   after 3 consecutive failures >15% loss
+1. `wg-select` - picks initial server (from state file or random),
+   runs before wg.service
+2. `wg-failover` - queries Prometheus for packet loss per server,
+   switches to lowest-loss alternative
+3. `wg-health-check` - timer (1min), checks tunnel quality, triggers
+   failover after 3 consecutive failures >15% loss
 
 **Two probers:**
 
-- External (on hypervisor): pings all VPN server endpoints directly - measures
-  reachability of servers you're NOT connected to
-- Internal (in VPN namespace): pings root DNS through active tunnel - measures
-  actual tunnel quality
+- External (on hypervisor): pings all VPN server endpoints directly -
+  measures reachability of servers you're NOT connected to
+- Internal (in VPN namespace): pings root DNS through active tunnel -
+  measures actual tunnel quality
 
-**Failover trigger:** wg.service `OnFailure = "wg-failover.service"` + health
-check timer.
+**Failover trigger:** wg.service `OnFailure = "wg-failover.service"` +
+health check timer.
 
 Config symlink pattern: `/run/wg-active.conf` ->
 `/run/secrets/wireguard/$SERVER`
@@ -352,13 +356,13 @@ systemd.network.networks."50-wg0" = {
 };
 ```
 
-Warning: `Domains=~.` prevents DNS resolution of WireGuard endpoints. Use IP
-addresses for endpoints, not domains.
+Warning: `Domains=~.` prevents DNS resolution of WireGuard endpoints.
+Use IP addresses for endpoints, not domains.
 
 ## rpfilter (Reverse Path Filtering)
 
-NixOS firewall blocks wg traffic when routing all traffic through tunnel.
-Solutions (pick one):
+NixOS firewall blocks wg traffic when routing all traffic through
+tunnel. Solutions (pick one):
 
 1. `networking.firewall.checkReversePath = "loose";` (recommended)
 2. `networking.firewall.checkReversePath = false;`
@@ -380,16 +384,16 @@ networking.firewall = {
 
 ## Troubleshooting
 
-**persistentKeepalive not working with privateKeyFile:** PostUp sets private
-key after config, breaking auto-connect. Workaround:
+**persistentKeepalive not working with privateKeyFile:** PostUp sets
+private key after config, breaking auto-connect. Workaround:
 
 ```nix
 postUp = [ "wg set wg0 peer ${publicKey} persistent-keepalive 25" ];
 # Don't set persistentKeepalive in peers
 ```
 
-**Some services fail but ping works:** MTU too large. Default is 1420 (1500 -
-80 wg overhead). Lower it:
+**Some services fail but ping works:** MTU too large. Default is 1420
+(1500 - 80 wg overhead). Lower it:
 
 ```nix
 networking.wireguard.interfaces.wg0.mtu = 1000;  # tune upward from here

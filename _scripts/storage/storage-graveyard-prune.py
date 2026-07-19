@@ -24,11 +24,17 @@ app = App(
 )
 
 
-def parse_record_line(raw_line: str) -> tuple[dt.datetime, Path] | None:
+def parse_record_line(
+  raw_line: str,
+) -> tuple[dt.datetime, Path] | None:
   """Parse a graveyard record line into its timestamp and buried path."""
   try:
-    removed_at_raw, _original_path, buried_path = raw_line.split("\t", 2)
-    removed_at = dt.datetime.strptime(removed_at_raw, RECORD_TIMESTAMP_FORMAT)
+    removed_at_raw, _original_path, buried_path = raw_line.split(
+      "\t", 2
+    )
+    removed_at = dt.datetime.strptime(
+      removed_at_raw, RECORD_TIMESTAMP_FORMAT
+    )
   except ValueError:
     return None
   return removed_at, Path(buried_path)
@@ -50,17 +56,23 @@ def prune_empty_parents(*, path: Path, graveyard_root: Path) -> None:
     parent = parent.parent
 
 
-def remove_expired_entry(*, entry_path: Path, graveyard_root: Path) -> None:
+def remove_expired_entry(
+  *, entry_path: Path, graveyard_root: Path
+) -> None:
   """Delete one expired graveyard entry and clean up empty parent directories."""
   if entry_path.is_symlink() or entry_path.is_file():
     entry_path.unlink(missing_ok=True)
   elif entry_path.is_dir():
     shutil.rmtree(entry_path, ignore_errors=True)
 
-  prune_empty_parents(path=entry_path.parent, graveyard_root=graveyard_root)
+  prune_empty_parents(
+    path=entry_path.parent, graveyard_root=graveyard_root
+  )
 
 
-def prune_graveyard(*, graveyard_root: Path, retention_days: int) -> None:
+def prune_graveyard(
+  *, graveyard_root: Path, retention_days: int
+) -> None:
   """Remove expired graveyard entries and rewrite the retained record file."""
   graveyard_root_resolved = graveyard_root.resolve(strict=False)
   record_path = graveyard_root / RECORD_FILENAME
@@ -71,7 +83,9 @@ def prune_graveyard(*, graveyard_root: Path, retention_days: int) -> None:
   retention_window = dt.timedelta(days=retention_days)
   kept_lines: list[str] = []
 
-  for raw_line in record_path.read_text(encoding="utf-8").splitlines():
+  for raw_line in record_path.read_text(
+    encoding="utf-8"
+  ).splitlines():
     if not raw_line.strip():
       continue
 

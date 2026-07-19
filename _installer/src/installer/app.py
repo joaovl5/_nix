@@ -6,7 +6,10 @@ from coisas.repository import RepositoryURI
 from cyclopts import App
 from rich.console import Console
 
-from installer.context import InstallerContext, SecretsEncryptionParams
+from installer.context import (
+  InstallerContext,
+  SecretsEncryptionParams,
+)
 from installer.steps import (
   CloneRepositories,
   CommitFacter,
@@ -35,8 +38,10 @@ def main(
   flake_host: str,
   flake: str = "git@github.com:joaovl5/_nix.git",
   secrets: str | None = "git@github.com:joaovl5/__secrets.git",
-  secrets_file_disk_encryption: str | None = "secrets/disk_encryption.yaml",
-  secrets_extract_disk_encryption_key: str | None = '["servers"]["tyrant"]',
+  secrets_file_disk_encryption: str
+  | None = "secrets/disk_encryption.yaml",
+  secrets_extract_disk_encryption_key: str
+  | None = '["servers"]["tyrant"]',
   secrets_use_disk_encryption: bool = False,
   secrets_disk_encryption_keyfile_location: str = "/tmp/secret.key",
   use_sudo: bool = True,
@@ -96,7 +101,9 @@ def main(
   )
 
   cli = CLI(console=Console())
-  cli.info(f"Prepared installer for [bold yellow]{host}:{port}[/bold yellow]")
+  cli.info(
+    f"Prepared installer for [bold yellow]{host}:{port}[/bold yellow]"
+  )
 
   steps = [
     CloneRepositories(),
@@ -118,5 +125,7 @@ def main(
   try:
     installer.run()
   except Exception as e:
-    cli.console.print(f"[bold red]Installation failed:[/bold red] {e}")
+    cli.console.print(
+      f"[bold red]Installation failed:[/bold red] {e}"
+    )
     raise SystemExit(1)

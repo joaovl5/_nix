@@ -49,7 +49,8 @@ app = App(
 def contains_control_characters(value: str) -> bool:
   """Return whether the value contains Unicode control characters."""
   return any(
-    unicodedata.category(character).startswith("C") for character in value
+    unicodedata.category(character).startswith("C")
+    for character in value
   )
 
 
@@ -100,7 +101,9 @@ class LogTemplateInput(BaseModel):
 
   @field_validator("short_title_slug")
   @classmethod
-  def validate_short_title_slug(cls, value: str, info: ValidationInfo) -> str:
+  def validate_short_title_slug(
+    cls, value: str, info: ValidationInfo
+  ) -> str:
     if not value:
       raise ValueError(
         "must slugify to at least one ASCII letter or number; punctuation-only, emoji-only, or non-ASCII-only titles cannot be used as filenames"
@@ -112,7 +115,9 @@ class LogTemplateInput(BaseModel):
 
     short_title = info.data.get("short_title")
     if isinstance(short_title, str) and value != slugify(short_title):
-      raise ValueError("must match the slug generated from the short title")
+      raise ValueError(
+        "must match the slug generated from the short title"
+      )
     return value
 
   def render_context(self) -> dict[str, str | int]:
@@ -121,7 +126,9 @@ class LogTemplateInput(BaseModel):
       "date_slug": self.date_slug,
       # JSON string encoding keeps YAML frontmatter valid for arbitrary single-line input.
       "short_title": json.dumps(self.short_title, ensure_ascii=False),
-      "report_brief": json.dumps(self.report_brief, ensure_ascii=False),
+      "report_brief": json.dumps(
+        self.report_brief, ensure_ascii=False
+      ),
     }
 
 
@@ -151,7 +158,9 @@ def format_validation_error(error: ValidationError) -> str:
   """Render a user-facing validation error summary."""
   lines = ["Validation failed:"]
   for entry in error.errors():
-    raw_location = ".".join(str(part) for part in entry["loc"]) or "input"
+    raw_location = (
+      ".".join(str(part) for part in entry["loc"]) or "input"
+    )
     location = VALIDATION_FIELD_LABELS.get(
       raw_location, raw_location.replace("_", " ")
     )
@@ -173,7 +182,9 @@ def output_dir() -> Path:
   return skill_dir.parent.parent.parent / "docs" / "logs"
 
 
-def render_template(*, template_file: Path, context: LogTemplateInput) -> str:
+def render_template(
+  *, template_file: Path, context: LogTemplateInput
+) -> str:
   """Render the markdown template with validated log metadata."""
   template = template_file.read_text(encoding="utf-8")
   replacements = context.render_context()

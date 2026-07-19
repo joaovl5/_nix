@@ -11,8 +11,10 @@ Use this after a non-trivial task yields either:
   - **Existing skill:** update `./.agents/skills`
   - **Existing docs:** update `./docs/wip`
   - **New skill:** create one only if no current skill fits
-  - **New docs:** create them only if no current page can absorb the change
-- **Ephemeral knowledge:** store situation-specific context in `./docs/logs`
+  - **New docs:** create them only if no current page can absorb the
+    change
+- **Ephemeral knowledge:** store situation-specific context in
+  `./docs/logs`
 
 Use the guide below; more than one action may apply:
 
@@ -28,24 +30,28 @@ if (non-trivial reusable wisdom) ->
 
 ## Shared principles
 
-- **Scope:** prefer the smallest structural update that fits the new knowledge
-- **Concision:** keep skill and doc updates short, logs may stay detailed when
-  detail helps
+- **Scope:** prefer the smallest structural update that fits the new
+  knowledge
+- **Concision:** keep skill and doc updates short, logs may stay
+  detailed when detail helps
 - **Skill support:** use supporting skills when relevant
 
 ## Procedures
 
-- **(A) Updating skills:** when new wisdom fits a skill, extend it instead of
-  creating a near-duplicate
-- **(B) Updating docs:** use when an existing doc is the best long-term home
+- **(A) Updating skills:** when new wisdom fits a skill, extend it
+  instead of creating a near-duplicate
+- **(B) Updating docs:** use when an existing doc is the best
+  long-term home
 - **(C) Adding skills:** only when
   - **Gap:** no current skill covers the subject
   - **Reuse:** it will be reusable later, not situation-specific
 - **(D) Adding docs:** only when
-  - **No fit:** no current page can absorb it, even after restructuring
+  - **No fit:** no current page can absorb it, even after
+    restructuring
   - **Shared value:** it matters to agents and developers
-- **(E) Logging ephemeral knowledge:** use for debugging logs, research notes,
-  incident reports, and other situation-specific material worth keeping
+- **(E) Logging ephemeral knowledge:** use for debugging logs,
+  research notes, incident reports, and other situation-specific
+  material worth keeping
   - **Location:** `./docs/logs`
   - **Adding a log:** bootstrap it with the helper
     - **Command:**
@@ -59,4 +65,5 @@ if (non-trivial reusable wisdom) ->
     - **After running:**
       - use template comments as the basis for filling placeholders
       - remove the comments after filling every placeholder
-      - keep logs detailed enough for future correlation, but cut filler
+      - keep logs detailed enough for future correlation, but cut
+        filler

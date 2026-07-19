@@ -12,11 +12,14 @@ eww open <window_name>
 - **Config flag:** official docs say every Eww command should include
   `--config /path/to/config/dir` when using a non-default config dir
 - **Repo caveat:** this repo links
-  `modules/aspects/desktop/desktop/widgets/eww/config` to `~/.config/eww`
+  `modules/aspects/desktop/desktop/widgets/eww/config` to
+  `~/.config/eww`
 - **Live file:** the live Yuck file still sits under `bar/`
-- **Launch unknown:** no repo-local launcher or service command was found
-- **Verification:** prove the real `bar` launch command with `eww --help`, the
-  running service, or current launcher before documenting commands
+- **Launch unknown:** no repo-local launcher or service command was
+  found
+- **Verification:** prove the real `bar` launch command with
+  `eww --help`, the running service, or current launcher before
+  documenting commands
 
 ## Troubleshooting commands
 
@@ -30,7 +33,8 @@ eww open --debug <window_name>
 eww inspector
 ```
 
-- **`eww reload`:** use when hot reload missed a config or style change
+- **`eww reload`:** use when hot reload missed a config or style
+  change
 - **`eww logs`:** use for daemon and runtime errors
 - **`eww state`:** use to inspect current variable values
 - **`eww debug`:** use for widget structure and debug data
@@ -41,11 +45,11 @@ eww inspector
 
 ## Repo verification
 
-- **Search first:** before assuming launch behavior, search repo files for
-  `eww open`, `eww open-many`, and `eww daemon`
+- **Search first:** before assuming launch behavior, search repo files
+  for `eww open`, `eww open-many`, and `eww daemon`
 - **Config evidence:** also search for `--config` and `config/bar`
-- **Current evidence:** repo search found module wiring and config files, but
-  no launch command
+- **Current evidence:** repo search found module wiring and config
+  files, but no launch command
 - **Edit boundary:** change repo sources, not generated Eww config
 
 ## Source map
@@ -73,20 +77,25 @@ eww inspector
   <https://elkowar.github.io/eww/configuration.html#generating-a-list-of-widgets-from-json-using-for>
 - **`include`:**
   <https://elkowar.github.io/eww/configuration.html#using-include>
-- **Expressions:** <https://elkowar.github.io/eww/expression_language.html>
-- **GTK theming:** <https://elkowar.github.io/eww/working_with_gtk.html>
+- **Expressions:**
+  <https://elkowar.github.io/eww/expression_language.html>
+- **GTK theming:**
+  <https://elkowar.github.io/eww/working_with_gtk.html>
 - **Magic vars:** <https://elkowar.github.io/eww/magic-vars.html>
 - **Widgets:** <https://elkowar.github.io/eww/widgets.html>
-- **Troubleshooting:** <https://elkowar.github.io/eww/troubleshooting.html>
+- **Troubleshooting:**
+  <https://elkowar.github.io/eww/troubleshooting.html>
 
 ### External docs linked by Eww
 
 - **GTK CSS overview:** <https://docs.gtk.org/gtk3/css-overview.html>
-- **GTK CSS properties:** <https://docs.gtk.org/gtk3/css-properties.html>
+- **GTK CSS properties:**
+  <https://docs.gtk.org/gtk3/css-properties.html>
 
 ### Current repo evidence
 
-- **Module entry:** `modules/aspects/desktop/desktop/widgets/eww/default.nix`
+- **Module entry:**
+  `modules/aspects/desktop/desktop/widgets/eww/default.nix`
 - **Bar Yuck:**
   `modules/aspects/desktop/desktop/widgets/eww/config/bar/eww.yuck`
 - **Bar SCSS:**
@@ -98,5 +107,5 @@ eww inspector
 
 - **Launch command:** the actual command or service that opens `bar`
 - **`.bar` selector:** whether `.bar` is a live GTK class or dead SCSS
-- **Bar growth:** whether a third or fourth metric still fits the current
-  right-side dock cleanly
+- **Bar growth:** whether a third or fourth metric still fits the
+  current right-side dock cleanly

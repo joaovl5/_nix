@@ -53,7 +53,9 @@ def _find_nfnl_project_root(anchor: Path) -> Path:
   for candidate in [current, *current.parents]:
     if (candidate / ".nfnl.fnl").is_file():
       return candidate
-  raise RuntimeError(f"Could not locate .nfnl.fnl above anchor: {anchor}")
+  raise RuntimeError(
+    f"Could not locate .nfnl.fnl above anchor: {anchor}"
+  )
 
 
 def _path_for_nvim(path: Path, base: Path) -> str:
@@ -188,7 +190,9 @@ def main(
 
   if not resolved_nfnl_rtp.is_dir():
     print(f"nfnl runtimepath not found: {resolved_nfnl_rtp}")
-    print("Hint: pass --nfnl-rtp PATH if nfnl is installed elsewhere.")
+    print(
+      "Hint: pass --nfnl-rtp PATH if nfnl is installed elsewhere."
+    )
     return 1
 
   try:
@@ -215,8 +219,12 @@ def main(
     "+qa",
   ]
 
-  with tempfile.TemporaryDirectory(prefix="nfnl-config-home-") as config_home:
-    print(f"$ XDG_CONFIG_HOME={config_home} {_format_command(command)}")
+  with tempfile.TemporaryDirectory(
+    prefix="nfnl-config-home-"
+  ) as config_home:
+    print(
+      f"$ XDG_CONFIG_HOME={config_home} {_format_command(command)}"
+    )
     env = os.environ.copy()
     env["XDG_CONFIG_HOME"] = config_home
     try:
@@ -243,7 +251,9 @@ def main(
   if completed.returncode != 0:
     print("nfnl recompilation failed.")
     print("Hints:")
-    print("- Make sure `nvim` is the repo's configured Neovim on PATH.")
+    print(
+      "- Make sure `nvim` is the repo's configured Neovim on PATH."
+    )
     print(
       "- Trust `modules/aspects/desktop/desktop/apps/editor/neovim/config/.nfnl.fnl` once in interactive Neovim before using this script."
     )

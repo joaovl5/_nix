@@ -27,7 +27,14 @@ _REMOTE_CACHE = ".cache/nix_installer"
 def nix_build(flake_ref: str) -> str:
   """Build a flake ref locally and return the resulting store path."""
   result = subprocess.run(
-    ["nix", "build", *NIX_FLAGS, flake_ref, "--no-link", "--print-out-paths"],
+    [
+      "nix",
+      "build",
+      *NIX_FLAGS,
+      flake_ref,
+      "--no-link",
+      "--print-out-paths",
+    ],
     capture_output=True,
     text=True,
   )
@@ -63,7 +70,9 @@ def nix_copy_command(
   return ShellCommand(
     "nix",
     args,
-    env={"NIX_SSHOPTS": f"-i {ssh_config.identity} -p {ssh_config.port}"},
+    env={
+      "NIX_SSHOPTS": f"-i {ssh_config.identity} -p {ssh_config.port}"
+    },
   )
 
 
@@ -209,7 +218,8 @@ class SendKeyfile:
     assert context.encryption_params is not None
 
     cli.run_command(
-      command=context.do_ssh | ShellCommand("mkdir", ["-p", _REMOTE_CACHE]),
+      command=context.do_ssh
+      | ShellCommand("mkdir", ["-p", _REMOTE_CACHE]),
       description="Creating remote cache directory",
       error_msg="Failed to create remote cache directory",
     )
@@ -376,13 +386,16 @@ class DownloadFacter:
   def execute(self, context: InstallerContext, cli: CLI) -> None:
     secrets_dir = context.secrets_dir
     if secrets_dir is None:
-      raise InstallerError("Secrets directory required for facter download")
+      raise InstallerError(
+        "Secrets directory required for facter download"
+      )
 
     facter_dir = f"{secrets_dir}/facter"
     Path(facter_dir).mkdir(parents=True, exist_ok=True)
 
     cli.run_command(
-      command=context.do_ssh | ShellCommand("mkdir", ["-p", _REMOTE_CACHE]),
+      command=context.do_ssh
+      | ShellCommand("mkdir", ["-p", _REMOTE_CACHE]),
       description="Creating remote cache directory",
       error_msg="Failed to create remote cache directory",
     )
@@ -392,7 +405,12 @@ class DownloadFacter:
       | context.do_sudo
       | ShellCommand(
         "install",
-        ["-m", "644", "/tmp/facter.json", f"~/{_REMOTE_CACHE}/facter.json"],
+        [
+          "-m",
+          "644",
+          "/tmp/facter.json",
+          f"~/{_REMOTE_CACHE}/facter.json",
+        ],
       ),
       description="Copying facter.json to cache",
       error_msg="Failed to copy facter.json to cache",
@@ -430,7 +448,9 @@ class CommitFacter:
     secrets_dir = context.secrets_dir
     assert secrets_dir is not None
 
-    git = GitHelper(config=_GIT_INSTALLER_CONFIG, repo_path=secrets_dir)
+    git = GitHelper(
+      config=_GIT_INSTALLER_CONFIG, repo_path=secrets_dir
+    )
     msg = f"[my-installer][new-facter-cfg]:{context.flake_host}"
 
     cli.run_command(
@@ -484,9 +504,7 @@ class UpdateSecretsPin:
       error_msg="Failed to update npins/sources.json",
     )
 
-    msg = (
-      f"[my-installer][update-secrets][new-facter-cfg]:{context.flake_host}"
-    )
+    msg = f"[my-installer][update-secrets][new-facter-cfg]:{context.flake_host}"
 
     cli.run_command(
       command=git.add(["npins/sources.json"]),
@@ -585,7 +603,8 @@ class CopyKeys:
       )
 
     cli.run_command(
-      command=context.do_ssh | ShellCommand("rm", ["-rf", _REMOTE_CACHE]),
+      command=context.do_ssh
+      | ShellCommand("rm", ["-rf", _REMOTE_CACHE]),
       description="Cleaning up cache directory",
       error_msg="Failed to clean up cache",
     )
@@ -606,7 +625,8 @@ class GenerateInitrdSSHKeys:
     initrd_key_dir = f"/mnt/{context.initrd_ssh_key_dir}"
 
     cli.run_command(
-      command=pipeline | ShellCommand("mkdir", ["-p", initrd_key_dir]),
+      command=pipeline
+      | ShellCommand("mkdir", ["-p", initrd_key_dir]),
       description="Creating initrd secrets directory",
       error_msg="Failed to create initrd secrets directory",
     )

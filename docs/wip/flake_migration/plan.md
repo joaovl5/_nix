@@ -1,23 +1,25 @@
 # Flake to npins Migration Implementation Plan
 
 > **For agentic workers:** REQUIRED: Use
-> `superpowers:subagent-driven-development` (if subagents are available) or
-> `superpowers:executing-plans` to implement this plan. Steps use checkbox
-> (`- [ ]`) syntax for tracking.
+> `superpowers:subagent-driven-development` (if subagents are
+> available) or `superpowers:executing-plans` to implement this plan.
+> Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace flake input/lock management with `npins` while preserving
-the repo's current flake-like outputs through a dependency-free `flake.nix`
-shim.
+**Goal:** Replace flake input/lock management with `npins` while
+preserving the repo's current flake-like outputs through a
+dependency-free `flake.nix` shim.
 
-**Architecture:** `npins/sources.json` becomes the dependency source of truth.
-Root `default.nix` imports npins pins, builds a flake-shaped `inputs` set
-through `with-inputs` plus local fixed-point self glue, imports `./globals`
-separately, and calls the existing FUP-backed `outputs/` tree. `flake.nix`
-becomes a thin wrapper over `default.nix` for `nix fmt`, `nix flake check`,
-deploy-rs, `nh`, and compatibility callers.
+**Architecture:** `npins/sources.json` becomes the dependency source
+of truth. Root `default.nix` imports npins pins, builds a flake-shaped
+`inputs` set through `with-inputs` plus local fixed-point self glue,
+imports `./globals` separately, and calls the existing FUP-backed
+`outputs/` tree. `flake.nix` becomes a thin wrapper over `default.nix`
+for `nix fmt`, `nix flake check`, deploy-rs, `nh`, and compatibility
+callers.
 
-**Tech Stack:** Nix, npins, denful/with-inputs, flake-utils-plus, treefmt-nix,
-deploy-rs, Home Manager, Python/pytest for installer tests.
+**Tech Stack:** Nix, npins, denful/with-inputs, flake-utils-plus,
+treefmt-nix, deploy-rs, Home Manager, Python/pytest for installer
+tests.
 
 **Spec:** `docs/wip/flake_migration/spec.md`
 
@@ -25,22 +27,23 @@ deploy-rs, Home Manager, Python/pytest for installer tests.
 
 ## Execution rules
 
-- Core implementation happens in a separate worktree, not this planning
-  worktree.
-- Worktree path: `~/.config/superpowers/worktrees/my_nix/wip-npins-migration`.
+- Core implementation happens in a separate worktree, not this
+  planning worktree.
+- Worktree path:
+  `~/.config/superpowers/worktrees/my_nix/wip-npins-migration`.
 - Branch: `wip/npins-migration`.
 - Base from current `HEAD` at implementation start.
 - Incremental commits are expected in the implementation worktree.
-- Do not delete `flake.lock` until the npins-backed shim evaluates/checks
-  successfully.
-- Do not build a custom adapter or patch dependency outputs without stopping
-  to ask.
+- Do not delete `flake.lock` until the npins-backed shim
+  evaluates/checks successfully.
+- Do not build a custom adapter or patch dependency outputs without
+  stopping to ask.
 - Use targeted `git add <paths>`; avoid `git add .`.
 
 ### Per-commit validation rule
 
-Before every implementation commit that changes Nix/config/docs files, run
-this sequence on that commit's intended file set:
+Before every implementation commit that changes Nix/config/docs files,
+run this sequence on that commit's intended file set:
 
 ```bash
 nix fmt
@@ -48,9 +51,10 @@ git add <exact intended files for this commit>
 prek
 ```
 
-If `nix fmt` or `prek` modifies files, stage the hook/formatter output for the
-same topic and rerun `prek` before committing. This replaces any empty final
-`prek` run; do not rely on `prek` with no staged files as evidence.
+If `nix fmt` or `prek` modifies files, stage the hook/formatter output
+for the same topic and rerun `prek` before committing. This replaces
+any empty final `prek` run; do not rely on `prek` with no staged files
+as evidence.
 
 ## Chunk 1: Isolated worktree and baseline
 
@@ -107,8 +111,8 @@ No commit for this task.
 npins init --bare
 ```
 
-Expected: `npins/default.nix` and `npins/sources.json` exist, with no unwanted
-default `nixpkgs` channel pin.
+Expected: `npins/default.nix` and `npins/sources.json` exist, with no
+unwanted default `nixpkgs` channel pin.
 
 - [ ] **Step 2: Add required support pin**
 
@@ -126,13 +130,13 @@ npins add --name unstable git https://github.com/NixOS/nixpkgs -b nixos-unstable
 npins add --name unstable-small git https://github.com/NixOS/nixpkgs -b nixos-unstable-small
 ```
 
-Expected: three distinct nixpkgs source pins exist. Do not add a separate
-`nixpkgs` pin; `nixpkgs` is an adapter alias to `unstable`.
+Expected: three distinct nixpkgs source pins exist. Do not add a
+separate `nixpkgs` pin; `nixpkgs` is an adapter alias to `unstable`.
 
 - [ ] **Step 4: Add non-nixpkgs pins from `flake.nix`**
 
-Use `npins add --name <input> ...` for each real source input from the spec's
-root input table, excluding `globals` and alias-only `nixpkgs`.
+Use `npins add --name <input> ...` for each real source input from the
+spec's root input table, excluding `globals` and alias-only `nixpkgs`.
 
 Required names:
 
@@ -144,10 +148,11 @@ Rules:
 
 - Use explicit refs from `flake.nix` where present, e.g. `nix-flatpak`
   `v0.7.0`, `mysecrets` `main`, `superpowers` `main`.
-- For roots without explicit refs, use the lock-observed branch name from
-  current `flake.lock` before deletion.
+- For roots without explicit refs, use the lock-observed branch name
+  from current `flake.lock` before deletion.
 - Use normal npins pins; do not preserve `shallow=1` semantics.
-- Do not add transitive pins unless evaluation later proves they are required.
+- Do not add transitive pins unless evaluation later proves they are
+  required.
 - [ ] **Step 5: Verify pins**
 
 ```bash
@@ -213,7 +218,8 @@ Must include:
 }
 ```
 
-Expected: `globals` is absent; raw source inputs are not forced to be flakes.
+Expected: `globals` is absent; raw source inputs are not forced to be
+flakes.
 
 - [ ] **Step 2: Write `inputs.nix`**
 
@@ -238,7 +244,8 @@ self = final_outputs // {
 };
 ```
 
-If this cannot be implemented cleanly with `with-inputs`, stop and ask.
+If this cannot be implemented cleanly with `with-inputs`, stop and
+ask.
 
 - [ ] **Step 3: Write root `default.nix`**
 
@@ -279,7 +286,8 @@ nix eval .#supportedSystems
 nix eval .#inputs.self.outPath
 ```
 
-Expected: all evaluate through both non-flake and thin-flake entrypoints.
+Expected: all evaluate through both non-flake and thin-flake
+entrypoints.
 
 - [ ] **Step 7: Commit adapter**
 
@@ -319,8 +327,8 @@ For child modules, prefer:
 { inputs, globals } @ context:
 ```
 
-Use `inputs` where old input behavior is required and `globals` where globals
-data is required.
+Use `inputs` where old input behavior is required and `globals` where
+globals data is required.
 
 - [ ] **Step 3: Preserve output attrs**
 
@@ -351,9 +359,9 @@ NixOS/Home Manager modules and tests receive `globals` directly.
 nix eval .#_utils.hosts.mk_extra_args --apply 'f: builtins.hasAttr "globals" (f { pkgs = (import .#inputs.nixpkgs { system = "x86_64-linux"; }); })'
 ```
 
-If this exact expression is awkward because of Nix limitations, replace it
-with an equivalent `nix eval --expr` that proves `mk_extra_args` includes
-`globals`.
+If this exact expression is awkward because of Nix limitations,
+replace it with an equivalent `nix eval --expr` that proves
+`mk_extra_args` includes `globals`.
 
 - [ ] **Step 6: Stage and commit output context changes**
 
@@ -391,8 +399,8 @@ globals = import inputs.globals;
 
 with direct use of the passed `globals` argument.
 
-- [ ] **Step 2: Replace direct relative globals imports where in migration
-      scope**
+- [ ] **Step 2: Replace direct relative globals imports where in
+      migration scope**
 
 Replace direct imports such as:
 
@@ -401,13 +409,13 @@ import ../../globals/hosts.nix
 import ../../globals/units.nix
 ```
 
-with data from the passed `globals` attrset, when the file participates in the
-migrated output/module context.
+with data from the passed `globals` attrset, when the file
+participates in the migrated output/module context.
 
 - [ ] **Step 3: Update package imports that need globals**
 
-Ensure package helpers like `outputs/packages/octodns.nix` receive `globals`
-explicitly from the output context.
+Ensure package helpers like `outputs/packages/octodns.nix` receive
+`globals` explicitly from the output context.
 
 - [ ] **Step 4: Search for forbidden globals patterns**
 
@@ -415,8 +423,9 @@ explicitly from the output context.
 grep -R "inputs\.globals\|import .*globals" _lib outputs systems users --include='*.nix'
 ```
 
-Expected: no `inputs.globals`; remaining direct `import ./globals`-style usage
-must be either outside scope or deliberately justified in the commit message.
+Expected: no `inputs.globals`; remaining direct
+`import ./globals`-style usage must be either outside scope or
+deliberately justified in the commit message.
 
 - [ ] **Step 5: Run globals smoke evals**
 
@@ -462,7 +471,8 @@ git rm users/_modules/zen-browser/containers.nix users/_modules/zen-browser/defa
 grep -R "inputs\.zen-browser\|inputs\.firefox-addons\|firefox-addons\|zen-browser" users --include='*.nix'
 ```
 
-Expected: no references, except possibly historical docs outside `users/`.
+Expected: no references, except possibly historical docs outside
+`users/`.
 
 - [ ] **Step 3: Commit stale module deletion**
 
@@ -532,8 +542,8 @@ In `docs/wip/isolation.md`, replace old `hybrid-links.flake_root` /
 grep -R "flake_location\|flake_root\|flake_path" _modules users home docs/wip --exclude='plan.md' --exclude='spec.md'
 ```
 
-Expected: no live config references. Historical docs may be left only if
-deliberately out of scope.
+Expected: no live config references. Historical docs may be left only
+if deliberately out of scope.
 
 - [ ] **Step 8: Commit rename cleanup**
 
@@ -559,8 +569,8 @@ In `users/_modules/cli/nix-tools.nix`:
 
 - remove `flake-edit` from `home.packages`;
 - add `npins` near other Nix tooling;
-- keep `programs.nh.flake` behavior, but point it at `cfg.repo_location` after
-  Task 7;
+- keep `programs.nh.flake` behavior, but point it at
+  `cfg.repo_location` after Task 7;
 - keep bare deploy aliases as repo-root commands.
 - [ ] **Step 2: Remove lock-update behavior from update script**
 
@@ -573,10 +583,11 @@ Keep script name and non-Nix app updates.
 In `outputs/checks/treefmt/config.nix`:
 
 - remove `flake-edit.enable = true`;
-- change `projectRootFile` from `"flake.nix"` to `"npins/sources.json"`.
+- change `projectRootFile` from `"flake.nix"` to
+  `"npins/sources.json"`.
 
-If treefmt does not accept a nested `projectRootFile`, stop and ask before
-choosing a different marker.
+If treefmt does not accept a nested `projectRootFile`, stop and ask
+before choosing a different marker.
 
 - [ ] **Step 4: Update AGENTS.md**
 
@@ -586,8 +597,8 @@ Required guidance:
 - `flake.nix` is a thin tooling shim;
 - `globals/` changes do not require pin updates;
 - `mysecrets` pin updates use `npins update mysecrets`;
-- run `npins verify` when `npins/`, `inputs.nix`, or `input-overrides.nix`
-  changes;
+- run `npins verify` when `npins/`, `inputs.nix`, or
+  `input-overrides.nix` changes;
 - keep `nix fmt`, staged `prek`, and flake checks via the shim;
 - document all-systems environment-blocker fallback.
 - [ ] **Step 5: Update deployment doc live guidance**
@@ -621,20 +632,21 @@ Replace the lock update step with a step named around npins, e.g.
 
 New behavior:
 
-- if `auto_push = false`, skip/disable the npins update and tell user to push
-  secrets first;
+- if `auto_push = false`, skip/disable the npins update and tell user
+  to push secrets first;
 - otherwise run `npins update mysecrets` in the config repo path;
 - stage only `npins/sources.json`.
 - [ ] **Step 2: Use selected command style**
 
-The accepted milestone-1 implementation is a shell command equivalent to:
+The accepted milestone-1 implementation is a shell command equivalent
+to:
 
 ```bash
 cd <flake_dir> && npins update mysecrets
 ```
 
-Keep this localized to the installer step. Do not introduce a broad command
-framework unless necessary.
+Keep this localized to the installer step. Do not introduce a broad
+command framework unless necessary.
 
 - [ ] **Step 3: Preserve step ordering**
 
@@ -653,7 +665,8 @@ Expected new assertions:
 
 - npins update command is used;
 - `npins/sources.json` is staged;
-- `auto_push=false` skips/disables repin with a user-facing instruction.
+- `auto_push=false` skips/disables repin with a user-facing
+  instruction.
 - [ ] **Step 5: Run installer tests**
 
 ```bash
@@ -761,9 +774,10 @@ nix build .#checks.x86_64-linux.vm_bundle_contract
 nix build .#checks.x86_64-linux.wireguard_tunnels
 ```
 
-If `wireguard_tunnels` fails because `inputs.nixarr.inputs.vpnconfinement` is
-missing, add the minimal npins support pin and input override needed for that
-dependency, then re-run this check.
+If `wireguard_tunnels` fails because
+`inputs.nixarr.inputs.vpnconfinement` is missing, add the minimal
+npins support pin and input override needed for that dependency, then
+re-run this check.
 
 - [ ] **Step 7: Run affected Frag compatibility tests**
 
@@ -771,8 +785,8 @@ dependency, then re-run this check.
 pytest _scripts/frag/tests/test_image_assets.py
 ```
 
-Expected: tests pass or skip only for documented runtime prerequisites such as
-Docker/Nix availability.
+Expected: tests pass or skip only for documented runtime prerequisites
+such as Docker/Nix availability.
 
 - [ ] **Step 8: Run local flake check before lock deletion**
 
@@ -780,16 +794,16 @@ Docker/Nix availability.
 nix flake check
 ```
 
-Expected: passes through the npins-backed shim while `flake.lock` still
-exists. Only proceed to Task 12 after this check passes.
+Expected: passes through the npins-backed shim while `flake.lock`
+still exists. Only proceed to Task 12 after this check passes.
 
 ### Task 12: Delete `flake.lock`
 
 **Files:**
 
 - Delete: `flake.lock`
-- [ ] **Step 1: Delete lock file after Task 11 probes and local `nix flake
-      check` pass**
+- [ ] **Step 1: Delete lock file after Task 11 probes and local `nix
+      flake check` pass**
 
 ```bash
 git rm flake.lock
@@ -804,8 +818,8 @@ nix eval .#inputs.self.outPath
 nix build .#checks.x86_64-linux.formatting
 ```
 
-Expected: all succeed and no `flake.lock` is recreated as a required source of
-truth.
+Expected: all succeed and no `flake.lock` is recreated as a required
+source of truth.
 
 - [ ] **Step 3: Commit lock removal**
 
@@ -826,16 +840,17 @@ git commit -m "chore(npins): remove flake lock"
 nix fmt
 ```
 
-Expected: succeeds and leaves no uncommitted changes. If files change, stage
-exact files, run `prek` per the per-commit validation rule, and commit them as
-a final formatting commit.
+Expected: succeeds and leaves no uncommitted changes. If files change,
+stage exact files, run `prek` per the per-commit validation rule, and
+commit them as a final formatting commit.
 
 - [ ] **Step 2: Confirm per-commit pre-commit coverage**
 
 Review this plan's implementation commits. Every commit that changed
-Nix/config/docs files must have run the per-commit validation rule (`nix fmt`
--> targeted `git add` -> `prek`) before commit. If any commit missed it,
-create a corrective staged validation commit or stop and report the gap.
+Nix/config/docs files must have run the per-commit validation rule
+(`nix fmt` -> targeted `git add` -> `prek`) before commit. If any
+commit missed it, create a corrective staged validation commit or stop
+and report the gap.
 
 - [ ] **Step 3: Run local flake check through shim**
 
@@ -843,7 +858,8 @@ create a corrective staged validation commit or stop and report the gap.
 nix flake check
 ```
 
-Expected: passes through the npins-backed shim after `flake.lock` deletion.
+Expected: passes through the npins-backed shim after `flake.lock`
+deletion.
 
 - [ ] **Step 4: Try all-systems flake check**
 
@@ -853,8 +869,8 @@ nix flake check --all-systems
 
 Expected: passes if builders/binfmt are available.
 
-If blocked by local builder/binfmt/environment constraints, record the exact
-blocker and rely on:
+If blocked by local builder/binfmt/environment constraints, record the
+exact blocker and rely on:
 
 - successful `nix flake check`;
 - successful targeted host/package/app/check matrix from Task 11;

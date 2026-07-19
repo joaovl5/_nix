@@ -6,7 +6,9 @@ import unittest
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 MODULE_PATH = SCRIPT_DIR / "qmp.py"
-SPEC = importlib.util.spec_from_file_location("vm_qmp_skill", MODULE_PATH)
+SPEC = importlib.util.spec_from_file_location(
+  "vm_qmp_skill", MODULE_PATH
+)
 qmp = importlib.util.module_from_spec(SPEC)
 assert SPEC is not None and SPEC.loader is not None
 sys.modules[SPEC.name] = qmp
@@ -100,7 +102,9 @@ class SerialParsingTests(unittest.TestCase):
     self.assertEqual("foo", result.output)
     self.assertEqual(0, result.exit_code)
 
-  def test_extract_pull_bytes_from_no_newline_serial_output(self) -> None:
+  def test_extract_pull_bytes_from_no_newline_serial_output(
+    self,
+  ) -> None:
     """It decodes base64 payloads without extra line breaks."""
     tag = "fresh"
     payload = base64.b64encode(b"hello\n").decode()
@@ -120,12 +124,15 @@ class SerialParsingTests(unittest.TestCase):
   def test_strip_ansi_removes_escape_sequences(self) -> None:
     """It strips ANSI sequences from captured serial output."""
     self.assertEqual(
-      "plain red text", qmp.strip_ansi("plain \x1b[31mred\x1b[0m text")
+      "plain red text",
+      qmp.strip_ansi("plain \x1b[31mred\x1b[0m text"),
     )
 
 
 class SerialWrapperTests(unittest.TestCase):
-  def test_build_serial_bootstrap_command_uses_base64_wrapper(self) -> None:
+  def test_build_serial_bootstrap_command_uses_base64_wrapper(
+    self,
+  ) -> None:
     """It embeds the wrapper script in the typed bootstrap command."""
     typed_command, script_text = qmp.build_serial_bootstrap_command(
       command="echo 'hi'",
@@ -137,9 +144,15 @@ class SerialWrapperTests(unittest.TestCase):
     decoded = base64.b64decode(encoded, validate=True).decode()
     self.assertEqual(script_text, decoded)
     self.assertIn("/bin/sh -lc", script_text)
-    self.assertIn(qmp.marker_line(tag="tag123", kind="begin"), script_text)
-    self.assertIn(qmp.marker_line(tag="tag123", kind="end"), script_text)
-    self.assertIn(qmp.marker_line(tag="tag123", kind="status"), script_text)
+    self.assertIn(
+      qmp.marker_line(tag="tag123", kind="begin"), script_text
+    )
+    self.assertIn(
+      qmp.marker_line(tag="tag123", kind="end"), script_text
+    )
+    self.assertIn(
+      qmp.marker_line(tag="tag123", kind="status"), script_text
+    )
     self.assertIn(">/dev/ttyS0 2>&1", script_text)
 
   def test_decode_pulled_file_data(self) -> None:

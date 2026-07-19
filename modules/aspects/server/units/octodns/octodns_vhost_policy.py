@@ -19,7 +19,12 @@ class VhostPolicyProcessor(BaseProcessor):
   """
 
   def __init__(
-    self, id, public_vhosts, public_ipv4, managed_record_types=None, **kwargs
+    self,
+    id,
+    public_vhosts,
+    public_ipv4,
+    managed_record_types=None,
+    **kwargs,
   ):
     super().__init__(id, **kwargs)
     self.public_vhosts = set(public_vhosts)
@@ -31,7 +36,9 @@ class VhostPolicyProcessor(BaseProcessor):
   def _is_pihole(self, target):
     return "pihole" in target.id.lower()
 
-  def process_source_and_target_zones(self, desired, existing, target):
+  def process_source_and_target_zones(
+    self, desired, existing, target
+  ):
     """Filter and rewrite records for public-facing DNS targets."""
     if self._is_pihole(target):
       return desired, existing

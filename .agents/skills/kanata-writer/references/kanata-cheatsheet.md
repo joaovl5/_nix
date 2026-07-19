@@ -1,7 +1,8 @@
 # Kanata Cheatsheet
 
-Use this as a compact syntax aid after loading the Kanata skill. Verify
-details against the pinned Kanata version when behavior matters.
+Use this as a compact syntax aid after loading the Kanata skill.
+Verify details against the pinned Kanata version when behavior
+matters.
 
 ## Sources
 
@@ -11,15 +12,17 @@ details against the pinned Kanata version when behavior matters.
   `modules/aspects/desktop/desktop/services/kanata/default.nix`
 - **Upstream guide:**
   <https://github.com/jtroo/kanata/blob/main/docs/config.adoc>
-- **Upstream README:** <https://github.com/jtroo/kanata/blob/main/README.md>
+- **Upstream README:**
+  <https://github.com/jtroo/kanata/blob/main/README.md>
 
 ## Syntax basics
 
-- **S-expression:** `(defsrc key1 key2 ...)` lists forms in parentheses
+- **S-expression:** `(defsrc key1 key2 ...)` lists forms in
+  parentheses
 - **String:** bare words like `backspace` or quoted strings like
   `"string with spaces"`
-- **Whitespace:** spaces, tabs, and newlines are flexible; use them for layer
-  alignment
+- **Whitespace:** spaces, tabs, and newlines are flexible; use them
+  for layer alignment
 - **Comments:** `;; single line` and `#| multi-line |#`
 
 ## Minimal structure
@@ -40,10 +43,10 @@ details against the pinned Kanata version when behavior matters.
 
 - **Required forms:** one `defsrc` and at least one `deflayer` or
   `deflayermap`
-- **Layer shape:** each `deflayer` action aligns to the corresponding `defsrc`
-  key
-- **Alternative shape:** `deflayermap` uses input-output pairs instead of full
-  layer rows
+- **Layer shape:** each `deflayer` action aligns to the corresponding
+  `defsrc` key
+- **Alternative shape:** `deflayermap` uses input-output pairs instead
+  of full layer rows
 
 ## Emergency stop and reload
 
@@ -107,7 +110,8 @@ Examples: `C-c`, `S-1`, `M-tab`
 
 - **Plain tap-hold:** tap when released early, hold after timeout
 - **Press variant:** hold activates on another key press
-- **Release variant:** hold activates after another key press and release
+- **Release variant:** hold activates after another key press and
+  release
 - **Tap keys variant:** early tap only for specified keys
 - **Opposite hand:** pair with `defhands` for hand-aware behavior
 - **HACK:** for Linux repeat quirks, some configs wrap tap-hold in
@@ -139,7 +143,8 @@ Use with hand-aware actions such as `tap-hold-opposite-hand`.
 - **One-shot:** action applies to the next key press
 - **Tap-dance:** repeated taps choose actions in order
 - **Macro delays:** numeric `0`-`9` values are delays in macros
-- **Digit output:** use `Digit0`-`Digit9` when a macro should type digits
+- **Digit output:** use `Digit0`-`Digit9` when a macro should type
+  digits
 
 ## Mouse actions
 
@@ -179,7 +184,8 @@ Use with hand-aware actions such as `tap-hold-opposite-hand`.
 Common condition forms:
 
 - **Boolean:** `(or ...)`, `(and ...)`, `(not ...)`
-- **History:** `(key-history key recency)` and `(key-timing recency lt/gt ms)`
+- **History:** `(key-history key recency)` and
+  `(key-timing recency lt/gt ms)`
 - **Input:** `(input real key)` or `(input virtual key)`
 - **Layer:** `(layer name)` and `(base-layer name)`
 
@@ -279,12 +285,13 @@ windows-interception-keyboard-hwids (...)
 
 ## Key names
 
-- **Modifiers:** `lctl`, `rctl`, `lsft`, `rsft`, `lalt`, `ralt`, `lmet`,
-  `rmet`
+- **Modifiers:** `lctl`, `rctl`, `lsft`, `rsft`, `lalt`, `ralt`,
+  `lmet`, `rmet`
 - **Special:** `spc`, `ret`, `tab`, `esc`, `bspc`, `del`
 - **Arrows:** `left`, `rght`, `up`, `down`
 - **Navigation:** `home`, `end`, `pgup`, `pgdn`
 - **Functions:** `f1` through `f12`
-- **Numpad:** `kp0` through `kp9`, `kpdiv`, `kpmul`, `kpadd`, `kpsub`, `kpdec`
+- **Numpad:** `kp0` through `kp9`, `kpdiv`, `kpmul`, `kpadd`, `kpsub`,
+  `kpdec`
 
 Use upstream key definitions when exact spelling matters.

@@ -1,7 +1,7 @@
 # Textual Widgets Reference
 
-Prefer built-in widgets and containers before writing custom widgets. Most
-emit typed messages; handle those messages in parents with
+Prefer built-in widgets and containers before writing custom widgets.
+Most emit typed messages; handle those messages in parents with
 `on_<widget>_<message>` or `@on(...)`.
 
 ## App Chrome and Display
@@ -12,10 +12,10 @@ emit typed messages; handle those messages in parents with
 yield Header(show_clock=True)
 ```
 
-Displays title/subtitle from `App.TITLE`, `App.SUB_TITLE`, and `self.title` /
-`self.sub_title`. `show_clock=True` displays a clock in current Textual; do
-not look for old `Clock`/`DigitClock` widgets in current `textual.widgets`
-exports.
+Displays title/subtitle from `App.TITLE`, `App.SUB_TITLE`, and
+`self.title` / `self.sub_title`. `show_clock=True` displays a clock in
+current Textual; do not look for old `Clock`/`DigitClock` widgets in
+current `textual.widgets` exports.
 
 ### `Footer`
 
@@ -23,9 +23,9 @@ exports.
 yield Footer()
 ```
 
-Shows visible key bindings from `BINDINGS`. Use `show=False` on bindings that
-should work but not appear. Use `check_action()` and `refresh_bindings()` for
-dynamic enable/disable display.
+Shows visible key bindings from `BINDINGS`. Use `show=False` on
+bindings that should work but not appear. Use `check_action()` and
+`refresh_bindings()` for dynamic enable/disable display.
 
 ### `Static` and `Label`
 
@@ -61,8 +61,8 @@ def save(self, event: Button.Pressed) -> None:
     ...
 ```
 
-Variants: `default`, `primary`, `success`, `warning`, `error`. Message:
-`Button.Pressed` with `.button`.
+Variants: `default`, `primary`, `success`, `warning`, `error`.
+Message: `Button.Pressed` with `.button`.
 
 ### `Checkbox`
 
@@ -113,8 +113,8 @@ Common messages:
 - `Input.Changed`: input value changed.
 - `Input.Submitted`: user pressed Enter.
 
-Useful properties: `.value`, `.cursor_position`, validation state. Use Textual
-validators from `textual.validation` where appropriate.
+Useful properties: `.value`, `.cursor_position`, validation state. Use
+Textual validators from `textual.validation` where appropriate.
 
 ### `MaskedInput`
 
@@ -122,8 +122,9 @@ validators from `textual.validation` where appropriate.
 MaskedInput(template="0000-0000-0000-0000")
 ```
 
-Use for structured input like codes/card-like patterns. Template characters
-are version-sensitive; verify exact mask syntax in docs for strict validation.
+Use for structured input like codes/card-like patterns. Template
+characters are version-sensitive; verify exact mask syntax in docs for
+strict validation.
 
 ### `TextArea`
 
@@ -138,9 +139,9 @@ text_area.delete()
 text_area.clear()
 ```
 
-Multi-line text editor with selection, optional soft wrapping, and optional
-syntax highlighting. Use for editing text, logs with selection, or code-like
-input.
+Multi-line text editor with selection, optional soft wrapping, and
+optional syntax highlighting. Use for editing text, logs with
+selection, or code-like input.
 
 ## Selection Widgets
 
@@ -154,8 +155,9 @@ Select(
 )
 ```
 
-A compact dropdown. In current Textual, blank/no selection uses `Select.NULL`
-(not old `Select.BLANK`). Message: `Select.Changed` with `.value`.
+A compact dropdown. In current Textual, blank/no selection uses
+`Select.NULL` (not old `Select.BLANK`). Message: `Select.Changed` with
+`.value`.
 
 ### `OptionList`
 
@@ -163,9 +165,9 @@ A compact dropdown. In current Textual, blank/no selection uses `Select.NULL`
 OptionList("One", "Two", "Three")
 ```
 
-List of options with keyboard/mouse navigation. Supports Rich renderables.
-Messages include option highlighted/selected events; selected events include
-option index/option data depending on version.
+List of options with keyboard/mouse navigation. Supports Rich
+renderables. Messages include option highlighted/selected events;
+selected events include option index/option data depending on version.
 
 ### `SelectionList`
 
@@ -203,9 +205,9 @@ table.add_row("Alice", 30, "NYC", key="alice")
 table.update_cell("alice", "Age", 31)
 ```
 
-Features: rows/columns, cursor navigation, cell/row selection, updates,
-deletion. Messages include cell/row highlighted/selected variants. Use stable
-keys when updating cells later.
+Features: rows/columns, cursor navigation, cell/row selection,
+updates, deletion. Messages include cell/row highlighted/selected
+variants. Use stable keys when updating cells later.
 
 ### `Tree`
 
@@ -216,8 +218,8 @@ branch.add_leaf("Leaf")
 tree.root.expand()
 ```
 
-Hierarchical data. Node `.data` can hold application data. Messages include
-node selected/expanded/collapsed.
+Hierarchical data. Node `.data` can hold application data. Messages
+include node selected/expanded/collapsed.
 
 ### `DirectoryTree`
 
@@ -226,8 +228,8 @@ DirectoryTree("~/projects")
 ```
 
 Filesystem tree. Use for file pickers/browsers. Messages include
-file/directory selection events; selected paths are `pathlib.Path` values in
-current APIs.
+file/directory selection events; selected paths are `pathlib.Path`
+values in current APIs.
 
 ## Navigation and Content Switching
 
@@ -245,8 +247,9 @@ with TabbedContent(initial="settings"):
 self.query_one(TabbedContent).active = "home"
 ```
 
-`TabbedContent` combines tabs with `ContentSwitcher`; only the active pane is
-visible. Messages include tab activated/disabled/enabled variants.
+`TabbedContent` combines tabs with `ContentSwitcher`; only the active
+pane is visible. Messages include tab activated/disabled/enabled
+variants.
 
 ### `ContentSwitcher`
 
@@ -291,8 +294,8 @@ plain = Log()
 plain.write_line("line")
 ```
 
-`RichLog` accepts Rich renderables. Writes may render after size/layout is
-known, so tests may need `await pilot.pause()`.
+`RichLog` accepts Rich renderables. Writes may render after
+size/layout is known, so tests may need `await pilot.pause()`.
 
 ## Progress and Visual Status
 
@@ -304,7 +307,8 @@ bar.update(progress=42)
 bar.advance(1)
 ```
 
-Use for determinate progress. Messages include changed/completed events.
+Use for determinate progress. Messages include changed/completed
+events.
 
 ### `Sparkline`
 
@@ -325,7 +329,8 @@ Use for indeterminate background work.
 
 ### `Toast`
 
-Usually create via `self.notify("message")` instead of mounting directly.
+Usually create via `self.notify("message")` instead of mounting
+directly.
 
 ## Containers
 
@@ -411,20 +416,21 @@ class Counter(Static, can_focus=True):
 
 ### High-Performance Drawing
 
-For large custom renderables, prefer Textual's line API (`render_line`) over
-re-rendering a huge Rich object. Verify current `render_line` signatures in
-the docs/source for your Textual version before implementing; this is an
-advanced path.
+For large custom renderables, prefer Textual's line API
+(`render_line`) over re-rendering a huge Rich object. Verify current
+`render_line` signatures in the docs/source for your Textual version
+before implementing; this is an advanced path.
 
 ## Widget Design Rules
 
 - Expose state as reactives only when UI should respond to changes.
-- Emit custom messages for user intent; avoid children directly mutating
-  parent internals.
-- Put reusable default styling in `DEFAULT_CSS`; app-specific styling in app
-  `.tcss`.
-- Keep `compose()` declarative; do dynamic insertion with `mount()`/`remove()`
-  in handlers/workers.
+- Emit custom messages for user intent; avoid children directly
+  mutating parent internals.
+- Put reusable default styling in `DEFAULT_CSS`; app-specific styling
+  in app `.tcss`.
+- Keep `compose()` declarative; do dynamic insertion with
+  `mount()`/`remove()` in handlers/workers.
 - Prefer built-in messages (`Button.Pressed`, `Input.Submitted`) over
   low-level mouse/key events.
-- Use stable `id` values for widgets queried by tests or event decorators.
+- Use stable `id` values for widgets queried by tests or event
+  decorators.

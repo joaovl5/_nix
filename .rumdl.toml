@@ -12,7 +12,7 @@
   flavor = "default"
 
 [MD013]
-  line-length = 78
+  line-length = 70
   code-blocks = false
   tables      = false
   headings    = false

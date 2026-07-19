@@ -25,7 +25,9 @@ type Snapshots = list[Snapshot]
 type SnapshotEntry = dict[str, object]
 
 
-def _require_machine(*, globals_dict: dict[str, object], key: str) -> Machine:
+def _require_machine(
+  *, globals_dict: dict[str, object], key: str
+) -> Machine:
   """Return a required VM driver object from the driver globals."""
   value = globals_dict[key]
   assert isinstance(value, Machine), (
@@ -52,7 +54,9 @@ def _parse_snapshots(*, raw: str) -> Snapshots:
   return data
 
 
-def _snapshots(*, machine: Machine, tag: str | None = None) -> Snapshots:
+def _snapshots(
+  *, machine: Machine, tag: str | None = None
+) -> Snapshots:
   """List restic snapshots, optionally filtered by tag."""
   tag_flag = f"--tag {tag}" if tag else ""
   raw = machine.succeed(f"{_RESTIC} snapshots --json {tag_flag}")
@@ -87,7 +91,8 @@ def _new_snapshot(
   """Return the single snapshot that appeared since the previous check."""
   snapshots = _snapshots(machine=machine, tag=tag)
   snapshots_by_id = {
-    _snapshot_id(snapshot=snapshot): snapshot for snapshot in snapshots
+    _snapshot_id(snapshot=snapshot): snapshot
+    for snapshot in snapshots
   }
   new_ids = set(snapshots_by_id) - known_ids
   # The retention tests rely on each service run producing one new snapshot.
@@ -103,7 +108,9 @@ def _restore_path_content(
 ) -> str:
   """Restore the path fixture snapshot and return its file contents."""
   machine.succeed(f"rm -rf {target}")
-  machine.succeed(f"{_RESTIC} restore {snapshot_id} --target {target}")
+  machine.succeed(
+    f"{_RESTIC} restore {snapshot_id} --target {target}"
+  )
   return machine.succeed(f"cat {target}/{_PATH_FILE}").strip()
 
 
@@ -111,7 +118,9 @@ def _dump_snapshot_file(
   *, machine: Machine, snapshot_id: str, path: str
 ) -> str:
   """Dump a single file from a restic snapshot."""
-  return machine.succeed(f"{_RESTIC} dump {snapshot_id} {path}").strip()
+  return machine.succeed(
+    f"{_RESTIC} dump {snapshot_id} {path}"
+  ).strip()
 
 
 def _parse_snapshot_entries(*, raw: str) -> list[SnapshotEntry]:
@@ -143,7 +152,9 @@ def _assert_unit_succeeded(*, machine: Machine, service: str) -> None:
     f"systemctl show {service} "
     "--property=ActiveState,Result,ExecMainStatus --value --no-pager"
   )
-  states = [line.strip() for line in output.splitlines() if line.strip()]
+  states = [
+    line.strip() for line in output.splitlines() if line.strip()
+  ]
   # The service inspection must return all expected state fields.
   assert len(states) >= 3, f"Could not inspect {service}: {output!r}"
   # Maintenance units must not land in the failed state.
@@ -155,7 +166,9 @@ def _assert_unit_succeeded(*, machine: Machine, service: str) -> None:
     f"{service} result should be success, got {states}"
   )
   # Successful oneshot units also exit with status code zero.
-  assert states[2] == "0", f"{service} exit status should be 0, got {states}"
+  assert states[2] == "0", (
+    f"{service} exit status should be 0, got {states}"
+  )
 
 
 def run(*, driver_globals: dict[str, object]) -> None:
@@ -164,7 +177,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
   if callable(start_all):
     start_all()
 
-  machine = _require_machine(globals_dict=driver_globals, key="machine")
+  machine = _require_machine(
+    globals_dict=driver_globals, key="machine"
+  )
   machine.wait_for_unit("multi-user.target")
   machine.wait_for_unit("postgresql.service")
 
@@ -176,7 +191,8 @@ def run(*, driver_globals: dict[str, object]) -> None:
     "mkdir -p /test-data && printf 'important-content' > /test-data/file.txt"
   )
   _start(
-    service="restic-backups-machine_my_path_to_a.service", machine=machine
+    service="restic-backups-machine_my_path_to_a.service",
+    machine=machine,
   )
 
   path_snapshot = _new_snapshot(
@@ -210,7 +226,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
 
   snaps = _snapshots(machine=machine, tag=_CUSTOM_TAG)
   # The custom backup fixture runs once, so exactly one snapshot should exist.
-  assert len(snaps) == 1, f"Expected 1 custom snapshot, got {len(snaps)}"
+  assert len(snaps) == 1, (
+    f"Expected 1 custom snapshot, got {len(snaps)}"
+  )
   custom_snapshot_id = _snapshot_id(snapshot=snaps[0])
 
   custom_content = _dump_snapshot_file(
@@ -235,11 +253,15 @@ def run(*, driver_globals: dict[str, object]) -> None:
 
   snaps = _snapshots(machine=machine, tag=_POSTGRES_TAG)
   # The PostgreSQL fixture also performs one backup run.
-  assert len(snaps) == 1, f"Expected 1 postgres snapshot, got {len(snaps)}"
+  assert len(snaps) == 1, (
+    f"Expected 1 postgres snapshot, got {len(snaps)}"
+  )
   postgres_snapshot = snaps[0]
   tags = _get_tags(snapshot=postgres_snapshot)
   # The PostgreSQL snapshot must keep its restic classification tag.
-  assert _POSTGRES_TAG in tags, f"Missing {_POSTGRES_TAG} tag in {tags}"
+  assert _POSTGRES_TAG in tags, (
+    f"Missing {_POSTGRES_TAG} tag in {tags}"
+  )
 
   postgres_snapshot_id = _snapshot_id(snapshot=postgres_snapshot)
   ls_entries = _parse_snapshot_entries(
@@ -248,7 +270,8 @@ def run(*, driver_globals: dict[str, object]) -> None:
   dump_paths = [
     _entry_path(entry=entry)
     for entry in ls_entries
-    if entry.get("struct_type") == "node" and entry.get("type") == "file"
+    if entry.get("struct_type") == "node"
+    and entry.get("type") == "file"
   ]
   # The dump backup should produce one SQL file for the test database export.
   assert len(dump_paths) == 1, (
@@ -259,7 +282,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
   machine.succeed(
     "runuser -u postgres -- dropdb --if-exists backup_local_restore"
   )
-  machine.succeed("runuser -u postgres -- createdb backup_local_restore")
+  machine.succeed(
+    "runuser -u postgres -- createdb backup_local_restore"
+  )
   machine.succeed(
     f"{_RESTIC} dump {postgres_snapshot_id} {postgres_dump_path} > /tmp/backup_local_restore.sql"
   )
@@ -283,14 +308,18 @@ def run(*, driver_globals: dict[str, object]) -> None:
     ("second-content", "second"),
     ("third-content", "third"),
   ]:
-    machine.succeed(f"printf '{expected_content}' > /test-data/file.txt")
+    machine.succeed(
+      f"printf '{expected_content}' > /test-data/file.txt"
+    )
     _start(
       service="restic-backups-machine_my_path_to_a.service",
       machine=machine,
     )
 
     path_snapshot = _new_snapshot(
-      machine=machine, tag=_PATH_TAG, known_ids=known_path_snapshot_ids
+      machine=machine,
+      tag=_PATH_TAG,
+      known_ids=known_path_snapshot_ids,
     )
     path_snapshot_id = _snapshot_id(snapshot=path_snapshot)
     known_path_snapshot_ids.add(path_snapshot_id)
@@ -307,18 +336,24 @@ def run(*, driver_globals: dict[str, object]) -> None:
     )
 
   _start(
-    service="backup_forget_machine_my_path_on_a.service", machine=machine
+    service="backup_forget_machine_my_path_on_a.service",
+    machine=machine,
   )
 
-  remaining_path_snapshots = _snapshots(machine=machine, tag=_PATH_TAG)
+  remaining_path_snapshots = _snapshots(
+    machine=machine, tag=_PATH_TAG
+  )
   remaining_path_snapshot_ids = {
-    _snapshot_id(snapshot=snapshot) for snapshot in remaining_path_snapshots
+    _snapshot_id(snapshot=snapshot)
+    for snapshot in remaining_path_snapshots
   }
   expected_remaining_path_snapshots = {
     snapshot_id for snapshot_id, _ in path_history[-2:]
   }
   # The forget job should keep only the two most recent path snapshots.
-  assert remaining_path_snapshot_ids == expected_remaining_path_snapshots, (
+  assert (
+    remaining_path_snapshot_ids == expected_remaining_path_snapshots
+  ), (
     "Path forget kept unexpected snapshots: "
     f"expected {sorted(expected_remaining_path_snapshots)}, "
     f"got {sorted(remaining_path_snapshot_ids)}"
@@ -380,12 +415,16 @@ def run(*, driver_globals: dict[str, object]) -> None:
   # The custom backup payload must remain readable after maintenance.
   assert (
     _dump_snapshot_file(
-      machine=machine, snapshot_id=custom_snapshot_id, path=_CUSTOM_FILE
+      machine=machine,
+      snapshot_id=custom_snapshot_id,
+      path=_CUSTOM_FILE,
     )
     == "backup-custom-data"
   )
   postgres_dump = _dump_snapshot_file(
-    machine=machine, snapshot_id=postgres_snapshot_id, path=postgres_dump_path
+    machine=machine,
+    snapshot_id=postgres_snapshot_id,
+    path=postgres_dump_path,
   )
   # The PostgreSQL dump must still contain the seeded fixture row after maintenance.
   assert "backup-fixture" in postgres_dump, (

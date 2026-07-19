@@ -47,7 +47,9 @@ def _curl_resource(machine: Machine, host: str, token: str) -> str:
 
 def _clear_resource_log(resource: Machine) -> None:
   """Clear the private resource listener log before a token-scoped probe."""
-  succeed(resource, f": > {q(RESOURCE_LOG)}", "Failed to clear resource log")
+  succeed(
+    resource, f": > {q(RESOURCE_LOG)}", "Failed to clear resource log"
+  )
 
 
 def _read_resource_log(resource: Machine) -> str:
@@ -69,7 +71,8 @@ def _assert_log_has_source(
     f"{message}: token {token!r} missing from resource log\n{log}"
   )
   assert any(
-    line.split()[1].startswith(source_prefix) for line in matching_lines
+    line.split()[1].startswith(source_prefix)
+    for line in matching_lines
   ), (
     f"{message}: expected source prefix {source_prefix!r}, got {matching_lines!r}"
   )
@@ -217,18 +220,24 @@ def _assert_tunnel_state(client: Machine, gateway: Machine) -> None:
 
   for machine, role in [(client, "client"), (gateway, "gateway")]:
     xfrm_state = succeed(
-      machine, "ip xfrm state", f"Failed to inspect xfrm state on {role}"
+      machine,
+      "ip xfrm state",
+      f"Failed to inspect xfrm state on {role}",
     )
     assert (
-      GATEWAY_PUBLIC_IP in xfrm_state and CLIENT_PUBLIC_IP in xfrm_state
+      GATEWAY_PUBLIC_IP in xfrm_state
+      and CLIENT_PUBLIC_IP in xfrm_state
     ), (
       f"{role} xfrm state lacks expected public tunnel endpoints\n{xfrm_state}"
     )
     xfrm_policy = succeed(
-      machine, "ip xfrm policy", f"Failed to inspect xfrm policy on {role}"
+      machine,
+      "ip xfrm policy",
+      f"Failed to inspect xfrm policy on {role}",
     )
     assert (
-      PRIVATE_SUBNET in xfrm_policy or PRIVATE_RESOURCE_IP in xfrm_policy
+      PRIVATE_SUBNET in xfrm_policy
+      or PRIVATE_RESOURCE_IP in xfrm_policy
     ), (
       f"{role} xfrm policy lacks protected private subnet evidence\n{xfrm_policy}"
     )

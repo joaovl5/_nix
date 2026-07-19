@@ -13,7 +13,11 @@ import pytest
 # Path to the test flake fixture used for manual nix builds.
 FIXTURE_DIR = Path(__file__).parent.parent / "fixtures" / "test_flake"
 
-_NIX_FLAGS = ["--option", "experimental-features", "nix-command flakes"]
+_NIX_FLAGS = [
+  "--option",
+  "experimental-features",
+  "nix-command flakes",
+]
 
 
 @pytest.mark.manual
@@ -36,7 +40,9 @@ class TestBuildDiskoScript:
     )
 
     # Assert the fixture flake can build its Disko script successfully.
-    assert result.returncode == 0, f"nix build failed:\n{result.stderr}"
+    assert result.returncode == 0, (
+      f"nix build failed:\n{result.stderr}"
+    )
     store_path = result.stdout.strip()
     # Assert the build output is a realized Nix store path.
     assert store_path.startswith("/nix/store/")

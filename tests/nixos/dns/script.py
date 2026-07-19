@@ -33,7 +33,9 @@ LONG_RUNNING_UNITS = (
 )
 
 
-def _require_machine(*, globals_dict: dict[str, object], key: str) -> Machine:
+def _require_machine(
+  *, globals_dict: dict[str, object], key: str
+) -> Machine:
   """Return a required VM driver object from the driver globals."""
   value = globals_dict[key]
   assert isinstance(value, Machine), (
@@ -58,7 +60,9 @@ def _succeed(*, machine: Machine, command: str, message: str) -> str:
   """Run a command and reframe driver failures as assertion failures."""
   try:
     return machine.succeed(command).strip()
-  except Exception as exc:  # pragma: no cover - integration-driver surface
+  except (
+    Exception
+  ) as exc:  # pragma: no cover - integration-driver surface
     raise AssertionError(f"{message}: {command}") from exc
 
 
@@ -78,11 +82,15 @@ def _wait_until_succeeds(
   """Wait for a command to start succeeding, surfacing driver errors clearly."""
   try:
     machine.wait_until_succeeds(command)
-  except Exception as exc:  # pragma: no cover - integration-driver surface
+  except (
+    Exception
+  ) as exc:  # pragma: no cover - integration-driver surface
     raise AssertionError(f"{message}: {command}") from exc
 
 
-def _systemd_property(*, machine: Machine, unit: str, prop: str) -> str:
+def _systemd_property(
+  *, machine: Machine, unit: str, prop: str
+) -> str:
   """Read a single systemd property from the resolver VM."""
   return _succeed(
     machine=machine,
@@ -115,7 +123,9 @@ def _wait_for_successful_oneshot(
     )
 
 
-def _curl_json(*, machine: Machine, command: str, message: str) -> object:
+def _curl_json(
+  *, machine: Machine, command: str, message: str
+) -> object:
   """Run curl and parse the response body as JSON."""
   output = _succeed(machine=machine, command=command, message=message)
   try:
@@ -287,7 +297,9 @@ def _assert_no_cloudflare_path(*, resolver: Machine) -> None:
 
 def run(*, driver_globals: dict[str, object]) -> None:
   """Run DNS integration assertions."""
-  resolver = _require_machine(globals_dict=driver_globals, key="resolver")
+  resolver = _require_machine(
+    globals_dict=driver_globals, key="resolver"
+  )
   probe = _require_machine(globals_dict=driver_globals, key="probe")
 
   _start_all(driver_globals=driver_globals)
@@ -313,8 +325,12 @@ def run(*, driver_globals: dict[str, object]) -> None:
   _assert_pihole_api_auth(resolver=resolver)
 
   # Phase 4: prove the declared vhosts resolve through Pi-hole/OctoDNS and undeclared names do not.
-  _assert_dns_answer(probe=probe, hostname=ALPHA_HOST, expected=RESOLVER_IP)
-  _assert_dns_answer(probe=probe, hostname=BETA_HOST, expected=RESOLVER_IP)
+  _assert_dns_answer(
+    probe=probe, hostname=ALPHA_HOST, expected=RESOLVER_IP
+  )
+  _assert_dns_answer(
+    probe=probe, hostname=BETA_HOST, expected=RESOLVER_IP
+  )
   _assert_missing_name(probe=probe)
 
   # Phase 5: prove Traefik serves the expected backend over verified HTTPS for each vhost.

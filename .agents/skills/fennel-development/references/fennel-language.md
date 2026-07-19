@@ -26,7 +26,8 @@
 - **Sequence table:** `[1 2 3]`
 - **Dynamic lookup:** `(. tbl key)`
 - **Known string key:** `tbl.key`
-- **Nil-safe lookup:** `(?. tbl :key)` when your Fennel version supports it
+- **Nil-safe lookup:** `(?. tbl :key)` when your Fennel version
+  supports it
 - **Mutation:** `(set tbl.key 3)` or `(tset tbl key value)`
 
 ### Functions and binding
@@ -35,22 +36,22 @@
 - **Anonymous function:** `(fn [x] (+ x 1))`
 - **`fn`:** ignores extra args and fills missing args with `nil`
 - **`lambda`:** fails loudly when required args are `nil`
-- **Bindings:** use `let` for short scopes, `local` for stable bindings, and
-  `var` only when rebinding is required
+- **Bindings:** use `let` for short scopes, `local` for stable
+  bindings, and `var` only when rebinding is required
 - **Immutability:** bindings are immutable; referenced tables are not
 
 ### Macros and compiler scope
 
 - **Macro modules:** load shared macros with `import-macros`
 - **Compiler scope:** macro modules run in compiler scope, not runtime
-- **`macroexpand`:** macro-only helper; use it for macro forms, not arbitrary
-  runtime code
-- **`include`:** compile-time bundling still emits runtime loading for the
-  included module
-- **Templates:** quote AST with backtick, unquote with `,`, splice bodies with
-  `,(unpack body)`
-- **Sandbox:** compiler file IO is read-only and limited to cwd/subdirs unless
-  sandboxing is disabled
+- **`macroexpand`:** macro-only helper; use it for macro forms, not
+  arbitrary runtime code
+- **`include`:** compile-time bundling still emits runtime loading for
+  the included module
+- **Templates:** quote AST with backtick, unquote with `,`, splice
+  bodies with `,(unpack body)`
+- **Sandbox:** compiler file IO is read-only and limited to
+  cwd/subdirs unless sandboxing is disabled
 
 ### Control flow and iteration
 
@@ -62,8 +63,8 @@
 - **`while`:** handles loops
 - **`icollect`:** builds sequences
 - **`collect`:** builds key/value tables
-- **Loop helpers:** `accumulate`, `fcollect`, and `faccumulate` cover tighter
-  loop cases
+- **Loop helpers:** `accumulate`, `fcollect`, and `faccumulate` cover
+  tighter loop cases
 
 ### Destructuring and values
 
@@ -72,18 +73,19 @@
 - **`&as`:** keeps the original value too
 - **Truthy rules:** only `nil` and `false` are falsey
 - **`or`:** is a fallback operator, not a nil-only operator
-- **Varargs:** `...` is not a table; use `[ ... ]`, `table.pack`, `values`,
-  `pick-values`, `select`, or `table.unpack` when you need exact multivalue
-  control
+- **Varargs:** `...` is not a table; use `[ ... ]`, `table.pack`,
+  `values`, `pick-values`, `select`, or `table.unpack` when you need
+  exact multivalue control
 
 ## Interop and debugging
 
 - **Lua APIs:** call directly from Fennel
-- **Raw Lua:** `lua` emits raw Lua when Fennel syntax is not enough; use it
-  sparingly
-- **Inspecting tables:** `(print tbl)` usually shows table identity only; use
-  `fennel.view` when available or the host inspector
-- **Macro debugging:** use `macrodebug` first for macro expansion issues
+- **Raw Lua:** `lua` emits raw Lua when Fennel syntax is not enough;
+  use it sparingly
+- **Inspecting tables:** `(print tbl)` usually shows table identity
+  only; use `fennel.view` when available or the host inspector
+- **Macro debugging:** use `macrodebug` first for macro expansion
+  issues
 
 ## Compact module example
 

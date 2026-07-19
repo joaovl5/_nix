@@ -9,9 +9,17 @@ _PARSE_CASES: dict[str, tuple[str, URIType, GitForge | None]] = {
   "gitlab": ("gitlab:user/repo", URIType.GIT_FORGE, GitForge.GITLAB),
   "gitea": ("gitea:user/repo", URIType.GIT_FORGE, GitForge.GITEA),
   "git_at": ("git@github.com:user/repo.git", URIType.GIT_URL, None),
-  "git_ssh": ("git+ssh://git@github.com/user/repo", URIType.GIT_URL, None),
+  "git_ssh": (
+    "git+ssh://git@github.com/user/repo",
+    URIType.GIT_URL,
+    None,
+  ),
   "ssh": ("ssh://git@github.com/user/repo", URIType.GIT_URL, None),
-  "https": ("https://github.com/user/repo.git", URIType.GIT_URL, None),
+  "https": (
+    "https://github.com/user/repo.git",
+    URIType.GIT_URL,
+    None,
+  ),
   "http": ("http://github.com/user/repo.git", URIType.GIT_URL, None),
 }
 
@@ -31,7 +39,10 @@ _GET_URL_CASES: dict[str, tuple[str, str]] = {
   "local_path": ("/home/user/flake", "/home/user/flake"),
   "github": ("github:user/repo", "git@github.com:user/repo.git"),
   "gitlab": ("gitlab:user/repo", "git@gitlab.com:user/repo.git"),
-  "git_at": ("git@github.com:user/repo.git", "git@github.com:user/repo.git"),
+  "git_at": (
+    "git@github.com:user/repo.git",
+    "git@github.com:user/repo.git",
+  ),
   "https": (
     "https://github.com/user/repo.git",
     "https://github.com/user/repo.git",
@@ -46,7 +57,9 @@ _GET_URL_CASES: dict[str, tuple[str, str]] = {
   ids=_PARSE_CASES.keys(),
 )
 def test_parse(
-  uri_str: str, expected_type: URIType, expected_forge: GitForge | None
+  uri_str: str,
+  expected_type: URIType,
+  expected_forge: GitForge | None,
 ):
   """Parse repository references into the expected URI category."""
   uri = RepositoryURI.parse(uri_str)

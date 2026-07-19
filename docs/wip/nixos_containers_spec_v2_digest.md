@@ -13,7 +13,8 @@ The first spec mixed three things:
 2. unresolved questions,
 3. implementation sketches.
 
-That made it hard to read and hard to decide what was actually accepted.
+That made it hard to read and hard to decide what was actually
+accepted.
 
 For v2, the flow should be:
 
@@ -23,8 +24,9 @@ For v2, the flow should be:
 
 ## Decision results used for v2
 
-- V1 specifies normalized multi-unit containers, host-provider edges, and
-  cross-container edges, but implementation may enforce them in stages.
+- V1 specifies normalized multi-unit containers, host-provider edges,
+  and cross-container edges, but implementation may enforce them in
+  stages.
 - Primary helper shape:
   `my.containers.<name> = c.unit "unit.<name>" { id = ...; target = ...; };`.
 - Existing `default.nix` remains the host wrapper; migrated units add
@@ -35,11 +37,12 @@ For v2, the flow should be:
   `{ protocol; port; }`. Container exposure supplies host `target`.
 - Multi-unit containers use a plain attrset with
   `units = { ... }; expose = [ ... ];`.
-- Container IDs derive `10.88.<id>.1` host and `10.88.<id>.2` guest addresses.
+- Container IDs derive `10.88.<id>.1` host and `10.88.<id>.2` guest
+  addresses.
 - Writable host-mounted state uses `privateUsers = "no"` in v1;
   idmapped/userns hardening is later.
-- Secrets use host-decrypted env files mounted into the guest; services opt
-  into `EnvironmentFile`.
+- Secrets use host-decrypted env files mounted into the guest;
+  services opt into `EnvironmentFile`.
 
 ## Working anchors
 
@@ -77,8 +80,8 @@ The main ergonomic path is:
 one container = one unit
 ```
 
-The underlying model may support multiple units per container, but v1 should
-not be optimized around that.
+The underlying model may support multiple units per container, but v1
+should not be optimized around that.
 
 ### Helper namespace
 
@@ -102,8 +105,8 @@ Backups target host paths, not guest root filesystems.
 
 ### Host/shared providers
 
-Shared Postgres and cross-container communication matter, but they do not need
-to be fully specified in the first spec.
+Shared Postgres and cross-container communication matter, but they do
+not need to be fully specified in the first spec.
 
 The first spec should leave a clean seam for them.
 
@@ -131,8 +134,8 @@ Possibilities:
 - unit registry key, e.g. `"actual-budget"`
 - unit + default exposure target
 
-The current preference appears to be: explicit unit identity, not inferred
-from container name.
+The current preference appears to be: explicit unit identity, not
+inferred from container name.
 
 ### 2. Unit file shape
 
@@ -164,11 +167,12 @@ The spec needs one way to answer:
 Possible homes:
 
 - separate `meta.nix`, pure data;
-- metadata inside the unit option declaration via something like `o.unit`;
+- metadata inside the unit option declaration via something like
+  `o.unit`;
 - no metadata file, require each helper to know unit-specific facts.
 
-The current discussion leaned away from redundant `name` and `module` fields
-in metadata.
+The current discussion leaned away from redundant `name` and `module`
+fields in metadata.
 
 ### 4. Endpoint meaning
 
@@ -184,11 +188,11 @@ container exposure
   "publish that endpoint on the host as target Y"
 ```
 
-Important: `target = "actual"` is not a TLD or FQDN. It is the existing repo
-vhost target concept used by `my.vhosts`.
+Important: `target = "actual"` is not a TLD or FQDN. It is the
+existing repo vhost target concept used by `my.vhosts`.
 
-Open question: should v1 expose only one default HTTP endpoint, avoiding
-general endpoint machinery until later?
+Open question: should v1 expose only one default HTTP endpoint,
+avoiding general endpoint machinery until later?
 
 ### 5. Container `id`
 
@@ -206,19 +210,20 @@ host side      = 10.88.12.1
 container side = 10.88.12.2
 ```
 
-Open question: keep this formula, or use explicit addresses to make the spec
-less magical?
+Open question: keep this formula, or use explicit addresses to make
+the spec less magical?
 
 ### 6. Writable state and user namespaces
 
 Known issue:
 
 - `privateUsers = "pick"` is safer,
-- but writable host bind mounts are simpler with `privateUsers = "no"`.
+- but writable host bind mounts are simpler with
+  `privateUsers = "no"`.
 
 Open question: should v1 explicitly choose `privateUsers = "no"` for
-writable-state containers, or avoid saying this in the high-level spec until
-implementation?
+writable-state containers, or avoid saying this in the high-level spec
+until implementation?
 
 ### 7. Secrets
 
@@ -230,17 +235,19 @@ Possible first models:
 - systemd credentials projected to specific services;
 - envvar sugar for units that explicitly want it.
 
-Important nuance: after full container compromise, any secret made available
-to that container is reachable. The distinction is mostly about accidental
-exposure, service scoping, and operational cleanliness.
+Important nuance: after full container compromise, any secret made
+available to that container is reachable. The distinction is mostly
+about accidental exposure, service scoping, and operational
+cleanliness.
 
 ### 8. Future communication model
 
 Postgres, cross-container dependencies, and host providers should be
 acknowledged but probably not specified deeply in v1.
 
-Open question: should v2 contain only a short "future seam" section, or a
-minimal normalized shape such as `consumes` without implementation promises?
+Open question: should v2 contain only a short "future seam" section,
+or a minimal normalized shape such as `consumes` without
+implementation promises?
 
 ## Suggested question batches
 
@@ -254,6 +261,6 @@ Instead of asking one-by-one, ask in batches:
 6. state/secrets/security trade-offs,
 7. future seams.
 
-The next step should be a batched `ask` covering the decisions above. After
-those answers, write only the accepted contract into
+The next step should be a batched `ask` covering the decisions above.
+After those answers, write only the accepted contract into
 `docs/wip/nixos_containers_spec_v2.md`.

@@ -78,10 +78,16 @@ NETWORK_TIMEOUT = 4
 # Restart and recovery assertions depend on these names matching the Nix fixtures exactly.
 PLAIN_SOURCE_SERVICES = {
   "ipv4": ("plain-demo.service", f"{LOG_ROOT}/plain-demo-source-ip"),
-  "ipv6": ("plain-demo-v6.service", f"{LOG_ROOT}/plain-demo-source-ip-v6"),
+  "ipv6": (
+    "plain-demo-v6.service",
+    f"{LOG_ROOT}/plain-demo-source-ip-v6",
+  ),
 }
 CONFINED_SOURCE_SERVICES = {
-  "ipv4": ("confined-demo.service", f"{LOG_ROOT}/confined-demo-source-ip"),
+  "ipv4": (
+    "confined-demo.service",
+    f"{LOG_ROOT}/confined-demo-source-ip",
+  ),
   "ipv6": (
     "confined-demo-v6.service",
     f"{LOG_ROOT}/confined-demo-source-ip-v6",
@@ -188,7 +194,9 @@ def _clear_log(machine: Machine, path: str) -> None:
 
 def _log_has_token(machine: Machine, path: str, token: str) -> bool:
   """Return whether a fixture log contains a token."""
-  status, _ = machine.execute(f"grep -F {q(token)} {q(path)} >/dev/null")
+  status, _ = machine.execute(
+    f"grep -F {q(token)} {q(path)} >/dev/null"
+  )
   return status == 0
 
 
@@ -215,8 +223,12 @@ def _assert_log_has_entry(
 ) -> None:
   """Assert that a fixture log contains an exact token/source entry."""
   entry = f"{token} {source}"
-  status, _ = machine.execute(f"grep -Fx {q(entry)} {q(path)} >/dev/null")
-  assert status == 0, f"{message}: entry {entry!r} missing from {path}"
+  status, _ = machine.execute(
+    f"grep -Fx {q(entry)} {q(path)} >/dev/null"
+  )
+  assert status == 0, (
+    f"{message}: entry {entry!r} missing from {path}"
+  )
 
 
 def _http_get(
@@ -250,7 +262,12 @@ def _assert_http_body(
 ) -> None:
   """Assert that an HTTP endpoint returns the expected body."""
   body = _http_get(
-    machine, address, port, family=family, namespace=namespace, path=path
+    machine,
+    address,
+    port,
+    family=family,
+    namespace=namespace,
+    path=path,
   )
   assert body == expected_body, (
     f"{message}: expected {expected_body!r}, got {body!r}"
@@ -393,7 +410,9 @@ def _run_service_capture(
     f"Failed to remove stale output {output_path}",
   )
   succeed(
-    machine, f"systemctl start {q(service)}", f"Failed to start {service}"
+    machine,
+    f"systemctl start {q(service)}",
+    f"Failed to start {service}",
   )
   repeat_until_succeeds(
     machine,
@@ -429,7 +448,9 @@ def _assert_confined_source_observer_fail_closed(
   )
   _clear_log(probe, observer_log_path)
   succeed(
-    isolated, f"rm -f {q(output_path)}", f"Failed to clear {output_path}"
+    isolated,
+    f"rm -f {q(output_path)}",
+    f"Failed to clear {output_path}",
   )
   fail(isolated, f"systemctl start {q(service)}", message)
   status, _ = isolated.execute(f"test -s {q(output_path)}")
@@ -453,14 +474,26 @@ def _assert_denied_listener_preflight(
   """Assert that the allowed path works before the denied path is tested."""
   blocked_on = machine if blocked_machine is None else blocked_machine
   _clear_log(machine, log_path)
-  succeed(machine, control_command, f"{message}: control preflight failed")
+  succeed(
+    machine, control_command, f"{message}: control preflight failed"
+  )
   _assert_log_has_token(
-    machine, log_path, control_token, f"{message}: control token missing"
+    machine,
+    log_path,
+    control_token,
+    f"{message}: control token missing",
   )
   _clear_log(machine, log_path)
-  fail(blocked_on, blocked_command, f"{message}: blocked command must fail")
+  fail(
+    blocked_on,
+    blocked_command,
+    f"{message}: blocked command must fail",
+  )
   _assert_log_lacks_token(
-    machine, log_path, blocked_token, f"{message}: blocked token leaked"
+    machine,
+    log_path,
+    blocked_token,
+    f"{message}: blocked token leaked",
   )
 
 
@@ -493,7 +526,9 @@ def _assert_route(
     if family == "6"
     else f"{_command_prefix(WG_NAMESPACE)}ip route get {q(address)}"
   )
-  route = succeed(machine, command, f"Failed to inspect route for {address}")
+  route = succeed(
+    machine, command, f"Failed to inspect route for {address}"
+  )
   for needle in expected_present:
     assert needle in route, (
       f"{message}: expected {needle!r} in route output {route!r}"
@@ -513,7 +548,9 @@ def _assert_service_inactive(
     f"systemctl show {q(service)} --property=ActiveState,SubState,Result --value --no-pager",
     f"Failed to inspect {service}",
   )
-  states = [line.strip() for line in output.splitlines() if line.strip()]
+  states = [
+    line.strip() for line in output.splitlines() if line.strip()
+  ]
   assert states and states[0] != "active", (
     f"{message}: {service} is unexpectedly active ({states})"
   )
@@ -528,9 +565,13 @@ def _assert_service_failed(
     f"systemctl show {q(service)} --property=ActiveState,Result --value --no-pager",
     f"Failed to inspect {service}",
   )
-  states = [line.strip() for line in output.splitlines() if line.strip()]
+  states = [
+    line.strip() for line in output.splitlines() if line.strip()
+  ]
   assert (
-    len(states) >= 2 and states[0] == "failed" and states[1] == "exit-code"
+    len(states) >= 2
+    and states[0] == "failed"
+    and states[1] == "exit-code"
   ), f"{message}: {service} did not fail with exit-code ({states})"
 
 
@@ -753,7 +794,9 @@ def _assert_no_duplicate_state(
   )
 
 
-def _assert_startup_fail_closed(probe: Machine, isolated: Machine) -> None:
+def _assert_startup_fail_closed(
+  probe: Machine, isolated: Machine
+) -> None:
   """Assert that startup fails closed until the relay comes online."""
   isolated.wait_for_unit(WG_HOST_UNIT)
   # Creating a WireGuard interface does not require a completed handshake, so the
@@ -775,10 +818,16 @@ def _assert_startup_fail_closed(probe: Machine, isolated: Machine) -> None:
   ), (
     "Plain IPv6 source observer must keep using isolated shared-VLAN source while relay is down"
   )
-  for label, (service, output_path) in CONFINED_SOURCE_SERVICES.items():
-    observer_address, observer_family, observer_log_path, observer_token = (
-      REMOTE_SOURCE_OBSERVERS[label]
-    )
+  for label, (
+    service,
+    output_path,
+  ) in CONFINED_SOURCE_SERVICES.items():
+    (
+      observer_address,
+      observer_family,
+      observer_log_path,
+      observer_token,
+    ) = REMOTE_SOURCE_OBSERVERS[label]
     _assert_confined_source_observer_fail_closed(
       probe,
       isolated,
@@ -1080,25 +1129,41 @@ def _assert_source_observers(isolated: Machine) -> None:
   """Assert the observed source addresses for plain and confined services."""
   plain_v4_service, plain_v4_output = PLAIN_SOURCE_SERVICES["ipv4"]
   plain_v6_service, plain_v6_output = PLAIN_SOURCE_SERVICES["ipv6"]
-  confined_v4_service, confined_v4_output = CONFINED_SOURCE_SERVICES["ipv4"]
-  confined_v6_service, confined_v6_output = CONFINED_SOURCE_SERVICES["ipv6"]
+  confined_v4_service, confined_v4_output = CONFINED_SOURCE_SERVICES[
+    "ipv4"
+  ]
+  confined_v6_service, confined_v6_output = CONFINED_SOURCE_SERVICES[
+    "ipv6"
+  ]
 
   assert (
     _run_service_capture(isolated, plain_v4_service, plain_v4_output)
     == ISOLATED_SHARED_V4
-  ), "Plain IPv4 source observer must see the isolated shared-VLAN source"
+  ), (
+    "Plain IPv4 source observer must see the isolated shared-VLAN source"
+  )
   assert (
     _run_service_capture(isolated, plain_v6_service, plain_v6_output)
     == ISOLATED_SHARED_V6
-  ), "Plain IPv6 source observer must see the isolated shared-VLAN source"
+  ), (
+    "Plain IPv6 source observer must see the isolated shared-VLAN source"
+  )
   assert (
-    _run_service_capture(isolated, confined_v4_service, confined_v4_output)
+    _run_service_capture(
+      isolated, confined_v4_service, confined_v4_output
+    )
     == RELAY_SHARED_V4
-  ), "Confined IPv4 source observer must see the relay shared-VLAN source"
+  ), (
+    "Confined IPv4 source observer must see the relay shared-VLAN source"
+  )
   assert (
-    _run_service_capture(isolated, confined_v6_service, confined_v6_output)
+    _run_service_capture(
+      isolated, confined_v6_service, confined_v6_output
+    )
     == RELAY_SHARED_V6
-  ), "Confined IPv6 source observer must see the relay shared-VLAN source"
+  ), (
+    "Confined IPv6 source observer must see the relay shared-VLAN source"
+  )
 
 
 def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
@@ -1122,7 +1187,9 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
     tcp4,
     family="4",
     source_address=PROBE_PRIMARY_V4,
-  ), "Namespace TCP port mapping over IPv4 did not echo the expected token"
+  ), (
+    "Namespace TCP port mapping over IPv4 did not echo the expected token"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-port-map-tcp-v4"),
@@ -1137,7 +1204,9 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
     tcp6,
     family="6",
     source_address=PROBE_PRIMARY_V6,
-  ), "Namespace TCP port mapping over IPv6 did not echo the expected token"
+  ), (
+    "Namespace TCP port mapping over IPv6 did not echo the expected token"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-port-map-tcp-v6"),
@@ -1152,7 +1221,9 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
     udp4,
     family="4",
     source_address=PROBE_PRIMARY_V4,
-  ), "Namespace UDP port mapping over IPv4 did not echo the expected token"
+  ), (
+    "Namespace UDP port mapping over IPv4 did not echo the expected token"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-port-map-udp-v4"),
@@ -1167,7 +1238,9 @@ def _assert_port_mappings(probe: Machine, isolated: Machine) -> None:
     udp6,
     family="6",
     source_address=PROBE_PRIMARY_V6,
-  ), "Namespace UDP port mapping over IPv6 did not echo the expected token"
+  ), (
+    "Namespace UDP port mapping over IPv6 did not echo the expected token"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-port-map-udp-v6"),
@@ -1422,7 +1495,9 @@ def _assert_open_vpn_ports(
 
   assert tcp4 in _tcp_roundtrip(
     relay, NAMESPACE_WG_V4, OPEN_VPN_TCP_PORT, tcp4, family="4"
-  ), "Open VPN TCP port over IPv4 did not echo the expected token from relay"
+  ), (
+    "Open VPN TCP port over IPv4 did not echo the expected token from relay"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-open-vpn-tcp-v4"),
@@ -1432,7 +1507,9 @@ def _assert_open_vpn_ports(
   )
   assert tcp6 in _tcp_roundtrip(
     relay, NAMESPACE_WG_V6, OPEN_VPN_TCP_PORT, tcp6, family="6"
-  ), "Open VPN TCP port over IPv6 did not echo the expected token from relay"
+  ), (
+    "Open VPN TCP port over IPv6 did not echo the expected token from relay"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-open-vpn-tcp-v6"),
@@ -1442,7 +1519,9 @@ def _assert_open_vpn_ports(
   )
   assert udp4 in _udp_roundtrip(
     relay, NAMESPACE_WG_V4, OPEN_VPN_UDP_PORT, udp4, family="4"
-  ), "Open VPN UDP port over IPv4 did not echo the expected token from relay"
+  ), (
+    "Open VPN UDP port over IPv4 did not echo the expected token from relay"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-open-vpn-udp-v4"),
@@ -1452,7 +1531,9 @@ def _assert_open_vpn_ports(
   )
   assert udp6 in _udp_roundtrip(
     relay, NAMESPACE_WG_V6, OPEN_VPN_UDP_PORT, udp6, family="6"
-  ), "Open VPN UDP port over IPv6 did not echo the expected token from relay"
+  ), (
+    "Open VPN UDP port over IPv6 did not echo the expected token from relay"
+  )
   _assert_log_has_entry(
     isolated,
     _log_path("namespace-open-vpn-udp-v6"),
@@ -1764,12 +1845,12 @@ def _assert_dns(isolated: Machine, probe: Machine) -> None:
   positive_v6 = _token("dns-approved-ipv6")
   _clear_log(probe, approved_v4_log)
   _clear_log(probe, approved_v6_log)
-  assert _dig_query(isolated, PROBE_PRIMARY_V4, positive_v4, family="4"), (
-    "Approved IPv4 confined dig query returned no answer"
-  )
-  assert _dig_query(isolated, PROBE_PRIMARY_V6, positive_v6, family="6"), (
-    "Approved IPv6 confined dig query returned no answer"
-  )
+  assert _dig_query(
+    isolated, PROBE_PRIMARY_V4, positive_v4, family="4"
+  ), "Approved IPv4 confined dig query returned no answer"
+  assert _dig_query(
+    isolated, PROBE_PRIMARY_V6, positive_v6, family="6"
+  ), "Approved IPv6 confined dig query returned no answer"
   _assert_log_has_token(
     probe,
     approved_v4_log,
@@ -2043,10 +2124,16 @@ def _assert_midflight_outage(
 ) -> None:
   """Assert that a live relay outage fails closed and then recovers."""
   relay.shutdown()
-  for label, (service, output_path) in CONFINED_SOURCE_SERVICES.items():
-    observer_address, observer_family, observer_log_path, observer_token = (
-      REMOTE_SOURCE_OBSERVERS[label]
-    )
+  for label, (
+    service,
+    output_path,
+  ) in CONFINED_SOURCE_SERVICES.items():
+    (
+      observer_address,
+      observer_family,
+      observer_log_path,
+      observer_token,
+    ) = REMOTE_SOURCE_OBSERVERS[label]
     _assert_confined_source_observer_fail_closed(
       probe,
       isolated,

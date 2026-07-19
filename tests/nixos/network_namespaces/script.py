@@ -58,7 +58,9 @@ NAMESPACE_LISTENER_SERVICES = (
 _TOKEN_COUNTER = itertools.count(1)
 
 
-def _require_machine(*, globals_dict: dict[str, object], key: str) -> Machine:
+def _require_machine(
+  *, globals_dict: dict[str, object], key: str
+) -> Machine:
   """Return a required VM driver object from the driver globals."""
   value = globals_dict[key]
   assert isinstance(value, Machine), (
@@ -72,10 +74,14 @@ def _q(*, value: str) -> str:
   return shlex.quote(value)
 
 
-def _require_callable(*, obj: object, name: str) -> Callable[..., object]:
+def _require_callable(
+  *, obj: object, name: str
+) -> Callable[..., object]:
   """Return a named callable from a runtime object."""
   method = getattr(obj, name, None)
-  assert callable(method), f"Machine is missing required method {name}()"
+  assert callable(method), (
+    f"Machine is missing required method {name}()"
+  )
   return method
 
 
@@ -90,7 +96,9 @@ def _start_namespace_listeners(*, host: Machine) -> None:
   """Start the namespace listener fixtures after namespace restarts."""
   # Confined listeners are stopped by BindsTo= when the namespace unit restarts.
   # Start them explicitly before assertions that depend on host-to-namespace ingress.
-  host.succeed(f"systemctl start {' '.join(NAMESPACE_LISTENER_SERVICES)}")
+  host.succeed(
+    f"systemctl start {' '.join(NAMESPACE_LISTENER_SERVICES)}"
+  )
   for service in NAMESPACE_LISTENER_SERVICES:
     host.wait_for_unit(service)
 
@@ -99,7 +107,9 @@ def _succeed(*, machine: Machine, command: str, message: str) -> str:
   """Run a command and reframe driver failures as assertion failures."""
   try:
     return machine.succeed(command).strip()
-  except Exception as exc:  # pragma: no cover - integration-driver surface
+  except (
+    Exception
+  ) as exc:  # pragma: no cover - integration-driver surface
     raise AssertionError(f"{message}: {command}") from exc
 
 
@@ -119,7 +129,9 @@ def _wait_until_succeeds(
   """Wait for a command to start succeeding, surfacing driver errors clearly."""
   try:
     machine.wait_until_succeeds(command)
-  except Exception as exc:  # pragma: no cover - integration-driver surface
+  except (
+    Exception
+  ) as exc:  # pragma: no cover - integration-driver surface
     raise AssertionError(f"{message}: {command}") from exc
 
 
@@ -135,7 +147,9 @@ def _log_path(*, name: str) -> str:
 
 def _clear_log(*, machine: Machine, path: str) -> None:
   """Create or truncate a fixture log file."""
-  machine.succeed(f"mkdir -p {_q(value=LOG_ROOT)} && : > {_q(value=path)}")
+  machine.succeed(
+    f"mkdir -p {_q(value=LOG_ROOT)} && : > {_q(value=path)}"
+  )
 
 
 def _read_log(*, machine: Machine, path: str) -> str:
@@ -146,14 +160,20 @@ def _read_log(*, machine: Machine, path: str) -> str:
 
 
 def _assert_log_has_entry(
-  *, machine: Machine, path: str, token: str, source: str, message: str
+  *,
+  machine: Machine,
+  path: str,
+  token: str,
+  source: str,
+  message: str,
 ) -> None:
   """Assert that a listener log recorded the expected token/source pair."""
   log_lines = _read_log(machine=machine, path=path).splitlines()
   expected = f"{token} {source}"
   # Listener logs must capture the exact token and source address under test.
   assert expected in log_lines, (
-    f"{message}. Missing {expected!r} in {path}:\n" + "\n".join(log_lines)
+    f"{message}. Missing {expected!r} in {path}:\n"
+    + "\n".join(log_lines)
   )
 
 
@@ -326,7 +346,9 @@ def _assert_blocked_path(
   )
 
 
-def _assert_service_attachment(*, host: Machine, probe: Machine) -> None:
+def _assert_service_attachment(
+  *, host: Machine, probe: Machine
+) -> None:
   """Assert that confined services really run from inside the namespace."""
   # Source-observer services are separate probe fixtures; prove they are reachable
   # before starting one-shot confined services whose only output is a curl result.
@@ -344,9 +366,15 @@ def _assert_service_attachment(*, host: Machine, probe: Machine) -> None:
   )
   _clear_log(machine=probe, path=_log_path(name="observer-v4.log"))
   _clear_log(machine=probe, path=_log_path(name="observer-v6.log"))
-  host.succeed("systemctl start ns-source-v4.service ns-source-v6.service")
-  source_v4 = host.succeed(f"cat {_log_path(name='source-v4')}").strip()
-  source_v6 = host.succeed(f"cat {_log_path(name='source-v6')}").strip()
+  host.succeed(
+    "systemctl start ns-source-v4.service ns-source-v6.service"
+  )
+  source_v4 = host.succeed(
+    f"cat {_log_path(name='source-v4')}"
+  ).strip()
+  source_v6 = host.succeed(
+    f"cat {_log_path(name='source-v6')}"
+  ).strip()
   # The IPv4 source observer must see the confined namespace address.
   assert source_v4 == NAMESPACE_V4, (
     f"IPv4 source should be namespace address, got {source_v4!r}"
@@ -480,7 +508,14 @@ def _assert_dns_policy(*, host: Machine, probe: Machine) -> None:
       "doh-udp-v6",
     ),
   ]
-  for mode, address, port, family, log_name, description in denied_cases:
+  for (
+    mode,
+    address,
+    port,
+    family,
+    log_name,
+    description,
+  ) in denied_cases:
     _assert_blocked_path(
       host=host,
       probe=probe,
@@ -763,7 +798,9 @@ def _assert_fail_closed(*, host: Machine, probe: Machine) -> None:
   )
 
 
-def _assert_restart_idempotency(*, host: Machine, probe: Machine) -> None:
+def _assert_restart_idempotency(
+  *, host: Machine, probe: Machine
+) -> None:
   """Assert that repeated restarts do not duplicate namespace state."""
   for _ in range(3):
     host.succeed("systemctl restart test.service")
@@ -771,7 +808,9 @@ def _assert_restart_idempotency(*, host: Machine, probe: Machine) -> None:
     _start_namespace_listeners(host=host)
   _assert_port_mappings(probe=probe, host=host)
 
-  netns_count = host.succeed("ip netns list | grep -c '^test '").strip()
+  netns_count = host.succeed(
+    "ip netns list | grep -c '^test '"
+  ).strip()
   # Restarting repeatedly must leave exactly one namespace registration behind.
   assert netns_count == "1", (
     f"Expected one test namespace entry, got {netns_count}"
@@ -780,7 +819,9 @@ def _assert_restart_idempotency(*, host: Machine, probe: Machine) -> None:
     "iptables -t nat -S PREROUTING | grep -c 'MYNS-test-NAT'"
   ).strip()
   # IPv4 NAT rules must remain single-instanced across restarts.
-  assert nat_jumps == "1", f"Expected one IPv4 NAT jump, got {nat_jumps}"
+  assert nat_jumps == "1", (
+    f"Expected one IPv4 NAT jump, got {nat_jumps}"
+  )
   fwd_jumps = host.succeed(
     "iptables -S FORWARD | grep -c 'MYNS-test-FWD'"
   ).strip()
@@ -792,7 +833,9 @@ def _assert_restart_idempotency(*, host: Machine, probe: Machine) -> None:
     "ip6tables -t nat -S PREROUTING | grep -c 'MYNS-test-NAT'"
   ).strip()
   # IPv6 NAT rules must also remain single-instanced across restarts.
-  assert nat6_jumps == "1", f"Expected one IPv6 NAT jump, got {nat6_jumps}"
+  assert nat6_jumps == "1", (
+    f"Expected one IPv6 NAT jump, got {nat6_jumps}"
+  )
 
 
 def _assert_partial_startup_cleanup(*, host: Machine) -> None:
@@ -819,7 +862,9 @@ def _assert_partial_startup_cleanup(*, host: Machine) -> None:
 
   host.succeed("systemctl start failcore.service")
   host.wait_for_unit("failcore.service")
-  netns_count = host.succeed("ip netns list | grep -c '^failcore '").strip()
+  netns_count = host.succeed(
+    "ip netns list | grep -c '^failcore '"
+  ).strip()
   # Recovery must recreate exactly one failcore namespace instance.
   assert netns_count == "1", (
     f"Expected one recovered failcore namespace, got {netns_count}"

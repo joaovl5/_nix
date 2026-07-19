@@ -15,7 +15,9 @@ from typing import TextIO
 
 from cyclopts import App, CycloptsError
 
-SCRIPT_DESCRIPTION = "Run arbitrary Lua inside the repo Neovim config."
+SCRIPT_DESCRIPTION = (
+  "Run arbitrary Lua inside the repo Neovim config."
+)
 CONFIG_PATH = Path(
   "modules/aspects/desktop/desktop/apps/editor/neovim/config"
 )
@@ -49,7 +51,9 @@ def _lua_literal(value: object) -> str:
   return json.dumps(value)
 
 
-def _read_lua_source(*, file: Path | None, lua: tuple[str, ...]) -> str:
+def _read_lua_source(
+  *, file: Path | None, lua: tuple[str, ...]
+) -> str:
   if file is not None:
     return file.expanduser().read_text(encoding="utf-8")
   return " ".join(lua)
@@ -99,7 +103,9 @@ def _run_lua(
     "w", encoding="utf-8", suffix=".lua", delete=False
   ) as lua_file:
     _ = lua_file.write(
-      _wrapped_lua_source(lua_source, defer_ms=defer_ms, auto_quit=auto_quit)
+      _wrapped_lua_source(
+        lua_source, defer_ms=defer_ms, auto_quit=auto_quit
+      )
     )
     lua_path = Path(lua_file.name)
 

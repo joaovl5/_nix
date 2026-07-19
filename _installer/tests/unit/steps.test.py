@@ -51,7 +51,9 @@ def _make_context(
     flake=RepositoryURI.parse(flake),
     flake_host="testhost",
     secrets=RepositoryURI.parse(secrets) if secrets else None,
-    ssh_config=SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key")),
+    ssh_config=SSHConfig(
+      host="root@10.0.0.1", identity=Path("/tmp/key")
+    ),
     encryption_params=SecretsEncryptionParams(
       repo_url="git@github.com:user/secrets.git",
       sops_file="secrets/disk.yaml",
@@ -86,7 +88,9 @@ def _get_command(cli: MockCLI, call_index: int = -1) -> Command:
   return cli.run_command.call_args_list[call_index][1]["command"]
 
 
-def _assert_type_tree(cmd: object, types: Sequence[type[object]]) -> None:
+def _assert_type_tree(
+  cmd: object, types: Sequence[type[object]]
+) -> None:
   for expected in types:
     assert isinstance(cmd, expected)
     cmd = getattr(cmd, "inner", None)
@@ -95,7 +99,9 @@ def _assert_type_tree(cmd: object, types: Sequence[type[object]]) -> None:
 class TestCloneRepositories:
   def test_skips_when_both_local(self):
     """Skip cloning when both repositories are already local paths."""
-    ctx = _make_context(flake="/local/flake", secrets="/local/secrets")
+    ctx = _make_context(
+      flake="/local/flake", secrets="/local/secrets"
+    )
     step = CloneRepositories()
     # Assert the step is skipped when no clone operation is required.
     assert step.should_skip(ctx) is True
@@ -125,7 +131,9 @@ class TestCloneRepositories:
 
   def test_skips_local_flake_clones_remote_secrets(self):
     """Clone only the remote secrets repository when the flake is local."""
-    ctx = _make_context(flake="/local/flake", secrets="github:user/secrets")
+    ctx = _make_context(
+      flake="/local/flake", secrets="github:user/secrets"
+    )
     cli = _mock_cli()
     step = CloneRepositories()
     step.execute(ctx, cli)
@@ -214,7 +222,8 @@ class TestRunDisko:
     assert RunDisko().should_skip(ctx) is False
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-disko-script"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-disko-script",
   )
   def test_builds_disko_script_locally(self, mock_build: MagicMock):
     """Build the Disko script from the selected flake host."""
@@ -229,7 +238,8 @@ class TestRunDisko:
     assert ctx.flake_host in ref
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-disko-script"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-disko-script",
   )
   def test_copies_and_runs_via_ssh(self, _mock_build: MagicMock):
     """Copy the built script and execute it remotely."""
@@ -240,7 +250,8 @@ class TestRunDisko:
     assert cli.run_command.call_count == 3
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-disko-script"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-disko-script",
   )
   def test_runs_store_path_on_target(self, _mock_build: MagicMock):
     """Execute the copied Disko store path through SSH and sudo."""
@@ -249,12 +260,15 @@ class TestRunDisko:
     RunDisko().execute(ctx, cli)
     run_cmd = _get_command(cli, 1)
     # Assert the remote execution wraps the command in SSH and sudo.
-    _assert_type_tree(run_cmd, [SSHCommand, SudoCommand, ShellCommand])
+    _assert_type_tree(
+      run_cmd, [SSHCommand, SudoCommand, ShellCommand]
+    )
 
 
 class TestRunFacter:
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-facter"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-facter",
   )
   def test_builds_facter_locally(self, mock_build: MagicMock):
     """Build nixos-facter from nixpkgs before remote execution."""
@@ -265,7 +279,8 @@ class TestRunFacter:
     mock_build.assert_called_once_with("nixpkgs#nixos-facter")
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-facter"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-facter",
   )
   def test_copies_and_runs_via_ssh(self, _mock_build: MagicMock):
     """Copy the built facter closure and execute it remotely."""
@@ -276,7 +291,8 @@ class TestRunFacter:
     assert cli.run_command.call_count == 3
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-facter"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-facter",
   )
   def test_runs_facter_binary_on_target(self, _mock_build: MagicMock):
     """Run the nixos-facter binary from the copied store path."""
@@ -285,14 +301,17 @@ class TestRunFacter:
     RunFacter().execute(ctx, cli)
     run_cmd = _get_command(cli, 1)
     # Assert the command is wrapped for remote privileged execution.
-    _assert_type_tree(run_cmd, [SSHCommand, SudoCommand, ShellCommand])
+    _assert_type_tree(
+      run_cmd, [SSHCommand, SudoCommand, ShellCommand]
+    )
     assert isinstance(run_cmd, SSHCommand)
     assert isinstance(run_cmd.inner, SudoCommand)
     assert isinstance(run_cmd.inner.inner, ShellCommand)
     inner = run_cmd.inner.inner
     # Assert the executed binary path points at the built nixos-facter output.
     assert (
-      "nixos-facter" in inner.program or "abc-nixos-facter" in inner.program
+      "nixos-facter" in inner.program
+      or "abc-nixos-facter" in inner.program
     )
 
 
@@ -375,7 +394,9 @@ class TestUpdateSecretsPin:
     """Emit guidance when the secrets pin step is skipped."""
     ctx = _make_context(auto_commit=True, auto_push=False)
     cli = _mock_cli()
-    installer = Installer(context=ctx, cli=cli, steps=[UpdateSecretsPin()])
+    installer = Installer(
+      context=ctx, cli=cli, steps=[UpdateSecretsPin()]
+    )
 
     installer.run()
 
@@ -431,7 +452,9 @@ class TestNixBuild:
   @patch("installer.steps.subprocess.run")
   def test_raises_on_failure(self, mock_run: MagicMock):
     """Raise an installer error when nix build fails."""
-    mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="error")
+    mock_run.return_value = MagicMock(
+      returncode=1, stdout="", stderr="error"
+    )
     # Assert failing builds are converted into InstallerError.
     with pytest.raises(InstallerError, match="nix build failed"):
       nix_build("nixpkgs#hello")
@@ -439,7 +462,9 @@ class TestNixBuild:
   @patch("installer.steps.subprocess.run")
   def test_raises_on_empty_output(self, mock_run: MagicMock):
     """Reject successful builds that return no store path."""
-    mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+    mock_run.return_value = MagicMock(
+      returncode=0, stdout="", stderr=""
+    )
     # Assert empty build output is treated as an error.
     with pytest.raises(InstallerError, match="no output path"):
       nix_build("nixpkgs#hello")
@@ -449,7 +474,9 @@ class TestNixCopyCommand:
   def test_basic_copy(self):
     """Build a remote nix copy command for a store path."""
     cfg = SSHConfig(host="root@10.0.0.1", identity=Path("/tmp/key"))
-    cmd = nix_copy_command(ssh_config=cfg, store_path="/nix/store/abc123")
+    cmd = nix_copy_command(
+      ssh_config=cfg, store_path="/nix/store/abc123"
+    )
     built = cmd.build()
     # Assert the command copies to the configured SSH destination.
     assert "nix" in built
@@ -488,7 +515,9 @@ class TestNixCopyCommand:
     cfg = SSHConfig(
       host="root@10.0.0.1", identity=Path("/tmp/key"), port=2222
     )
-    cmd = nix_copy_command(ssh_config=cfg, store_path="/nix/store/abc123")
+    cmd = nix_copy_command(
+      ssh_config=cfg, store_path="/nix/store/abc123"
+    )
     built = cmd.build()
     # Assert the environment prefix carries the SSH options for nix copy.
     assert "NIX_SSHOPTS=-i /tmp/key -p 2222" in built
@@ -502,7 +531,8 @@ class TestInstallSystem:
     assert InstallSystem().should_skip(ctx) is False
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-system"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-system",
   )
   def test_builds_toplevel_locally(self, mock_build: MagicMock):
     """Build the selected host's toplevel system closure."""
@@ -514,7 +544,8 @@ class TestInstallSystem:
     assert "system.build.toplevel" in ref
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-system"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-system",
   )
   def test_copies_to_mnt_store(self, _mock_build: MagicMock):
     """Copy the built closure into the mounted target store."""
@@ -530,7 +561,8 @@ class TestInstallSystem:
     assert "--substitute-on-destination" in built
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-system"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-system",
   )
   def test_runs_nixos_install_via_ssh(self, _mock_build: MagicMock):
     """Run nixos-install remotely after copying the closure."""
@@ -541,10 +573,13 @@ class TestInstallSystem:
     assert cli.run_command.call_count == 3
     install_cmd = _get_command(cli, 2)
     # Assert nixos-install executes through SSH with sudo.
-    _assert_type_tree(install_cmd, [SSHCommand, SudoCommand, ShellCommand])
+    _assert_type_tree(
+      install_cmd, [SSHCommand, SudoCommand, ShellCommand]
+    )
 
   @patch(
-    "installer.steps.nix_build", return_value="/nix/store/abc-nixos-system"
+    "installer.steps.nix_build",
+    return_value="/nix/store/abc-nixos-system",
   )
   def test_skips_chown_when_root(self, _mock_build: MagicMock):
     """Skip the ownership fix when the remote session already has root access."""

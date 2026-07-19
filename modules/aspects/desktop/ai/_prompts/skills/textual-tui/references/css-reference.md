@@ -1,9 +1,9 @@
 # Textual CSS Reference
 
-Textual CSS (usually `.tcss`) resembles web CSS but targets terminal widgets,
-not HTML. It supports type/id/class selectors, pseudo-classes, variables,
-nesting, terminal-specific units, layout, and widget-specific style
-properties.
+Textual CSS (usually `.tcss`) resembles web CSS but targets terminal
+widgets, not HTML. It supports type/id/class selectors,
+pseudo-classes, variables, nesting, terminal-specific units, layout,
+and widget-specific style properties.
 
 ## Loading and Precedence
 
@@ -18,14 +18,15 @@ class MyWidget(Widget):
     """
 ```
 
-- `CSS_PATH`: external `.tcss` file(s), relative to the Python module by
-  default.
+- `CSS_PATH`: external `.tcss` file(s), relative to the Python module
+  by default.
 - `CSS`: inline CSS string, loaded after `CSS_PATH`.
-- `DEFAULT_CSS`: widget defaults, intended to be overridden by app CSS.
-- `Screen.CSS` / `Screen.CSS_PATH`: apply while the screen is active; not
-  descendant-scoped.
-- Dynamic inline style is available through `widget.styles`, but prefer TCSS
-  for stable styling.
+- `DEFAULT_CSS`: widget defaults, intended to be overridden by app
+  CSS.
+- `Screen.CSS` / `Screen.CSS_PATH`: apply while the screen is active;
+  not descendant-scoped.
+- Dynamic inline style is available through `widget.styles`, but
+  prefer TCSS for stable styling.
 
 ## Selectors
 
@@ -40,16 +41,17 @@ class MyWidget(Widget):
 | Child            | `A > B`     | `#sidebar > Button` | Direct children only         |
 | Pseudo           | `:state`    | `Button:hover`      | State-based                  |
 
-Common pseudo-classes: `:hover`, `:focus`, `:blur`, `:disabled`, `:enabled`,
-`:dark`, `:empty`, `:first-child`, `:last-child`, `:first-of-type`,
-`:last-of-type`, `:even`, `:odd`, `:focus-within`, `:inline`.
+Common pseudo-classes: `:hover`, `:focus`, `:blur`, `:disabled`,
+`:enabled`, `:dark`, `:empty`, `:first-child`, `:last-child`,
+`:first-of-type`, `:last-of-type`, `:even`, `:odd`, `:focus-within`,
+`:inline`.
 
-Specificity: IDs > classes/pseudo-classes > types. `!important` overrides
-normal precedence.
+Specificity: IDs > classes/pseudo-classes > types. `!important`
+overrides normal precedence.
 
-**Textual-specific caveat:** type selectors match subclasses. `Static { ... }`
-also matches `class Status(Static)`. Use a class or specific type selector
-when subclass matching is too broad.
+**Textual-specific caveat:** type selectors match subclasses.
+`Static { ... }` also matches `class Status(Static)`. Use a class or
+specific type selector when subclass matching is too broad.
 
 ## Variables
 
@@ -62,12 +64,12 @@ $panel-border: round $brand;
 }
 ```
 
-Variables start with `$`, can reference other variables, and are used in
-values (not selectors). Theme variables include `$primary`, `$secondary`,
-`$accent`, `$background`, `$surface`, `$panel`, `$boost`, `$foreground`,
-`$success`, `$warning`, `$error`, `$input-cursor-foreground`,
-`$input-cursor-background`, `$input-selection-background`,
-`$input-selection-foreground`.
+Variables start with `$`, can reference other variables, and are used
+in values (not selectors). Theme variables include `$primary`,
+`$secondary`, `$accent`, `$background`, `$surface`, `$panel`,
+`$boost`, `$foreground`, `$success`, `$warning`, `$error`,
+`$input-cursor-foreground`, `$input-cursor-background`,
+`$input-selection-background`, `$input-selection-foreground`.
 
 ## Nesting
 
@@ -85,8 +87,8 @@ values (not selectors). Theme variables include `$primary`, `$secondary`,
 }
 ```
 
-Without `&`, nested selectors become descendants. `&` refers to the parent
-selector.
+Without `&`, nested selectors become descendants. `&` refers to the
+parent selector.
 
 ## Units and Scalars
 
@@ -108,7 +110,8 @@ Outside to inside: margin -> border/outline -> padding -> content.
 
 - Default: `box-sizing: border-box` (padding/border included in
   `width`/`height`).
-- `box-sizing: content-box` adds padding/border around the content dimensions.
+- `box-sizing: content-box` adds padding/border around the content
+  dimensions.
 - Sibling margins overlap; padding does not.
 - `outline` looks like a border but does not affect widget size.
 
@@ -163,8 +166,8 @@ Grid {
 | `content-align-vertical`   | Content vertical axis                     | `top`, `middle`, `bottom`                            |
 | `text-align`               | Text flow                                 | `left`, `center`, `right`, `justify` where supported |
 
-Use `align` to move widgets, `content-align` to move widget content, and
-`text-align` to align lines of text.
+Use `align` to move widgets, `content-align` to move widget content,
+and `text-align` to align lines of text.
 
 ## Dimensions and Spacing
 
@@ -176,8 +179,8 @@ Use `align` to move widgets, `content-align` to move widget content, and
 | `margin`                   | spacing shorthand                         |
 | `padding`                  | spacing shorthand                         |
 
-`height: 1fr` is the usual way to let a content area fill remaining space
-between docked/header/footer widgets.
+`height: 1fr` is the usual way to let a content area fill remaining
+space between docked/header/footer widgets.
 
 ## Display, Visibility, Overflow
 
@@ -189,8 +192,9 @@ between docked/header/footer widgets.
 | `overflow`                 | `visible`, `hidden`, `scroll`, `auto` | Both axes                       |
 | `overflow-x`, `overflow-y` | same                                  | Per-axis                        |
 
-Default overflow varies by widget/container. Use `overflow-y: auto` for
-scrollable content, or use `VerticalScroll` / `ScrollableContainer`.
+Default overflow varies by widget/container. Use `overflow-y: auto`
+for scrollable content, or use `VerticalScroll` /
+`ScrollableContainer`.
 
 ## Borders and Outlines
 
@@ -203,21 +207,21 @@ scrollable content, or use `VerticalScroll` / `ScrollableContainer`.
 }
 ```
 
-Border styles include `solid`, `heavy`, `wide`, `tall`, `round`, `double`,
-`dashed`, `dotted`, `hkey`, `vkey`, `inner`, `outer`, `blank`, `hidden`,
-`none`, `top`.
+Border styles include `solid`, `heavy`, `wide`, `tall`, `round`,
+`double`, `dashed`, `dotted`, `hkey`, `vkey`, `inner`, `outer`,
+`blank`, `hidden`, `none`, `top`.
 
 Directional borders: `border-top`, `border-right`, `border-bottom`,
 `border-left`.
 
-Title/subtitle styling: `border-title-color`, `border-title-background`,
-`border-title-style`, `border-title-align`, and matching `border-subtitle-*`
-properties.
+Title/subtitle styling: `border-title-color`,
+`border-title-background`, `border-title-style`, `border-title-align`,
+and matching `border-subtitle-*` properties.
 
 ## Colors and Text
 
-Color formats: named colors (`darkblue`), hex (`#9932cc`, `#9932cc7f`),
-`rgb(...)`, `rgba(...)`, `hsl(...)`.
+Color formats: named colors (`darkblue`), hex (`#9932cc`,
+`#9932cc7f`), `rgb(...)`, `rgba(...)`, `hsl(...)`.
 
 | Property          | Values                                                                          |
 | ----------------- | ------------------------------------------------------------------------------- |
@@ -266,8 +270,8 @@ widget.has_class("active")
 self.query(".item").add_class("dim")
 ```
 
-Changing classes triggers style recomputation. Prefer classes over mutating
-many inline style properties.
+Changing classes triggers style recomputation. Prefer classes over
+mutating many inline style properties.
 
 ## Style Animation
 

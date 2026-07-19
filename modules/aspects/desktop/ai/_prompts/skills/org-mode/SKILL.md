@@ -225,7 +225,8 @@ M-x package-install RET org-roam RET
      :unnarrowed t)))
 ```
 
-- Variables: `${title}`, `${slug}`, `${file}`, `${foo}` (custom accessors)
+- Variables: `${title}`, `${slug}`, `${file}`, `${foo}` (custom
+  accessors)
 
 ### org-roam-dailies (Journaling)
 

@@ -76,13 +76,17 @@ class TestNixRunCommand:
 class TestSudoCommand:
   def test_wraps_shell(self):
     """Prefix shell commands with sudo."""
-    cmd = SudoCommand(inner=ShellCommand("nixos-install", ["--root", "/mnt"]))
+    cmd = SudoCommand(
+      inner=ShellCommand("nixos-install", ["--root", "/mnt"])
+    )
     # Assert sudo is inserted before the wrapped shell command.
     assert cmd.build() == ["sudo", "nixos-install", "--root", "/mnt"]
 
   def test_wraps_nix_command(self):
     """Prefix nix commands with sudo without dropping nix arguments."""
-    cmd = SudoCommand(inner=NixCommand(["profile", "install", "nixpkgs#git"]))
+    cmd = SudoCommand(
+      inner=NixCommand(["profile", "install", "nixpkgs#git"])
+    )
     result = cmd.build()
     # Assert sudo wraps the underlying nix command rather than replacing it.
     assert result[0] == "sudo"
@@ -106,7 +110,10 @@ class TestGitCommand:
     """Emit git config overrides before the subcommand."""
     cmd = GitCommand(
       args=["commit", "-m", "test"],
-      config={"user.name": "nixos-installer", "user.email": "nix@local"},
+      config={
+        "user.name": "nixos-installer",
+        "user.email": "nix@local",
+      },
     )
     result = cmd.build()
     # Assert each config entry becomes a `-c key=value` pair.
@@ -142,7 +149,9 @@ class TestGitCommand:
 
   def test_env_prefix(self):
     """Support environment overrides on git commands."""
-    cmd = GitCommand(args=["push"], env={"GIT_SSH_COMMAND": "ssh -o Foo=bar"})
+    cmd = GitCommand(
+      args=["push"], env={"GIT_SSH_COMMAND": "ssh -o Foo=bar"}
+    )
     result = cmd.build()
     # Assert git commands can be prefixed with env assignments.
     assert result == [
@@ -226,7 +235,9 @@ class TestSSHCommand:
 
   def test_custom_port(self):
     """Use the configured non-default SSH port."""
-    config = SSHConfig(host="user@host", identity=Path("/key"), port=2222)
+    config = SSHConfig(
+      host="user@host", identity=Path("/key"), port=2222
+    )
     cmd = SSHCommand(inner=ShellCommand("whoami"), config=config)
     result = cmd.build()
     # Assert the configured port is emitted in the SSH command.
@@ -245,7 +256,12 @@ class TestRsyncCommand:
     cmd = RsyncCommand(src="/tmp/file.json", dest="/backup/file.json")
     result = cmd.build()
     # Assert local rsync uses only source and destination paths.
-    assert result == ["rsync", "-avz", "/tmp/file.json", "/backup/file.json"]
+    assert result == [
+      "rsync",
+      "-avz",
+      "/tmp/file.json",
+      "/backup/file.json",
+    ]
 
   def _get_ssh_str(self, result: list[str]) -> str:
     """Extract the ssh command string (value after -e flag)."""
@@ -355,7 +371,9 @@ class TestCommandWrappers:
 
   def test_composed_ssh_passthrough(self):
     """Compose SSH with a passthrough wrapper without adding sudo."""
-    composed = SSHWrapper(config=self._config()) | PassthroughWrapper()
+    composed = (
+      SSHWrapper(config=self._config()) | PassthroughWrapper()
+    )
     cmd = composed.wrap(ShellCommand("ls"))
     # Assert passthrough composition leaves the inner command unwrapped.
     assert isinstance(cmd, SSHCommand)
@@ -364,7 +382,9 @@ class TestCommandWrappers:
   def test_pipe_to_command(self):
     """Pipe composed wrappers directly into a command."""
     cmd = (
-      SSHWrapper(config=self._config()) | SudoWrapper() | ShellCommand("ls")
+      SSHWrapper(config=self._config())
+      | SudoWrapper()
+      | ShellCommand("ls")
     )
     # Assert piping produces the same nested wrapper structure as manual wrap.
     assert isinstance(cmd, SSHCommand)

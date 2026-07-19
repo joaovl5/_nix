@@ -2,8 +2,8 @@
 
 ## Quirks
 
-A quirk is a registered data key. Aspects emit data on that key; consumers
-receive assembled data as function args.
+A quirk is a registered data key. Aspects emit data on that key;
+consumers receive assembled data as function args.
 
 ```nix
 den.quirks.firewall.description = "Firewall port declarations";
@@ -17,11 +17,11 @@ den.aspects.networking.nixos = { firewall, lib, ... }: {
 };
 ```
 
-Use quirks when many aspects produce structured data for one or more consumers
-and producer order should not matter.
+Use quirks when many aspects produce structured data for one or more
+consumers and producer order should not matter.
 
-Quirk payloads are not typed by the quirk registry. Validate in consumers or
-producer helpers.
+Quirk payloads are not typed by the quirk registry. Validate in
+consumers or producer helpers.
 
 ## Pipes
 
@@ -57,7 +57,8 @@ den.default.includes = [ den.policies.my-policy ];
 den.aspects.some-host.includes = [ den.policies.my-policy ];
 ```
 
-Use policies for topology and routing. Use aspects for behavior grouping.
+Use policies for topology and routing. Use aspects for behavior
+grouping.
 
 ## Recipes
 

@@ -2,20 +2,21 @@
 
 > **For agentic workers:** REQUIRED: Use
 > superpowers:subagent-driven-development (if subagents available) or
-> superpowers:executing-plans to implement this plan. Steps use checkbox
-> (`- [ ]`) syntax for tracking.
+> superpowers:executing-plans to implement this plan. Steps use
+> checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a first draft of the native NixOS container framework
 described in `docs/wip/nixos_containers_spec_v2.md`.
 
-**Architecture:** Add a small `c` helper namespace, an `o.unit` metadata
-wrapper, a host-side `my.containers` lowering module, and split Actual Budget
-into a guest-safe unit plus existing host wrapper. The first implementation is
-intentionally draft-grade: the schema exists for multi-unit, host-provider,
-and cross-container edges, while enforcement can land in later iterations.
+**Architecture:** Add a small `c` helper namespace, an `o.unit`
+metadata wrapper, a host-side `my.containers` lowering module, and
+split Actual Budget into a guest-safe unit plus existing host wrapper.
+The first implementation is intentionally draft-grade: the schema
+exists for multi-unit, host-provider, and cross-container edges, while
+enforcement can land in later iterations.
 
-**Tech Stack:** NixOS modules, native `containers.<name>`, existing repo
-`mylib` helpers, eval-style flake checks.
+**Tech Stack:** NixOS modules, native `containers.<name>`, existing
+repo `mylib` helpers, eval-style flake checks.
 
 ---
 
@@ -23,25 +24,28 @@ and cross-container edges, while enforcement can land in later iterations.
 
 Create:
 
-- `_lib/containers/default.nix` — `c` helper namespace, including `c.unit`.
-- `users/_units/_containers/default.nix` — `my.containers` NixOS module and
-  lowering logic.
-- `users/_units/actual-budget/unit.nix` — guest-safe Actual Budget unit.
-- `outputs/checks/containers.nix` — eval checks for the container contract.
+- `_lib/containers/default.nix` — `c` helper namespace, including
+  `c.unit`.
+- `users/_units/_containers/default.nix` — `my.containers` NixOS
+  module and lowering logic.
+- `users/_units/actual-budget/unit.nix` — guest-safe Actual Budget
+  unit.
+- `outputs/checks/containers.nix` — eval checks for the container
+  contract.
 
 Modify:
 
 - `_lib/with_config.nix` — expose `containers` helper namespace.
 - `_lib/options/default.nix` — add `o.unit` with read-only metadata.
 - `users/_units/default.nix` — import `./_containers`.
-- `users/_units/actual-budget/default.nix` — keep host wrapper behavior while
-  reusing `unit.nix`.
+- `users/_units/actual-budget/default.nix` — keep host wrapper
+  behavior while reusing `unit.nix`.
 - `outputs/checks/default.nix` — include `containers.nix` checks.
 
 Do not modify in the first draft:
 
-- `globals/hosts.nix` — do not move tyrant Actual Budget into a real container
-  yet.
+- `globals/hosts.nix` — do not move tyrant Actual Budget into a real
+  container yet.
 - MicroVM files.
 - Existing reverse-proxy schemas.
 
@@ -55,8 +59,8 @@ Do not modify in the first draft:
 - Modify: `outputs/checks/default.nix`
 - [ ] **Step 1: Create the failing check file**
 
-Add `outputs/checks/containers.nix` with a synthetic NixOS host that imports
-only the modules needed for this proof:
+Add `outputs/checks/containers.nix` with a synthetic NixOS host that
+imports only the modules needed for this proof:
 
 ```nix
 {
@@ -151,8 +155,8 @@ Run:
 nix build .#checks.x86_64-linux.containers_contract
 ```
 
-Expected: fails because `users/_units/_containers`, `my.containers`, `c.unit`,
-and/or `o.unit` do not exist yet.
+Expected: fails because `users/_units/_containers`, `my.containers`,
+`c.unit`, and/or `o.unit` do not exist yet.
 
 - [ ] **Step 4: Commit the failing check**
 
@@ -207,7 +211,8 @@ in rec {
 }
 ```
 
-Keep this intentionally small. The host module performs validation/lowering.
+Keep this intentionally small. The host module performs
+validation/lowering.
 
 - [ ] **Step 2: Expose the namespace in `_lib/with_config.nix`**
 
@@ -266,8 +271,8 @@ in {
 };
 ```
 
-Do not wrap `o.unit` with `with_backup_items`. Containerized backups are
-host-owned and come from metadata/lowering.
+Do not wrap `o.unit` with `with_backup_items`. Containerized backups
+are host-owned and come from metadata/lowering.
 
 - [ ] **Step 2: Run the contract check**
 
@@ -275,8 +280,8 @@ host-owned and come from metadata/lowering.
 nix build .#checks.x86_64-linux.containers_contract
 ```
 
-Expected: still fails until Actual Budget exposes metadata and `my.containers`
-lowers it.
+Expected: still fails until Actual Budget exposes metadata and
+`my.containers` lowers it.
 
 - [ ] **Step 3: Commit**
 
@@ -387,8 +392,9 @@ in {
 }
 ```
 
-This keeps host-only vhost and backup options in the host wrapper. `unit.nix`
-remains guest-safe and does not declare host backup ownership.
+This keeps host-only vhost and backup options in the host wrapper.
+`unit.nix` remains guest-safe and does not declare host backup
+ownership.
 
 - [ ] **Step 3: Run current backup check**
 
@@ -396,8 +402,8 @@ remains guest-safe and does not declare host backup ownership.
 nix build .#checks.x86_64-linux.backups-eval
 ```
 
-Expected: pass, preserving existing `tyrant_actual_budget_state_to_a` while
-Actual Budget is still host-run.
+Expected: pass, preserving existing `tyrant_actual_budget_state_to_a`
+while Actual Budget is still host-run.
 
 - [ ] **Step 4: Run the container contract check**
 
@@ -535,9 +541,9 @@ Implementation may only validate and preserve these declarations in
 
 - [ ] **Step 2: Add check assertions**
 
-Extend `containers_contract` with a synthetic app/redis pair and a host
-Postgres edge. Assert the declarations survive normalization and known target
-containers/endpoints validate.
+Extend `containers_contract` with a synthetic app/redis pair and a
+host Postgres edge. Assert the declarations survive normalization and
+known target containers/endpoints validate.
 
 - [ ] **Step 3: Run the contract check**
 

@@ -7,7 +7,11 @@ from typing import Protocol, overload, runtime_checkable
 from attrs import Factory, define
 from rich.text import Text
 
-NIX_FLAGS = ["--option", "experimental-features", "nix-command flakes"]
+NIX_FLAGS = [
+  "--option",
+  "experimental-features",
+  "nix-command flakes",
+]
 
 
 @runtime_checkable
@@ -60,7 +64,9 @@ class ShellCommand:
 class NixCommand:
   """Represent a `nix` invocation with shared feature flags."""
 
-  args: list[str]  # e.g. ["flake", "update", "mysecrets", "--flake", path]
+  args: list[
+    str
+  ]  # e.g. ["flake", "update", "mysecrets", "--flake", path]
   env: dict[str, str] = Factory(dict)
 
   def render(self) -> Text:
@@ -98,7 +104,12 @@ class NixRunCommand:
     return text
 
   def build(self) -> list[str]:
-    cmd = _env_prefix(self.env) + ["nix", "run"] + NIX_FLAGS + [self.package]
+    cmd = (
+      _env_prefix(self.env)
+      + ["nix", "run"]
+      + NIX_FLAGS
+      + [self.package]
+    )
     if self.args:
       cmd += ["--"] + self.args
     return cmd
@@ -128,7 +139,9 @@ class GitCommand:
   def build(self) -> list[str]:
     env = _env_prefix(self.env)
     config_args = [
-      arg for k, v in self.config.items() for arg in ["-c", f"{k}={v}"]
+      arg
+      for k, v in self.config.items()
+      for arg in ["-c", f"{k}={v}"]
     ]
     git = ["git"] + config_args
     if self.repo_path:
@@ -147,16 +160,22 @@ class GitHelper:
   def add(self, paths: list[str]) -> GitCommand:
     """Build a git add command."""
     return GitCommand(
-      args=["add", *paths], repo_path=self.repo_path, config=self.config
+      args=["add", *paths],
+      repo_path=self.repo_path,
+      config=self.config,
     )
 
   def commit(self, msg: str) -> GitCommand:
     """Build a git commit command."""
     return GitCommand(
-      args=["commit", "-m", msg], repo_path=self.repo_path, config=self.config
+      args=["commit", "-m", msg],
+      repo_path=self.repo_path,
+      config=self.config,
     )
 
-  def push(self, *, remote: str = "origin", ref: str = "HEAD") -> GitCommand:
+  def push(
+    self, *, remote: str = "origin", ref: str = "HEAD"
+  ) -> GitCommand:
     """Build a git push command."""
     return GitCommand(
       args=["push", "-u", remote, ref], repo_path=self.repo_path
@@ -228,7 +247,9 @@ class RsyncCommand:
   def render(self) -> Text:
     text = Text()
     if self.ssh_config:
-      text.append(f"[ssh {self.ssh_config.host}] ", style="bold yellow")
+      text.append(
+        f"[ssh {self.ssh_config.host}] ", style="bold yellow"
+      )
     text.append("$ ", style="dim")
     text.append("rsync ", style="bold")
     text.append(f"{self.src} -> {self.dest}", style="dim")

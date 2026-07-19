@@ -32,7 +32,13 @@ _FORGE_PREFIXES: dict[str, GitForge] = {
   "gitea:": GitForge.GITEA,
 }
 
-_GIT_URL_PREFIXES = ("git@", "git+ssh://", "ssh://", "https://", "http://")
+_GIT_URL_PREFIXES = (
+  "git@",
+  "git+ssh://",
+  "ssh://",
+  "https://",
+  "http://",
+)
 _LOCAL_PATH_PREFIXES = ("/", "./", "~/")
 
 

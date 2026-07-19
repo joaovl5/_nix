@@ -47,7 +47,10 @@ BASE_KEY_CODES = {
   "`": "grave_accent",
 }
 SHIFT_KEY_CODES = {
-  **{chr(code): chr(code + 32) for code in range(ord("A"), ord("Z") + 1)},
+  **{
+    chr(code): chr(code + 32)
+    for code in range(ord("A"), ord("Z") + 1)
+  },
   "_": "minus",
   "+": "equal",
   "?": "slash",
@@ -146,7 +149,9 @@ class SerialTimeoutError(RuntimeError):
   """Raised when serial markers do not arrive before the timeout."""
 
 
-def _require_json_object(*, value: object, context: str) -> JsonObject:
+def _require_json_object(
+  *, value: object, context: str
+) -> JsonObject:
   if not isinstance(value, dict):
     raise QmpError(f"{context} must be a JSON object")
 
@@ -163,10 +168,15 @@ def _require_json_object_list(
 ) -> list[JsonObject]:
   if not isinstance(value, list):
     raise QmpError(f"{context} must be a JSON array")
-  return [_require_json_object(value=item, context=context) for item in value]
+  return [
+    _require_json_object(value=item, context=context)
+    for item in value
+  ]
 
 
-def _load_json_object(*, payload_text: str, context: str) -> JsonObject:
+def _load_json_object(
+  *, payload_text: str, context: str
+) -> JsonObject:
   return _require_json_object(
     value=json.loads(payload_text),
     context=context,
@@ -210,7 +220,9 @@ class QmpClient:
     while True:
       line = file_obj.readline()
       if not line:
-        raise QmpError("QMP socket closed before a response was received")
+        raise QmpError(
+          "QMP socket closed before a response was received"
+        )
       payload = _load_json_object(
         payload_text=line.decode(),
         context="QMP response",
@@ -227,7 +239,9 @@ class QmpSession:
   client: QmpClient
 
 
-InjectedSession = Annotated[QmpSession, Parameter(parse=False, show=False)]
+InjectedSession = Annotated[
+  QmpSession, Parameter(parse=False, show=False)
+]
 
 
 def derive_serial_log_path(socket_path: Path) -> Path:
@@ -252,7 +266,8 @@ def chord_to_keys(chord: str) -> list[QmpKey]:
   if not tokens:
     raise ValueError("Key chord cannot be empty")
   return [
-    {"type": "qcode", "data": normalize_qcode(token)} for token in tokens
+    {"type": "qcode", "data": normalize_qcode(token)}
+    for token in tokens
   ]
 
 
@@ -265,7 +280,9 @@ def char_to_keys(char: str) -> list[QmpKey]:
       {"type": "qcode", "data": "shift"},
       {"type": "qcode", "data": SHIFT_KEY_CODES[char]},
     ]
-  raise ValueError(f"Unsupported character for send-key mapping: {char!r}")
+  raise ValueError(
+    f"Unsupported character for send-key mapping: {char!r}"
+  )
 
 
 def text_to_event_keys(text: str) -> list[list[QmpKey]]:
@@ -283,7 +300,9 @@ def build_send_key_payload(
   return {"execute": "send-key", "arguments": arguments}
 
 
-def marker_line(*, tag: str, kind: str, value: str | None = None) -> str:
+def marker_line(
+  *, tag: str, kind: str, value: str | None = None
+) -> str:
   """Build one serial marker line for begin, status, or end markers."""
   line = f"{SERIAL_MARKER_PREFIX}:{tag}:{kind}"
   if value is not None:
@@ -331,7 +350,9 @@ def strip_ansi(text: str) -> str:
   return ANSI_ESCAPE_RE.sub("", text)
 
 
-def extract_serial_result(*, text: str, tag: str) -> SerialResult | None:
+def extract_serial_result(
+  *, text: str, tag: str
+) -> SerialResult | None:
   """Extract the most recent serial marker block for the given tag."""
   begin = marker_line(tag=tag, kind="begin")
   end = marker_line(tag=tag, kind="end")
@@ -355,10 +376,14 @@ def extract_serial_result(*, text: str, tag: str) -> SerialResult | None:
   code_text, _, after_status_line = after_status.partition("\n")
   code_text = code_text.strip()
   if not code_text:
-    raise QmpError(f"Missing exit status in serial marker for tag {tag}")
+    raise QmpError(
+      f"Missing exit status in serial marker for tag {tag}"
+    )
 
   output_segment = before_status + after_status_line
-  output_lines = [line for line in output_segment.splitlines() if line]
+  output_lines = [
+    line for line in output_segment.splitlines() if line
+  ]
   return SerialResult(
     output="\n".join(output_lines),
     exit_code=int(code_text),
@@ -391,7 +416,9 @@ def wait_for_serial_result(
       return result
     time.sleep(0.1)
   if not saw_file:
-    raise SerialTimeoutError(f"Serial log never appeared: {serial_log}")
+    raise SerialTimeoutError(
+      f"Serial log never appeared: {serial_log}"
+    )
   raise SerialTimeoutError(
     f"Timed out waiting for serial markers in {serial_log}"
   )
@@ -399,7 +426,9 @@ def wait_for_serial_result(
 
 def extract_pull_bytes(*, payload_text: str) -> bytes:
   """Decode base64 file contents captured over serial."""
-  return base64.b64decode("".join(payload_text.split()), validate=True)
+  return base64.b64decode(
+    "".join(payload_text.split()), validate=True
+  )
 
 
 def current_serial_offset(serial_log: Path) -> int:
@@ -424,10 +453,14 @@ def query_mice(client: QmpClient) -> list[JsonObject]:
     action="query-mice",
   )
   mice = response.get("return")
-  return _require_json_object_list(value=mice, context="query-mice return")
+  return _require_json_object_list(
+    value=mice, context="query-mice return"
+  )
 
 
-def ensure_current_absolute_mouse(*, mice: list[JsonObject]) -> JsonObject:
+def ensure_current_absolute_mouse(
+  *, mice: list[JsonObject]
+) -> JsonObject:
   """Return the active absolute mouse device or raise."""
   for mouse in mice:
     if mouse.get("current") and mouse.get("absolute"):
@@ -530,7 +563,9 @@ def build_screendump_payload(
   return {"execute": "screendump", "arguments": arguments}
 
 
-def run_type_command(*, client: QmpClient, text: str, delay: float) -> None:
+def run_type_command(
+  *, client: QmpClient, text: str, delay: float
+) -> None:
   """Type text into the guest with per-character send-key events."""
   for keys in text_to_event_keys(text):
     require_ok(
@@ -570,11 +605,15 @@ def run_serial_command(
     if not output.endswith("\n"):
       sys.stdout.write("\n")
   if result.exit_code is None:
-    raise QmpError(f"Missing serial exit status marker in {serial_log}")
+    raise QmpError(
+      f"Missing serial exit status marker in {serial_log}"
+    )
   return result.exit_code
 
 
-def serial_log_from_args(*, socket_path: Path, override: str | None) -> Path:
+def serial_log_from_args(
+  *, socket_path: Path, override: str | None
+) -> Path:
   """Resolve the serial log path from CLI options."""
   return (
     Path(override)
@@ -584,7 +623,9 @@ def serial_log_from_args(*, socket_path: Path, override: str | None) -> Path:
 
 
 def _session_from_socket_path(*, socket_path: Path) -> QmpSession:
-  return QmpSession(socket_path=socket_path, client=QmpClient(socket_path))
+  return QmpSession(
+    socket_path=socket_path, client=QmpClient(socket_path)
+  )
 
 
 @app.command(name="key")
@@ -597,7 +638,9 @@ def _key_command(
   """Send a key chord with QMP send-key."""
   response = require_ok(
     response=_session.client.execute(
-      build_send_key_payload(keys=chord_to_keys(chord), hold_ms=hold_ms)
+      build_send_key_payload(
+        keys=chord_to_keys(chord), hold_ms=hold_ms
+      )
     ),
     action="send-key",
   )
@@ -620,7 +663,9 @@ def _type_command(
 @mouse_app.command(name="info")
 def _mouse_info(*, _session: InjectedSession) -> int:
   """Show query-mice output."""
-  print(json.dumps(query_mice(_session.client), indent=2, sort_keys=True))
+  print(
+    json.dumps(query_mice(_session.client), indent=2, sort_keys=True)
+  )
   return 0
 
 
@@ -634,7 +679,9 @@ def _mouse_move_abs(
   """Move absolute pointer coordinates."""
   ensure_current_absolute_mouse(mice=query_mice(_session.client))
   response = require_ok(
-    response=_session.client.execute(mouse_move_abs_payload(x=x, y=y)),
+    response=_session.client.execute(
+      mouse_move_abs_payload(x=x, y=y)
+    ),
     action="input-send-event",
   )
   print(json.dumps(response))
@@ -650,7 +697,9 @@ def _mouse_move_rel(
 ) -> int:
   """Move relative pointer coordinates."""
   response = require_ok(
-    response=_session.client.execute(mouse_move_rel_payload(dx=dx, dy=dy)),
+    response=_session.client.execute(
+      mouse_move_rel_payload(dx=dx, dy=dy)
+    ),
     action="input-send-event",
   )
   print(json.dumps(response))
@@ -827,13 +876,17 @@ def _pull_command(
     return result.exit_code
 
   output_path.parent.mkdir(parents=True, exist_ok=True)
-  output_path.write_bytes(extract_pull_bytes(payload_text=result.output))
+  output_path.write_bytes(
+    extract_pull_bytes(payload_text=result.output)
+  )
   print(output_path)
   return 0
 
 
 @app.command(name="hmp")
-def _hmp_command(hmp_command: str, *, _session: InjectedSession) -> int:
+def _hmp_command(
+  hmp_command: str, *, _session: InjectedSession
+) -> int:
   """Escape hatch for human-monitor-command."""
   response = require_ok(
     response=_session.client.execute(
@@ -849,7 +902,9 @@ def _hmp_command(hmp_command: str, *, _session: InjectedSession) -> int:
 
 
 @app.command(name="raw")
-def _raw_command(json_payload: str, *, _session: InjectedSession) -> int:
+def _raw_command(
+  json_payload: str, *, _session: InjectedSession
+) -> int:
   """Escape hatch for raw QMP JSON."""
   payload = _load_json_object(
     payload_text=json_payload,
@@ -863,7 +918,9 @@ def _raw_command(json_payload: str, *, _session: InjectedSession) -> int:
 @app.meta.default
 def _run_cli(
   socket_path: Path,
-  *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
+  *tokens: Annotated[
+    str, Parameter(show=False, allow_leading_hyphen=True)
+  ],
 ) -> int:
   """Launch the QMP CLI with a shared socket path."""
   session = _session_from_socket_path(socket_path=socket_path)

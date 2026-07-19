@@ -13,13 +13,15 @@ class Machine(_MachineProtocol, Protocol):
 
 _REPO_A = "/var/lib/backups/repos/coordinator"
 _PWD_A = "/run/secrets/backup_restic_password_A"
-_REPO_B = (
-  "sftp://backup-user@storage:59222//var/lib/backups/repos/coordinator"
-)
+_REPO_B = "sftp://backup-user@storage:59222//var/lib/backups/repos/coordinator"
 _PWD_B = "/run/secrets/backup_restic_password_B"
 
-_RESTIC_A = f"restic --repo {_REPO_A} --password-file {_PWD_A} --no-lock"
-_RESTIC_B = f"restic --repo '{_REPO_B}' --password-file {_PWD_B} --no-lock"
+_RESTIC_A = (
+  f"restic --repo {_REPO_A} --password-file {_PWD_A} --no-lock"
+)
+_RESTIC_B = (
+  f"restic --repo '{_REPO_B}' --password-file {_PWD_B} --no-lock"
+)
 
 _PATH_TAG = "item:my-path"
 _POSTGRES_TAG = "item:my-postgres"
@@ -38,7 +40,9 @@ type Snapshots = list[Snapshot]
 type SnapshotEntry = dict[str, object]
 
 
-def _require_machine(*, globals_dict: dict[str, object], key: str) -> Machine:
+def _require_machine(
+  *, globals_dict: dict[str, object], key: str
+) -> Machine:
   """Return a required VM driver object from the driver globals."""
   value = globals_dict[key]
   assert isinstance(value, Machine), (
@@ -58,7 +62,9 @@ def _start_and_assert_success(*, service: str, node: Machine) -> None:
   result = node.succeed(f"systemctl show -P Result {service}").strip()
   # Promotion fixtures must report Result=success when systemd finishes them.
   assert result == "success", f"{service} result mismatch: {result!r}"
-  status = node.succeed(f"systemctl show -P ExecMainStatus {service}").strip()
+  status = node.succeed(
+    f"systemctl show -P ExecMainStatus {service}"
+  ).strip()
   # Successful promotion fixtures must also exit with code zero.
   assert status == "0", f"{service} exit status mismatch: {status!r}"
 
@@ -76,7 +82,9 @@ def _parse_snapshots(*, raw: str) -> Snapshots:
   return data
 
 
-def _snapshots(*, node: Machine, repo_cmd: str, tag: str) -> Snapshots:
+def _snapshots(
+  *, node: Machine, repo_cmd: str, tag: str
+) -> Snapshots:
   """List snapshots for a repository/tag pair."""
   raw = node.succeed(f"{repo_cmd} snapshots --json --tag {tag}")
   return _parse_snapshots(raw=raw)
@@ -150,7 +158,8 @@ def _dump_paths(
     for entry in _ls_entries(
       node=node, repo_cmd=repo_cmd, snapshot_id=snapshot_id
     )
-    if entry.get("struct_type") == "node" and entry.get("type") == "file"
+    if entry.get("struct_type") == "node"
+    and entry.get("type") == "file"
   ]
 
 
@@ -181,7 +190,9 @@ def _path_snapshot_content(
   """Restore a path snapshot and return the fixture file contents."""
   restore_target = f"/tmp/path-restore-{snapshot_id}"
   node.succeed(f"rm -rf {restore_target}")
-  node.succeed(f"{repo_cmd} restore {snapshot_id} --target {restore_target}")
+  node.succeed(
+    f"{repo_cmd} restore {snapshot_id} --target {restore_target}"
+  )
   return node.succeed(f"cat {restore_target}{_PATH_FILE}").strip()
 
 
@@ -206,7 +217,9 @@ def _restore_postgres_snapshot(
   dump_path = _postgres_dump_path(
     node=node, repo_cmd=repo_cmd, snapshot_id=snapshot_id
   )
-  node.succeed(f"runuser -u postgres -- dropdb --if-exists {database}")
+  node.succeed(
+    f"runuser -u postgres -- dropdb --if-exists {database}"
+  )
   node.succeed(f"runuser -u postgres -- createdb {database}")
   node.succeed(
     f"{repo_cmd} dump {snapshot_id} {dump_path} > /tmp/{database}.sql"
@@ -235,7 +248,10 @@ def _assert_promoted_postgres_snapshot(
 ) -> None:
   """Assert that a promoted PostgreSQL snapshot restores the seeded row."""
   _restore_postgres_snapshot(
-    node=node, repo_cmd=repo_cmd, snapshot_id=snapshot_id, database=database
+    node=node,
+    repo_cmd=repo_cmd,
+    snapshot_id=snapshot_id,
+    database=database,
   )
   restored_note = _postgres_note(node=node, database=database)
   # The promoted PostgreSQL snapshot must restore the seeded row contents.
@@ -253,7 +269,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
   coordinator = _require_machine(
     globals_dict=driver_globals, key="coordinator"
   )
-  storage = _require_machine(globals_dict=driver_globals, key="storage")
+  storage = _require_machine(
+    globals_dict=driver_globals, key="storage"
+  )
 
   coordinator.wait_for_unit("multi-user.target")
   coordinator.wait_for_unit("postgresql.service")
@@ -326,7 +344,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
       node=coordinator,
     )
 
-    path_b = _snapshots(node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG)
+    path_b = _snapshots(
+      node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG
+    )
     new_ids = [
       snapshot_id
       for snapshot_id in _snapshot_ids(snapshots=path_b)
@@ -341,7 +361,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
     path_snapshot_ids.append(snapshot_id)
     expected_path_content[snapshot_id] = content
 
-  path_b = _snapshots(node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG)
+  path_b = _snapshots(
+    node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG
+  )
   _assert_snapshot_ids(
     snapshots=path_b,
     expected_ids=path_snapshot_ids,
@@ -356,7 +378,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
 
   kept_path_ids = path_snapshot_ids[-2:]
   forgotten_path_id = path_snapshot_ids[0]
-  path_b = _snapshots(node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG)
+  path_b = _snapshots(
+    node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG
+  )
   _assert_snapshot_ids(
     snapshots=path_b,
     expected_ids=kept_path_ids,
@@ -402,7 +426,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
     node=coordinator,
   )
 
-  path_b = _snapshots(node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG)
+  path_b = _snapshots(
+    node=coordinator, repo_cmd=_RESTIC_B, tag=_PATH_TAG
+  )
   _assert_snapshot_ids(
     snapshots=path_b,
     expected_ids=kept_path_ids,
@@ -413,7 +439,9 @@ def run(*, driver_globals: dict[str, object]) -> None:
     node=coordinator, repo_cmd=_RESTIC_B, snapshot_id=latest_path_id
   )
   # Prune/check must preserve the newest retained path snapshot content.
-  assert latest_path_content == expected_path_content[latest_path_id], (
+  assert (
+    latest_path_content == expected_path_content[latest_path_id]
+  ), (
     f"Latest path snapshot {latest_path_id} content mismatch: {latest_path_content!r}"
   )
 

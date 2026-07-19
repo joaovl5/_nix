@@ -24,9 +24,10 @@
 
 - **Mode variable:** `define-minor-mode` creates the toggle variable
   `my-highlight-mode`
-- **Buffer-local hook:** use `nil t` in `add-hook` to keep the hook local to
-  the buffer
-- **Disable cleanup:** remove hooks and overlays when the mode turns off
+- **Buffer-local hook:** use `nil t` in `add-hook` to keep the hook
+  local to the buffer
+- **Disable cleanup:** remove hooks and overlays when the mode turns
+  off
 
 ## Creating a custom keymap
 
@@ -40,7 +41,8 @@
   "Keymap for `my-mode'.")
 ```
 
-- **Prefix maps:** build a sparse keymap, then bind it under a prefix key
+- **Prefix maps:** build a sparse keymap, then bind it under a prefix
+  key
 
 ```elisp
 (defvar my-prefix-map
@@ -62,8 +64,8 @@
   (overlay-put ov 'evaporate t))
 ```
 
-- **Self-removal:** `evaporate` makes an overlay delete itself when its text
-  is deleted
+- **Self-removal:** `evaporate` makes an overlay delete itself when
+  its text is deleted
 - **Queries:** use `overlays-at` and `overlays-in`
 - **Removal:** use `delete-overlay`
 - **Property filter:**
@@ -85,7 +87,8 @@
 
 - **Absolute or relative timer:**
   `run-at-time time repeat function &rest args`
-- **Idle timer:** `run-with-idle-timer secs repeat function &rest args`
+- **Idle timer:**
+  `run-with-idle-timer secs repeat function &rest args`
 - **Delay timer:** `run-with-timer secs repeat function &rest args`
 - **Lifecycle:** keep the timer object and cancel it when done
 
@@ -105,8 +108,8 @@
  :noquery t)
 ```
 
-- **Synchronous work:** use `call-process`, `process-file`, or `process-lines`
-  when async adds no value
+- **Synchronous work:** use `call-process`, `process-file`, or
+  `process-lines` when async adds no value
 
 ```elisp
 (with-temp-buffer
@@ -127,8 +130,8 @@
 (display-buffer buffer &optional action)
 ```
 
-- **Display choices:** `display-buffer` is non-destructive, `pop-to-buffer`
-  may move focus, and `switch-to-buffer` always does
+- **Display choices:** `display-buffer` is non-destructive,
+  `pop-to-buffer` may move focus, and `switch-to-buffer` always does
 
 ```elisp
 (save-selected-window
@@ -204,8 +207,8 @@
 (put 'previous-line 'repeat-map 'my-repeat-map)
 ```
 
-- **Repeat mode:** built-in `repeat-mode` in Emacs 28+ repeats commands
-  through a keymap on the command symbol
+- **Repeat mode:** built-in `repeat-mode` in Emacs 28+ repeats
+  commands through a keymap on the command symbol
 
 ## Pattern: async operations
 
@@ -226,7 +229,7 @@
      :noquery t)))
 ```
 
-- **Threads:** build support varies, so check `(fboundp 'make-thread)` or
-  `(featurep 'threads)` before relying on them
-- **Portable async:** prefer processes, timers, or built-in async APIs like
-  `url-retrieve`
+- **Threads:** build support varies, so check `(fboundp 'make-thread)`
+  or `(featurep 'threads)` before relying on them
+- **Portable async:** prefer processes, timers, or built-in async APIs
+  like `url-retrieve`

@@ -1,24 +1,28 @@
 # Repo NixOS test framework reference
 
-Use this for repo wiring facts. Load other references for driver API semantics
-or assertion patterns
+Use this for repo wiring facts. Load other references for driver API
+semantics or assertion patterns
 
 ## Files involved
 
-- **Flake entrypoint:** `tests/default.nix` exposes suites as flake checks
+- **Flake entrypoint:** `tests/default.nix` exposes suites as flake
+  checks
 - **Wrapper definition:** `lib/tests/default.nix` defines
   `mylib.tests.mk_test`
 - **Suite entrypoint:** `tests/nixos/<suite>/default.nix` calls
   `mylib.tests.mk_test`
-- **Fixture files:** `tests/nixos/<suite>/*.nix` hold substantial node setup
-- **Driver module:** `tests/nixos/<suite>/script.py` contains orchestration
-- **Suite package marker:** `tests/nixos/<suite>/__init__.py` keeps the suite
-  importable
-- **Shared helpers:** `tests/common/` holds reusable Nix and Python helpers
-- **Python packaging:** `tests/pyproject.toml` builds the test package with
-  `uv_build`
-- **Import checks:** `lib/tests/default.nix` registers driver imports through
-  `pythonImportsCheck`
+- **Fixture files:** `tests/nixos/<suite>/*.nix` hold substantial node
+  setup
+- **Driver module:** `tests/nixos/<suite>/script.py` contains
+  orchestration
+- **Suite package marker:** `tests/nixos/<suite>/__init__.py` keeps
+  the suite importable
+- **Shared helpers:** `tests/common/` holds reusable Nix and Python
+  helpers
+- **Python packaging:** `tests/pyproject.toml` builds the test package
+  with `uv_build`
+- **Import checks:** `lib/tests/default.nix` registers driver imports
+  through `pythonImportsCheck`
 
 ## `mylib.tests.mk_test` contract
 
@@ -32,8 +36,8 @@ mylib.tests.mk_test {
 }
 ```
 
-The wrapper keeps the public selector `python_module_name = "example"` and
-generates:
+The wrapper keeps the public selector `python_module_name = "example"`
+and generates:
 
 ```python
 from nixos.example.script import run
@@ -43,34 +47,40 @@ run(driver_globals=globals())
 Keep these facts true:
 
 - **Driver function:** the Python file defines
-  `run(driver_globals: dict[str, object]) -> None` or an equivalent signature
+  `run(driver_globals: dict[str, object]) -> None` or an equivalent
+  signature
 - **Module contract:** `python_module_name = "example"` means
   `from nixos.example.script import run`
-- **Per-suite package:** each suite needs `tests/nixos/<suite>/__init__.py`
-- **Named nodes:** read named NixOS nodes from `driver_globals`, for example
-  `driver_globals["relay"]`
-- **Import registration:** add new driver imports to `lib/tests/default.nix`
-  `pythonImportsCheck`
-- **Shared helpers:** keep reusable helpers in `tests/common/` instead of
-  copying them between suites
+- **Per-suite package:** each suite needs
+  `tests/nixos/<suite>/__init__.py`
+- **Named nodes:** read named NixOS nodes from `driver_globals`, for
+  example `driver_globals["relay"]`
+- **Import registration:** add new driver imports to
+  `lib/tests/default.nix` `pythonImportsCheck`
+- **Shared helpers:** keep reusable helpers in `tests/common/` instead
+  of copying them between suites
 
 ## New-suite checklist
 
 - **Suite entrypoint:** create `tests/nixos/<suite>/default.nix`
-- **Fixture files:** add `tests/nixos/<suite>/*.nix` when setup is substantial
-- **Driver module:** add `tests/nixos/<suite>/script.py` defining `run(...)`
+- **Fixture files:** add `tests/nixos/<suite>/*.nix` when setup is
+  substantial
+- **Driver module:** add `tests/nixos/<suite>/script.py` defining
+  `run(...)`
 - **Suite package marker:** add `tests/nixos/<suite>/__init__.py`
 - **Import check:** register the new driver in `lib/tests/default.nix`
   `pythonImportsCheck`
-- **Shared helpers:** put reusable cross-suite helpers in `tests/common/`
-- **Deterministic inputs:** materialize generated files or secrets inside the
-  VM and keep them deterministic
+- **Shared helpers:** put reusable cross-suite helpers in
+  `tests/common/`
+- **Deterministic inputs:** materialize generated files or secrets
+  inside the VM and keep them deterministic
 - **Syntax check:** run
   `uv run --project tests python -m py_compile tests/nixos/<suite>/script.py`
-- **Flake visibility:** stage new suite files before flake-backed `nix eval`
-  or `nix build`
-- **Targeted build:** run `nix build .#checks.x86_64-linux.<test_name>` for
-  the suite you changed
+- **Flake visibility:** stage new suite files before flake-backed
+  `nix eval` or `nix build`
+- **Targeted build:** run
+  `nix build .#checks.x86_64-linux.<test_name>` for the suite you
+  changed
 
 ## Minimal complex-suite template
 
@@ -171,8 +181,8 @@ def run(driver_globals: dict[str, object]) -> None:
 
 ## Comment expectations
 
-- **Nix fixtures:** explain non-obvious topology, secrets, addresses, firewall
-  or NAT rules, and fixture-service purpose
-- **Python drivers:** explain scenario phases, control paths for negative
-  assertions, and known limitations
+- **Nix fixtures:** explain non-obvious topology, secrets, addresses,
+  firewall or NAT rules, and fixture-service purpose
+- **Python drivers:** explain scenario phases, control paths for
+  negative assertions, and known limitations
 - **Placement:** keep comments close to the code that needs them

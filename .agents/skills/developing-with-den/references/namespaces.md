@@ -2,8 +2,8 @@
 
 ## What they are
 
-A namespace creates an aspect library under `den.ful.<name>` and a module
-argument alias.
+A namespace creates an aspect library under `den.ful.<name>` and a
+module argument alias.
 
 ```nix
 imports = [ (inputs.den.namespace "lav" false) ];
@@ -25,7 +25,8 @@ inputs.den.namespace "my" [ input ] # import input.flake.denful.my
 
 ## When to use
 
-Use namespaces for reusable aspect libraries and project-owned grouping.
+Use namespaces for reusable aspect libraries and project-owned
+grouping.
 
 ```nix
 { lav, ... }: {
@@ -56,8 +57,8 @@ Den can expose `den.lib.__findFile` for `<aspect/path>` shorthand.
 
 Then modules that accept `__findFile` can use angle-bracket lookup.
 
-Prefer normal attr access during migrations because it is easier to search and
-refactor.
+Prefer normal attr access during migrations because it is easier to
+search and refactor.
 
 ## Recipes
 
@@ -79,8 +80,8 @@ Use local namespaces for private project structure.
 }
 ```
 
-Vix uses exported `vix` for reusable/public aspects and local `vic` for
-personal aspects.
+Vix uses exported `vix` for reusable/public aspects and local `vic`
+for personal aspects.
 
 ### Move a reusable aspect into a namespace
 
@@ -97,8 +98,8 @@ Update consumers first, then remove the wrapper.
 
 ### Avoid mixing data and aspect libraries casually
 
-If a namespace also holds plain data helpers, keep names clear so agents do
-not include non-aspect values by mistake.
+If a namespace also holds plain data helpers, keep names clear so
+agents do not include non-aspect values by mistake.
 
 ## Source anchors
 

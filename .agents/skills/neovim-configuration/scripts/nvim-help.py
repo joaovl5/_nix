@@ -15,10 +15,14 @@ from typing import Annotated, TextIO
 
 from cyclopts import App, CycloptsError, Parameter
 
-SCRIPT_DESCRIPTION = "Search and print Neovim help through headless nvim."
+SCRIPT_DESCRIPTION = (
+  "Search and print Neovim help through headless nvim."
+)
 SLASH_DELIMITER_LENGTH = 2
 InjectedNvimBin = Annotated[str, Parameter(parse=False, show=False)]
-InjectedWithConfig = Annotated[bool, Parameter(parse=False, show=False)]
+InjectedWithConfig = Annotated[
+  bool, Parameter(parse=False, show=False)
+]
 
 app = App(
   name="nvim-help",
@@ -43,7 +47,9 @@ def _base_command(nvim_bin: str, *, with_config: bool) -> list[str]:
   return command
 
 
-def _run_lua(lua_source: str, nvim_bin: str, *, with_config: bool) -> int:
+def _run_lua(
+  lua_source: str, nvim_bin: str, *, with_config: bool
+) -> int:
   with tempfile.NamedTemporaryFile(
     "w", encoding="utf-8", suffix=".lua", delete=False
   ) as lua_file:
@@ -217,7 +223,9 @@ end
 
 @app.meta.default
 def _run_cli(
-  *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
+  *tokens: Annotated[
+    str, Parameter(show=False, allow_leading_hyphen=True)
+  ],
   nvim_bin: str = "nvim",
   with_config: bool = False,
 ) -> int:
