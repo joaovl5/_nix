@@ -77,7 +77,7 @@ just --dump -f justfile
 
 - **Wrong parser:** treating shell syntax errors as Just parser
   errors, or the reverse
-- **Hash confusion:** assuming `nix run .#pkg` is a Just comment;
+- **Hash confusion:** assuming `nix run .#pkg` isn't a Just comment;
   quote it as `nix run '.#pkg'` and avoid whitespace before `#`
 - **Glob assumptions:** remembering that `*` and `**` expansion is
   shell behavior, not Just behavior; use the right shell explicitly
