@@ -5,6 +5,7 @@ let
   raw_inputs = [
     # keep-sorted start
     "all-systems"
+    "ashrwm-src"
     "degoog-src"
     "fennel-ls-nvim-docs"
     "flake-compat"

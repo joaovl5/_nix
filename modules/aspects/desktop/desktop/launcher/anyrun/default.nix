@@ -7,11 +7,15 @@ in {
     systemd.user.services.anyrun-daemon = {
       enable = true;
       path = [anyrun_pkg];
-      description = "Ironbar unit";
+      description = "AnyRun daemon";
+      wantedBy = ["graphical-session.target"];
+      partOf = ["graphical-session.target"];
       after = ["dbus.service"];
       serviceConfig = {
         Type = "simple";
         ExecStart = "${anyrun_pkg}/bin/anyrun daemon";
+        Restart = "on-failure";
+        RestartSec = "1s";
       };
     };
   };

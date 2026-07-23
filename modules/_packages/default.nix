@@ -3,6 +3,7 @@
   inputs,
   ...
 }: let
+  ashrwm = pkgs.callPackage ./ashrwm {inherit inputs;};
   beads-ui = pkgs.callPackage ./beads-ui {inherit inputs;};
   beads-web = pkgs.callPackage ./beads-web {};
   degoog = pkgs.callPackage ./degoog {inherit inputs;};
@@ -20,6 +21,7 @@
   tubifarry = pkgs.callPackage ./tubifarry {};
 in {
   inherit
+    ashrwm
     beads-ui
     beads-web
     degoog

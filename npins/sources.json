@@ -12,6 +12,18 @@
       "url": null,
       "hash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768="
     },
+    "ashrwm-src": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "ssh://git@git.trll.ing/lav/ashrwm.git"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "9260a070d6acebe084a899d8400a21ab9db390a8",
+      "url": null,
+      "hash": "sha256-kh3JSg+WFax1m40XIGqOPVM8/hZfjkiCDF2ZGq4YYy0="
+    },
     "concord": {
       "type": "Git",
       "repository": {

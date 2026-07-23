@@ -43,20 +43,20 @@
          :halign "center"
          :valign "start"
          :spacing 0
-      (for wsp in {jq(niri_workspaces, 'map(select(.output == "HDMI-A-2" and .name != null)) | sort_by(.idx)')}
-        (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
-                :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
-          {wsp.name ?: wsp.idx})))
+      (for wsp in {jq(wm_workspaces, 'map(select(.display == "secondary"))')}
+        (button :class "workspace-button ${wsp.active ? 'active' : ''} ${wsp.focused ? 'focused' : ''} ${wsp.urgent ? 'urgent' : ''} ${wsp.empty ? 'empty' : ''}"
+                :onclick "bash scripts/workspaces.sh focus '${wsp.id}' '${wsp.display}'"
+          {wsp.label})))
     (box :class "workspace-list workspace-list-primary"
          :orientation "v"
          :space-evenly false
          :halign "center"
          :valign "start"
          :spacing 0
-      (for wsp in {jq(niri_workspaces, 'map(select(.output == "DP-4" and .name != null)) | sort_by(.idx)')}
-        (button :class "workspace-button ${wsp.is_active ? 'active' : ''} ${wsp.is_focused ? 'focused' : ''} ${wsp.is_urgent ? 'urgent' : ''} ${(wsp.active_window_id ?: 'empty') == 'empty' ? 'empty' : ''}"
-                :onclick "niri msg action focus-workspace '${wsp.name ?: wsp.idx}'"
-          {wsp.name ?: wsp.idx})))))
+      (for wsp in {jq(wm_workspaces, 'map(select(.display == "primary"))')}
+        (button :class "workspace-button ${wsp.active ? 'active' : ''} ${wsp.focused ? 'focused' : ''} ${wsp.urgent ? 'urgent' : ''} ${wsp.empty ? 'empty' : ''}"
+                :onclick "bash scripts/workspaces.sh focus '${wsp.id}' '${wsp.display}'"
+          {wsp.label})))))
 
 (defwidget metric [label value onchange]
   (box :orientation "v"
@@ -69,8 +69,8 @@
            :value value
            :onchange onchange)))
 
-(deflisten niri_workspaces :initial "[]"
-  "bash scripts/niri-workspaces.sh")
+(deflisten wm_workspaces :initial "[]"
+  "bash scripts/workspaces.sh")
 
 (defpoll time :interval "10s"
   "date '+%H:%M'")

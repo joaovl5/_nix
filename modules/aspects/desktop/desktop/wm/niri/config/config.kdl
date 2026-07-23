@@ -19,19 +19,6 @@ input {
   }
   workspace-auto-back-and-forth
 }
-output "DP-4" {
-  scale 1.333333
-  focus-at-startup
-  transform "normal"
-  position x=1080 y=396
-  mode "3840x2160@240.080000"
-}
-output "HDMI-A-2" {
-  scale 1.0
-  transform "90"
-  position x=0 y=240
-  mode "1920x1080@100.000000"
-}
 screenshot-path "~/pics/screenshots/%Y-%m-%d %H-%M-%S.png"
 prefer-no-csd
 layout {
@@ -345,9 +332,6 @@ workspace "I" {
 workspace "J" {
   open-on-output "HDMI-A-2"
 }
-spawn-sh-at-startup "systemctl --user start ironbar"
-spawn-sh-at-startup "eww -c ~/.config/eww/bar daemon"
-spawn-sh-at-startup "eww -c ~/.config/eww/bar open bar"
 gestures {
   hot-corners {
     off
