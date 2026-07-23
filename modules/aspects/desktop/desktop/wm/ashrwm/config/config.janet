@@ -1,7 +1,7 @@
 # Start with the upstream defaults.
 (put config :border-width 2)
-(put config :outer-padding 4)
-(put config :inner-padding 4)
+(put config :outer-padding 8)
+(put config :inner-padding 8)
 (put config :border-sticky 0x356239)
 (put config :border-normal 0x444444)
 (put config :border-focused 0xffffff)
@@ -9,6 +9,8 @@
 (put config :tap-to-click true)
 (put config :natural-scroll false)
 (put config :dwt true)
+(put config :accel-profile :flat)
+(put config :accel-speed -0.9)
 (put config :focus-follows-mouse true)
 
 (put config :layout :tile)
@@ -26,6 +28,7 @@
      @[[:grave {:mod4 true} (action/spawn ["swaync-client" "--toggle-panel"])]
        [:Return {:mod4 true} (action/spawn ["footclient"])]
        [:q {:mod4 true} (action/close)]
+       [:r {:mod4 true} (action/config)]
        [:space {:mod4 true} (action/spawn ["anyrun" "--plugins" "libapplications.so"])]
        [:a {:mod4 true} (action/spawn ["hexecute"])]
        [:n {:mod4 true} (action/spawn ["anyrun" "--plugins" "libsymbols.so"])]
