@@ -1,0 +1,5 @@
+(put config :border-width 4)
+(put config :outer-padding 0)
+(put config :inner-padding 0)
+(put config :layout :scroller)
+(put config :main-ratio 0.7)
