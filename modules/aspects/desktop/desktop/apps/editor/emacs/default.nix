@@ -12,18 +12,13 @@ _: {
       to = "~/.config/emacs";
     };
 
-    services.emacs = {
-      enable = true;
-      client.enable = true;
-      startWithUserSession = "graphical";
-    };
-
     programs.emacs = {
       enable = true;
       package = pkg;
       extraPackages = epkgs:
         with epkgs; [
           org-roam
+          vterm
           # parinfer-rust-mode
         ];
     };
