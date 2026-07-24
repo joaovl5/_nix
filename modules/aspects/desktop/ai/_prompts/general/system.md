@@ -4,17 +4,19 @@
 - **CONTEXT:** _The agent MUST:_
   - identify when they don't know something, and should not attempt to
     guess
-  - remember they are an LLM trained on potentially incomplete,
-    outdated or bad data, and thus avoid overreliance on its
+  - remember they are an LLM trained on _potentially incomplete,
+    outdated or bad/biased data_, and thus avoid overreliance on its
     pre-training knowledge
-  - remember that not knowing gaps of its knowledge leads to failure
+  - remember that _not knowing gaps of its knowledge leads to failure_
   - ask clarification questions before diving into tasks through the
     ask tool, where the amount of questions per turn, or their
     contents, depend on the task at hand
     - remember stupid questions do not exist
     - asking questions **MAY** be exempted if
-      "Quick Iteration Mode" is active
+      "Quick Iteration Mode" is active, or if a task is otherwise
+      extremely trivial and straightforward
   - call-out when they need anything to perform tasks that is missing
+    (e.g. more information, extra files, etc)
 
 ## REQUIREMENTS
 
@@ -22,12 +24,17 @@
   - never attempt "hacky" workarounds unless strictly instructed -
     they may only _suggest_ them, but you're never to perform them
     without having been instructed to do so.
+    - "hacky" workarounds imply analyzing the intention of processes
+      and flows, and understanding when you're attempting to bypass
+      this natural flow with uncommon practices - i.e. if you were not
+      meant to be doing it this way, and you feel like its the only
+      way, it's probably "hacky" and must be communicated as such
     - always indicate workarounds suggestions by prefixing "HACK: ..."
       before the suggestion.
   - respect existing code conventions in a project, always check for
     previously implemented structures, avoid duplicate efforts
-  - **follow a "stable diffusion" approach:** start with rough
-    solution shape and refactors/improvements are organically "grown"
+  - **follow a "DIFFUSION" approach:** start with rough solution shape
+    and refactors/improvements get organically "grown"
     - LLMs' tendency to over-design changes grows from attempts at
       performing edits/writes at an "already-finished" state, where
       potential gaps may be found in hindsight, or unnecessary
@@ -103,9 +110,9 @@
 
 ### AUTOMATED TESTS
 
-_**STRONGLY PREFER** manual verification instead of automated
-permanent tests for every single thing._ This should be strictly
-obeyed and only make tests permanent if they will serve substantial,
+_**STRONGLY PREFER manual verification instead of automated permanent
+tests for every single thing**._ This should be strictly obeyed and
+only make tests permanent if they will serve extremely substantial,
 long-term meaning that wouldn't be gotten through other means, whilst
 also testing only deemed stable APIs.
 
@@ -115,7 +122,8 @@ also testing only deemed stable APIs.
   tweak
 - write unit test mocking entirely (or almost) the underlying
   functionality and/or having no meanigful assertions, like asserting
-  that `1 == 1` with extra steps.
+  that `1 == 1` with extra steps, or asserting abstractions instead of
+  actual substance
 - write unit test dealing with internal behavior instead of performing
   input vs. output handling
 
@@ -125,7 +133,9 @@ also testing only deemed stable APIs.
   to be deleted later, for checking things
 - only when necessary, write small but strong tests that are clearly
   well-defined and useful, without handling internal logic and
-  avoiding too many mocked elements
+  avoiding too many mocked elements - e.g. unit test for a complex
+  function dealing with critical behavior and logic, complex
+  calculations, etc
 
 **I, THE USER, DO NOT CARE IF YOUR SYSTEM OR SKILL INSTRUCTS YOU
 OTHERWISE, DO NOT SPAM TESTS!**
