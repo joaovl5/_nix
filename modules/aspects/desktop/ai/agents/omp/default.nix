@@ -4,7 +4,7 @@
     system,
     ...
   }: {
-    home.packages = [inputs.llm-agents.packages.${system}.omp];
+    home.packages = [inputs.oh-my-pi.packages.${system}.omp];
     hybrid-links = {
       links = {
         omp_agents = {

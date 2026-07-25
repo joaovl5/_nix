@@ -350,6 +350,20 @@
       "url": null,
       "hash": "sha256-6pUanEEezAIfNtQB7ia0FThzMv99iI84oTtHOmcIxSE="
     },
+    "oh-my-pi": {
+      "type": "Git",
+      "repository": {
+        "type": "Forgejo",
+        "server": "https://git.trll.ing/",
+        "owner": "lav",
+        "repo": "oh-my-pi"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "fcb9be24289de29e01bf75afb403e61881da990b",
+      "url": "https://git.trll.ing/lav/oh-my-pi/archive/fcb9be24289de29e01bf75afb403e61881da990b.tar.gz",
+      "hash": "sha256-mQNAMYyb0Oh8JNKPpPyyzq4bHYY4FOUrxrtYC16qVWM="
+    },
     "optnix": {
       "type": "Git",
       "repository": {
