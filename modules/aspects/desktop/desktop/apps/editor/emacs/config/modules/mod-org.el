@@ -6,6 +6,7 @@
 ;;; Code:
 
 (require 'seq)
+(declare-function org-download-clipboard "org-download")
 
 (setq
 ;; keep-sorted start
@@ -108,6 +109,41 @@
   (unless (advice-member-p #'my/org-refresh-theme-derived-faces 'load-theme)
     (advice-add 'load-theme :after #'my/org-refresh-theme-derived-faces)))
 
+;; Commands
+
+(defun my/org-return-dwim ()
+  "Insert a new list item or perform a regular Org return."
+  (interactive)
+  (if (and (not (org-at-table-p))
+           (org-in-item-p))
+      (org-insert-item (org-at-item-checkbox-p))
+    (call-interactively #'org-return)))
+
+(defun my/org-shift-return-dwim ()
+  "Continue a list item or preserve the standard Org Shift-Return behavior."
+  (interactive)
+  (if (and (not (org-at-table-p))
+           (org-in-item-p))
+      (call-interactively #'org-return)
+    (call-interactively #'org-table-copy-down)))
+
+(defun my/org-clipboard-has-image-p ()
+  "Return non-nil when the Wayland clipboard contains an image."
+  (let ((wl_paste (executable-find "wl-paste")))
+    (and wl_paste
+         (seq-some
+          (lambda (mime_type)
+            (string-prefix-p "image/" mime_type))
+          (ignore-errors
+            (process-lines wl_paste "--list-types"))))))
+
+(defun my/org-paste-clipboard-dwim ()
+  "Insert a clipboard image with Org Download or yank text."
+  (interactive)
+  (if (my/org-clipboard-has-image-p)
+      (org-download-clipboard)
+    (call-interactively #'yank)))
+
 ;; Hooks
 
 (defun my/org-mode-setup ()
@@ -144,6 +180,9 @@
             ("M-j" . nil)
             ("M-k" . nil)
             ("M-l" . nil)
+            ("M-v" . my/org-paste-clipboard-dwim)
+            ("RET" . my/org-return-dwim)
+            ("<S-return>" . my/org-shift-return-dwim)
             ("M-RET" . org-open-at-point))
      :config
      (require 'org-indent)
@@ -154,6 +193,18 @@
      ; TODO: move to specialized (use-builtin) later
      :straight nil
      :ensure nil
+     :commands (org-roam-alias-add
+                org-roam-alias-remove
+                org-roam-extract-subtree
+                org-roam-node-find
+                org-roam-node-insert
+                org-roam-node-random
+                org-roam-ref-add
+                org-roam-ref-find
+                org-roam-ref-remove
+                org-roam-refile
+                org-roam-tag-add
+                org-roam-tag-remove)
      :custom
      (org-roam-directory (file-truename "~/org/roam/"))
      :bind (("C-c o d" . org-roam-buffer-toggle)
