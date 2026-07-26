@@ -1,10 +1,17 @@
 ;; get doom emacs theme pack!  -*- lexical-binding: t; -*-
 
-
 (declare-function posframe-poshandler-frame-bottom-center "posframe")
 (declare-function which-key-mode "which-key")
 (declare-function which-key-posframe-mode "which-key-posframe")
 
+(defvar no-littering-var-directory)
+
+(defconst my-theme-state-file
+  (expand-file-name "theme" no-littering-var-directory)
+  "File containing the last theme selected with `consult-theme'.")
+
+(defvar my-consult-theme-active nil
+  "Non-nil while the outer `consult-theme' call is active.")
 (defvar which-key-allow-imprecise-window-fit)
 (defvar which-key-custom-popup-max-dimensions-function)
 (defvar which-key-idle-delay)
@@ -104,7 +111,6 @@
     (global-display-line-numbers-mode)
   (global-nlinum-mode t))
 
-
 ;; more useful frame title, that show either a file or a
 ;; buffer name (if the buffer isn't visiting a file)
 (setq frame-title-format
@@ -123,32 +129,63 @@
   (when (member "Noto Serif" (font-family-list))
     (set-face-attribute 'variable-pitch nil :family "Noto Serif" :height 1.18)))
 
+(defun my-theme-read ()
+  "Return the persisted theme, or nil when none can be read."
+  (when (file-readable-p my-theme-state-file)
+    (condition-case nil
+        (with-temp-buffer
+          (insert-file-contents my-theme-state-file)
+          (let ((read-eval nil))
+            (let ((theme (read (current-buffer))))
+              (and (symbolp theme) theme))))
+      (error nil))))
+
+(defun my-theme-save ()
+  "Persist the currently enabled theme."
+  (make-directory (file-name-directory my-theme-state-file) t)
+  (with-temp-file my-theme-state-file
+    (prin1 (or (car custom-enabled-themes) 'default) (current-buffer))
+    (insert "\n")))
+
+(defun my-consult-theme-persist (function &rest arguments)
+  "Call FUNCTION with ARGUMENTS and persist its final theme."
+  (if my-consult-theme-active
+      (apply function arguments)
+    (let ((my-consult-theme-active t))
+      (prog1 (apply function arguments)
+        (my-theme-save)))))
+
+(with-eval-after-load 'consult
+  (unless (advice-member-p #'my-consult-theme-persist 'consult-theme)
+    (advice-add 'consult-theme :around #'my-consult-theme-persist)))
 
 (defun handle-theme ()
   (sup 'doom-themes)
   (sup 'kaolin-themes)
-  (load-theme 'kaolin-dark t))
+  (let ((theme (or (my-theme-read) 'kaolin-dark)))
+    (unless (eq theme 'default)
+      (load-theme theme t))))
 
 (defun handle-modeline ()
   (straight-use-package 'doom-modeline)
   (doom-modeline-mode t)
   ;; keep-sorted start
-  (setq doom-modeline-buffer-modification-icon t)
-  (setq doom-modeline-buffer-name t)
-  (setq doom-modeline-buffer-state-icon t)
-  (setq doom-modeline-height 25)
-  (setq doom-modeline-hud nil)
-  (setq doom-modeline-icon t)
-  (setq doom-modeline-lsp-icon t)
-  (setq doom-modeline-major-mode-color-icon t)
-  (setq doom-modeline-major-mode-icon t)
-  (setq doom-modeline-project-detection 'auto)
-  (setq doom-modeline-support-imenu t)
-  (setq doom-modeline-time-analogue-clock t)
-  (setq doom-modeline-time-clock-size 0.7)
-  (setq doom-modeline-time-icon t)
-  (setq doom-modeline-time-live-icon t)
-  (setq doom-modeline-unicode-number t))
+  (setq doom-modeline-buffer-modification-icon t
+        doom-modeline-buffer-name t
+        doom-modeline-buffer-state-icon t
+        doom-modeline-height 25
+        doom-modeline-hud nil
+        doom-modeline-icon t
+        doom-modeline-lsp-icon t
+        doom-modeline-major-mode-color-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-project-detection 'auto
+        doom-modeline-support-imenu t
+        doom-modeline-time-analogue-clock t
+        doom-modeline-time-clock-size 0.7
+        doom-modeline-time-icon t
+        doom-modeline-time-live-icon t
+        doom-modeline-unicode-number t))
   ;; keep-sorted end
 
 ;; better help buffer
@@ -168,7 +205,6 @@
     :init
     (require 'hyperbole)
     (hyperb:init-menubar)))
-
 
 ;; indent guides
 (defun handle-indents ()
@@ -205,9 +241,7 @@
          (scroll-on-jump-with-scroll-advice-add evil-goto-line)
          (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-bottom)
          (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-center)
-         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-top)))
-)
-
+         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-top))))
 
 ;; keep-sorted start
 (handle-fonts)
@@ -218,7 +252,6 @@
 (handle-scroll)
 (handle-theme)
 ;; keep-sorted end
-
 
 ;; NOTE(@lerax): dom 01 jun 2025 12:42:24
 ;; helm-descbinds became incompatible with which-key-mode ins 202402XX version

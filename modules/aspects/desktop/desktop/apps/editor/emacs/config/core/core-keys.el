@@ -7,7 +7,6 @@
 ;; (setq golden-ratio-auto-scale t)
 ;; (golden-ratio-mode 1)
 
-
 (declare-function citre-peek-abort "citre")
 (declare-function eldoc-box-quit-frame "eldoc-box")
 (declare-function my-dired-current-file-directory "core-views")
@@ -56,13 +55,13 @@
   (cond
     ((and (bound-and-true-p citre-peek--mode)
        (fboundp 'citre-peek-abort))
-      (citre-peek-abort)
-      t)
+     (citre-peek-abort)
+     t)
     ((and (boundp 'eldoc-box--frame)
        (eq (selected-frame) eldoc-box--frame)
        (fboundp 'eldoc-box-quit-frame))
-      (eldoc-box-quit-frame)
-      t)
+     (eldoc-box-quit-frame)
+     t)
     (t nil)))
 
 (defun my-quit-emacs ()
@@ -87,79 +86,70 @@
   (unless (my-close-transient-ui)
     (call-interactively #'evil-force-normal-state)))
 
+(defun gek (lst lhs rhs)
+  "Bind LHS to RHS in each Evil state from LST"
+  (dolist (state lst)
+    (evil-global-set-key state lhs rhs)))
+
+(defun gek* (lst &rest binds)
+  "Apply multiple binds of the form (lhs rhs) for states on LST"
+  (while binds
+    (gek lst
+         (kbd (pop binds))
+         (pop binds))))
+
 (defun my-evil-setup ()
   "Configure Evil bindings and initial states."
-  (defalias 'ek 'evil-global-set-key)
-  (dolist (state '(normal motion visual))
-    (ek state
-      (kbd "<escape>")
-      #'my-evil-force-normal-state-or-close))
-  (dolist (state '(normal motion visual))
-    (ek state
-      (kbd "C-b")
-      #'my-scroll-page-up)
-    (ek state
-      (kbd "C-d")
-      #'my-scroll-half-down)
-    (ek state
-      (kbd "C-e")
-      #'my-scroll-line-down)
-    (ek state
-      (kbd "C-f")
-      #'my-scroll-page-down)
-    (ek state
-      (kbd "C-h")
-      #'evil-window-left)
-    (ek state
-      (kbd "C-j")
-      #'evil-window-down)
-    (ek state
-      (kbd "C-k")
-      #'evil-window-up)
-    (ek state
-      (kbd "C-l")
-      #'evil-window-right)
-    (ek state
-      (kbd "C-u")
-      #'my-scroll-half-up)
-    (ek state
-      (kbd "C-y")
-      #'my-scroll-line-up))
-  (ek 'normal (kbd "K") #'eldoc-box-help-at-point)
-  (ek 'normal (kbd "M-L") #'completion-at-point)
-  (ek 'normal (kbd "; h") #'evil-window-move-far-left)
-  (ek 'normal (kbd "; j") #'evil-window-move-very-bottom)
-  (ek 'normal (kbd "; k") #'evil-window-move-very-top)
-  (ek 'normal (kbd "; l") #'evil-window-move-far-right)
-  (ek 'normal (kbd "; r") #'my-window-resize-hydra/body)
-  (ek 'normal (kbd "SPC |") #'evil-window-vsplit)
-  (ek 'normal (kbd "SPC -") #'evil-window-split)
-  (ek 'normal (kbd "SPC e") #'my-dired-current-file-directory)
-  (ek 'normal (kbd "SPC E") #'my-dired-project-directory)
-  (ek 'normal (kbd "SPC SPC") #'consult-fd)
-  (ek 'normal (kbd "SPC /") #'consult-ripgrep)
-  (ek 'normal (kbd "SPC g d") #'citre-peek)
-  (ek 'normal (kbd "SPC g r") #'citre-peek-reference)
-  (ek 'normal (kbd "SPC g u") #'citre-update-this-tags-file)
-  (ek 'normal (kbd "SPC r r") #'org-roam-node-find)
-  (ek 'normal (kbd "SPC r R") #'org-roam-ref-find)
-  (ek 'normal (kbd "SPC r a r") #'org-roam-ref-add)
-  (ek 'normal (kbd "SPC r a t") #'org-roam-tag-add)
-  (ek 'normal (kbd "SPC r a a") #'org-roam-alias-add)
-  (ek 'normal (kbd "SPC r x r") #'org-roam-ref-remove)
-  (ek 'normal (kbd "SPC r x t") #'org-roam-tag-remove)
-  (ek 'normal (kbd "SPC r x a") #'org-roam-alias-remove)
-  (ek 'normal (kbd "SPC r n r") #'org-roam-refile)
-  (ek 'normal (kbd "SPC r n i") #'org-roam-node-insert)
-  (ek 'normal (kbd "SPC r n e") #'org-roam-extract-subtree)
-  (ek 'normal (kbd "SPC r n R") #'org-roam-node-random)
-  (ek 'normal (kbd "SPC w d") #'evil-quit)
-  (ek 'normal (kbd "SPC w D") #'my-evil-quit-all)
-  (ek 'normal (kbd "SPC w w") #'evil-switch-to-windows-last-buffer)
-  (ek 'normal (kbd "SPC x x") #'my-flymake-show-diagnostics)
-  (ek 'normal (kbd "g d") #'citre-peek)
-  (ek 'normal (kbd "g r") #'citre-peek-reference)
-  (ek 'normal (kbd "q") #'my-evil-record-macro-or-close)
+  ;; Reserve SPC as a leader prefix in the states that use it.
+  (gek '(normal visual) (kbd "SPC") nil)
+  (gek* '(normal motion visual)
+        "<escape>" #'my-evil-force-normal-state-or-close
+        "C-b" #'my-scroll-page-up
+        "C-f" #'my-scroll-page-down
+        "C-u" #'my-scroll-half-up
+        "C-d" #'my-scroll-half-down
+        "C-e" #'my-scroll-line-up
+        "C-e" #'my-scroll-line-down
+        "C-h" #'evil-window-left
+        "C-j" #'evil-window-down
+        "C-k" #'evil-window-up
+        "C-l" #'evil-window-right)
+  (gek* '(normal visual)
+        "SPC r n i" #'org-roam-node-insert
+        "SPC r n r" #'org-roam-refile)
+  (gek* '(normal)
+        "K" #'eldoc-box-help-at-point
+        "; r" #'my-window-resize-hydra/body
+        "; h" #'evil-window-move-far-left
+        "; j" #'evil-window-move-very-bottom
+        "; k" #'evil-window-move-very-top
+        "; l" #'evil-window-move-far-right
+        "SPC |" #'evil-window-vsplit
+        "SPC -" #'evil-window-split
+        "SPC e" #'my-dired-current-file-directory
+        "SPC E" #'my-dired-project-directory
+        "SPC SPC" #'consult-fd
+        "SPC /" #'consult-ripgrep
+        "SPC g d" #'citre-peek
+        "SPC g r" #'citre-peek-reference
+        "SPC g u" #'citre-update-this-tags-file
+        "SPC r r" #'org-roam-node-find
+        "SPC r R" #'org-roam-ref-find
+        "SPC r a r" #'org-roam-ref-add
+        "SPC r a t" #'org-roam-tag-add
+        "SPC r a a" #'org-roam-alias-add
+        "SPC r x r" #'org-roam-ref-remove
+        "SPC r x t" #'org-roam-tag-remove
+        "SPC r x a" #'org-roam-alias-remove
+        "SPC r n e" #'org-roam-extract-subtree
+        "SPC r n R" #'org-roam-node-random
+        "SPC w d" #'evil-quit
+        "SPC w D" #'my-evil-quit-all
+        "SPC w w" #'evil-switch-to-windows-last-buffer
+        "SPC x x" #'my-flymake-show-diagnostics
+        "g d" #'citre-peek
+        "g r" #'citre-peek-reference
+        "q" #'my-evil-record-macro-or-close)
   (evil-set-initial-state 'vterm-mode 'emacs)
   (evil-set-initial-state 'sly-mrepl-mode 'emacs)
   (evil-set-initial-state 'inferior-emacs-lisp-mode 'emacs)
@@ -275,7 +265,6 @@ Resize: _h_ width-  _l_ width+  _k_ height-  _j_ height+  _<escape>_ exit
 (put 'my-scroll-page-down 'scroll-command t)
 (put 'my-scroll-page-up 'scroll-command t)
 
-
 ;; keep-sorted start
 (global-set-key (kbd "<C-down>") (lambda () (interactive) (enlarge-window 10)))
 (global-set-key (kbd "<C-left>") (lambda () (interactive (shrink-window-horizontally 10))))
@@ -289,7 +278,9 @@ Resize: _h_ width-  _l_ width+  _k_ height-  _j_ height+  _<escape>_ exit
 (global-set-key (kbd "C-l") 'completion-at-point)
 (global-set-key (kbd "C-s") 'save-buffer)
 (global-set-key (kbd "C-x C-c") #'my-quit-emacs)
+(global-set-key (kbd "M--") #'text-scale-decrease)
 (global-set-key (kbd "M-<tab>") 'other-window)
+(global-set-key (kbd "M-=") #'text-scale-increase)
 (global-set-key (kbd "M-c") 'kill-ring-save)
 (global-set-key (kbd "M-h") 'windmove-left)
 (global-set-key (kbd "M-j") 'windmove-down)
@@ -298,7 +289,5 @@ Resize: _h_ width-  _l_ width+  _k_ height-  _j_ height+  _<escape>_ exit
 (global-set-key (kbd "M-m") 'view-echo-area-messages)
 (global-set-key (kbd "M-v") 'yank)
 ;; keep-sorted end
-
-
 
 (provide 'core-keys)

@@ -7,24 +7,25 @@
 
 (require 'seq)
 (declare-function org-download-clipboard "org-download")
-
+(declare-function evil-ret "evil-commands")
 (setq
 ;; keep-sorted start
- org-adapt-indentation t
- org-agenda-tags-column 0
- org-auto-align-tags nil
- org-catch-invisible-edits 'show-and-error
- org-edit-src-content-indentation 0
- org-ellipsis " · "
- org-hide-emphasis-markers t
- org-hide-leading-stars t
- org-insert-heading-respect-content t
- org-log-done t
- org-pretty-entities t
- org-special-ctrl-a/e t
- org-src-fontify-natively t
- org-src-tab-acts-natively t
- org-tags-column -80)
+  org-adapt-indentation t
+  org-agenda-tags-column 0
+  org-auto-align-tags nil
+  org-catch-invisible-edits 'show-and-error
+  org-edit-src-content-indentation 0
+  org-ellipsis " · "
+  org-hide-emphasis-markers t
+  org-hide-leading-stars t
+  org-insert-heading-respect-content t
+  org-log-done t
+  org-pretty-entities t
+  org-return-follows-link t
+  org-special-ctrl-a/e t
+  org-src-fontify-natively t
+  org-src-tab-acts-natively t
+  org-tags-column -80)
 ;; keep-sorted end
 
 ;; Org face setup
@@ -119,6 +120,13 @@
       (org-insert-item (org-at-item-checkbox-p))
     (call-interactively #'org-return)))
 
+(defun my/org-open-link-or-evil-ret ()
+  "Open the Org link at point or preserve Evil's normal Return behavior."
+  (interactive)
+  (if (org-in-regexp org-link-any-re)
+      (org-open-at-point)
+    (call-interactively #'evil-ret)))
+
 (defun my/org-shift-return-dwim ()
   "Continue a list item or preserve the standard Org Shift-Return behavior."
   (interactive)
@@ -181,10 +189,13 @@
             ("M-k" . nil)
             ("M-l" . nil)
             ("M-v" . my/org-paste-clipboard-dwim)
-            ("RET" . my/org-return-dwim)
-            ("<S-return>" . my/org-shift-return-dwim)
             ("M-RET" . org-open-at-point))
      :config
+     (evil-define-key 'normal org-mode-map
+       (kbd "RET") #'my/org-open-link-or-evil-ret)
+     (evil-define-key 'insert org-mode-map
+       (kbd "RET") #'my/org-return-dwim
+       (kbd "<S-return>") #'my/org-shift-return-dwim)
      (require 'org-indent)
      (my/org-ensure-theme-refresh-hooks)
      (my/org-setup-faces))

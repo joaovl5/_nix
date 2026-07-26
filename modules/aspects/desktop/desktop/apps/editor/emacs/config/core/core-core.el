@@ -38,6 +38,8 @@ PROMPT sets the `read-string prompt."
 ;; --- opts/modes
 
 (editorconfig-mode 1)
+(setq desktop-save t)
+(desktop-save-mode 1)
 (savehist-mode 1)
 (save-place-mode 1)
 
@@ -56,6 +58,5 @@ PROMPT sets the `read-string prompt."
   (revert-without-query '(".*"))
   :init
   (global-auto-revert-mode 1))
-
 
 (provide 'core-core)
