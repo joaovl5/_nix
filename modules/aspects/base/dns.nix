@@ -11,6 +11,7 @@ _: {
 
     vhosts = config.my.vhosts or {};
     inherit (config.my.dns) tld;
+    dns_servers = lib.unique (config.my.dns.main_dns ++ config.my.dns.fallback_dns);
   in
     o.module "dns" (with o; {
       enable = toggle "Enable DNS presets" true;
@@ -19,7 +20,7 @@ _: {
       main_dns = opt "List of DNS servers" (t.listOf t.str) [
         "192.168.15.13"
       ];
-      fallback_dns = opt "List of fallback DNS servers" (t.listOf t.str) [
+      fallback_dns = opt "List of fallback DNS servers, also appended to the active resolver list" (t.listOf t.str) [
         # quad9
         "2620:fe::fe"
         "2620:fe::9"
@@ -30,11 +31,11 @@ _: {
       use_tls = toggle "Whether to use TLS" false;
     }) {}
     (opts: (o.when opts.enable {
-      networking.nameservers = opts.main_dns;
+      networking.nameservers = dns_servers;
       services.resolved = {
         enable = true;
         settings.Resolve = {
-          DNS = opts.main_dns;
+          DNS = dns_servers;
           FallbackDNS = opts.fallback_dns;
           DNSSEC = opts.use_dnssec;
           DNSOverTLS = opts.use_tls;

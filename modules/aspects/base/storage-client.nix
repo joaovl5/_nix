@@ -35,6 +35,10 @@ _: {
             "nofail"
             "_netdev"
             "nfsvers=4.2"
+            "softerr"
+            "timeo=100"
+            "retrans=3"
+            "x-systemd.mount-timeout=30s"
             "x-systemd.automount"
             "x-systemd.idle-timeout=${opts.client.automount_timeout}"
           ];
