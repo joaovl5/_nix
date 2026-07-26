@@ -5,7 +5,7 @@
 (setq which-func-update-delay 1.0)
 ; (setq idle-update-delay which-func-update-delay)  ;; Obsolete in >= 30.1
 
-(defalias #'view-hello-file #'ignore)  ; Never show the hello file
+(defalias #'view-hello-file #'ignore) ; Never show the hello file
 
 ;; Disable fontification during user input to reduce lag in large buffers.
 ;; Also helps marginally with scrolling performance.
@@ -34,8 +34,9 @@
 (setq-default truncate-lines t)
 
 ;; clipboard sharing w/ system
-(setq select-enable-clipboard t
-      select-enable-primary t)
+(setq
+ select-enable-clipboard t
+ select-enable-primary t)
 
 ;;
 (setq vc-follow-symlinks nil)
@@ -45,10 +46,10 @@
 (setq warning-suppress-log-types '((comp)))
 
 ;; Perf: Reduce command completion overhead.
-(setq read-extended-command-predicate #'command-completion-default-include-p)
+(setq read-extended-command-predicate
+      #'command-completion-default-include-p)
 
-(defvar username
-  (getenv "USER"))
+(defvar username (getenv "USER"))
 
 (message "[!] starting... be patient, %s!" username)
 
@@ -61,7 +62,8 @@
   "Directory for core functionality.")
 (defvar modules-dir (expand-file-name "modules" root-dir)
   "Directory for modules.")
-(defvar savefile-dir (expand-file-name "savefile" user-emacs-directory)
+(defvar savefile-dir
+  (expand-file-name "savefile" user-emacs-directory)
   "This folder stores all the automatically generated save/history-files.")
 
 (unless (file-exists-p savefile-dir)
@@ -104,7 +106,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(dired-broken-symlink ((t (:background "brown" :foreground "navajo white" :weight bold))))
- '(doom-modeline ((t nil)))
- '(error ((t (:foreground "#ff6c6b"))))
- '(line-number-current-line ((t (:foreground "yellow" :inherit line-number)))))
+ '(dired-broken-symlink
+   ((t
+     (:background "brown" :foreground "navajo white" :weight bold))))
+ '(doom-modeline ((t nil))) '(error ((t (:foreground "#ff6c6b"))))
+ '(line-number-current-line
+   ((t (:foreground "yellow" :inherit line-number)))))

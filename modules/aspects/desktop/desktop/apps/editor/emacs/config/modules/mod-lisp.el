@@ -15,21 +15,24 @@
 (declare-function eldoc-box-help-at-point "eldoc-box")
 (declare-function evil-local-set-key "evil-core")
 
-(defconst my-elisp-lexical-binding-header ";; -*- lexical-binding: t; -*-\n\n"
+(defvar apheleia-formatters)
+(defvar apheleia-mode-alist)
+(defconst my-elisp-lexical-binding-header
+  ";; -*- lexical-binding: t; -*-\n\n"
   "Header inserted into new Emacs Lisp files.")
 
 (defun my-elisp-insert-lexical-binding-header ()
   "Insert a lexical-binding header in new empty Emacs Lisp files."
   (when (and buffer-file-name
-          (derived-mode-p 'emacs-lisp-mode)
-          (= (point-min) (point-max)))
+             (derived-mode-p 'emacs-lisp-mode)
+             (= (point-min) (point-max)))
     (insert my-elisp-lexical-binding-header)
     (setq-local lexical-binding t)))
 
 (defun my-geiser-use-hover-doc-key ()
   "Use the global hover documentation command on `K' in Geiser buffers."
   (if (fboundp 'evil-local-set-key)
-    (evil-local-set-key 'normal (kbd "K") #'eldoc-box-help-at-point)
+      (evil-local-set-key 'normal (kbd "K") #'eldoc-box-help-at-point)
     (local-set-key (kbd "K") #'eldoc-box-help-at-point)))
 
 ;; (defconst my-parinfer-rust-mode-hooks
@@ -74,32 +77,50 @@
 ;;     (with-current-buffer buffer
 ;;       (my-enable-parinfer-rust-mode))))
 
-(add-hook 'emacs-lisp-mode-hook #'my-elisp-insert-lexical-binding-header)
+(add-hook
+ 'emacs-lisp-mode-hook #'my-elisp-insert-lexical-binding-header)
 
-(use smartparens
-  :ensure t
-  :hook ((prog-mode . smartparens-mode)))
+(use smartparens :ensure t :hook ((prog-mode . smartparens-mode)))
 
-(use aggressive-indent
-  :ensure t
-  :hook ((emacs-lisp-mode . aggressive-indent-mode)
-          (lisp-interaction-mode . aggressive-indent-mode)
-          (lisp-mode . aggressive-indent-mode)
-          (common-lisp-mode . aggressive-indent-mode)))
+(use
+ aggressive-indent
+ :ensure t
+ :hook
+ ((emacs-lisp-mode . aggressive-indent-mode)
+  (lisp-interaction-mode . aggressive-indent-mode)
+  (lisp-mode . aggressive-indent-mode)
+  (common-lisp-mode . aggressive-indent-mode)))
 
-(use geiser
-  :ensure t
-  :hook ((scheme-mode . geiser-mode)
-          (geiser-mode . my-geiser-use-hover-doc-key))
-  :custom
-  (geiser-active-implementations '(guile))
-  (geiser-default-implementation 'guile)
-  (geiser-mode-auto-p nil)
-  (geiser-mode-autodoc-p t))
+(use elisp-autofmt :ensure t)
 
-(use geiser-guile
-  :ensure t
-  :after geiser)
+(use
+ apheleia
+ :ensure t
+ :hook (emacs-lisp-mode . apheleia-mode)
+ :bind (:map emacs-lisp-mode-map ("C-c C-f" . apheleia-format-buffer))
+ :config
+ (setf
+  (alist-get 'elisp-autofmt apheleia-formatters)
+  '("python" (expand-file-name
+     "straight/repos/emacs-elisp-autofmt/elisp-autofmt-cmd.py"
+     (or (bound-and-true-p straight-base-dir) user-emacs-directory))
+    "--stdout" "--color=never" input))
+ (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist)
+       'elisp-autofmt))
+
+(use
+ geiser
+ :ensure t
+ :hook
+ ((scheme-mode . geiser-mode)
+  (geiser-mode . my-geiser-use-hover-doc-key))
+ :custom
+ (geiser-active-implementations '(guile))
+ (geiser-default-implementation 'guile)
+ (geiser-mode-auto-p nil)
+ (geiser-mode-autodoc-p t))
+
+(use geiser-guile :ensure t :after geiser)
 
 ;; (use parinfer-rust-mode
 ;;      :straight nil

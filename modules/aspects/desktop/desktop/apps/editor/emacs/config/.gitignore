@@ -13,6 +13,7 @@ auto-save-list
 custom.el
 ede-projects.el
 el-get
+elisp-autofmt-cache
 eln-cache
 eln-cache/
 elpa

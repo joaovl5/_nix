@@ -2,6 +2,13 @@
   system = "x86_64-linux";
   pkgs = inputs.nixpkgs.legacyPackages.${system};
   local_packages = import ../_packages {inherit pkgs inputs;};
+  elisp_autofmt = pkgs.writeShellApplication {
+    name = "elisp-autofmt";
+    runtimeInputs = [pkgs.emacs pkgs.python3];
+    text = ''
+      exec python ${pkgs.emacsPackages.elisp-autofmt.src}/elisp-autofmt-cmd.py "$@"
+    '';
+  };
   main = pkgs.mkShell {
     packages = with pkgs; [
       # keep-sorted start
@@ -9,6 +16,7 @@
       basedpyright
       biome
       deadnix
+      elisp_autofmt
       fish
       jsonfmt
       just

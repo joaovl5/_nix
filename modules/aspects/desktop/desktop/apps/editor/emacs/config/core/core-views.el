@@ -5,10 +5,9 @@
 (defun my-dired-open-directory (directory)
   "Open DIRECTORY in a Dired side window on the left."
   (let ((window
-         (display-buffer
-          (dired-noselect directory)
-          '((display-buffer-in-side-window)
-            (side . left)))))
+         (display-buffer (dired-noselect directory)
+                         '((display-buffer-in-side-window)
+                           (side . left)))))
     (set-window-dedicated-p window nil)
     (select-window window)))
 
@@ -25,8 +24,7 @@
   (my-dired-open-directory
    (file-name-as-directory
     (expand-file-name
-     (or (and buffer-file-name
-              (file-name-directory buffer-file-name))
+     (or (and buffer-file-name (file-name-directory buffer-file-name))
          default-directory)))))
 
 (defun my-dired-project-directory ()
@@ -40,69 +38,76 @@
          default-directory)))))
 
 (defun handle-dired ()
-  (use dired
-       :straight nil
-       :ensure nil
-       :hook (dired-mode . auto-revert-mode)
-       :custom
-       (dired-listing-switches "-alh --group-directories-first")
-       :config
-       (with-eval-after-load 'evil
-         (evil-define-key 'normal dired-mode-map
-           (kbd "SPC") nil
-           (kbd "h") #'dired-up-directory
-           (kbd "l") #'my-dired-find-file))))
+  (use
+   dired
+   :straight nil
+   :ensure nil
+   :hook (dired-mode . auto-revert-mode)
+   :custom (dired-listing-switches "-alh --group-directories-first")
+   :config
+   (with-eval-after-load 'evil
+     (evil-define-key
+      'normal
+      dired-mode-map
+      (kbd "SPC")
+      nil
+      (kbd "h")
+      #'dired-up-directory
+      (kbd "l")
+      #'my-dired-find-file))))
 
 (defun handle-projectile ()
   (straight-use-package 'projectile)
   (projectile-mode t))
 
 (defun handle-actions ()
-  (use consult
-       :ensure t
-       :bind (;; keep-sorted start
-              ("C-c ." . consult-line)
-              ("C-c /" . consult-ripgrep)
-              ("C-c <spc>" . consult-find)
-              ("C-c <tab>" . consult-buffer)
-              ("C-c f M" . consult-global-mark)
-              ("C-c f d" . consult-flymake)
-              ("C-c f h" . consult-history)
-              ("C-c f m" . consult-man)
-              ("C-c f m" . consult-mark)
-              ("C-c f o" . consult-outline))
-              ;; keep-sorted end
-       :hook (completion-list-mode . consult-preview-at-point-mode)
-       :custom
-       (register-preview-delay 0.1)
-       (register-preview-function #'consult-register-format)
-       (xref-)))
-
+  (use
+   consult
+   :ensure t
+   :bind
+   ( ;; keep-sorted start
+    ("C-c ." . consult-line)
+    ("C-c /" . consult-ripgrep)
+    ("C-c <spc>" . consult-find)
+    ("C-c <tab>" . consult-buffer)
+    ("C-c f M" . consult-global-mark)
+    ("C-c f d" . consult-flymake)
+    ("C-c f h" . consult-history)
+    ("C-c f m" . consult-man)
+    ("C-c f m" . consult-mark)
+    ("C-c f o" . consult-outline))
+   ;; keep-sorted end
+   :hook (completion-list-mode . consult-preview-at-point-mode)
+   :custom
+   (register-preview-delay 0.1)
+   (register-preview-function #'consult-register-format)
+   (xref-)))
 
 
 (defun handle-completions ()
-  (use corfu
-       :ensure t
-       :bind
-       (:map corfu-map
-             ;; keep-sorted start
-             ("M-d" . corfu-next-page)
-             ("M-j" . corfu-next)
-             ("M-k" . corfu-previous)
-             ("M-u" . corfu-previous-page))
-             ;; keep-sorted end
-       :custom
-       (corfu-auto t)
-       (corfu-preselect t)
-       (corfu-quit-no-match 'separator)
-       :init
-       (global-corfu-mode)
-       :config
-       (corfu-popupinfo-mode t))
-  (use emacs
-       :custom
-       (tab-always-indent 'complete)
-       (text-mode-ispell-word-completion nil)))
+  (use
+   corfu
+   :ensure t
+   :bind
+   (:map
+    corfu-map
+    ;; keep-sorted start
+    ("M-d" . corfu-next-page)
+    ("M-j" . corfu-next)
+    ("M-k" . corfu-previous)
+    ("M-u" . corfu-previous-page))
+   ;; keep-sorted end
+   :custom
+   (corfu-auto t)
+   (corfu-preselect t)
+   (corfu-quit-no-match 'separator)
+   :init (global-corfu-mode)
+   :config (corfu-popupinfo-mode t))
+  (use
+   emacs
+   :custom
+   (tab-always-indent 'complete)
+   (text-mode-ispell-word-completion nil)))
 
 (defun my-vertico-next-page (&optional n)
   "Forward page in Vertico"
@@ -120,66 +125,64 @@
 
 
 (defun handle-minibuf ()
-  (use vertico
-     :bind
-     (:map vertico-map
-           ;; keep-sorted start
-           ("C-d" . my-vertico-next-page)
-           ("C-u" . my-vertico-previous-page)
-           ("M-j" . vertico-next)
-           ("M-k" . vertico-previous))
-           ;; keep-sorted end
-     :custom
-     (vertico-count 10)
-     (vertico-cycle t)
-     :init
-     (vertico-mode)
-     (vertico-multiform-mode))
-  (use savehist
-       :init
-       (savehist-mode))
-  (use emacs
-       :custom
-       (context-menu-mode t)
-       (enable-recursive-minibuffers t)
-       (read-extended-command-predicate #'command-completion-default-include-p)
-       (minibuffer-prompt-proprties
-         '(read-only t
-           cursor-intangible t
-           face minibuffer-prompt)))
-  (use orderless
-       :custom
-       (completion-styles '(orderless basic))
-       (completion-category-overrides '((file (styles partial-completion))))
-       (completion-category-defaults nil)
-       (completion-pcm-leading-wildcard t))
-  (use nerd-icons-completion
-    :init
-    (nerd-icons-completion-mode)
-    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-  (use marginalia
-       :bind (:map minibuffer-local-map
-               ("M-RET" . marginalia-cycle))
-       :init
-       (marginalia-mode))
-  (use embark
-       :ensure t
-       :bind (("M-;" . embark-act)
-              ("M-:" . embark-dwim))
-       :init
-       (setq prefix-help-command #'embark-prefix-help-command)
-       :config
-       ; (setq embark-indicators
-       ;  '(embark-minimal-indicator  ; default is embark-mixed-indicator
-       ;    embark-highlight-indicator
-       ;    embark-isearch-highlight-indicator))
-       (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
-       (add-to-list 'display-buffer-alist
-                    '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                      nil
-                      (window-parameters (mode-line-format . none)))))
+  (use
+   vertico
+   :bind
+   (:map
+    vertico-map
+    ;; keep-sorted start
+    ("C-d" . my-vertico-next-page)
+    ("C-u" . my-vertico-previous-page)
+    ("M-j" . vertico-next)
+    ("M-k" . vertico-previous))
+   ;; keep-sorted end
+   :custom (vertico-count 10) (vertico-cycle t)
+   :init (vertico-mode) (vertico-multiform-mode))
+  (use savehist :init (savehist-mode))
+  (use
+   emacs
+   :custom (context-menu-mode t) (enable-recursive-minibuffers t)
+   (read-extended-command-predicate
+    #'command-completion-default-include-p)
+   (minibuffer-prompt-proprties
+    '(read-only t cursor-intangible t face minibuffer-prompt)))
+  (use
+   orderless
+   :custom
+   (completion-styles '(orderless basic))
+   (completion-category-overrides
+    '((file (styles partial-completion))))
+   (completion-category-defaults nil)
+   (completion-pcm-leading-wildcard t))
+  (use
+   nerd-icons-completion
+   :init (nerd-icons-completion-mode)
+   (add-hook
+    'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+  (use
+   marginalia
+   :bind (:map minibuffer-local-map ("M-RET" . marginalia-cycle))
+   :init (marginalia-mode))
+  (use
+   embark
+   :ensure t
+   :bind (("M-;" . embark-act) ("M-:" . embark-dwim))
+   :init (setq prefix-help-command #'embark-prefix-help-command)
+   :config
+   ; (setq embark-indicators
+   ;  '(embark-minimal-indicator  ; default is embark-mixed-indicator
+   ;    embark-highlight-indicator
+   ;    embark-isearch-highlight-indicator))
+   (add-to-list
+    'vertico-multiform-categories '(embark-keybinding grid))
+   (add-to-list
+    'display-buffer-alist
+    '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+      nil
+      (window-parameters (mode-line-format . none)))))
   ; (use embark-consult
   ;      :ensure t)
+  ;; format: off
   ;; keep-sorted start
   (global-set-key (kbd "C-c f b") #'list-bookmarks)
   (global-set-key (kbd "C-c f k") #'embark-bindings)
@@ -189,8 +192,8 @@
   (global-set-key (kbd "C-c p f") #'projectile-find-file)
   (global-set-key (kbd "C-c p p") #'projectile-switch-project)
   (global-set-key (kbd "C-c p r") #'projectile-recentf))
-  ;; keep-sorted end
-
+;; keep-sorted end
+;; format: on
 
 
 ;; keep-sorted start

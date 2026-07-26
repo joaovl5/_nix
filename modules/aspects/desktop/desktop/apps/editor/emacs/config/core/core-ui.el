@@ -36,27 +36,31 @@
 
 (defun my-which-key-popup-max-dimensions (_window-width)
   "Return fixed-height max dimensions for the which-key popup."
-  (let* ((frame-width (max 1 (- (frame-width) which-key-unicode-correction)))
-         (max-width (round (* frame-width my-which-key-popup-max-width))))
-    (cons my-which-key-popup-height
-          (max 20 (min frame-width max-width)))))
+  (let* ((frame-width
+          (max 1 (- (frame-width) which-key-unicode-correction)))
+         (max-width
+          (round (* frame-width my-which-key-popup-max-width))))
+    (cons
+     my-which-key-popup-height (max 20 (min frame-width max-width)))))
 
 (defun my-which-key-setup-side-window ()
   "Use a terminal-safe bottom side window for which-key."
   (when (fboundp 'which-key-posframe-mode)
     (which-key-posframe-mode -1))
-  (setq which-key-allow-imprecise-window-fit t
-        which-key-popup-type 'side-window
-        which-key-side-window-location 'bottom
-        which-key-side-window-max-height my-which-key-popup-height
-        which-key-side-window-max-width my-which-key-popup-max-width))
+  (setq
+   which-key-allow-imprecise-window-fit t
+   which-key-popup-type 'side-window
+   which-key-side-window-location 'bottom
+   which-key-side-window-max-height my-which-key-popup-height
+   which-key-side-window-max-width my-which-key-popup-max-width))
 
 (defun my-which-key-setup-posframe ()
   "Use a centered graphical posframe for which-key."
   (straight-use-package 'which-key-posframe)
   (require 'which-key-posframe)
-  (setq which-key-posframe-border-width 1
-        which-key-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
+  (setq
+   which-key-posframe-border-width 1
+   which-key-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
   (which-key-posframe-mode 1)
   (setq which-key-custom-popup-max-dimensions-function
         #'my-which-key-popup-max-dimensions))
@@ -64,14 +68,14 @@
 (defun my-which-key-setup-style ()
   "Configure which-key sizing, columns, and placement."
   (require 'which-key)
-  (setq which-key-idle-delay 0
-        which-key-idle-secondary-delay 0
-        which-key-max-description-length 35
-        which-key-max-display-columns nil
-        which-key-min-display-lines my-which-key-popup-height
-        which-key-sort-order 'which-key-key-order-alpha)
-  (if (and (display-graphic-p)
-           (window-system))
+  (setq
+   which-key-idle-delay 0
+   which-key-idle-secondary-delay 0
+   which-key-max-description-length 35
+   which-key-max-display-columns nil
+   which-key-min-display-lines my-which-key-popup-height
+   which-key-sort-order 'which-key-key-order-alpha)
+  (if (and (display-graphic-p) (window-system))
       (my-which-key-setup-posframe)
     (my-which-key-setup-side-window)))
 ;; keep-sorted start
@@ -87,9 +91,10 @@
 (scroll-bar-mode -1)
 (setq inhibit-startup-screen t)
 (setq ring-bell-function 'ignore)
-(setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
+(setq
+ scroll-margin 0
+ scroll-conservatively 100000
+ scroll-preserve-screen-position 1)
 (setq use-dialog-box nil)
 (size-indication-mode t)
 (tool-bar-mode -1)
@@ -97,11 +102,21 @@
 
 ;; handle margins
 (setq-default
-  top-margin-width 2
-  bottom-margin-height 2
-  left-margin-width 2
-  right-margin-width 2)
+ top-margin-width 0
+ bottom-margin-height 0
+ left-margin-width 0
+ right-margin-width 0)
 (set-window-buffer nil (current-buffer))
+
+(use perfect-margin :ensure t :commands perfect-margin-mode)
+
+(use
+ writeroom-mode
+ :ensure t
+ :commands (writeroom-mode global-writeroom-mode)
+ :hook
+ (writeroom-mode-enable . (lambda () (display-line-numbers-mode -1)))
+ (writeroom-mode-disable . (lambda () (display-line-numbers-mode 1))))
 
 ;; show line numbers at the beginning of each line
 ;; there's a built-in linum-mode, but we're using
@@ -114,20 +129,20 @@
 ;; more useful frame title, that show either a file or a
 ;; buffer name (if the buffer isn't visiting a file)
 (setq frame-title-format
-      '("" invocation-name " @ " username " - " (:eval (if (buffer-file-name))
-                                                       (abbreviate-file-name (buffer-file-name))
-                                                       "%b")))
+      '("" invocation-name " @ " username " - "
+        (:eval
+         (if (buffer-file-name))
+         (abbreviate-file-name (buffer-file-name))
+         "%b")))
 
 ;; Global font ownership lives here; Org-only typography stays in `mod-org.el`.
 (defun handle-fonts ()
   (straight-use-package 'nerd-icons)
 
-  (when (member "Iosevka Nerd Font" (font-family-list))
-    (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 216)
-    (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font"))
-
-  (when (member "Noto Serif" (font-family-list))
-    (set-face-attribute 'variable-pitch nil :family "Noto Serif" :height 1.18)))
+  (let ((font-name "RecMonoSmCasual Nerd Font Mono"))
+    (when (member font-name (font-family-list))
+      (set-face-attribute 'default nil :font font-name :height 226)
+      (set-face-attribute 'fixed-pitch nil :family font-name))))
 
 (defun my-theme-read ()
   "Return the persisted theme, or nil when none can be read."
@@ -138,7 +153,8 @@
           (let ((read-eval nil))
             (let ((theme (read (current-buffer))))
               (and (symbolp theme) theme))))
-      (error nil))))
+      (error
+       nil))))
 
 (defun my-theme-save ()
   "Persist the currently enabled theme."
@@ -170,23 +186,24 @@
   (straight-use-package 'doom-modeline)
   (doom-modeline-mode t)
   ;; keep-sorted start
-  (setq doom-modeline-buffer-modification-icon t
-        doom-modeline-buffer-name t
-        doom-modeline-buffer-state-icon t
-        doom-modeline-height 25
-        doom-modeline-hud nil
-        doom-modeline-icon t
-        doom-modeline-lsp-icon t
-        doom-modeline-major-mode-color-icon t
-        doom-modeline-major-mode-icon t
-        doom-modeline-project-detection 'auto
-        doom-modeline-support-imenu t
-        doom-modeline-time-analogue-clock t
-        doom-modeline-time-clock-size 0.7
-        doom-modeline-time-icon t
-        doom-modeline-time-live-icon t
-        doom-modeline-unicode-number t))
-  ;; keep-sorted end
+  (setq
+   doom-modeline-buffer-modification-icon t
+   doom-modeline-buffer-name t
+   doom-modeline-buffer-state-icon t
+   doom-modeline-height 25
+   doom-modeline-hud nil
+   doom-modeline-icon t
+   doom-modeline-lsp-icon t
+   doom-modeline-major-mode-color-icon t
+   doom-modeline-major-mode-icon t
+   doom-modeline-project-detection 'auto
+   doom-modeline-support-imenu t
+   doom-modeline-time-analogue-clock t
+   doom-modeline-time-clock-size 0.7
+   doom-modeline-time-icon t
+   doom-modeline-time-live-icon t
+   doom-modeline-unicode-number t))
+;; keep-sorted end
 
 ;; better help buffer
 (defun handle-helpful ()
@@ -198,13 +215,10 @@
   (global-set-key (kbd "C-c h v") #'helpful-variable)
   (global-set-key (kbd "C-c h x") #'helpful-command)
   (global-set-key (kbd "C-k") #'helpful-at-point))
-  ;; keep-sorted end
+;; keep-sorted end
 
 (defun handle-links ()
-  (use hyperbole
-    :init
-    (require 'hyperbole)
-    (hyperb:init-menubar)))
+  (use hyperbole :init (require 'hyperbole) (hyperb:init-menubar)))
 
 ;; indent guides
 (defun handle-indents ()
@@ -214,34 +228,39 @@
 (defun handle-scroll ()
   (sup 'beacon)
   (beacon-mode 1)
-  (use pixel-scroll
-       :straight nil
-       :ensure nil
-       :bind (([remap scroll-up-command] . pixel-scroll-interpolate-down)
-              ([remap scroll-down-command] . pixel-scroll-interpolate-up))
-       :custom
-       (pixel-scroll-precision-interpolate-page t)
-       (pixel-scroll-precision-interpolation-total-time 0.25)
-       :init
-       (pixel-scroll-precision-mode 1))
-  (use scroll-on-jump
-       :ensure t
-       :custom
-       (scroll-on-jump-curve 'smooth-out)
-       (scroll-on-jump-duration 0.4)
-       :config
-       (with-eval-after-load 'evil
-         (scroll-on-jump-advice-add evil-ex-search-next)
-         (scroll-on-jump-advice-add evil-ex-search-previous)
-         (scroll-on-jump-advice-add evil-goto-mark)
-         (scroll-on-jump-advice-add evil-goto-mark-line)
-         (scroll-on-jump-advice-add evil-jump-backward)
-         (scroll-on-jump-advice-add evil-jump-forward)
-         (scroll-on-jump-advice-add evil-jump-item)
-         (scroll-on-jump-with-scroll-advice-add evil-goto-line)
-         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-bottom)
-         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-center)
-         (scroll-on-jump-with-scroll-advice-add evil-scroll-line-to-top))))
+  (use
+   pixel-scroll
+   :straight nil
+   :ensure nil
+   :bind
+   (([remap scroll-up-command] . pixel-scroll-interpolate-down)
+    ([remap scroll-down-command] . pixel-scroll-interpolate-up))
+   :custom
+   (pixel-scroll-precision-interpolate-page t)
+   (pixel-scroll-precision-interpolation-total-time 0.25)
+   :init (pixel-scroll-precision-mode 1))
+  (use
+   scroll-on-jump
+   :ensure t
+   :custom
+   (scroll-on-jump-curve 'smooth-out)
+   (scroll-on-jump-duration 0.4)
+   :config
+   (with-eval-after-load 'evil
+     (scroll-on-jump-advice-add evil-ex-search-next)
+     (scroll-on-jump-advice-add evil-ex-search-previous)
+     (scroll-on-jump-advice-add evil-goto-mark)
+     (scroll-on-jump-advice-add evil-goto-mark-line)
+     (scroll-on-jump-advice-add evil-jump-backward)
+     (scroll-on-jump-advice-add evil-jump-forward)
+     (scroll-on-jump-advice-add evil-jump-item)
+     (scroll-on-jump-with-scroll-advice-add evil-goto-line)
+     (scroll-on-jump-with-scroll-advice-add
+      evil-scroll-line-to-bottom)
+     (scroll-on-jump-with-scroll-advice-add
+      evil-scroll-line-to-center)
+     (scroll-on-jump-with-scroll-advice-add
+      evil-scroll-line-to-top))))
 
 ;; keep-sorted start
 (handle-fonts)
@@ -265,7 +284,8 @@
         (which-key-mode +1))
     (error
      (let ((error-message (cadr err)))
-       (with-temp-message "" ;; don't print to minibuffer
+       (with-temp-message
+           "" ;; don't print to minibuffer
          (message "[Prelude] bypass error: %s" error-message))))))
 
 ;; show available keybindings after you start typing
@@ -273,7 +293,8 @@
 ;; which-key bug
 ;; https://github.com/justbur/emacs-which-key/issues/306
 (if (daemonp)
-    (add-hook 'server-after-make-frame-hook #'prelude-safe-which-key-mode)
+    (add-hook
+     'server-after-make-frame-hook #'prelude-safe-which-key-mode)
   (prelude-safe-which-key-mode))
 
 (provide 'core-ui)

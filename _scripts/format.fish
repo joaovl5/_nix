@@ -37,6 +37,13 @@ function format_nix
     run_quiet statix fix --ignore $emacs_config_dir -- .
 end
 
+function format_elisp
+    set -l files (tracked_files '*.el')
+    test (count $files) -eq 0; and return 0
+
+    run_quiet elisp-autofmt --color=never $files
+end
+
 function format_fennel
     set -l files (tracked_files '*.fnl')
     test (count $files) -eq 0; and return 0
@@ -120,6 +127,7 @@ end
 job_pool_init
 job_pool_start format_markdown
 job_pool_start format_nix
+job_pool_start format_elisp
 job_pool_start format_fennel
 job_pool_start format_python
 job_pool_start format_web_and_json

@@ -12,34 +12,35 @@
 ;; Disable "file-name-handler-alist" than enable it later for speed.
 (defvar startup/file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq file-name-handler-alist startup/file-name-handler-alist)
-            (makunbound 'startup/file-name-handler-alist)))
+(add-hook
+ 'emacs-startup-hook
+ (lambda ()
+   (setq file-name-handler-alist startup/file-name-handler-alist)
+   (makunbound 'startup/file-name-handler-alist)))
 
 (setq package-quickstart t)
 
 (setq use-package-always-defer t)
 
 (setq
-  inhibit-splash-screen t
-  inhibit-startup-screen t
-  inhibit-startup-message t
-  inhibit-startup-buffer-menu t)
+ inhibit-splash-screen t
+ inhibit-startup-screen t
+ inhibit-startup-message t
+ inhibit-startup-buffer-menu t)
 
 (setq
-  auto-save-default nil
-  auto-save-list-file-prefix nil
-  backup-directory-alist '((".*" . "~/.local/share/Trash/files"))
-  create-lockfiles nil
-  make-backup-files nil
-  mode-line-format nil)
+ auto-save-default nil
+ auto-save-list-file-prefix nil
+ backup-directory-alist '((".*" . "~/.local/share/Trash/files"))
+ create-lockfiles nil
+ make-backup-files nil
+ mode-line-format nil)
 
 (setq load-prefer-newer t)
 
 
 ;; Increase how much is read from processes in a single chunk
-(setq read-process-output-max (* 2 1024 1024))  ; 1024kb
+(setq read-process-output-max (* 2 1024 1024)) ; 1024kb
 
 (setq process-adaptive-read-buffering nil)
 
@@ -61,7 +62,8 @@
 (defun minimal-emacs--reset-inhibit-redisplay ()
   "Reset inhibit redisplay."
   (setq-default inhibit-redisplay nil)
-  (remove-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay))
+  (remove-hook
+   'post-command-hook #'minimal-emacs--reset-inhibit-redisplay))
 
 
 (when (not noninteractive)
@@ -78,15 +80,18 @@
 
   ;; Reduce *Message* noise at startup. An empty scratch buffer (or the
   ;; dashboard) is more than enough, and faster to display.
-  (setq inhibit-startup-screen t
-        inhibit-startup-echo-area-message user-login-name)
-  (setq initial-buffer-choice nil
-        inhibit-startup-buffer-menu t
-        inhibit-x-resources t)
+  (setq
+   inhibit-startup-screen t
+   inhibit-startup-echo-area-message user-login-name)
+  (setq
+   initial-buffer-choice nil
+   inhibit-startup-buffer-menu t
+   inhibit-x-resources t)
 
   ;; Disable bidirectional text scanning for a modest performance boost.
-  (setq-default bidi-display-reordering 'left-to-right
-                bidi-paragraph-direction 'left-to-right)
+  (setq-default
+   bidi-display-reordering 'left-to-right
+   bidi-paragraph-direction 'left-to-right)
 
   ;; Give up some bidirectional functionality for slightly faster re-display.
   (setq bidi-inhibit-bpa t)
@@ -108,8 +113,9 @@
   ;; Suppress redisplay and redraw during startup to avoid delays and
   ;; prevent flashing an unstyled Emacs frame.
   (setq-default inhibit-redisplay t)
-  (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay -100))
-
+  (add-hook
+   'post-command-hook #'minimal-emacs--reset-inhibit-redisplay
+   -100))
 
 
 (setq-default inhibit-redisplay t)
