@@ -261,7 +261,12 @@
  org-roam-dailies
  :straight nil
  :ensure nil
- :commands org-roam-dailies-capture-today
+ :commands
+ (org-roam-dailies-capture-today
+  org-roam-dailies-goto-date
+  org-roam-dailies-goto-next-note
+  org-roam-dailies-goto-previous-note
+  org-roam-dailies-goto-today)
  :bind (("C-c o D" . org-roam-dailies-capture-today)))
 
 (use

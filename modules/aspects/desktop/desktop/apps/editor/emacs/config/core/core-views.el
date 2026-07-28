@@ -180,8 +180,7 @@
     '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
       nil
       (window-parameters (mode-line-format . none)))))
-  ; (use embark-consult
-  ;      :ensure t)
+  (use embark-consult :ensure t)
   ;; format: off
   ;; keep-sorted start
   (global-set-key (kbd "C-c f b") #'list-bookmarks)

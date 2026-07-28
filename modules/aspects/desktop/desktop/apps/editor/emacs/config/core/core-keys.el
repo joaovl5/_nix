@@ -11,6 +11,11 @@
 (declare-function eldoc-box-quit-frame "eldoc-box")
 (declare-function my-dired-current-file-directory "core-views")
 (declare-function my-dired-project-directory "core-views")
+(declare-function org-roam-dailies-goto-date "org-roam-dailies")
+(declare-function org-roam-dailies-goto-next-note "org-roam-dailies")
+(declare-function org-roam-dailies-goto-previous-note
+                  "org-roam-dailies")
+(declare-function org-roam-dailies-goto-today "org-roam-dailies")
 (declare-function org-roam-alias-add "org-roam-node")
 (declare-function org-roam-alias-remove "org-roam-node")
 (declare-function org-roam-extract-subtree "org-roam-node")
@@ -23,6 +28,10 @@
 (declare-function org-roam-refile "org-roam-node")
 (declare-function org-roam-tag-add "org-roam-node")
 (declare-function org-roam-tag-remove "org-roam-node")
+(declare-function projectile-add-known-project "projectile")
+(declare-function projectile-configure-project "projectile")
+(declare-function projectile-recentf "projectile")
+(declare-function projectile-switch-project "projectile")
 (declare-function evil-force-normal-state "evil")
 (declare-function evil-global-set-key "evil")
 (declare-function evil-mode "evil")
@@ -163,6 +172,22 @@
    #'citre-peek-reference
    "SPC g u"
    #'citre-update-this-tags-file
+   "SPC p p"
+   #'projectile-switch-project
+   "SPC p r"
+   #'projectile-recentf
+   "SPC p a"
+   #'projectile-add-known-project
+   "SPC p c"
+   #'projectile-configure-project
+   "SPC r d d"
+   #'org-roam-dailies-goto-today
+   "SPC r d f"
+   #'org-roam-dailies-goto-date
+   "SPC r d h"
+   #'org-roam-dailies-goto-previous-note
+   "SPC r d l"
+   #'org-roam-dailies-goto-next-note
    "SPC r r"
    #'org-roam-node-find
    "SPC r R"

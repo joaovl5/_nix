@@ -110,11 +110,41 @@
 
 (use perfect-margin :ensure t :commands perfect-margin-mode)
 
+(defun my-writeroom-adjust-relative-width (&optional window)
+  "Keep fractional `writeroom-width' relative to WINDOW's pixel width."
+  (when (and (bound-and-true-p writeroom-mode)
+             (floatp writeroom-width))
+    (let ((window
+           (if (window-live-p window)
+               window
+             (selected-window))))
+      (with-selected-window window
+        (setq-local visual-fill-column-width
+                    (max 1
+                         (round
+                          (/ (* (window-pixel-width window)
+                                writeroom-width)
+                             (window-font-width window)))))
+        (visual-fill-column-adjust)))))
+
+(defun my-writeroom-setup-relative-width ()
+  "Keep Writeroom proportional when its window changes size."
+  (add-hook
+   'window-size-change-functions #'my-writeroom-adjust-relative-width
+   nil t)
+  (my-writeroom-adjust-relative-width))
+
 (use
  writeroom-mode
  :ensure t
  :commands (writeroom-mode global-writeroom-mode)
+ :custom (writeroom-width 0.5)
+ :config
+ (advice-add
+  'text-scale-adjust
+  :after #'my-writeroom-adjust-relative-width)
  :hook
+ (writeroom-mode-enable . my-writeroom-setup-relative-width)
  (writeroom-mode-enable . (lambda () (display-line-numbers-mode -1)))
  (writeroom-mode-disable . (lambda () (display-line-numbers-mode 1))))
 
