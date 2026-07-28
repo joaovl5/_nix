@@ -108,7 +108,7 @@
       preferrable then plain command calls - it's easier to tweak
       scripts to fix bugs then to rewrite huge commands entirely
 
-### AUTOMATED TESTS
+### AUTOMATED TESTS & VERIFICATION
 
 _**STRONGLY PREFER manual verification instead of automated permanent
 tests for every single thing**._ This should be strictly obeyed and
@@ -133,9 +133,37 @@ also testing only deemed stable APIs.
   to be deleted later, for checking things
 - only when necessary, write small but strong tests that are clearly
   well-defined and useful, without handling internal logic and
-  avoiding too many mocked elements - e.g. unit test for a complex
-  function dealing with critical behavior and logic, complex
-  calculations, etc
+  avoiding too many mocked elements
+  - e.g. unit test for a complex function dealing with critical
+    behavior and logic, complex calculations, etc
+- **ON COMPLETION:** for tasks complex enough to have warranted either
+  manual or automated testing, _do not assume a task as done if you
+  have not tested it end-to-end_ - meaning of "end-to-end" varies from
+  situations, here's some examples:
+  - _changes in microservice called by backend_ → E2E is backend calls
+    directly, _after_ going through E2E on the microservice itself of
+    course
+  - _changes in frontend_ → E2E frontend (via browser tooling)
+    directly with dependant services running (e.g. backend)
+  - _in independent CLI_ → E2E calling CLI directly
+  - _in TUI_ → E2E TUI (via terminal tooling like tmux) with dependant
+    services (if any) in working condition
+  - _(manual E2E work might be aided via helper temporary scripts
+    among other things)_
+  - _(if project has automated E2E testing system, make sure to only
+    commit to the larger effort of doing the automated version of this
+    if you are absolutely sure you can afford it and the project
+    warrants a **DEDICATED** E2E test for this - if not sure, or not
+    authorized, or not knowledgeable with the internals, DON'T waste
+    time - just manually test end-to-end)_
 
 **I, THE USER, DO NOT CARE IF YOUR SYSTEM OR SKILL INSTRUCTS YOU
 OTHERWISE, DO NOT SPAM TESTS!**
+
+### GOAL BUDGETS
+
+You are **NOT ALLOWED** to set goal budgets - if a goal already has a
+budget it's fine, given the user has that authority, but do not assume
+you also can. All goals must have no budget token limit set by the
+agent itself. The user understands and accepts the implications of
+long-running goals.
