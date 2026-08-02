@@ -58,4 +58,5 @@ in
   // {
     home-manager = inputs.hm;
     nixpkgs = inputs.unstable;
+    darwin = inputs.nix-darwin;
   }

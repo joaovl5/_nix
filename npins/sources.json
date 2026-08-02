@@ -276,6 +276,19 @@
       "url": null,
       "hash": "sha256-oo8H9xgk5KGtGYQ8jCDsFYfVIn+PiQFa8WfVGip3t3s="
     },
+    "nix-darwin": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "15abb8c98f336cd8bd840d71059adebabe60bf04",
+      "url": "https://github.com/nix-darwin/nix-darwin/archive/15abb8c98f336cd8bd840d71059adebabe60bf04.tar.gz",
+      "hash": "sha256-0tLW8Ff5yt8AH97jw4ZpFJ0OCJ122zIlgWGDmOfU/VU="
+    },
     "nix-flatpak": {
       "type": "Git",
       "repository": {
@@ -325,6 +338,13 @@
       "revision": "4fd527b1bb92cff2f80b3297ae68588dbe772c49",
       "url": null,
       "hash": "sha256-Q+s91/rtWoE3DIFf5EfNnsDplFia5sgfb/Q+CPsSy1Y="
+    },
+    "nixpkgs-unstable": {
+      "type": "Channel",
+      "name": "nixpkgs-unstable",
+      "artifact": "nixexprs.tar.xz",
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1045908.a5cbcfe95479/nixexprs.tar.xz",
+      "hash": "sha256-Kr66C7mAWVoVLl2vhGoDaDksNBHRIHneLaO2/c4drCw="
     },
     "nur": {
       "type": "Git",
