@@ -24,6 +24,20 @@
       "url": null,
       "hash": "sha256-jfxFrTRR51jNGvPrfVOyU76QVtnO1ChOxbrNLyS/Qac="
     },
+    "bonsai-llama-pkg": {
+      "type": "Git",
+      "repository": {
+        "type": "Forgejo",
+        "server": "https://git.trll.ing/",
+        "owner": "lav",
+        "repo": "bonsai-llama-pkg"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "70c5c08f2910f542263b3fe4875b583df0b75c93",
+      "url": "https://git.trll.ing/lav/bonsai-llama-pkg/archive/70c5c08f2910f542263b3fe4875b583df0b75c93.tar.gz",
+      "hash": "sha256-V6KmbhhwuVqrCzYkLSNKShqhOzig4GZgkb9q9ZLDhJE="
+    },
     "concord": {
       "type": "Git",
       "repository": {
