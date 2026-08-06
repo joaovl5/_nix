@@ -18,6 +18,12 @@ _: {
               position = "0,240";
               transform = "90";
             }
+            {
+              criteria = "HDMI-A-1";
+              mode = "1920x1080@60Hz";
+              position = "3960,240"; # ?
+              transform = "90";
+            }
           ];
         };
       }

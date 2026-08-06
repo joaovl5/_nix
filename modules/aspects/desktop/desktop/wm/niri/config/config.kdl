@@ -14,7 +14,7 @@ input {
     natural-scroll
   }
   mouse {
-    accel-speed -0.9
+    accel-speed 0.1
     accel-profile "flat"
   }
   workspace-auto-back-and-forth
@@ -22,19 +22,14 @@ input {
 screenshot-path "~/pics/screenshots/%Y-%m-%d %H-%M-%S.png"
 prefer-no-csd
 layout {
-  gaps 5
-  struts {
-    left 50
-    right 50
-    top 85
-    bottom 85
-  }
+  gaps 1
   background-color "000000"
   focus-ring {
-    off
+    on
+    width 1
   }
   border {
-    width 1.5
+    width 0
     active-color "9c9c9c"
     inactive-color "2a2a2a"
   }
@@ -49,6 +44,48 @@ layout {
   }
   center-focused-column "never"
   always-center-single-column
+}
+output "DP-4" {
+  mode "3840x2160@240.084"
+  scale 1.333333
+  transform "normal"
+  position x=1080 y=396
+  layout {
+    struts {
+      left 50
+      right 50
+      top 85
+      bottom 85
+    }
+  }
+}
+output "HDMI-A-2" {
+  mode "1920x1080@100.000"
+  scale 1
+  transform "90"
+  position x=0 y=240
+  layout {
+    struts {
+      left 0
+      right 0
+      top 0
+      bottom 0
+    }
+  }
+}
+output "HDMI-A-1" {
+  mode "1920x1080@60.000"
+  scale 1
+  transform "90"
+  position x=3960 y=240
+  layout {
+    struts {
+      left 0
+      right 0
+      top 0
+      bottom 0
+    }
+  }
 }
 cursor {
   xcursor-theme "default"
@@ -340,3 +377,4 @@ gestures {
 xwayland-satellite {
   path "xwayland-satellite"
 }
+
