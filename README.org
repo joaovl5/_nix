@@ -18,4 +18,4 @@
   /Fading/ ideas that once were me, /replacing/ their contents.
   /Carving/ the message back, /gathering/ sparks in my mind, /freezing/ them in runes.
   /Caging/ myself inside here, devoid of remembrance, frozen in my own ashes.
-  [[*The Abomination][/Spiralling/ back to the beginning.]]
+  [[#The Abomination][/Spiralling/ back to the beginning.]]
