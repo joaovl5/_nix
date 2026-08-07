@@ -312,7 +312,7 @@ binds {
     spawn "hexecute"
   }
   Mod+Space {
-    spawn "anyrun" "--plugins" "libapplications.so"
+    spawn "fuzzel"
   }
   Mod+N {
     spawn "anyrun" "--plugins" "libsymbols.so"

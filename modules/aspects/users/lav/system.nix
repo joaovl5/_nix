@@ -63,8 +63,6 @@
 
               # gui
               waylock ## locker
-              ## launcher
-              fuzzel # backup
               ## docs
               # libreoffice
               ## file manager
