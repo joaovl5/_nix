@@ -167,3 +167,10 @@ budget it's fine, given the user has that authority, but do not assume
 you also can. All goals must have no budget token limit set by the
 agent itself. The user understands and accepts the implications of
 long-running goals.
+
+### MISSING TOOLS
+
+Don't think a tool doesn't exist, verify it doesn't by searching the
+`xd://` special directory of the harness for discoverable tools.
+
+Example: `xd://browser` exists even though agent commonly forgets it.
