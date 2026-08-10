@@ -1,0 +1,180 @@
+(defvar timeline_height 48)
+
+(defpoll current_time
+  :interval "1m"
+  :initial "0"
+  "date +%s")
+
+(defpoll next_midnight
+  :interval "5m"
+  :initial "0"
+  "date --date='tomorrow 00:00' +%s")
+
+(defpoll calendar_state
+  :interval "5m"
+  :initial "{\"schema\":2,\"state\":\"starting\",\"message\":\"loading calendar\",\"heading\":\"calendar\",\"timeline_width\":2750,\"timeline_start\":0,\"timeline_end\":1,\"labels\":[],\"ticks\":[],\"all_day\":[],\"lanes\":[],\"future\":[]}"
+  "env UV_PROJECT_ENVIRONMENT=\"$HOME/.cache/lav-shell/.venv\" PYTHONPYCACHEPREFIX=\"$HOME/.cache/lav-shell/pycache\" uv run --project \"$HOME/.config/eww/lav-shell\" --frozen calendar-state")
+
+(defwidget timeline-label [item]
+  (box
+    :class "timeline-label-cell"
+    :width {item.width_px}
+    :height 12
+    :space-evenly false
+    (label
+      :text {item.text}
+      :halign "start")))
+
+(defwidget timeline-tick [item]
+  (box
+    :class {item.major ? "timeline-tick major" : "timeline-tick minor"}
+    :width {item.width_px}
+    :height 4
+    :space-evenly false))
+
+(defwidget timeline-segment [segment]
+  (eventbox
+    :class {segment.kind == "event" ? "timeline-segment event" : "timeline-segment gap"}
+    :style {segment.kind == "event" ? "box-shadow: inset 2px 0 ${segment.color}, inset -1px 0 #142b3e;" : ""}
+    :active {segment.kind == "event"}
+    :tooltip {segment.tooltip}
+    (box
+      :width {segment.width_px}
+      :height {timeline_height}
+      :space-evenly false
+      (label
+        :text {segment.short_title}
+        :limit-width {segment.label_chars}
+        :xalign 0.0))))
+
+(defwidget timeline-lane [lane timeline_width]
+  (box
+    :class "timeline-lane"
+    :orientation "h"
+    :space-evenly false
+    :width {timeline_width}
+    (for segment in {lane.segments}
+      (timeline-segment :segment segment))))
+
+(defwidget timeline-marker [timestamp marker_class x_offset]
+  (box
+    :class "timeline-marker-overlay"
+    :visible {timestamp >= calendar_state.timeline_start && timestamp <= calendar_state.timeline_end}
+    :orientation "h"
+    :space-evenly false
+    :width {calendar_state.timeline_width}
+    :height {timeline_height + 16}
+    :halign "start"
+    :valign "fill"
+    (box
+      :width {round((timestamp - calendar_state.timeline_start) * calendar_state.timeline_width / (calendar_state.timeline_end - calendar_state.timeline_start), 0) + x_offset}
+      :space-evenly false)
+    (box
+      :class {marker_class}
+      :width 1
+      :vexpand true)))
+
+(defwidget calendar-timeline []
+  (box
+    :class "calendar-timeline"
+    :orientation "v"
+    :space-evenly false
+    (box
+      :class "all-day-row"
+      :orientation "h"
+      :space-evenly false
+      (for event in {calendar_state.all_day}
+        (eventbox
+          :class "all-day-event"
+          :style "border-color: ${event.color};"
+          :active true
+          :tooltip {event.tooltip}
+          (label :text {event.title})))
+      (label
+        :class "calendar-status ${calendar_state.state}"
+        :text {calendar_state.message}
+        :visible {calendar_state.message != ""}
+        :hexpand true
+        :halign "end"))
+    (overlay
+      (box
+        :orientation "v"
+        :space-evenly false
+        (box
+          :class "timeline-labels"
+          :orientation "h"
+          :space-evenly false
+          :width {calendar_state.timeline_width}
+          (for item in {calendar_state.labels}
+            (timeline-label :item item)))
+        (box
+          :class "timeline-ticks"
+          :orientation "h"
+          :space-evenly false
+          :width {calendar_state.timeline_width}
+          (for item in {calendar_state.ticks}
+            (timeline-tick :item item)))
+        (box
+          :class "timeline-lanes"
+          :orientation "v"
+          :space-evenly false
+          (for lane in {calendar_state.lanes}
+            (timeline-lane
+              :lane lane
+              :timeline_width {calendar_state.timeline_width}))))
+      (timeline-marker
+        :timestamp current_time
+        :marker_class "current-time-marker"
+        :x_offset 0)
+      (timeline-marker
+        :timestamp next_midnight
+        :marker_class "day-boundary-marker"
+        :x_offset -4))))
+
+(defwidget future-event [event]
+  (eventbox
+    :class "future-event"
+    :style "border-left-color: ${event.color};"
+    :active true
+    :tooltip {event.tooltip}
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing 6
+      (label
+        :class "future-when"
+        :text {event.when}
+        :xalign 0.0)
+      (label
+        :class "future-title"
+        :text {event.title}
+        :limit-width 36
+        :xalign 0.0))))
+
+(defwidget future-events []
+  (box
+    :class "future-events"
+    :orientation "v"
+    :space-evenly false
+    (label
+      :class "future-heading"
+      :text "next"
+      :xalign 0.0)
+    (for event in {calendar_state.future}
+      (future-event :event event))))
+
+(defwidget calendar-bar []
+  (calendar-timeline))
+
+(defwindow calendar-bar
+  :monitor "DP-4"
+  :windowtype "dock"
+  :focusable "none"
+  :exclusive false
+  :geometry (geometry
+             :x "0px"
+             :y "0px"
+             :width "2780px"
+             :height "74px"
+             :anchor "top center")
+  (calendar-bar))

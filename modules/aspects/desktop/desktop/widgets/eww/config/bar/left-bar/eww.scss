@@ -1,0 +1,69 @@
+.bar {
+  background-color: $color_background;
+  border: 1px solid $color_border;
+  color: $color_text_secondary;
+  padding: 12px 4px;
+
+  font-family: $font_left_bar;
+  font-size: 15.5px;
+}
+
+.sidestuff slider {
+  all: unset;
+  color: #ffd5cd;
+}
+
+.metric scale trough highlight {
+  all: unset;
+  background-color: #6c5abc;
+  color: $color_background;
+  border-radius: 0px;
+}
+
+.metric scale trough {
+  all: unset;
+  background-color: #45444c;
+  border-radius: 0px;
+  min-height: 7px;
+  min-width: 40px;
+  margin-left: 0px;
+}
+
+.metric {
+  font-size: 26px;
+  margin-bottom: 15px;
+}
+
+.workspaces {
+  font-size: 18px;
+}
+
+.workspace-list {
+  min-width: 12px;
+}
+
+.workspace-button {
+  color: #6f737b;
+  min-width: 12px;
+  padding: 1px 0;
+}
+
+.workspace-button.active {
+  color: $color_text_secondary;
+}
+
+.workspace-button.focused {
+  color: $color_accent;
+}
+
+.workspace-button.urgent {
+  color: #ff6b6b;
+}
+
+.workspace-button.empty {
+  opacity: 0.55;
+}
+
+.workspace-button:hover {
+  color: $color_accent;
+}

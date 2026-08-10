@@ -1,0 +1,145 @@
+$calendar_font_size: 16px;
+$calendar_font_size_small: $calendar_font_size - 2px;
+
+.calendar-bar {
+  background-color: $color_background;
+  border: 0px solid $color_border;
+  color: $color_text;
+  font-family: $font_calendar;
+  padding: 1px 10px;
+}
+
+.calendar-timeline {
+  min-width: 2750px;
+}
+
+.future-heading {
+  color: $color_text_muted;
+  font-size: $calendar_font_size;
+  font-weight: bold;
+}
+
+.all-day-event {
+  background-color: #202020;
+  border: 1px solid #454545;
+  border-radius: 3px;
+  color: #b7d5ff;
+  font-size: $calendar_font_size;
+  margin-right: 5px;
+  padding: 0 5px;
+}
+
+.all-day-event:hover {
+  background-color: #303030;
+}
+
+.calendar-status {
+  color: $color_text_muted;
+  font-size: $calendar_font_size_small;
+  padding-right: 6px;
+}
+
+.calendar-status.stale {
+  color: #d4a85a;
+}
+
+.calendar-status.error {
+  color: #e06c75;
+}
+
+.timeline-label-cell {
+  color: #777777;
+  font-size: $calendar_font_size_small;
+}
+
+.timeline-tick {
+  box-shadow: inset 1px 0 #363636;
+}
+
+.timeline-tick.minor {
+  box-shadow: inset 1px 0 #222222;
+}
+
+.timeline-lanes {
+  border-bottom: 1px solid #202020;
+}
+
+.timeline-segment.event {
+  background-color: #1f3950;
+  box-shadow: inset 2px 0 #73a7d6, inset -1px 0 #142b3e;
+  color: #eef7ff;
+}
+
+.timeline-segment.event:hover {
+  background-color: #2a4c69;
+}
+
+.timeline-segment.event label {
+  font-size: $calendar_font_size;
+  padding-left: 4px;
+}
+.timeline-segment.gap {
+  background-color: #101010;
+}
+
+@keyframes current_time_pulse {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.current-time-marker {
+  background-color: #ff9f9f;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: current_time_pulse;
+  animation-timing-function: ease-in-out;
+  min-width: 1px;
+}
+
+.day-boundary-marker {
+  background-color: #747474;
+  min-width: 1px;
+}
+
+.calendar-separator {
+  background-color: $color_border;
+  margin: 0 12px;
+  min-width: 1px;
+}
+
+.future-events {
+  min-width: 570px;
+}
+
+.future-heading {
+  margin-bottom: 0;
+}
+
+.future-event {
+  border-left: 2px solid #3d6382;
+  color: $color_text;
+  margin-bottom: 1px;
+  padding: 0 7px;
+}
+
+.future-event:hover {
+  background-color: #1a1a1a;
+}
+
+.future-when {
+  color: #7897b2;
+  font-size: $calendar_font_size_small;
+}
+
+.future-title {
+  font-size: $calendar_font_size;
+}

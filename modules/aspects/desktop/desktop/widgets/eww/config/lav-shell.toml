@@ -1,0 +1,8 @@
+[general]
+  secrets_file = "~/.config/eww/lav-shell.secrets"
+
+[calendar.agendo]
+  color = "#6e87cc"
+
+[calendar.work]
+  color = "#926ecc"

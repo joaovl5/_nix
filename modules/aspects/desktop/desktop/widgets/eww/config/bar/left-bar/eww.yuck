@@ -1,0 +1,88 @@
+(defwidget bar []
+  (centerbox :orientation "v"
+    (workspaces)
+    (centerstuff)
+    (sidestuff)))
+
+(defwidget centerstuff []
+  (box
+    :class "centerstuff"
+    :orientation "v"
+    :halign "center"
+    :valign "center"
+    time
+    date))
+
+(defwidget sidestuff []
+  (box
+    :class "sidestuff"
+    :orientation "v"
+    :space-evenly false
+    :valign "end"
+    :halign "center"
+    (metric :label "⎈"
+            :value {round(EWW_CPU.avg, 0)}
+            :onchange "")
+    (metric :label "⌸"
+            :value {EWW_RAM.used_mem_perc}
+            :onchange "")
+    (metric :label "⍙"
+            :value {round((1 - (EWW_DISK["/"].free / EWW_DISK["/"].total)) * 100, 0)}
+            :onchange "")))
+
+(defwidget workspaces []
+  (box :class "workspaces"
+       :orientation "h"
+       :space-evenly false
+       :halign "center"
+       :valign "start"
+       :spacing 4
+    (box :class "workspace-list workspace-list-secondary"
+         :orientation "v"
+         :space-evenly false
+         :halign "center"
+         :valign "start"
+         :spacing 0
+      (for wsp in {jq(wm_workspaces, 'map(select(.display == "secondary"))')}
+        (button :class "workspace-button ${wsp.active ? 'active' : ''} ${wsp.focused ? 'focused' : ''} ${wsp.urgent ? 'urgent' : ''} ${wsp.empty ? 'empty' : ''}"
+                :onclick "bash scripts/workspaces.sh focus '${wsp.id}' '${wsp.display}'"
+          {wsp.label})))
+    (box :class "workspace-list workspace-list-primary"
+         :orientation "v"
+         :space-evenly false
+         :halign "center"
+         :valign "start"
+         :spacing 0
+      (for wsp in {jq(wm_workspaces, 'map(select(.display == "primary"))')}
+        (button :class "workspace-button ${wsp.active ? 'active' : ''} ${wsp.focused ? 'focused' : ''} ${wsp.urgent ? 'urgent' : ''} ${wsp.empty ? 'empty' : ''}"
+                :onclick "bash scripts/workspaces.sh focus '${wsp.id}' '${wsp.display}'"
+          {wsp.label})))))
+
+(defwidget metric [label value onchange]
+  (box :orientation "v"
+       :class "metric"
+       :space-evenly false
+    (box :class "label" label)
+    (scale :min 0
+           :max 101
+           :active {onchange != ""}
+           :value value
+           :onchange onchange)))
+
+(deflisten wm_workspaces :initial "[]"
+  "bash scripts/workspaces.sh")
+
+(defpoll time :interval "10s"
+  "date '+%H:%M'")
+(defpoll date :interval "10s"
+  "date '+%d.%m'")
+
+(defwindow bar
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "36px"
+                      :height "30%"
+                      :anchor "right center")
+  (bar))
