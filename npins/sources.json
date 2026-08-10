@@ -286,9 +286,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "0d5ecc66a3c5820934fbaf5bfa49e588b054b19e",
+      "revision": "06b7915ee24c52b29c6462d6768ef273dedf8f9d",
       "url": null,
-      "hash": "sha256-oo8H9xgk5KGtGYQ8jCDsFYfVIn+PiQFa8WfVGip3t3s="
+      "hash": "sha256-daE6+igin++w7BOhVucmRhEnRp7bv0BDJ52GcxRic+U="
     },
     "nix-darwin": {
       "type": "Git",
