@@ -394,9 +394,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "fcb9be24289de29e01bf75afb403e61881da990b",
-      "url": "https://git.trll.ing/lav/oh-my-pi/archive/fcb9be24289de29e01bf75afb403e61881da990b.tar.gz",
-      "hash": "sha256-mQNAMYyb0Oh8JNKPpPyyzq4bHYY4FOUrxrtYC16qVWM="
+      "revision": "639fe900b06a8674d92f1b5d268be3627132842d",
+      "url": "https://git.trll.ing/lav/oh-my-pi/archive/639fe900b06a8674d92f1b5d268be3627132842d.tar.gz",
+      "hash": "sha256-MhxjAMJiYYIB9oQZ8L3GiWBBsysmIlyX41nAAVfp8uk="
     },
     "optnix": {
       "type": "Git",
