@@ -79,23 +79,23 @@
     :class "calendar-timeline"
     :orientation "v"
     :space-evenly false
-    (box
-      :class "all-day-row"
-      :orientation "h"
-      :space-evenly false
-      (for event in {calendar_state.all_day}
-        (eventbox
-          :class "all-day-event"
-          :style "border-color: ${event.color};"
-          :active true
-          :tooltip {event.tooltip}
-          (label :text {event.title})))
-      (label
-        :class "calendar-status ${calendar_state.state}"
-        :text {calendar_state.message}
-        :visible {calendar_state.message != ""}
-        :hexpand true
-        :halign "end"))
+    ; (box
+    ;   :class "all-day-row"
+    ;   :orientation "h"
+    ;   :space-evenly false
+    ;   (for event in {calendar_state.all_day}
+    ;     (eventbox
+    ;       :class "all-day-event"
+    ;       :style "border-color: ${event.color};"
+    ;       :active true
+    ;       :tooltip {event.tooltip}
+    ;       (label :text {event.title})))
+    ;   (label
+    ;     :class "calendar-status ${calendar_state.state}"
+    ;     :text {calendar_state.message}
+    ;     :visible {calendar_state.message != ""}
+    ;     :hexpand true
+    ;     :halign "end"))
     (overlay
       (box
         :orientation "v"
