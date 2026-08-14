@@ -21,6 +21,7 @@ _: {
     home.packages = with pkgs; [
       # keep-sorted start
       biome
+      deno
       eslint
       eslint_d
       node_pkg
