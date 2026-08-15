@@ -5,8 +5,8 @@ _: {
     inputs,
     ...
   }: let
+    nts = pkgs.vimPlugins.nvim-treesitter;
     treesitter = let
-      nts = pkgs.vimPlugins.nvim-treesitter;
       kanataGrammar = pkgs.tree-sitter.buildGrammar {
         language = "kanata";
         version = "0.1.0+${inputs.tree-sitter-kanata.shortRev}";
@@ -22,7 +22,8 @@ _: {
 
     grammarsPath = pkgs.symlinkJoin {
       name = "nvim-treesitter-grammars";
-      paths = treesitter.dependencies;
+      # HTML and Svelte inherit this query-only fragment, which allGrammars omits.
+      paths = treesitter.dependencies ++ [nts.queries.html_tags];
     };
 
     plugins_set =

@@ -18,6 +18,7 @@
                   :python
                   :rust
                   :scss
+                  :svelte
                   :tsx
                   :typescript
                   :vimdoc])

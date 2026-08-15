@@ -407,6 +407,10 @@
     "branch": "main",
     "commit": "7014644e25d5cebcb3e70a079804c44ec14d8e46"
   },
+  "vim-svelte-plugin": {
+    "branch": "master",
+    "commit": "f80ff67a94e3ac279fe55ecdf55ad7342f4a5228"
+  },
   "volt": {
     "branch": "main",
     "commit": "620de1321f275ec9d80028c68d1b88b409c0c8b1"
@@ -418,6 +422,10 @@
   "xml2lua.nvim": {
     "branch": "master",
     "commit": "c5fa33ad038958e9592df06e8ca6a88f4e7543aa"
+  },
+  "yats.vim": {
+    "branch": "master",
+    "commit": "2d9b95b91b9f72bb1769951841b32d2a879d3cd7"
   },
   "yorumi.nvim": {
     "branch": "main",

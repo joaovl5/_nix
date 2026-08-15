@@ -62,6 +62,7 @@
                                                :reportExplicitAny false}}}}
          :ruff {:server_capabilities {:hoverProvider false}}
          :pyrefly {}
+         :svelte {}
          :glsl_analyzer {}
          ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}

@@ -1,4 +1,4 @@
-(import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
+(import-macros {: do-req : let-req : plugin : p! : key} :./lib/init-macros)
 (local {: v/autocmd} (require :lib/nvim))
 
 (local js-ts-filetypes [:javascript
@@ -8,7 +8,8 @@
                         :typescriptreact
                         :typescript.tsx])
 
-[(plugin
+[(p! :HerringtonDarkholme/yats.vim)
+ (plugin
    :pmizio/typescript-tools.nvim
    {:dependencies [:nvim-lua/plenary.nvim :neovim/nvim-lspconfig]
     :lazy true
