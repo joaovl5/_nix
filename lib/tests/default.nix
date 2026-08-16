@@ -26,7 +26,6 @@
         "nixos"
         "common"
         "nixos.backup_local.script"
-        "nixos.ashrwm.script"
         "nixos.backup_promotion.script"
         "nixos.network_namespaces.script"
         "nixos.dns.script"

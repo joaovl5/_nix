@@ -1,5 +1,7 @@
 _: {
-  den.aspects.desktop = {
+  # FIXME: broken due to build error, remove `.ashrwm` subaspect
+  # (or include in desktop) once fixed
+  den.aspects.desktop.ashrwm = {
     homeManager = {pkgs, ...}: {
       hybrid-links.links.ashrwm = {
         from = ./config;

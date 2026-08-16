@@ -19,7 +19,8 @@ even one published system lacks capability, the command fails.
   `import all-systems` via `nixpkgs.legacyPackages.${system}`.
 - The published checks were therefore broader than the repo’s
   currently supported main architecture.
-- `tests/default.nix` gates NixOS tests only on `pkgs.stdenv.isLinux`,
+- `tests/default.nix` gates NixOS tests only on
+  `pkgs.stdenv.hostPlatform.isLinux`,
   so Linux VM tests appear for both `x86_64-linux` and `aarch64-linux`
   whenever those systems are published.
 - `systems/_modules/nix.nix` contains

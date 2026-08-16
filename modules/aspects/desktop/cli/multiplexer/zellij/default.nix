@@ -41,6 +41,10 @@ _: {
       yazi_zellij_live_cwd
     ];
 
+    # FIXME: whenever this needs restarting (e.g. updates) it
+    # seemingly cannot persist sessions and thus ends up closing all
+    # of them - frequently occurs the same activations in which the
+    # foot-server service needs to be restarted
     programs.zellij.enable = true;
 
     xdg.dataFile."zellij/plugins/zjstatus.wasm" = {

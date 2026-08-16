@@ -13,7 +13,7 @@
         && builtins.pathExists (test_root + "/${name}/default.nix") # assume a `default.nix` exists therein
     ) (builtins.readDir test_root));
 in
-  lib.optionalAttrs pkgs.stdenv.isLinux (
+  lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (
     builtins.listToAttrs (map (
         directory_name: let
           test = import (test_root + "/${directory_name}") args;

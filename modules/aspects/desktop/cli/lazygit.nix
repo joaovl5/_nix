@@ -22,10 +22,10 @@ _: {
       };
       git = {
         overrideGpg = true;
-        pagers = [
+        diffRenderers = [
           {
             colorArg = "always";
-            useExternalDiffGitConfig = true;
+            type = "extDiff";
           }
         ];
         commit = {

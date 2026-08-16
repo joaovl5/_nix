@@ -5,6 +5,7 @@ _: {
     ...
   }: {
     home.pointerCursor = {
+      enable = true;
       gtk.enable = true;
       x11.enable = true;
       package = pkgs.bibata-cursors;
@@ -20,10 +21,14 @@ _: {
         size = 14;
       };
 
-      theme = {
-        name = "Kanagawa-BL-LB";
-        package = pkgs.kanagawa-gtk-theme;
-      };
+      # FIXME: this got deprecated (iirc due to having unmaintained
+      # gtk-2 dependencies) and gives an eval error; need to find some
+      # other theme later
+
+      # theme = {
+      #   name = "Kanagawa-BL-LB";
+      #   package = pkgs.kanagawa-gtk-theme;
+      # };
 
       gtk4.theme = config.gtk.theme;
 

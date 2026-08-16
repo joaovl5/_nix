@@ -5,9 +5,13 @@ _: {
     ...
   }: {
     home.packages = with inputs.llm-agents.packages.${system}; [
-      (qmd.override {cudaSupport = true;})
       ck
       rtk
+
+      # FIXME: This is breaking `nix flake check` and for some reason cannot
+      # detect my "allowUnfree"
+
+      # (qmd.override {cudaSupport = true;})
     ];
   };
 }

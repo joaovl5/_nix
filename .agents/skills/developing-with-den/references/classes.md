@@ -60,7 +60,7 @@ Prefer module-level checks first:
 
 ```nix
 den.aspects.tools.homeManager = { pkgs, lib, ... }: {
-  home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.xclip ];
+  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.xclip ];
 };
 ```
 
