@@ -17,6 +17,9 @@ keybinds clear-defaults=true {
     bind "Alt z" {
       SwitchToMode "Locked"
     }
+    bind "Alt s" {
+      SwitchToMode "Scroll"
+    }
     bind "Alt q" {
       CloseFocus
     }
@@ -154,12 +157,43 @@ keybinds clear-defaults=true {
       SwitchToMode "Normal"
     }
   }
+  scroll {
+    bind "d" {
+      HalfPageScrollDown
+    }
+    bind "u" {
+      HalfPageScrollUp
+    }
+    bind "f" {
+      PageScrollDown
+    }
+    bind "b" {
+      PageScrollUp
+    }
+    bind "j" {
+      ScrollDown
+    }
+    bind "J" {
+      ScrollToBottom
+    }
+    bind "k" {
+      ScrollUp
+    }
+    bind "K" {
+      ScrollToTop
+    }
+  }
   shared_except "tmux" "locked" {
     bind "Ctrl a" {
       SwitchToMode "Tmux"
     }
     bind "Ctrl x" {
       SwitchToMode "Session"
+    }
+  }
+  shared_except "normal" {
+    bind "Esc" {
+      SwitchToMode "Normal"
     }
   }
 }
@@ -183,3 +217,4 @@ web_server_cert "/home/lav/.certs/localhost+3.pem"
 web_server_key "/home/lav/.certs/localhost+3-key.pem"
 enforce_https_on_localhost true
 web_server_port 4430
+
