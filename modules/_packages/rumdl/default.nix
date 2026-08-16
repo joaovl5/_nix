@@ -17,7 +17,7 @@ in
     pname = "rumdl";
     inherit src version;
 
-    cargoHash = "sha256-YHk0IirDoDR9R/qgR8CT8zcgQuBlM+qlsy3Xy7GDBCg=";
+    cargoHash = "sha256-ooLf+EpWDRfDQBQTI3xRGR9qm5kFptTB4eRIu09Jyvs=";
 
     cargoBuildFlags = [
       "--bin=rumdl"
