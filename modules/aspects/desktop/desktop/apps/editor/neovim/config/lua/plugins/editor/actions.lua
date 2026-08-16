@@ -63,7 +63,7 @@ do
   local _14_ = require("lib.plugins")
   local _15_ = require("lib.keys")
   local spec_24_auto = {}
-  for __25_auto, attrs_26_auto in ipairs({_14_.cmd("Trouble"), _14_.deps({{"folke/todo-comments.nvim", cmd = "TodoTrouble", opts = {}}}), _14_.opts({}), _14_.keys(_15_.group("diagnostics", _15_.bind("x", _15_.cmd("Trouble diagnostics toggle"), _15_.desc("Trouble")), _15_.bind("X", _15_.cmd("Trouble diagnostics toggle filter.buf=0"), _15_.desc("Trouble (Buffer)")), _15_.bind("t", _15_.cmd("TodoTrouble"), _15_.desc("TODOs")), _15_.bind("l", _15_.cmd("Trouble loclist toggle"), _15_.desc("Locations")), _15_.bind("q", _15_.cmd("Trouble qflist toggle"), _15_.desc("Quick fixes"))))}) do
+  for __25_auto, attrs_26_auto in ipairs({_14_.event("VeryLazy"), _14_.deps({{"folke/todo-comments.nvim", cmd = "TodoTrouble", opts = {}}}), _14_.opts({}), _14_.keys(_15_.group("diagnostics", _15_.bind("x", _15_.cmd("Trouble diagnostics toggle"), _15_.desc("Trouble")), _15_.bind("X", _15_.cmd("Trouble diagnostics toggle filter.buf=0"), _15_.desc("Trouble (Buffer)")), _15_.bind("t", _15_.cmd("TodoTrouble"), _15_.desc("TODOs")), _15_.bind("l", _15_.cmd("Trouble loclist toggle"), _15_.desc("Locations")), _15_.bind("q", _15_.cmd("Trouble qflist toggle"), _15_.desc("Quick fixes"))))}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end

@@ -41,7 +41,7 @@
                                    :args [:--line-numbers]}}}))
  ; trouble - see todo/errors/etc
  (p! :folke/trouble.nvim
-     (cmd :Trouble)
+     (event :VeryLazy)
      (deps [(plugin :folke/todo-comments.nvim
                     {:cmd :TodoTrouble :opts {}})])
      (opts {})
