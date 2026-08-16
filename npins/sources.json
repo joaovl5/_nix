@@ -51,18 +51,6 @@
       "url": "https://github.com/chojs23/concord/archive/90d1ee4b5cd3388fb21c2dbece24490032449281.tar.gz",
       "hash": "sha256-cBiRKHwgxmzHYxIR8ejfCeMJ4b0LApkRciovpE3ZZdg="
     },
-    "degoog-src": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/degoog.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "4ec589cab8c0b231b8c346ab9d877ef46e3de5b5",
-      "url": null,
-      "hash": "sha256-5Tid6WEe4GbIkfLOF6XetQoYxVpBj3Bk5KuCIe+Rrcc="
-    },
     "den": {
       "type": "GitRelease",
       "repository": {
@@ -230,18 +218,6 @@
       "url": "https://api.github.com/repos/denful/import-tree/tarball/refs/tags/v0.2.0",
       "hash": "sha256-Jjuz5CmSkur8KvLDoGa+vylEp+RkQtv4mt/qcMznpH0="
     },
-    "kaneo-src": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/kaneo.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "2d34b24609056ece70be2b86601c8269945a16d9",
-      "url": null,
-      "hash": "sha256-fS3FTQ4DIFXH/wGzzEfFu3xgIe2wKNU9ZG8nwPPTsPI="
-    },
     "llm-agents": {
       "type": "Git",
       "repository": {
@@ -253,18 +229,6 @@
       "revision": "daa4b601ba189c95c4c90c049a97189c1e85a112",
       "url": null,
       "hash": "sha256-rxGCv86TXB742cfK57chSHsTMC2ll5MP4VCG7DYvG1Y="
-    },
-    "mardi-gras-src": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/mardi-gras.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "2c5ec4269c98b82c8b4ecadefdcbceb0ddfe0089",
-      "url": null,
-      "hash": "sha256-H/v8mBZvRkyU1ZUlAbXaCHt1mmbdytrjYQN+94fxvu0="
     },
     "musnix": {
       "type": "Git",

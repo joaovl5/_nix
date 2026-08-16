@@ -221,7 +221,6 @@ in {
   assert tyrant.services.restic.backups ? tyrant_home_snapshot_to_a;
   assert tyrant.services.restic.backups ? tyrant_pihole_state_to_a;
   assert tyrant.services.restic.backups ? tyrant_traefik_acme_to_a;
-  assert tyrant.services.restic.backups ? tyrant_actual_budget_state_to_a;
   assert !(tyrant.services.restic.backups ? tyrant_qbittorrent_to_a);
   assert !(tyrant.services.restic.backups ? tyrant_nixarr_to_a);
   assert tyrant.services.restic.backups ? tyrant_shared_docs_core_to_a;

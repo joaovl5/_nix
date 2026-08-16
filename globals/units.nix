@@ -1,9 +1,6 @@
 # Shared defaults for unit options. Host-specific enablement lives in globals/hosts.nix.
 {lib, ...}: {
   my = {
-    "unit.akkoma" = {
-    };
-
     "unit.octodns" = {
     };
 

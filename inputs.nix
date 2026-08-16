@@ -6,12 +6,9 @@ let
     # keep-sorted start
     "all-systems"
     "ashrwm-src"
-    "degoog-src"
     "fennel-ls-nvim-docs"
     "flake-compat"
     "import-tree"
-    "kaneo-src"
-    "mardi-gras-src"
     "mysecrets"
     "nix-machine-protocol-src"
     "octodns-pihole-src"

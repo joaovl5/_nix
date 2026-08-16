@@ -51,16 +51,11 @@ in rec {
     ssh_user = "tyrant";
     ssh_port = default_ssh_port;
     units = [
-      "actual-budget"
-      "akkoma"
       "backup"
-      "degoog"
       "fail2ban"
       "forgejo"
       "gopeed"
-      "hermes-agent"
       "hister"
-      "kaneo"
       "nixarr"
       "octodns"
       "pihole"
@@ -103,36 +98,7 @@ in rec {
           vpn.enable = false; # our wireguard unit handles VPN
         };
 
-        "unit.actual-budget" = {
-          enable = true;
-        };
-
-        "unit.akkoma" = {
-          enable = true;
-          endpoint = {
-            port = 4010;
-            target = "i";
-          };
-          instance = {
-            name = "i.trll.ing";
-            description = "le trll";
-            email = "lav@trll.ing";
-            upload_limit_bytes = 100 * 1024 * 1024;
-            registrations_open = false;
-            invites_enabled = true;
-            federating = true;
-          };
-        };
-
         "unit.postgres" = {
-          enable = true;
-        };
-
-        "unit.kaneo" = {
-          enable = true;
-        };
-
-        "unit.degoog" = {
           enable = true;
         };
 
@@ -158,20 +124,6 @@ in rec {
         "unit.syncthing" = {
           enable = true;
           peer_device_ids.lavpc = "S7TNWPT-Q35KRUD-Q6SHKYK-REO2WLZ-DMLV7TW-KYPFCXJ-BFVECBC-LTRVHQT";
-        };
-
-        "unit.hermes-agent" = {
-          enable = true;
-          nat.external_interface = interface_name;
-          shared_access.enable = true;
-          ingress = {
-            dashboard.enable = true;
-            api.enable = true;
-            telegram_webhook = {
-              enable = true;
-              target = "hermes-telegram-webhook";
-            };
-          };
         };
 
         "unit.backup" = {
