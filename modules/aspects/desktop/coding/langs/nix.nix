@@ -1,5 +1,10 @@
 _: {
-  den.aspects.coding.homeManager = {pkgs, ...}: {
+  den.aspects.coding.homeManager = {
+    pkgs,
+    inputs,
+    system,
+    ...
+  }: {
     home.packages = with pkgs; [
       # lsp
       nixd
@@ -9,6 +14,8 @@ _: {
       deadnix
       # formatter
       alejandra
+
+      inputs.devenv.packages.${system}.default
     ];
   };
 }
