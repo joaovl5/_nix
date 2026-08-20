@@ -1,6 +1,6 @@
 default_mode "normal"
 theme "iceberg-dark"
-support_kitty_keyboard_protocol false
+support_kitty_keyboard_protocol true
 copy_on_select true
 session_serialization false
 serialize_pane_viewport true

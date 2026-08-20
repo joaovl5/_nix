@@ -109,7 +109,7 @@ environment {
   QT_SCALE_FACTOR "1"
   QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
   SDL_VIDEODRIVER "wayland"
-  TERMINAL "footclient"
+  TERMINAL "wezterm"
   WLR_DRM_NO_ATOMIC "1"
   XDG_CURRENT_DESKTOP "niri"
   XDG_SESSION_DESKTOP "niri"
@@ -237,7 +237,7 @@ binds {
     close-window
   }
   Mod+Return {
-    spawn "footclient"
+    spawn "wezterm"
   }
   Mod+Shift+0 {
     move-column-to-workspace "J"

@@ -1,6 +1,8 @@
 (import-macros {: do-req : let-req : plugin : p! : key}
                :./lib/init-macros)
 
+(local devdocs (require :plugins.editor._devdocs))
+
 ; type annotations generator
 [(p! :danymat/neogen
      (cmd :Neogen)
@@ -14,6 +16,31 @@
             :languages
             {:python {:template
                       {:annotation_convention :google_docstrings}}}}))
+ (p! :nitaicharan/devdocs.nvim
+     (deps [:nvim-lua/plenary.nvim
+            :folke/snacks.nvim
+            :xieyonn/spinner.nvim])
+     (keys
+       (bind :J
+             #(devdocs.cursor_lookup)
+             (desc "Devdocs (Cursor)"))
+       (group
+         :fuzzy
+         (bind :E
+               #(devdocs.ui_call :show)
+               (desc "Devdocs (Browse)")))
+       (group
+         :code
+         (bind :i
+               #(devdocs.install_for_filetype)
+               (desc "Devdocs Install (Filetype)"))
+         (bind :I
+               #(devdocs.install_browse)
+               (desc "Devdocs Install (Browse)"))
+         (bind :A
+               #(devdocs.install_all)
+               (desc "Devdocs Install (All)"))))
+     (opts {}))
  ; pretty hover
  (p! :Fildo7525/pretty_hover
      (event :LspAttach)
