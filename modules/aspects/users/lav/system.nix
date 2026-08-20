@@ -27,7 +27,11 @@
           inherit (config) hm_modules;
         in
           _: {
-            imports = hm_modules ++ [../../../../home/_modules/hybrid-links];
+            imports =
+              hm_modules
+              ++ [
+                ../../../../home/_modules
+              ];
 
             hybrid-links.source_root = inputs.self.outPath;
             hybrid-links.source_path = cfg.repo_location;

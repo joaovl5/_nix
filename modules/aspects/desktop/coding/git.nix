@@ -63,8 +63,11 @@ _: {
         attributes = [
           "* merge=mergiraf"
         ];
-
         signing = {signByDefault = true;};
+        ignores = [
+          "tmp-docs"
+          ".session-name"
+        ];
       };
       # testing
       git-cliff = {
@@ -72,16 +75,15 @@ _: {
       };
     };
 
-    home.shellAliases = {
-      ",ga" = "git";
-      ",ga." = "git add .";
-      ",gC" = "git commit";
-      ",gc" = "git commit -m";
-      ",gs" = "git status";
-      ",gP" = "git push";
-      ",gp" = "git pull";
-      ",gl" = "git log";
-      ",gd" = "git diff";
+    shell-abbrs = {
+      "ga" = "git";
+      "ga." = "git add .";
+      "gc" = "git commit";
+      "gs" = "git status";
+      "gP" = "git push";
+      "gp" = "git pull";
+      "gl" = "git log";
+      "gd" = "git diff";
     };
 
     home.packages = with pkgs; [
