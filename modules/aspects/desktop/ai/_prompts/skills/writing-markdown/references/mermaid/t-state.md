@@ -63,7 +63,6 @@ stateDiagram-v2
    State4 --> [*]
 ```
 
-
 ```mermaid
 ---
 title: Overriding diagram direction

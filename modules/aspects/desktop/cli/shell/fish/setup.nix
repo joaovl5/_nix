@@ -7,10 +7,14 @@
         ${lav.cli.shell.fish.secrets args}
       '';
       interactiveShellInit = ''
-        ${lib.readFile ./src/functions.fish}
-        bind ctrl-e __yazi_zellij_ctrl_e
         source $HOME/.config/television/shell/integration.fish
+        source $HOME/.config/fish/dynamic/init.fish
       '';
+    };
+
+    hybrid-links.links.fish = {
+      from = ./dynamic;
+      to = "~/.config/fish/dynamic";
     };
 
     # enable fish integrations w/ other apps/services

@@ -29,11 +29,9 @@ layout {
     }
     children
   }
-
   tab name="nvim" {
     pane command="nvim"
   }
-
   tab name="omp" {
     pane command="omp"
   }

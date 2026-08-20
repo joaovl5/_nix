@@ -1,7 +1,3 @@
-function !!
-    eval sudo $history[1]
-end
-
 function __yazi_zellij_decode_live_cwd
     set -l encoded_dir $argv[1]
     if test -z "$encoded_dir"
@@ -80,14 +76,4 @@ function __yazi_zellij_ctrl_e
     commandline -f repaint
 end
 
-function md --wraps mkdir -d "Create a directory and cd into it"
-    command mkdir -p $argv
-    if test $status = 0
-        switch $argv[(count $argv)]
-            case '-*'
-            case '*'
-                cd $argv[(count $argv)]
-                return
-        end
-    end
-end
+bind ctrl-e __yazi_zellij_ctrl_e
