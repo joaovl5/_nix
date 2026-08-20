@@ -10,6 +10,7 @@ local _progress_namespace = vim.api.nvim_create_namespace("devdocs-download-prog
 local _progress_inactive = "\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177"
 local _progress_complete = "\226\150\176\226\150\176\226\150\176\226\150\176\226\150\176\226\150\176\226\150\176"
 local _download_worker_count = 4
+local _line_similarity_weight = 40
 local _active_progress = nil
 local function _text(value)
   if (type(value) == "string") then
@@ -344,11 +345,55 @@ local function _normalize_heading(text)
   local without_prefix = string.gsub(normalized, "^%-+", "")
   return string.gsub(without_prefix, "%-+$", "")
 end
+local function _trigram_counts(text)
+  local normalized = string.lower(text)
+  local grams = {}
+  local size = #normalized
+  if (size == 0) then
+    return {grams, 0}
+  elseif (size < 3) then
+    grams[normalized] = 1
+    return {grams, 1}
+  else
+    local count = (size - 2)
+    for index = 1, count do
+      local gram = string.sub(normalized, index, (index + 2))
+      grams[gram] = ((grams[gram] or 0) + 1)
+    end
+    return {grams, count}
+  end
+end
+local function _trigram_similarity(left_grams, left_count, right)
+  local _let_41_ = _trigram_counts(right)
+  local right_grams = _let_41_[1]
+  local right_count = _let_41_[2]
+  if ((left_count == 0) or (right_count == 0)) then
+    return 0
+  else
+    local shared
+    do
+      local total = 0
+      for gram, count in pairs(left_grams) do
+        total = (total + math.min(count, (right_grams[gram] or 0)))
+      end
+      shared = total
+    end
+    return ((2 * shared) / (left_count + right_count))
+  end
+end
+local function _without_cursor_word(line, cursor_word)
+  if (cursor_word == "") then
+    return line
+  else
+    local context = string.gsub(line, vim.pesc(cursor_word), "", 1)
+    return context
+  end
+end
 local function _target_line(lines, entry)
   local path_parts = vim.split(entry.path, "#", {plain = true})
   local anchor = _normalize_heading((path_parts[2] or ""))
   local name = _normalize_heading(entry.name)
-  local _40_
+  local _44_
   do
     local target = nil
     for index, line in ipairs(lines) do
@@ -362,27 +407,27 @@ local function _target_line(lines, entry)
         target = (heading_3f and (anchor_match_3f or name_match_3f) and index)
       end
     end
-    _40_ = target
+    _44_ = target
   end
-  return (_40_ or 1)
+  return (_44_ or 1)
 end
 local function _resolve_item(repository, document_cache, item)
   local path_parts = vim.split(item.entry.path, "#", {plain = true})
   local path = path_parts[1]
   local cache_key = (item.lock.id .. ":" .. path)
   local cached
-  local or_42_ = document_cache[cache_key]
-  if not or_42_ then
+  local or_46_ = document_cache[cache_key]
+  if not or_46_ then
     local document = repository.find(item.lock.id, path)
     if document then
       local value = {text = document, lines = vim.split(document, "\n", {plain = true})}
       document_cache[cache_key] = value
-      or_42_ = value
+      or_46_ = value
     else
-      or_42_ = nil
+      or_46_ = nil
     end
   end
-  cached = or_42_
+  cached = or_46_
   if cached then
     item.preview = {text = cached.text, ft = "markdown"}
     item.pos = {_target_line(cached.lines, item.entry), 0}
@@ -416,11 +461,11 @@ local function _open_item(renderer, item)
   if item.preview then
     v_2f_24("vsplit")
     renderer.create_scratch_buffer(vim.split(item.preview.text, "\n", {plain = true}), "markdown")
-    local function _49_()
+    local function _53_()
       vim.api.nvim_win_set_cursor(0, item.pos)
       return v_2f_24("normal! zz")
     end
-    return v_2flater(_49_)
+    return v_2flater(_53_)
   else
     return nil
   end
@@ -438,6 +483,11 @@ M.cursor_lookup = function()
   local relevant_locks = {}
   local all_locks = {}
   local filetype = vim.bo.filetype
+  local cursor_word = vim.fn.expand("<cWORD>")
+  local line_context = _without_cursor_word(vim.api.nvim_get_current_line(), cursor_word)
+  local _let_55_ = _trigram_counts(line_context)
+  local context_grams = _let_55_[1]
+  local context_count = _let_55_[2]
   local items = {}
   local document_cache = {}
   for _, registry in ipairs((registries_usecase.list() or {})) do
@@ -451,31 +501,37 @@ M.cursor_lookup = function()
     else
     end
   end
-  local function _52_()
+  local function _57_()
     if (#relevant_locks > 0) then
       return relevant_locks
     else
       return all_locks
     end
   end
-  for _, lock in ipairs(_52_()) do
+  for _, lock in ipairs(_57_()) do
     for _0, entry in ipairs((entries_usecase.find(lock.id) or {})) do
       local item = {idx = (#items + 1), text = string.format("[%s] %s \194\183 %s", lock.name, entry.name, (entry.type or "")), entry = entry, lock = lock}
-      local function _53_(resolved)
+      local function _58_(resolved)
         return _resolve_item(repository, document_cache, resolved)
       end
-      item.resolve = _53_
+      item.resolve = _58_
       table.insert(items, item)
     end
   end
   if (#items == 0) then
     return v_2fn("No DevDocs documentation is installed", vim.log.levels.WARN)
   else
-    local function _54_(picker, item)
+    local function _59_(_, item)
+      local similarity = (item.line_similarity or _trigram_similarity(context_grams, context_count, item.text))
+      item.line_similarity = similarity
+      item.score = (item.score + (_line_similarity_weight * similarity))
+      return nil
+    end
+    local function _60_(picker, item)
       picker:close()
       return _open_item(renderer, item)
     end
-    return snacks.picker.pick({source = "select", title = "DevDocs", items = items, pattern = vim.fn.expand("<cWORD>"), format = "text", preview = _preview, layout = {preset = "default"}, confirm = _54_})
+    return snacks.picker.pick({source = "select", title = "DevDocs", items = items, pattern = cursor_word, matcher = {on_match = _59_}, format = "text", preview = _preview, layout = {preset = "default"}, confirm = _60_})
   end
 end
 return M

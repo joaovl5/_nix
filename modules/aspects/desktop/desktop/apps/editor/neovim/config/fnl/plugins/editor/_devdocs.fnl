@@ -1,3 +1,5 @@
+; TODO: refactor all of this later, this is not good and deserves much
+; scrutiny, was AI generated
 (local {: v/$ : v/n : v/later} (require :lib/nvim))
 
 (local M {})
@@ -11,9 +13,11 @@
 (local _spinner_id :devdocs-download)
 (local _progress_namespace
        (vim.api.nvim_create_namespace :devdocs-download-progress))
+
 (local _progress_inactive "▱▱▱▱▱▱▱")
 (local _progress_complete "▰▰▰▰▰▰▰")
 (local _download_worker_count 4)
+(local _line_similarity_weight 40)
 (var _active_progress nil)
 
 (fn _text [value]
@@ -65,7 +69,8 @@
             (.. (or spinner_text _progress_inactive)
                 " Downloading DevDocs documentation")
             (> progress.failed 0)
-            (string.format "Finished with %d failed download(s)" progress.failed)
+            (string.format "Finished with %d failed download(s)"
+                           progress.failed)
             "All DevDocs downloads completed")]
     (table.insert lines header)
     (table.insert lines "")
@@ -124,10 +129,12 @@
               (accumulate [width 0
                            _ registry (ipairs registries)]
                 (math.max width (vim.fn.strdisplaywidth registry.name)))
-              width (math.max 44 (math.min (+ max_name_width 10)
-                                           (- vim.o.columns 4)))
-              height (math.max 3 (math.min (+ (length rows) 2)
-                                            (- vim.o.lines 4)))
+              width (math.max 44
+                              (math.min (+ max_name_width 10)
+                                        (- vim.o.columns 4)))
+              height (math.max 3
+                               (math.min (+ (length rows) 2)
+                                         (- vim.o.lines 4)))
               row (math.max 0 (math.floor (/ (- vim.o.lines height) 2)))
               col (math.max 0 (math.floor (/ (- vim.o.columns width) 2)))
               win
@@ -182,12 +189,11 @@
     (_focus_progress_line progress 1)
     (_render_progress progress _progress_inactive)
     (when (= progress.failed 0)
-      (vim.defer_fn
-        (fn []
-          (when (and (= _active_progress progress)
-                     (not progress.running))
-            (_close_progress progress)
-            (set _active_progress nil)))
+      (vim.defer_fn (fn []
+                      (when (and (= _active_progress progress)
+                                 (not progress.running))
+                        (_close_progress progress)
+                        (set _active_progress nil)))
         1500))))
 
 (fn _install_registry [registry on_done]
@@ -320,6 +326,38 @@
         without_prefix (string.gsub normalized "^%-+" "")]
     (string.gsub without_prefix "%-+$" "")))
 
+(fn _trigram_counts [text]
+  (let [normalized (string.lower text)
+        grams {}
+        size (length normalized)]
+    (if (= size 0)
+        [grams 0]
+        (< size 3)
+        (do
+          (tset grams normalized 1)
+          [grams 1])
+        (let [count (- size 2)]
+          (for [index 1 count]
+            (let [gram (string.sub normalized index (+ index 2))]
+              (tset grams gram (+ (or (. grams gram) 0) 1))))
+          [grams count]))))
+
+(fn _trigram_similarity [left_grams left_count right]
+  (let [[right_grams right_count] (_trigram_counts right)]
+    (if (or (= left_count 0) (= right_count 0))
+        0
+        (let [shared
+              (accumulate [total 0
+                           gram count (pairs left_grams)]
+                (+ total (math.min count (or (. right_grams gram) 0))))]
+          (/ (* 2 shared) (+ left_count right_count))))))
+
+(fn _without_cursor_word [line cursor_word]
+  (if (= cursor_word "")
+      line
+      (let [context (string.gsub line (vim.pesc cursor_word) "" 1)]
+        context)))
+
 (fn _target_line [lines entry]
   (let [path_parts (vim.split entry.path "#" {:plain true})
         anchor (_normalize_heading (or (. path_parts 2) ""))
@@ -400,6 +438,10 @@
         relevant_locks []
         all_locks []
         filetype vim.bo.filetype
+        cursor_word (vim.fn.expand "<cWORD>")
+        line_context
+        (_without_cursor_word (vim.api.nvim_get_current_line) cursor_word)
+        [context_grams context_count] (_trigram_counts line_context)
         items []
         document_cache {}]
     (each [_ registry (ipairs (or (registries_usecase.list) []))]
@@ -432,7 +474,20 @@
           {:source :select
            :title "DevDocs"
            :items items
-           :pattern (vim.fn.expand "<cWORD>")
+           :pattern cursor_word
+           :matcher
+           {:on_match
+            (fn [_ item]
+              (let [similarity
+                    (or item.line_similarity
+                        (_trigram_similarity
+                          context_grams
+                          context_count
+                          item.text))]
+                (set item.line_similarity similarity)
+                (set item.score
+                     (+ item.score
+                        (* _line_similarity_weight similarity)))))}
            :format :text
            :preview _preview
            :layout {:preset :default}
