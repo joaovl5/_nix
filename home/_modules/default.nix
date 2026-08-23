@@ -1,6 +1,6 @@
 _: {
   imports = [
     ./hybrid-links
-    ./abbrs.nix
+    ./shell-stuff.nix
   ];
 }

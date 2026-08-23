@@ -8,7 +8,6 @@
       den.aspects.base-console
       den.aspects.base-security
       den.aspects.service-ntp
-      den.aspects.base-shell
     ];
 
     nixos = {

@@ -43,6 +43,43 @@
               enable = true;
             };
 
+            shell-abbrs = {
+              ".." = "cd ..";
+              "..." = "cd ../..";
+              "...." = "cd ../../..";
+              "....." = "cd ../../../..";
+              ":q" = "exit";
+              "mv" = "mv -v";
+              "mkdir" = "mkdir -v";
+              "cp" = "cp -v";
+              "grep" = "rg";
+              "find" = "fd";
+              "ncdu" = "gdu";
+              "df" = "dysk";
+              "ps" = "procs";
+              "less" = "moor";
+              # ssh
+              "@" = "ssh";
+              "@t" = "lazyssh";
+              # system stuff
+              "s" = "systemctl";
+              "st" = "systemctl-tui";
+              "ss" = "systemctl status";
+              "sr" = "systemctl restart";
+              "sx" = "systemctl stop";
+              "sl" = "journalctl";
+              "slk" = "kmon";
+              "slt" = "lazyjournal";
+              "u" = "systemctl --user";
+              "us" = "systemctl --user status";
+              "ur" = "systemctl --user restart";
+              "ux" = "systemctl --user stop";
+              "ul" = "journalctl --user";
+              # clouds
+              "@a" = "az";
+              "@at" = "az"; # TODO: placeholder for `az-tui`
+            };
+
             ### gpg
             services = {
               gpg-agent = {
@@ -64,6 +101,8 @@
               dua # same as gdu but rusty
               dysk
               procs # 'ps' replacement
+              moor
+              kmon # viewer for kernel logs
 
               # gui
               waylock ## locker
@@ -86,8 +125,6 @@
               copier
               jq
               bit-logo
-              python314Packages.huggingface-hub
-              cursor-cli
               azure-cli
               (openvpn.override {
                 openssl = openssl_legacy;

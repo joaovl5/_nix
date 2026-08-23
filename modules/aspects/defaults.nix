@@ -16,7 +16,6 @@
       den.aspects.base-nix
       den.aspects.cpp-nix
       # den.aspects.base-lix
-      den.aspects.base-shell
       den.aspects.base-dns
     ];
 

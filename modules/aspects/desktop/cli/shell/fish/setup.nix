@@ -1,5 +1,11 @@
 {lav, ...}: {
-  den.aspects.cli.homeManager = {lib, ...} @ args: {
+  den.aspects.cli.homeManager = {
+    lib,
+    mylib,
+    ...
+  } @ args: let
+    inherit (mylib) k-;
+  in {
     programs.fish = {
       enable = true;
       shellInit = ''
@@ -15,6 +21,10 @@
     hybrid-links.links.fish = {
       from = ./dynamic;
       to = "~/.config/fish/dynamic";
+    };
+
+    shell-keys = {
+      "clear-screen" = k- "C-F11" "clear";
     };
 
     # enable fish integrations w/ other apps/services

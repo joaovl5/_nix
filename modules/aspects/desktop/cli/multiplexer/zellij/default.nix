@@ -50,5 +50,12 @@ _: {
     xdg.dataFile."zellij/plugins/zjstatus.wasm" = {
       source = "${zjstatus}/bin/zjstatus.wasm";
     };
+
+    shell-abbrs = {
+      "j" = "zellij";
+      "ja" = "zellij attach";
+      "jd" = "zellij delete-session --force";
+      "jD" = "zellij delete-all-sessions --force";
+    };
   };
 }

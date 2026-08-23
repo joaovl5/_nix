@@ -102,6 +102,10 @@ _: {
       ];
     };
 
+    shell-abbrs = {
+      "n" = "nvim";
+    };
+
     home.packages = with pkgs; [
       neovide
       neovim-remote

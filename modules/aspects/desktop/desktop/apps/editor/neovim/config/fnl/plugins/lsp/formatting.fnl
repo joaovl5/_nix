@@ -5,7 +5,6 @@
         :alejandra {:command :alejandra}
         :jandent {:command :jindt :stdin true}
         :kdlfmt {:command :kdlfmt :args [:format :--kdl-version :v1 :--stdin]}
-        :nix_fmt {:command :nix :args [:fmt]}
         :prettierd {:command :prettierd}
         :sane_fnlfmt {:command :fnlfmt :args [:-]}})
 
@@ -13,13 +12,13 @@
 
 (local default_formatters_by_ft
        {; keep-sorted start
+
         :* [:keep-sorted]
-        :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
         :dockerfile [:dockerfmt]
         :fennel [:sane_fnlfmt]
         :fish [:fish_indent]
         :handlebars [:prettierd]
-        :janet [:jandent :squeeze_blanks]
+        :janet [:jandent]
         :javascript [:prettierd]
         :json [:jsonfmt]
         :kdl [:kdlfmt]
@@ -36,6 +35,7 @@
         :typescript [:prettierd]
         :typescriptreact [:prettierd]
         :yaml [:yamlfmt]})
+; :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
 
 ; keep-sorted end
 
