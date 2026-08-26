@@ -19,7 +19,8 @@ in rec {
     }
     // opts;
 
-  mk_secret_user = file: key: opts: (mk_secret file key (opts // {owner = cfg.username;}));
+  mk_secret_user = file: key: opts:
+    (opts // {owner = cfg.username;}) |> mk_secret file key;
 
   secret_path = name: config.sops.secrets.${name}.path;
 }

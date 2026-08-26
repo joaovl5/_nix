@@ -9,7 +9,7 @@
   to-arg = lib.escapeShellArg;
   join-sep = lib.concatStringsSep;
   mk-t = t: mk {type = t;};
-  mk-t-d = t: d:
+  mk-d-t = d: t:
     mk {
       type = t;
       default = d;
@@ -20,24 +20,22 @@
   inherit (mylib) kc-maps;
 in {
   options = {
-    shell-abbrs = mk-t-d (t.attrsOf t.str) {};
-    shell-keys = mk {
-      default = {};
-      type = t.attrsOf (t.submodule
-        {
-          options = {
-            key = mk-t t.str;
-            modifiers = let
-              mod-enum =
-                t.enum
-                kc-maps.base';
-            in
-              mk-t-d
-              (t.listOf mod-enum) [];
-            action = mk-t t.str;
-          };
-        });
-    };
+    shell-abbrs = t.attrsOf t.str |> mk-d-t {};
+    shell-keys = let
+      keys-t = t.submodule {
+        options = {
+          key = mk-t t.str;
+          modifiers = let
+            mod-enum =
+              t.enum
+              kc-maps.base';
+          in
+            t.listOf mod-enum |> mk-d-t [];
+          action = mk-t t.str;
+        };
+      };
+    in
+      t.attrsOf keys-t |> mk-d-t {};
   };
   config = {
     programs.fish = {
@@ -104,7 +102,9 @@ in {
           # fish
           ''bind ${to-arg k} ${v.action} # key name: ${safe-name}'';
       in
-        join-sep "\n" (lib.mapAttrsToList key-repr binds-by-kc);
+        lib.mapAttrsToList key-repr binds-by-kc
+        |> join-sep "\n";
+      # join-sep "\n" (lib.mapAttrsToList key-repr binds-by-kc);
     };
   };
 }

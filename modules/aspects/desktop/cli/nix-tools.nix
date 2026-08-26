@@ -10,9 +10,6 @@ _: {
     inherit (lib) mkMerge mkIf;
     cfg = nixos_config.my.nix;
   in {
-    imports = [
-      inputs.optnix.homeModules.optnix
-    ];
     programs = {
       # better nix cli
       nh = mkMerge [
@@ -59,31 +56,6 @@ _: {
           maintainers = ["lav"];
         };
       };
-
-      # options search
-      optnix = let
-        options_list_cmd = scope: "nix eval --json --impure --file ${lib.escapeShellArg cfg.repo_location} _utils.optnix.${scope}";
-      in {
-        enable = true;
-        settings = {
-          scopes = {
-            "nx" = {
-              description = "NixOS";
-              options-list-cmd = options_list_cmd "nx";
-            };
-            "hj" = {
-              description = "Hjem";
-              evaluator = "";
-              options-list-cmd = options_list_cmd "hj";
-            };
-            "hm" = {
-              description = "Home-Manager";
-              evaluator = "";
-              options-list-cmd = options_list_cmd "hm";
-            };
-          };
-        };
-      };
     };
 
     home.shellAliases = {
@@ -94,11 +66,7 @@ _: {
       "+c" = "nh clean all --elevation-program run0";
       "+ea" = "direnv allow";
       "+er" = "direnv reload";
-      "?" = "nps --color=always -e=true --truncate=true";
-      "?nx" = "optnix -s nx";
-      "?hm" = "optnix -s hm";
-      "?hj" = "optnix -s hj";
-      "?tvn" = "television nix-search-tv";
+      "?" = "tv nix-search-tv";
     };
 
     # faster direnv

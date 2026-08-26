@@ -70,18 +70,16 @@
     ("C-c /" . consult-ripgrep)
     ("C-c <spc>" . consult-find)
     ("C-c <tab>" . consult-buffer)
-    ("C-c f M" . consult-global-mark)
+    ("C-c f M" . consult-mark)
     ("C-c f d" . consult-flymake)
     ("C-c f h" . consult-history)
     ("C-c f m" . consult-man)
-    ("C-c f m" . consult-mark)
     ("C-c f o" . consult-outline))
    ;; keep-sorted end
    :hook (completion-list-mode . consult-preview-at-point-mode)
    :custom
    (register-preview-delay 0.1)
-   (register-preview-function #'consult-register-format)
-   (xref-)))
+   (register-preview-function #'consult-register-format)))
 
 
 (defun handle-completions ()
@@ -138,13 +136,12 @@
    ;; keep-sorted end
    :custom (vertico-count 10) (vertico-cycle t)
    :init (vertico-mode) (vertico-multiform-mode))
-  (use savehist :init (savehist-mode))
   (use
    emacs
    :custom (context-menu-mode t) (enable-recursive-minibuffers t)
    (read-extended-command-predicate
     #'command-completion-default-include-p)
-   (minibuffer-prompt-proprties
+   (minibuffer-prompt-properties
     '(read-only t cursor-intangible t face minibuffer-prompt)))
   (use
    orderless

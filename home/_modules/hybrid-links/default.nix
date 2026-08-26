@@ -9,7 +9,7 @@
 
   cfg = config.hybrid-links;
 
-  normalize_absolute = path: removeSuffix "/" (toString path);
+  normalize_absolute = path: toString path |> removeSuffix "/";
 
   is_nested_under = root: path:
     path == root || hasPrefix "${root}/" path;
@@ -101,7 +101,8 @@
     ];
 
   home_files =
-    mapAttrs' (
+    cfg.links
+    |> mapAttrs' (
       name: link:
         nameValuePair "hybrid-links/${name}" {
           source = source_from link;
@@ -109,8 +110,7 @@
           inherit (link) recursive;
           inherit (link) force;
         }
-    )
-    cfg.links;
+    );
 in {
   options.hybrid-links = {
     enable = mkOption {
@@ -119,7 +119,7 @@ in {
     };
 
     source_root = mkOption {
-      type = t.nullOr (t.oneOf [t.path t.str]);
+      type = t.oneOf [t.path t.str] |> t.nullOr;
       default = null;
     };
 

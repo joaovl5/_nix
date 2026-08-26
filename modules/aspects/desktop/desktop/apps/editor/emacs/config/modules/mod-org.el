@@ -163,6 +163,7 @@
 (defun my/org-mode-setup ()
   (visual-line-mode t)
   (auto-fill-mode -1)
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
 
   ; have line spacing ONLY in real lines and not "visual" lines that
   ; happen during wrap

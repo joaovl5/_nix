@@ -23,131 +23,126 @@
           ];
         };
 
-        home-manager.users.${cfg.username} = let
-          inherit (config) hm_modules;
-        in
-          _: {
-            imports =
-              hm_modules
-              ++ [
-                ../../../../home/_modules
-              ];
+        home-manager.users.${cfg.username} = _: {
+          imports = [
+            ../../../../home/_modules
+          ];
 
-            hybrid-links.source_root = inputs.self.outPath;
-            hybrid-links.source_path = cfg.repo_location;
+          hybrid-links.source_root = inputs.self.outPath;
+          hybrid-links.source_path = cfg.repo_location;
 
-            home.stateVersion = "23.11";
+          home.stateVersion = "23.11";
 
-            ## cli tools
-            my.syncthing = {
-              enable = true;
-            };
-
-            shell-abbrs = {
-              ".." = "cd ..";
-              "..." = "cd ../..";
-              "...." = "cd ../../..";
-              "....." = "cd ../../../..";
-              ":q" = "exit";
-              "mv" = "mv -v";
-              "mkdir" = "mkdir -v";
-              "cp" = "cp -v";
-              "grep" = "rg";
-              "find" = "fd";
-              "ncdu" = "gdu";
-              "df" = "dysk";
-              "ps" = "procs";
-              "less" = "moor";
-              # ssh
-              "@" = "ssh";
-              "@t" = "lazyssh";
-              # system stuff
-              "s" = "systemctl";
-              "st" = "systemctl-tui";
-              "ss" = "systemctl status";
-              "sr" = "systemctl restart";
-              "sx" = "systemctl stop";
-              "sl" = "journalctl";
-              "slk" = "kmon";
-              "slt" = "lazyjournal";
-              "u" = "systemctl --user";
-              "us" = "systemctl --user status";
-              "ur" = "systemctl --user restart";
-              "ux" = "systemctl --user stop";
-              "ul" = "journalctl --user";
-              # clouds
-              "@a" = "az";
-              "@at" = "az"; # TODO: placeholder for `az-tui`
-            };
-
-            ### gpg
-            services = {
-              gpg-agent = {
-                enable = true;
-                enableSshSupport = true;
-              };
-            };
-
-            # etc
-            home.packages = with pkgs; [
-              # terminal
-              ## emulator
-              ghostty
-              alacritty # backup
-              ## multiplexer
-              ## tui
-              systemctl-tui
-              gdu # ncdu alternative (MUCH faster on SSDs)
-              dua # same as gdu but rusty
-              dysk
-              procs # 'ps' replacement
-              moor
-              kmon # viewer for kernel logs
-
-              # gui
-              waylock ## locker
-              ## docs
-              # libreoffice
-              ## file manager
-              thunar
-              ## settings
-              nwg-look
-              pwvucontrol
-
-              ## vms
-              virt-manager
-
-              ## etc move later
-
-              zrythm
-              ardour
-              wireguard-tools
-              copier
-              jq
-              bit-logo
-              azure-cli
-              (openvpn.override {
-                openssl = openssl_legacy;
-              })
-              rustdesk
-
-              # dependencies
-              # keep-sorted start
-              bc
-              cliphist
-              go-grip
-              libnotify
-              perl
-              pinentry-curses
-              playerctl
-              rsync
-              runapp
-              unzip
-              wl-clipboard # wl-paste/...
-              xclip
-              # keep-sorted end
-            ];
+          ## cli tools
+          my.syncthing = {
+            enable = true;
           };
+
+          shell-abbrs = {
+            ".." = "cd ..";
+            "..." = "cd ../..";
+            "...." = "cd ../../..";
+            "....." = "cd ../../../..";
+            ":q" = "exit";
+            "mv" = "mv -v";
+            "mkdir" = "mkdir -v";
+            "cp" = "cp -v";
+            "grep" = "rg";
+            "find" = "fd";
+            "ncdu" = "gdu";
+            "df" = "dysk";
+            "ps" = "procs";
+            "less" = "moor";
+            # ssh
+            "@" = "ssh";
+            "@t" = "lazyssh";
+            # system stuff
+            "s" = "systemctl";
+            "st" = "systemctl-tui";
+            "ss" = "systemctl status";
+            "sr" = "systemctl restart";
+            "sx" = "systemctl stop";
+            "sl" = "journalctl";
+            "slk" = "kmon";
+            "slt" = "lazyjournal";
+            "u" = "systemctl --user";
+            "us" = "systemctl --user status";
+            "ur" = "systemctl --user restart";
+            "ux" = "systemctl --user stop";
+            "ul" = "journalctl --user";
+            # clouds
+            "@a" = "az";
+            "@at" = "az"; # TODO: placeholder for `az-tui`
+          };
+
+          ### gpg
+          services = {
+            gpg-agent = {
+              enable = true;
+              enableSshSupport = true;
+            };
+          };
+
+          # etc
+          home.packages = with pkgs; [
+            # terminal
+            ## emulator
+            ghostty
+            alacritty # backup
+            ## multiplexer
+            ## tui
+            systemctl-tui
+            gdu # ncdu alternative (MUCH faster on SSDs)
+            dua # same as gdu but rusty
+            dysk
+            procs # 'ps' replacement
+            moor
+            kmon # viewer for kernel logs
+
+            # gui
+            waylock ## locker
+            ## docs
+            # libreoffice
+            ## file manager
+            thunar
+            ## settings
+            nwg-look
+            pwvucontrol
+
+            ## vms
+            virt-manager
+
+            ## etc move later
+
+            zrythm
+            ardour
+            wireguard-tools
+            copier
+            jq
+            bit-logo
+            azure-cli
+            (openvpn.override {
+              openssl = openssl_legacy;
+            })
+            rustdesk
+
+            # dependencies
+            # keep-sorted start
+            bc
+            cliphist
+            go-grip
+            libnotify
+            perl
+            pinentry-curses
+            playerctl
+            rsync
+            runapp
+            unzip
+            wl-clipboard # wl-paste/...
+            xclip
+            # keep-sorted end
+          ];
+        };
       };
     };
   };

@@ -20,17 +20,6 @@
   the authoritative workflow. Prefer it over generic skill-writing
   guidance when they conflict.
 
-## Helpful Tooling
-
-- Searching nix and home-manager options
-  - `optnix -n -s nx <query>` - list of options if fuzzy search, more
-    details if you give exact option name
-  - switch `-s nx` with `-s hm` for searching home-manager options
-  - these options also search declared options (some new ones may be
-    missing if a system rebuild is pending)
-- Searching packages
-  - `nh search <query>`
-
 ## Required checks after changes
 
 In this order:

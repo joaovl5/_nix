@@ -123,9 +123,9 @@
    "C-d"
    #'my-scroll-half-down
    "C-e"
-   #'my-scroll-line-up
-   "C-e"
    #'my-scroll-line-down
+   "C-y"
+   #'my-scroll-line-up
    "C-h"
    #'evil-window-left
    "C-j"

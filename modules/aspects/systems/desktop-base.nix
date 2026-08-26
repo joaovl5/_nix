@@ -49,7 +49,6 @@
             nixos = {
               enable = o.def true;
               # not using this and it's causing issues
-              # optnix also does not need this
               includeAllModules = false;
             };
             doc = {enable = o.def true;};

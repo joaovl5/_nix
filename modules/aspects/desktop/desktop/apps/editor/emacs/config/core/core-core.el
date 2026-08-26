@@ -46,11 +46,7 @@ PROMPT sets the `read-string prompt."
 ;; --- opts/modes
 
 (editorconfig-mode 1)
-(setq desktop-save t)
-(desktop-save-mode 1)
-(savehist-mode 1)
 (save-place-mode 1)
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 ;; Keep Emacs recovery artifacts out of project trees.
 ;; `no-littering' sets a session prefix, so clear it after packages load.

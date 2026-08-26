@@ -43,11 +43,12 @@ let
   load_flake = source: (flake_compat {src = source;}).outputs;
 
   load_input = name: source:
-    normalize_source (
+    (
       if builtins.elem name raw_inputs
       then source
       else load_flake source
-    );
+    )
+    |> normalize_source;
 
   inputs = builtins.mapAttrs load_input sources;
 in

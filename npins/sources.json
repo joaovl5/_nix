@@ -376,18 +376,6 @@
       "url": "https://git.trll.ing/lav/oh-my-pi/archive/639fe900b06a8674d92f1b5d268be3627132842d.tar.gz",
       "hash": "sha256-MhxjAMJiYYIB9oQZ8L3GiWBBsysmIlyX41nAAVfp8uk="
     },
-    "optnix": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "https://git.sr.ht/~watersucks/optnix"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "d70527982f00bd40d3f49dedfa55cd2bfcceb38c",
-      "url": null,
-      "hash": "sha256-ZCQBUTKhEYbJ11lVk3u/ZCQs4xWbZQcODaMJ2W1XVkw="
-    },
     "pihole6api-src": {
       "type": "Git",
       "repository": {

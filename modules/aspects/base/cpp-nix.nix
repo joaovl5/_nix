@@ -8,6 +8,7 @@ _: {
         "external-builders"
         "fetch-closure"
         "git-hashing"
+        "pipe-operators"
       ];
     };
   };
