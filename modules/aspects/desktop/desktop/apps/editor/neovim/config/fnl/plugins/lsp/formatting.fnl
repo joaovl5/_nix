@@ -34,6 +34,7 @@
         :toml [:taplo]
         :typescript [:prettierd]
         :typescriptreact [:prettierd]
+        :typespec [:typespec]
         :yaml [:yamlfmt]})
 ; :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
 

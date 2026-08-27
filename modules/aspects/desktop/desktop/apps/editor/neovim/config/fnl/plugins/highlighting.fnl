@@ -21,6 +21,7 @@
                   :svelte
                   :tsx
                   :typescript
+                  :typespec
                   :vimdoc])
 
 ; keep-sorted end

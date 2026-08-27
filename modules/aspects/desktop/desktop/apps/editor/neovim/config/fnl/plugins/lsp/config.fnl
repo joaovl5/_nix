@@ -66,6 +66,7 @@
          :glsl_analyzer {}
          ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
+         :tsp_server {}
          :biome {}
          :janet_lsp {}
          ; :rust_analyzer {}

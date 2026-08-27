@@ -12,4 +12,6 @@
                         res.stderr)
                     vim.log.levels.ERROR))))
 
-[(plugin :eraserhd/parinfer-rust {:build build_parinfer :ft [:fennel]})]
+[{:dir _G.plugin_dirs.parinfer-rust
+  :name :parinfer-rust
+  :ft [:fennel]}]

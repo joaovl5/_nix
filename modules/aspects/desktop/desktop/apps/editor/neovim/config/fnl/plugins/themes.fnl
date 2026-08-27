@@ -1,9 +1,7 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 (local {: nil?} (require :./lib/utils))
 
-(set _G.Config.themes [{:source :nyoom-engineering/oxocarbon.nvim
-                        :names [:oxocarbon]}
-                       {:source :mellow-theme/mellow.nvim
+(set _G.Config.themes [{:source :mellow-theme/mellow.nvim
                         :names [:mellow]
                         :post_add #(set vim.g.mellow_italic_comments true)}
                        {:source :embark-theme/vim :names [:embark]}
