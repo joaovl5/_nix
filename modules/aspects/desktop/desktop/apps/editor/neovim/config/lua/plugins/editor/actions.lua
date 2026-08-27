@@ -32,18 +32,21 @@ do
     return devdocs.cursor_lookup()
   end
   local function _10_()
-    return devdocs.ui_call("show")
+    return devdocs.selection_lookup()
   end
   local function _11_()
-    return devdocs.install_for_filetype()
+    return devdocs.ui_call("show")
   end
   local function _12_()
-    return devdocs.install_browse()
+    return devdocs.install_for_filetype()
   end
   local function _13_()
+    return devdocs.install_browse()
+  end
+  local function _14_()
     return devdocs.install_all()
   end
-  for __25_auto, attrs_26_auto in ipairs({_6_.deps({"nvim-lua/plenary.nvim", "folke/snacks.nvim", "xieyonn/spinner.nvim"}), _6_.keys(_7_.bind("J", _9_, _7_.desc("Devdocs (Cursor)")), _7_.group("fuzzy", _7_.bind("E", _10_, _7_.desc("Devdocs (Browse)"))), _7_.group("code", _7_.bind("i", _11_, _7_.desc("Devdocs Install (Filetype)")), _7_.bind("I", _12_, _7_.desc("Devdocs Install (Browse)")), _7_.bind("A", _13_, _7_.desc("Devdocs Install (All)")))), _6_.opts({})}) do
+  for __25_auto, attrs_26_auto in ipairs({_6_.deps({"nvim-lua/plenary.nvim", "folke/snacks.nvim", "xieyonn/spinner.nvim"}), _6_.keys(_7_.bind("J", _9_, _7_.desc("Devdocs (Cursor)")), _7_.bind("J", _10_, _7_.desc("Devdocs (Selection)"), _7_.m("x")), _7_.group("fuzzy", _7_.bind("E", _11_, _7_.desc("Devdocs (Browse)"))), _7_.group("code", _7_.bind("i", _12_, _7_.desc("Devdocs Install (Filetype)")), _7_.bind("I", _13_, _7_.desc("Devdocs Install (Browse)")), _7_.bind("A", _14_, _7_.desc("Devdocs Install (All)")))), _6_.opts({})}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end
@@ -51,53 +54,53 @@ do
   spec_24_auto[1] = "nitaicharan/devdocs.nvim"
   _8_ = spec_24_auto
 end
-local _16_
+local _17_
 do
-  local _14_ = require("lib.plugins")
-  local _15_ = require("lib.keys")
+  local _15_ = require("lib.plugins")
+  local _16_ = require("lib.keys")
   local spec_24_auto = {}
-  local function _17_()
+  local function _18_()
     local name_1_auto = require("pretty_hover")
     local fun_2_auto = name_1_auto.hover
     return fun_2_auto()
   end
-  for __25_auto, attrs_26_auto in ipairs({_14_.event("LspAttach"), _14_.keys(_15_.bind("K", _17_, _15_.desc("Hover"))), _14_.opts({border = "none", wrap = true, multi_server = true, max_width = nil, max_height = nil})}) do
+  for __25_auto, attrs_26_auto in ipairs({_15_.event("LspAttach"), _15_.keys(_16_.bind("K", _18_, _16_.desc("Hover"))), _15_.opts({border = "none", wrap = true, multi_server = true, max_width = nil, max_height = nil})}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end
   end
   spec_24_auto[1] = "Fildo7525/pretty_hover"
-  _16_ = spec_24_auto
+  _17_ = spec_24_auto
 end
-local _20_
+local _21_
 do
-  local _18_ = require("lib.plugins")
-  local _19_ = require("lib.keys")
+  local _19_ = require("lib.plugins")
+  local _20_ = require("lib.keys")
   local spec_24_auto = {}
-  local function _21_()
+  local function _22_()
     local name_1_auto = require("tiny-code-action")
     local fun_2_auto = name_1_auto.code_action
     return fun_2_auto()
   end
-  for __25_auto, attrs_26_auto in ipairs({_18_.deps({"nvim-lua/plenary.nvim"}), _18_.event("LspAttach"), _18_.keys(_19_.group("code", _19_.bind("a", _21_, _19_.desc("Actions")))), _18_.opts({backend = "delta", picker = "snacks", resolve_timeout = 100, notify = {enabled = true, on_empty = true}, backend_opts = {delta = {header_lines_to_remove = 4, args = {"--line-numbers"}}}})}) do
+  for __25_auto, attrs_26_auto in ipairs({_19_.deps({"nvim-lua/plenary.nvim"}), _19_.event("LspAttach"), _19_.keys(_20_.group("code", _20_.bind("a", _22_, _20_.desc("Actions")))), _19_.opts({backend = "delta", picker = "snacks", resolve_timeout = 100, notify = {enabled = true, on_empty = true}, backend_opts = {delta = {header_lines_to_remove = 4, args = {"--line-numbers"}}}})}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end
   end
   spec_24_auto[1] = "rachartier/tiny-code-action.nvim"
-  _20_ = spec_24_auto
+  _21_ = spec_24_auto
 end
-local _24_
+local _25_
 do
-  local _22_ = require("lib.plugins")
-  local _23_ = require("lib.keys")
+  local _23_ = require("lib.plugins")
+  local _24_ = require("lib.keys")
   local spec_24_auto = {}
-  for __25_auto, attrs_26_auto in ipairs({_22_.event("VeryLazy"), _22_.deps({{"folke/todo-comments.nvim", cmd = "TodoTrouble", opts = {}}}), _22_.opts({}), _22_.keys(_23_.group("diagnostics", _23_.bind("x", _23_.cmd("Trouble diagnostics toggle"), _23_.desc("Trouble")), _23_.bind("X", _23_.cmd("Trouble diagnostics toggle filter.buf=0"), _23_.desc("Trouble (Buffer)")), _23_.bind("t", _23_.cmd("TodoTrouble"), _23_.desc("TODOs")), _23_.bind("l", _23_.cmd("Trouble loclist toggle"), _23_.desc("Locations")), _23_.bind("q", _23_.cmd("Trouble qflist toggle"), _23_.desc("Quick fixes"))))}) do
+  for __25_auto, attrs_26_auto in ipairs({_23_.event("VeryLazy"), _23_.deps({{"folke/todo-comments.nvim", cmd = "TodoTrouble", opts = {}}}), _23_.opts({}), _23_.keys(_24_.group("diagnostics", _24_.bind("x", _24_.cmd("Trouble diagnostics toggle"), _24_.desc("Trouble")), _24_.bind("X", _24_.cmd("Trouble diagnostics toggle filter.buf=0"), _24_.desc("Trouble (Buffer)")), _24_.bind("t", _24_.cmd("TodoTrouble"), _24_.desc("TODOs")), _24_.bind("l", _24_.cmd("Trouble loclist toggle"), _24_.desc("Locations")), _24_.bind("q", _24_.cmd("Trouble qflist toggle"), _24_.desc("Quick fixes"))))}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end
   end
   spec_24_auto[1] = "folke/trouble.nvim"
-  _24_ = spec_24_auto
+  _25_ = spec_24_auto
 end
-return {_3_, _8_, _16_, _20_, _24_, {"MagicDuck/grug-far.nvim", cmd = "GrugFar", opts = {}}}
+return {_3_, _8_, _17_, _21_, _25_, {"MagicDuck/grug-far.nvim", cmd = "GrugFar", opts = {}}}

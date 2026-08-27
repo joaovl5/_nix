@@ -4,7 +4,7 @@ local v_2f_24 = _local_1_["v/$"]
 local v_2fn = _local_1_["v/n"]
 local v_2flater = _local_1_["v/later"]
 local M = {}
-local _filetype_aliases = {fennel = "lua", javascriptreact = "javascript", sh = "bash", typescriptreact = "typescript"}
+local _filetype_aliases = {fennel = "lua", javascriptreact = "javascript", sh = "bash", tsx = "typescript", typescriptreact = "typescript"}
 local _spinner_id = "devdocs-download"
 local _progress_namespace = vim.api.nvim_create_namespace("devdocs-download-progress")
 local _progress_inactive = "\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177\226\150\177"
@@ -40,6 +40,53 @@ local function _registries_for_filetype(filetype)
   end
   return matches
 end
+local function _tailwind_context_3f(parser, range)
+  local node = parser:named_node_for_range(range, {ignore_injections = false})
+  local matches_3f = false
+  while (node and not matches_3f) do
+    if string.find(node:type(), "attribute", 1, true) then
+      local text = vim.treesitter.get_node_text(node, 0)
+      matches_3f = (string.match(text, "^%s*class%s*=") or string.match(text, "^%s*className%s*=") or string.match(text, "^%s*:class%s*=") or string.match(text, "^%s*v%-bind:class%s*="))
+    else
+    end
+    node = node:parent()
+  end
+  return matches_3f
+end
+local function _cursor_filetypes()
+  local _let_5_ = vim.api.nvim_win_get_cursor(0)
+  local row = _let_5_[1]
+  local col = _let_5_[2]
+  local range = {(row - 1), col, (row - 1), col}
+  local ok_3f, filetypes
+  local function _6_()
+    local parser = vim.treesitter.get_parser(0)
+    if not parser:is_valid(false, range) then
+      parser:parse(range)
+    else
+    end
+    local language_tree = parser:language_for_range(range)
+    local filetypes0 = {language_tree:lang()}
+    if _tailwind_context_3f(parser, range) then
+      table.insert(filetypes0, "tailwindcss")
+    else
+    end
+    return filetypes0
+  end
+  ok_3f, filetypes = pcall(_6_)
+  if ok_3f then
+    return filetypes
+  else
+    return {vim.bo.filetype}
+  end
+end
+local function _registry_matches_filetypes_3f(registry, filetypes)
+  local matches_3f = false
+  for _, filetype in ipairs(filetypes) do
+    matches_3f = (matches_3f or _registry_matches_filetype_3f(registry, filetype))
+  end
+  return matches_3f
+end
 local function _progress_window_valid_3f(progress)
   return (progress.win and vim.api.nvim_win_is_valid(progress.win) and (vim.api.nvim_win_get_buf(progress.win) == progress.buf))
 end
@@ -72,15 +119,15 @@ local function _progress_lines(progress, spinner_text)
   for _, row in ipairs(progress.rows) do
     local marker
     do
-      local case_7_ = row.status
-      if (case_7_ == "active") then
+      local case_13_ = row.status
+      if (case_13_ == "active") then
         marker = (spinner_text or _progress_inactive)
-      elseif (case_7_ == "done") then
+      elseif (case_13_ == "done") then
         marker = _progress_complete
-      elseif (case_7_ == "failed") then
+      elseif (case_13_ == "failed") then
         marker = _progress_inactive
       else
-        local _0 = case_7_
+        local _0 = case_13_
         marker = _progress_inactive
       end
     end
@@ -97,13 +144,13 @@ local function _render_progress(progress, spinner_text)
     for index, row in ipairs(progress.rows) do
       local hl_group
       do
-        local case_9_ = row.status
-        if (case_9_ == "done") then
+        local case_15_ = row.status
+        if (case_15_ == "done") then
           hl_group = "DiagnosticOk"
-        elseif (case_9_ == "failed") then
+        elseif (case_15_ == "failed") then
           hl_group = "DiagnosticError"
         else
-          local _ = case_9_
+          local _ = case_15_
           hl_group = nil
         end
       end
@@ -168,17 +215,17 @@ local function _open_progress(registries)
     vim.api.nvim_set_option_value("undolevels", -1, {buf = buf})
     vim.api.nvim_set_option_value("filetype", "devdocs-progress", {buf = buf})
     for _, key in ipairs({"q", "<Esc>"}) do
-      local function _17_()
+      local function _23_()
         return _close_progress(progress)
       end
-      vim.keymap.set("n", key, _17_, {buffer = buf, nowait = true, silent = true})
+      vim.keymap.set("n", key, _23_, {buffer = buf, nowait = true, silent = true})
     end
     do
       local spinner = require("spinner")
-      local function _18_(event)
+      local function _24_(event)
         return _render_progress(progress, event.text)
       end
-      spinner.config(_spinner_id, {kind = "custom", pattern = "aesthetic", placeholder = _progress_inactive, ui_scope = _spinner_id, on_update_ui = _18_})
+      spinner.config(_spinner_id, {kind = "custom", pattern = "aesthetic", placeholder = _progress_inactive, ui_scope = _spinner_id, on_update_ui = _24_})
     end
     _active_progress = progress
     _render_progress(progress, _progress_inactive)
@@ -192,7 +239,7 @@ local function _finish_progress(progress)
   _focus_progress_line(progress, 1)
   _render_progress(progress, _progress_inactive)
   if (progress.failed == 0) then
-    local function _20_()
+    local function _26_()
       if ((_active_progress == progress) and not progress.running) then
         _close_progress(progress)
         _active_progress = nil
@@ -201,7 +248,7 @@ local function _finish_progress(progress)
         return nil
       end
     end
-    return vim.defer_fn(_20_, 1500)
+    return vim.defer_fn(_26_, 1500)
   else
     return nil
   end
@@ -214,26 +261,26 @@ local function _install_registry(registry, on_done)
   local installer = vim.fs.joinpath(vim.fn.stdpath("config"), "scripts", "devdocs_install.py")
   local destination = vim.fs.joinpath(vim.fn.stdpath("data"), "devdocs", setup_config.plataform, registry.slug)
   local url = string.format("https://documents.devdocs.io/%s/db.json", registry.slug)
-  local function _23_(result)
+  local function _29_(result)
     if (result.code ~= 0) then
       local error_text = vim.trim((result.stderr or ""))
-      local _24_
+      local _30_
       if (error_text == "") then
-        _24_ = ""
+        _30_ = ""
       else
-        _24_ = (": " .. error_text)
+        _30_ = (": " .. error_text)
       end
-      v_2fn(("Failed to install " .. registry.name .. " documentation" .. _24_), vim.log.levels.ERROR)
+      v_2fn(("Failed to install " .. registry.name .. " documentation" .. _30_), vim.log.levels.ERROR)
       return on_done(false)
     else
-      local function _26_()
+      local function _32_()
         locks_repository.save({id = registry.slug, name = registry.name})
         return on_done(true)
       end
-      return entries_usecase.install_async(registry.slug, _26_)
+      return entries_usecase.install_async(registry.slug, _32_)
     end
   end
-  return vim.system({"python3", installer, url, destination}, {text = true}, vim.schedule_wrap(_23_))
+  return vim.system({"python3", installer, url, destination}, {text = true}, vim.schedule_wrap(_29_))
 end
 local function _install_queue(registries)
   local progress = _open_progress(registries)
@@ -243,7 +290,7 @@ local function _install_queue(registries)
     local active = 0
     local completed = 0
     local start_available = nil
-    local function _28_()
+    local function _34_()
       while ((active < _download_worker_count) and (next_index <= #registries)) do
         local index = next_index
         local row = progress.rows[index]
@@ -251,7 +298,7 @@ local function _install_queue(registries)
         active = (active + 1)
         row.status = "active"
         _focus_progress_line(progress, (index + 2))
-        local function _29_(success)
+        local function _35_(success)
           if success then
             row.status = "done"
           else
@@ -261,7 +308,7 @@ local function _install_queue(registries)
             progress.failed = (progress.failed + 1)
           else
           end
-          local function _32_()
+          local function _38_()
             collectgarbage("collect")
             active = (active - 1)
             completed = (completed + 1)
@@ -271,13 +318,13 @@ local function _install_queue(registries)
               return start_available()
             end
           end
-          return vim.schedule(_32_)
+          return vim.schedule(_38_)
         end
-        _install_registry(row.registry, _29_)
+        _install_registry(row.registry, _35_)
       end
       return _render_progress(progress, spinner.render(_spinner_id))
     end
-    start_available = _28_
+    start_available = _34_
     spinner.start(_spinner_id)
     return start_available()
   else
@@ -330,10 +377,10 @@ M.install_all = function()
   for _, registry in pairs(latest_registries) do
     table.insert(queue, registry)
   end
-  local function _38_(a, b)
+  local function _44_(a, b)
     return (a.name < b.name)
   end
-  table.sort(queue, _38_)
+  table.sort(queue, _44_)
   if (#queue == 0) then
     return v_2fn("No DevDocs documentation is available", vim.log.levels.WARN)
   else
@@ -364,9 +411,9 @@ local function _trigram_counts(text)
   end
 end
 local function _trigram_similarity(left_grams, left_count, right)
-  local _let_41_ = _trigram_counts(right)
-  local right_grams = _let_41_[1]
-  local right_count = _let_41_[2]
+  local _let_47_ = _trigram_counts(right)
+  local right_grams = _let_47_[1]
+  local right_count = _let_47_[2]
   if ((left_count == 0) or (right_count == 0)) then
     return 0
   else
@@ -389,11 +436,25 @@ local function _without_cursor_word(line, cursor_word)
     return context
   end
 end
+local function _pattern_matches_any_3f(pattern, items)
+  if (pattern == "") then
+    return true
+  else
+    local Matcher = require("snacks.picker.core.matcher")
+    local matcher = Matcher.new()
+    matcher:init(pattern)
+    local matches_3f = false
+    for _, item in ipairs(items) do
+      matches_3f = (matches_3f or (matcher:match(item) > 0))
+    end
+    return matches_3f
+  end
+end
 local function _target_line(lines, entry)
   local path_parts = vim.split(entry.path, "#", {plain = true})
   local anchor = _normalize_heading((path_parts[2] or ""))
   local name = _normalize_heading(entry.name)
-  local _44_
+  local _51_
   do
     local target = nil
     for index, line in ipairs(lines) do
@@ -407,27 +468,29 @@ local function _target_line(lines, entry)
         target = (heading_3f and (anchor_match_3f or name_match_3f) and index)
       end
     end
-    _44_ = target
+    _51_ = target
   end
-  return (_44_ or 1)
+  return (_51_ or 1)
+end
+local function _cached_document(repository, document_cache, lock_id, path)
+  local cache_key = (lock_id .. ":" .. path)
+  local or_53_ = document_cache[cache_key]
+  if not or_53_ then
+    local document = repository.find(lock_id, path)
+    if document then
+      local cached = {text = document, lines = vim.split(document, "\n", {plain = true})}
+      document_cache[cache_key] = cached
+      or_53_ = cached
+    else
+      or_53_ = nil
+    end
+  end
+  return or_53_
 end
 local function _resolve_item(repository, document_cache, item)
   local path_parts = vim.split(item.entry.path, "#", {plain = true})
   local path = path_parts[1]
-  local cache_key = (item.lock.id .. ":" .. path)
-  local cached
-  local or_46_ = document_cache[cache_key]
-  if not or_46_ then
-    local document = repository.find(item.lock.id, path)
-    if document then
-      local value = {text = document, lines = vim.split(document, "\n", {plain = true})}
-      document_cache[cache_key] = value
-      or_46_ = value
-    else
-      or_46_ = nil
-    end
-  end
-  cached = or_46_
+  local cached = _cached_document(repository, document_cache, item.lock.id, path)
   if cached then
     item.preview = {text = cached.text, ft = "markdown"}
     item.pos = {_target_line(cached.lines, item.entry), 0}
@@ -435,6 +498,50 @@ local function _resolve_item(repository, document_cache, item)
   else
     return nil
   end
+end
+local function _heading_matches(repository, document_cache, items, pattern)
+  local Matcher = require("snacks.picker.core.matcher")
+  local matcher = Matcher.new()
+  local seen = {}
+  local matches = {}
+  matcher:init(pattern)
+  for _, source_item in ipairs(items) do
+    local path_parts = vim.split(source_item.entry.path, "#", {plain = true})
+    local path = path_parts[1]
+    local cache_key = (source_item.lock.id .. ":" .. path)
+    if not seen[cache_key] then
+      seen[cache_key] = true
+      local cached = _cached_document(repository, document_cache, source_item.lock.id, path)
+      if cached then
+        local in_fence_3f = false
+        for _0, line in ipairs(cached.lines) do
+          if (string.match(line, "^%s*```") or string.match(line, "^%s*~~~")) then
+            in_fence_3f = not in_fence_3f
+          elseif not in_fence_3f then
+            local heading = string.match(line, "^#+%s+(.+)$")
+            if heading then
+              local without_suffix = string.gsub(heading, "%s+#+%s*$", "")
+              local name = string.gsub(without_suffix, "`", "")
+              local item = {idx = (#items + #matches + 1), text = string.format("[%s] %s \194\183 Heading", source_item.lock.name, name), entry = {name = name, path = path, type = "Heading"}, lock = source_item.lock}
+              if (matcher:match(item) > 0) then
+                local function _58_(resolved)
+                  return _resolve_item(repository, document_cache, resolved)
+                end
+                item.resolve = _58_
+                table.insert(matches, item)
+              else
+              end
+            else
+            end
+          else
+          end
+        end
+      else
+      end
+    else
+    end
+  end
+  return matches
 end
 local function _preview(ctx)
   ctx.preview:reset()
@@ -461,16 +568,16 @@ local function _open_item(renderer, item)
   if item.preview then
     v_2f_24("vsplit")
     renderer.create_scratch_buffer(vim.split(item.preview.text, "\n", {plain = true}), "markdown")
-    local function _53_()
+    local function _66_()
       vim.api.nvim_win_set_cursor(0, item.pos)
       return v_2f_24("normal! zz")
     end
-    return v_2flater(_53_)
+    return v_2flater(_66_)
   else
     return nil
   end
 end
-M.cursor_lookup = function()
+local function _lookup(query)
   local container = require("devdocs.application.ports.dependency_registry")
   local entries_usecase = require("devdocs.application.usecases.entries_usecase")
   local registries_usecase = require("devdocs.application.usecases.registries_usecase")
@@ -480,58 +587,72 @@ M.cursor_lookup = function()
   local locks = (locks_repository.list() or {})
   local snacks = require("snacks")
   local registries_by_slug = {}
+  local filetypes = _cursor_filetypes()
   local relevant_locks = {}
-  local all_locks = {}
-  local filetype = vim.bo.filetype
-  local cursor_word = vim.fn.expand("<cWORD>")
+  local cursor_word = query
   local line_context = _without_cursor_word(vim.api.nvim_get_current_line(), cursor_word)
-  local _let_55_ = _trigram_counts(line_context)
-  local context_grams = _let_55_[1]
-  local context_count = _let_55_[2]
+  local _let_68_ = _trigram_counts(line_context)
+  local context_grams = _let_68_[1]
+  local context_count = _let_68_[2]
   local items = {}
   local document_cache = {}
   for _, registry in ipairs((registries_usecase.list() or {})) do
     registries_by_slug[registry.slug] = registry
   end
   for _, lock in pairs(locks) do
-    table.insert(all_locks, lock)
     local registry = registries_by_slug[lock.id]
-    if (registry and _registry_matches_filetype_3f(registry, filetype)) then
+    if (registry and _registry_matches_filetypes_3f(registry, filetypes)) then
       table.insert(relevant_locks, lock)
     else
     end
   end
-  local function _57_()
-    if (#relevant_locks > 0) then
-      return relevant_locks
-    else
-      return all_locks
-    end
-  end
-  for _, lock in ipairs(_57_()) do
+  for _, lock in ipairs(relevant_locks) do
     for _0, entry in ipairs((entries_usecase.find(lock.id) or {})) do
       local item = {idx = (#items + 1), text = string.format("[%s] %s \194\183 %s", lock.name, entry.name, (entry.type or "")), entry = entry, lock = lock}
-      local function _58_(resolved)
+      local function _70_(resolved)
         return _resolve_item(repository, document_cache, resolved)
       end
-      item.resolve = _58_
+      item.resolve = _70_
       table.insert(items, item)
     end
   end
+  local pattern_matches_3f = _pattern_matches_any_3f(cursor_word, items)
+  if (not pattern_matches_3f and (cursor_word ~= "")) then
+    local heading_items = _heading_matches(repository, document_cache, items, cursor_word)
+    for _, item in ipairs(heading_items) do
+      table.insert(items, item)
+    end
+    pattern_matches_3f = (#heading_items > 0)
+  else
+  end
   if (#items == 0) then
     return v_2fn("No DevDocs documentation is installed", vim.log.levels.WARN)
+  elseif not pattern_matches_3f then
+    return v_2fn(("No DevDocs entries or headings match `" .. cursor_word .. "`"), vim.log.levels.WARN)
   else
-    local function _59_(_, item)
+    local function _72_(_, item)
       local similarity = (item.line_similarity or _trigram_similarity(context_grams, context_count, item.text))
       item.line_similarity = similarity
       item.score = (item.score + (_line_similarity_weight * similarity))
       return nil
     end
-    local function _60_(picker, item)
+    local function _73_(picker, item)
       picker:close()
       return _open_item(renderer, item)
     end
-    return snacks.picker.pick({source = "select", title = "DevDocs", items = items, pattern = cursor_word, matcher = {on_match = _59_}, format = "text", preview = _preview, layout = {preset = "default"}, confirm = _60_})
+    return snacks.picker.pick({source = "select", title = "DevDocs", items = items, pattern = cursor_word, matcher = {sort_empty = true, on_match = _72_}, format = "text", preview = _preview, layout = {preset = "default"}, confirm = _73_})
+  end
+end
+M.cursor_lookup = function()
+  return _lookup(vim.fn.expand("<cword>"))
+end
+M.selection_lookup = function()
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), {type = vim.fn.mode()})
+  local selection = vim.trim(table.concat(lines, " "))
+  if (selection ~= "") then
+    return _lookup(selection)
+  else
+    return nil
   end
 end
 return M

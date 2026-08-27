@@ -8,6 +8,7 @@
        {:fennel :lua
         :javascriptreact :javascript
         :sh :bash
+        :tsx :typescript
         :typescriptreact :typescript})
 
 (local _spinner_id :devdocs-download)
@@ -48,6 +49,42 @@
       (when (_registry_matches_filetype? registry filetype)
         (table.insert matches registry)))
     matches))
+
+(fn _tailwind_context? [parser range]
+  (var node
+       (parser:named_node_for_range range {:ignore_injections false}))
+  (var matches? false)
+  (while (and node (not matches?))
+    (when (string.find (node:type) "attribute" 1 true)
+      (let [text (vim.treesitter.get_node_text node 0)]
+        (set matches?
+             (or (string.match text "^%s*class%s*=")
+                 (string.match text "^%s*className%s*=")
+                 (string.match text "^%s*:class%s*=")
+                 (string.match text "^%s*v%-bind:class%s*=")))))
+    (set node (node:parent)))
+  matches?)
+
+(fn _cursor_filetypes []
+  (let [[row col] (vim.api.nvim_win_get_cursor 0)
+        range [(- row 1) col (- row 1) col]
+        (ok? filetypes)
+        (pcall
+          (fn []
+            (let [parser (vim.treesitter.get_parser 0)]
+              (when (not (parser:is_valid false range))
+                (parser:parse range))
+              (let [language_tree (parser:language_for_range range)
+                    filetypes [(language_tree:lang)]]
+                (when (_tailwind_context? parser range)
+                  (table.insert filetypes :tailwindcss))
+                filetypes))))]
+    (if ok? filetypes [vim.bo.filetype])))
+
+(fn _registry_matches_filetypes? [registry filetypes]
+  (accumulate [matches? false
+               _ filetype (ipairs filetypes)]
+    (or matches? (_registry_matches_filetype? registry filetype))))
 
 (fn _progress_window_valid? [progress]
   (and progress.win
@@ -358,6 +395,16 @@
       (let [context (string.gsub line (vim.pesc cursor_word) "" 1)]
         context)))
 
+(fn _pattern_matches_any? [pattern items]
+  (if (= pattern "")
+      true
+      (let [Matcher (require :snacks.picker.core.matcher)
+            matcher (Matcher.new)]
+        (matcher:init pattern)
+        (accumulate [matches? false
+                     _ item (ipairs items)]
+          (or matches? (> (matcher:match item) 0))))))
+
 (fn _target_line [lines entry]
   (let [path_parts (vim.split entry.path "#" {:plain true})
         anchor (_normalize_heading (or (. path_parts 2) ""))
@@ -380,22 +427,77 @@
                    index))))
       1)))
 
+(fn _cached_document [repository document_cache lock_id path]
+  (let [cache_key (.. lock_id ":" path)]
+    (or (. document_cache cache_key)
+        (let [document (repository.find lock_id path)]
+          (when document
+            (let [cached
+                  {:text document
+                   :lines (vim.split document "\n" {:plain true})}]
+              (tset document_cache cache_key cached)
+              cached))))))
+
 (fn _resolve_item [repository document_cache item]
   (let [path_parts (vim.split item.entry.path "#" {:plain true})
         path (. path_parts 1)
-        cache_key (.. item.lock.id ":" path)
         cached
-        (or (. document_cache cache_key)
-            (let [document (repository.find item.lock.id path)]
-              (when document
-                (let [value
-                      {:text document
-                       :lines (vim.split document "\n" {:plain true})}]
-                  (tset document_cache cache_key value)
-                  value))))]
+        (_cached_document repository document_cache item.lock.id path)]
     (when cached
       (set item.preview {:text cached.text :ft :markdown})
       (set item.pos [(_target_line cached.lines item.entry) 0]))))
+
+(fn _heading_matches [repository document_cache items pattern]
+  (let [Matcher (require :snacks.picker.core.matcher)
+        matcher (Matcher.new)
+        seen {}
+        matches []]
+    (matcher:init pattern)
+    (each [_ source_item (ipairs items)]
+      (let [path_parts
+            (vim.split source_item.entry.path "#" {:plain true})
+            path (. path_parts 1)
+            cache_key (.. source_item.lock.id ":" path)]
+        (when (not (. seen cache_key))
+          (tset seen cache_key true)
+          (let [cached
+                (_cached_document
+                  repository
+                  document_cache
+                  source_item.lock.id
+                  path)]
+            (when cached
+              (var in_fence? false)
+              (each [_ line (ipairs cached.lines)]
+                (if (or (string.match line "^%s*```")
+                        (string.match line "^%s*~~~"))
+                    (set in_fence? (not in_fence?))
+                    (not in_fence?)
+                    (let [heading (string.match line "^#+%s+(.+)$")]
+                      (when heading
+                        (let [without_suffix
+                              (string.gsub heading "%s+#+%s*$" "")
+                              name (string.gsub without_suffix "`" "")
+                              item
+                              {:idx (+ (length items)
+                                       (length matches)
+                                       1)
+                               :text
+                               (string.format "[%s] %s · Heading"
+                                              source_item.lock.name
+                                              name)
+                               :entry
+                               {:name name :path path :type :Heading}
+                               :lock source_item.lock}]
+                          (when (> (matcher:match item) 0)
+                            (set item.resolve
+                                 (fn [resolved]
+                                   (_resolve_item
+                                     repository
+                                     document_cache
+                                     resolved)))
+                            (table.insert matches item))))))))))))
+    matches))
 
 (fn _preview [ctx]
   (ctx.preview:reset)
@@ -424,7 +526,7 @@
         (vim.api.nvim_win_set_cursor 0 item.pos)
         (v/$ "normal! zz")))))
 
-(fn M.cursor_lookup []
+(fn _lookup [query]
   (let [container (require :devdocs.application.ports.dependency_registry)
         entries_usecase (require :devdocs.application.usecases.entries_usecase)
         registries_usecase
@@ -435,10 +537,9 @@
         locks (or (locks_repository.list) {})
         snacks (require :snacks)
         registries_by_slug {}
+        filetypes (_cursor_filetypes)
         relevant_locks []
-        all_locks []
-        filetype vim.bo.filetype
-        cursor_word (vim.fn.expand "<cWORD>")
+        cursor_word query
         line_context
         (_without_cursor_word (vim.api.nvim_get_current_line) cursor_word)
         [context_grams context_count] (_trigram_counts line_context)
@@ -447,14 +548,11 @@
     (each [_ registry (ipairs (or (registries_usecase.list) []))]
       (tset registries_by_slug registry.slug registry))
     (each [_ lock (pairs locks)]
-      (table.insert all_locks lock)
       (let [registry (. registries_by_slug lock.id)]
         (when (and registry
-                   (_registry_matches_filetype? registry filetype))
+                   (_registry_matches_filetypes? registry filetypes))
           (table.insert relevant_locks lock))))
-    (each [_ lock (ipairs (if (> (length relevant_locks) 0)
-                              relevant_locks
-                              all_locks))]
+    (each [_ lock (ipairs relevant_locks)]
       (each [_ entry (ipairs (or (entries_usecase.find lock.id) []))]
         (let [item
               {:idx (+ (length items) 1)
@@ -468,15 +566,28 @@
                (fn [resolved]
                  (_resolve_item repository document_cache resolved)))
           (table.insert items item))))
+    (var pattern_matches? (_pattern_matches_any? cursor_word items))
+    (when (and (not pattern_matches?) (not= cursor_word ""))
+      (let [heading_items
+            (_heading_matches repository document_cache items cursor_word)]
+        (each [_ item (ipairs heading_items)]
+          (table.insert items item))
+        (set pattern_matches? (> (length heading_items) 0))))
     (if (= (length items) 0)
         (v/n "No DevDocs documentation is installed" vim.log.levels.WARN)
+        (not pattern_matches?)
+        (v/n (.. "No DevDocs entries or headings match `"
+                 cursor_word
+                 "`")
+             vim.log.levels.WARN)
         (snacks.picker.pick
           {:source :select
            :title "DevDocs"
            :items items
            :pattern cursor_word
            :matcher
-           {:on_match
+           {:sort_empty true
+            :on_match
             (fn [_ item]
               (let [similarity
                     (or item.line_similarity
@@ -495,5 +606,18 @@
            (fn [picker item]
              (picker:close)
              (_open_item renderer item))}))))
+
+(fn M.cursor_lookup []
+  (_lookup (vim.fn.expand "<cword>")))
+
+(fn M.selection_lookup []
+  (let [lines
+        (vim.fn.getregion
+          (vim.fn.getpos :v)
+          (vim.fn.getpos ".")
+          {:type (vim.fn.mode)})
+        selection (vim.trim (table.concat lines " "))]
+    (when (not= selection "")
+      (_lookup selection))))
 
 M

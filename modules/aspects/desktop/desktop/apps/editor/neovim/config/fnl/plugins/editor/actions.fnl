@@ -24,6 +24,10 @@
        (bind :J
              #(devdocs.cursor_lookup)
              (desc "Devdocs (Cursor)"))
+       (bind :J
+             #(devdocs.selection_lookup)
+             (desc "Devdocs (Selection)")
+             (m :x))
        (group
          :fuzzy
          (bind :E
