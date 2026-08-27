@@ -22,8 +22,8 @@ _: {
 
     grammarsPath = pkgs.symlinkJoin {
       name = "nvim-treesitter-grammars";
-      # HTML and Svelte inherit this query-only fragment, which allGrammars omits.
-      paths = treesitter.dependencies ++ [nts.queries.html_tags];
+      # The configured parsers inherit these query-only fragments, which allGrammars omits.
+      paths = treesitter.dependencies ++ [nts.queries.ecma nts.queries.html_tags nts.queries.jsx];
     };
 
     plugins_set =
