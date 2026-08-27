@@ -17,6 +17,15 @@ input {
     accel-speed 0.1
     accel-profile "flat"
   }
+  tablet {
+    // ENV{LIBINPUT_CALIBRATION_MATRIX}="1 0 0 0 1 0" # default
+    // ENV{LIBINPUT_CALIBRATION_MATRIX}="0 -1 1 1 0 0" # 90 degree clockwise
+    // ENV{LIBINPUT_CALIBRATION_MATRIX}="-1 0 1 0 -1 1" # 180 degree clockwise
+    // ENV{LIBINPUT_CALIBRATION_MATRIX}="0 1 0 -1 0 1" # 270 degree clockwise
+    // ENV{LIBINPUT_CALIBRATION_MATRIX}="-1 0 1 0 1 0" # reflect along y axis
+    calibration-matrix 1.0 0.0 0.0 0.0 1.0 0.0
+    map-to-focused-output
+  }
   workspace-auto-back-and-forth
 }
 screenshot-path "~/pics/screenshots/%Y-%m-%d %H-%M-%S.png"
