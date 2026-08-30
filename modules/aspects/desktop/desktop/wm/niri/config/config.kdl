@@ -122,7 +122,7 @@ environment {
   WLR_DRM_NO_ATOMIC "1"
   XDG_CURRENT_DESKTOP "niri"
   XDG_SESSION_DESKTOP "niri"
-  XDG_SESSION_TYPE "niri"
+  XDG_SESSION_TYPE "wayland"
   __GLX_VENDOR_LIBRARY_NAME "nvidia"
   __NV_PRIME_RENDER_OFFLOAD "1"
   __VK_LAYER_NV_optimus "NVIDIA_only"
