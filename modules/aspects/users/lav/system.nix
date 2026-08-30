@@ -125,6 +125,7 @@
               openssl = openssl_legacy;
             })
             rustdesk
+            rnote
 
             # dependencies
             # keep-sorted start
