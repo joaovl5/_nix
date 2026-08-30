@@ -1,0 +1,16 @@
+diff --git a/runtime/lua/vim/lsp/semantic_tokens.lua b/runtime/lua/vim/lsp/semantic_tokens.lua
+--- a/runtime/lua/vim/lsp/semantic_tokens.lua
++++ b/runtime/lua/vim/lsp/semantic_tokens.lua
+@@ -237,9 +237,9 @@ function STHighlighter:on_attach(client_id)
+         self:reset()
+       end
+
+-      if
+-        opts.data.method == 'textDocument/didChange' or opts.data.method == 'textDocument/didOpen'
+-      then
++      if opts.data.method == 'textDocument/didChange' then
++        self:debounce_request()
++      elseif opts.data.method == 'textDocument/didOpen' then
+         self:send_request()
+       end
+     end,

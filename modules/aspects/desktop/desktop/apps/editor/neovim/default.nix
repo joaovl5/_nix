@@ -69,6 +69,11 @@ _: {
 
     programs.neovim = {
       enable = true;
+      # Neovim 0.12.4 refreshes semantic tokens throughout each typing burst.
+      # Remove this patch after https://github.com/neovim/neovim/issues/41521 is fixed.
+      package = pkgs.neovim-unwrapped.overrideAttrs (old: {
+        patches = (old.patches or []) ++ [./semantic-tokens-debounce.patch];
+      });
       sideloadInitLua = true;
       initLua = lib.mkOrder 1001 ''
         _G.plugin_dirs = {}
