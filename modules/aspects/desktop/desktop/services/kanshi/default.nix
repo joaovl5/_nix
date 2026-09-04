@@ -17,12 +17,14 @@ _: {
               mode = "1920x1080@100Hz";
               position = "0,240";
               transform = "90";
+              scale = 1;
             }
             {
               criteria = "HDMI-A-1";
               mode = "1920x1080@60Hz";
-              position = "3960,240"; # ?
+              position = "3960,240";
               transform = "90";
+              scale = 1.4;
             }
           ];
         };
