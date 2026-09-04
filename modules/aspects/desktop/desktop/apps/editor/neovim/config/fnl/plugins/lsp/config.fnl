@@ -70,8 +70,8 @@
          :biome {}
          :janet_lsp {}
          ; :rust_analyzer {}
-         :nim_langserver {}
-         ; :nimls {}
+         ; :nim_langserver {}
+         :nimls {}
          :lua_ls {:cmd [:lua-language-server]
                   :settings {:Lua {:completion {:callSnippet :Replace}}}}
          :fennel_ls {:cmd [:fennel-ls]

@@ -14,6 +14,7 @@
                   :kanata
                   :lua
                   :markdown
+                  :nim
                   :nix
                   :python
                   :rust

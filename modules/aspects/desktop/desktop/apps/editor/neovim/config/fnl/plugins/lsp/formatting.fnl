@@ -12,7 +12,6 @@
 
 (local default_formatters_by_ft
        {; keep-sorted start
-
         :* [:keep-sorted]
         :dockerfile [:dockerfmt]
         :fennel [:sane_fnlfmt]
@@ -36,6 +35,7 @@
         :typescriptreact [:prettierd]
         :typespec [:typespec]
         :yaml [:yamlfmt]})
+
 ; :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
 
 ; keep-sorted end
