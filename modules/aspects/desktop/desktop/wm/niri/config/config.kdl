@@ -18,13 +18,12 @@ input {
     accel-profile "flat"
   }
   tablet {
-    // ENV{LIBINPUT_CALIBRATION_MATRIX}="1 0 0 0 1 0" # default
+ // ENV{LIBINPUT_CALIBRATION_MATRIX}="1 0 0 0 1 0" # default
     // ENV{LIBINPUT_CALIBRATION_MATRIX}="0 -1 1 1 0 0" # 90 degree clockwise
     // ENV{LIBINPUT_CALIBRATION_MATRIX}="-1 0 1 0 -1 1" # 180 degree clockwise
     // ENV{LIBINPUT_CALIBRATION_MATRIX}="0 1 0 -1 0 1" # 270 degree clockwise
     // ENV{LIBINPUT_CALIBRATION_MATRIX}="-1 0 1 0 1 0" # reflect along y axis
-    calibration-matrix 1.0 0.0 0.0 0.0 1.0 0.0
-    map-to-focused-output
+
   }
   workspace-auto-back-and-forth
 }
@@ -75,7 +74,7 @@ output "HDMI-A-2" {
   position x=0 y=240
   layout {
     struts {
-      left 0
+      left 60
       right 0
       top 0
       bottom 0
@@ -84,12 +83,12 @@ output "HDMI-A-2" {
 }
 output "HDMI-A-1" {
   mode "1920x1080@60.000"
-  scale 1
+  scale 1.4
   transform "90"
   position x=3960 y=240
   layout {
     struts {
-      left 0
+      left 10
       right 0
       top 0
       bottom 0
