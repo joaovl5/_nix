@@ -84,5 +84,5 @@
                       :y "0%"
                       :width "36px"
                       :height "30%"
-                      :anchor "right center")
+                      :anchor "left center")
   (bar))
