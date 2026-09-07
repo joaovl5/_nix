@@ -60,6 +60,56 @@
   (straight-use-package 'projectile)
   (projectile-mode t))
 
+;; --- Consult async search input
+
+;; `consult-fd' and `consult-ripgrep' do not use the minibuffer
+;; completion styles for the part of the input they hand to fd/rg: they
+;; go through `consult--regexp-compiler'.  The default compiler only
+;; splits on spaces, so Orderless syntax (and fuzzy matching) never
+;; reached the external tools.  Route them through Orderless instead.
+(defvar consult--regexp-compiler)
+(defvar orderless-affix-dispatch-alist)
+(declare-function consult--convert-regexp "consult")
+(declare-function orderless-compile "orderless")
+(declare-function orderless--highlight "orderless")
+
+(defun my-consult--orderless-regexp-compiler (input type ignore-case)
+  "Compile INPUT into TYPE regexps with Orderless for Consult.
+Enables any-order components and safe regexp-producing dispatchers,
+including `=word' for literal and `~word' for flex matching."
+  ;; The package is otherwise deferred; a Consult command can be the
+  ;; first completion command after startup.
+  (require 'orderless)
+  ;; Orderless's `!' exclusion and `&' annotation dispatchers return
+  ;; predicates; fd/rg only accept regexps.  Treat those characters
+  ;; literally in the backend part rather than silently dropping a
+  ;; component.  Exclusions remain available in Consult's completion
+  ;; filter, for example `#search#!skip'.
+  (let* ((orderless-affix-dispatch-alist
+          (seq-remove
+           (lambda (entry) (memq (car entry) '(?! ?&)))
+           orderless-affix-dispatch-alist))
+         (regexps (cdr (orderless-compile input))))
+    (cons
+     (mapcar
+      (lambda (regexp) (consult--convert-regexp regexp type)) regexps)
+     (lambda (str) (orderless--highlight regexps ignore-case str)))))
+
+(defun my-consult-search-paths (fn &rest args)
+  "Run path search FN with fuzzy Orderless input.
+Flex is safe on file names, so `SPC SPC' behaves like a fuzzy finder."
+  (let ((consult--regexp-compiler
+         #'my-consult--orderless-regexp-compiler))
+    (apply fn args)))
+
+(defun my-consult-search-contents (fn &rest args)
+  "Run content search FN with fuzzy Orderless input.
+Plain input supports flex matching for `SPC /'; use `=word' to force a
+literal component when a broad fuzzy regexp returns too many lines."
+  (let ((consult--regexp-compiler
+         #'my-consult--orderless-regexp-compiler))
+    (apply fn args)))
+
 (defun handle-actions ()
   (use
    consult
@@ -79,7 +129,12 @@
    :hook (completion-list-mode . consult-preview-at-point-mode)
    :custom
    (register-preview-delay 0.1)
-   (register-preview-function #'consult-register-format)))
+   (register-preview-function #'consult-register-format)
+   :init
+   (dolist (command '(consult-fd consult-find consult-locate))
+     (advice-add command :around #'my-consult-search-paths))
+   (dolist (command '(consult-grep consult-git-grep consult-ripgrep))
+     (advice-add command :around #'my-consult-search-contents))))
 
 
 (defun handle-completions ()
@@ -145,10 +200,23 @@
     '(read-only t cursor-intangible t face minibuffer-prompt)))
   (use
    orderless
+   ;; Out of the box `orderless-matching-styles' is
+   ;; (orderless-literal orderless-regexp): every space-separated
+   ;; component has to appear verbatim, so `M-x' input like "swbuf" or
+   ;; "org td" returned nothing and only literal (prefix) typing
+   ;; worked.  `orderless-flex' adds the in-order subsequence match,
+   ;; which is the fuzzy behaviour expected from `M-x' and from buffer
+   ;; and file prompts.  The `orderless-affix-dispatch' default still
+   ;; allows per-component overrides: "=word" literal, "~word" flex,
+   ;; "!word" exclude.
    :custom
    (completion-styles '(orderless basic))
+   (orderless-matching-styles
+    '(orderless-literal orderless-regexp orderless-flex))
+   ;; `basic' first keeps TRAMP/remote host completion working, then
+   ;; partial-completion for `/u/s/b' style expansion, then fuzzy.
    (completion-category-overrides
-    '((file (styles partial-completion))))
+    '((file (styles basic partial-completion orderless))))
    (completion-category-defaults nil)
    (completion-pcm-leading-wildcard t))
   (use

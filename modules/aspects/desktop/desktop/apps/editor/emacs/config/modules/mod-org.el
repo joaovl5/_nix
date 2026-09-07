@@ -11,21 +11,18 @@
 ;; format: off
 (setq
  ;; keep-sorted start
- org-adapt-indentation t
- org-agenda-tags-column 0
- org-auto-align-tags nil
  org-catch-invisible-edits 'show-and-error
  org-edit-src-content-indentation 0
  org-ellipsis " · "
- org-hide-emphasis-markers t
- org-hide-leading-stars t
  org-insert-heading-respect-content t
  org-log-done t
  org-pretty-entities t
  org-return-follows-link t
  org-special-ctrl-a/e t
  org-src-fontify-natively t
+ org-src-preserve-indentation nil
  org-src-tab-acts-natively t
+ org-startup-indented t
  org-tags-column -80)
 ;; keep-sorted end
 ;; format: on
@@ -45,14 +42,14 @@
   "Preferred families for Org headings.")
 
 (defconst my/org-heading-heights
-  '((org-level-1 . 1.12)
-    (org-level-2 . 1.09)
-    (org-level-3 . 1.07)
-    (org-level-4 . 1.05)
-    (org-level-5 . 1.035)
-    (org-level-6 . 1.025)
-    (org-level-7 . 1.015)
-    (org-level-8 . 1.01))
+  '((org-level-1 . 1.2)
+    (org-level-2 . 1.15)
+    (org-level-3 . 1.12)
+    (org-level-4 . 1.09)
+    (org-level-5 . 1.07)
+    (org-level-6 . 1.05)
+    (org-level-7 . 1.025)
+    (org-level-8 . 1.0))
   "Restrained heading heights for Org headings.")
 
 (defconst my/org-code-faces
@@ -128,12 +125,20 @@
       (org-insert-item (org-at-item-checkbox-p))
     (call-interactively #'org-return)))
 
-(defun my/org-open-link-or-evil-ret ()
-  "Open the Org link at point or preserve Evil's normal Return behavior."
+(defun my/org-normal-ret-dwim ()
+  "Act on the Org thing at point from Evil normal state.
+Links open, headings cycle their TODO state, checkbox items toggle,
+and anything else keeps Evil's Return behavior."
   (interactive)
-  (if (org-in-regexp org-link-any-re)
-      (org-open-at-point)
-    (call-interactively #'evil-ret)))
+  (cond
+   ((org-in-regexp org-link-any-re)
+    (org-open-at-point))
+   ((org-at-heading-p)
+    (call-interactively #'org-todo))
+   ((org-at-item-checkbox-p)
+    (call-interactively #'org-toggle-checkbox))
+   (t
+    (call-interactively #'evil-ret))))
 
 (defun my/org-shift-return-dwim ()
   "Continue a list item or preserve the standard Org Shift-Return behavior."
@@ -158,6 +163,61 @@
       (org-download-clipboard)
     (call-interactively #'yank)))
 
+;; Block delimiter reveal
+
+;; `org-appear' only knows about emphasis markers, links, entities and
+;; hidden keywords, so it never touches the `#+begin_src' line that
+;; `org-modern' hides (org-modern applies an `invisible' text property
+;; through font-lock).  Mirror `org-appear' behavior for those lines:
+;; drop the property while point is on the delimiter line, and let
+;; font-lock put it back when point leaves.
+
+(defconst my/org-block-delimiter-re
+  "^[ \t]*#\\+\\(?:begin\\|end\\|BEGIN\\|END\\)_"
+  "Regexp matching an Org block delimiter line.")
+
+(defvar-local my/org-block-revealed nil
+  "Bounds of the block delimiter line currently revealed at point.")
+
+(defun my/org-block-delimiter-bounds ()
+  "Return the bounds of the block delimiter line at point, if any."
+  (save-excursion
+    (beginning-of-line)
+    (when (looking-at my/org-block-delimiter-re)
+      (cons (line-beginning-position) (line-end-position)))))
+
+(defun my/org-block-reveal-update ()
+  "Reveal the Org block delimiter line at point, hide the previous one."
+  (let ((bounds (my/org-block-delimiter-bounds)))
+    (unless (equal bounds my/org-block-revealed)
+      (when my/org-block-revealed
+        (let ((beg (car my/org-block-revealed))
+              (end (cdr my/org-block-revealed)))
+          (when (and (<= (point-min) beg) (<= end (point-max)))
+            (font-lock-flush beg end))))
+      (setq my/org-block-revealed bounds)
+      (when bounds
+        ;; The line may not have been fontified yet (for example after a
+        ;; jump into an off-screen block).  Fontify first, then reveal;
+        ;; otherwise jit-lock would add org-modern's invisibility after
+        ;; this hook and leave the delimiter hidden until point moved.
+        (font-lock-ensure (car bounds) (cdr bounds))
+        (with-silent-modifications
+          (remove-text-properties
+           (car bounds) (cdr bounds) '(invisible nil)))))))
+
+(define-minor-mode my/org-block-appear-mode
+  "Show the raw `#+begin_'/`#+end_' text of the block line at point."
+  :lighter
+  nil
+  (if my/org-block-appear-mode
+      (add-hook 'post-command-hook #'my/org-block-reveal-update nil t)
+    (remove-hook 'post-command-hook #'my/org-block-reveal-update t)
+    (when my/org-block-revealed
+      (font-lock-flush
+       (car my/org-block-revealed) (cdr my/org-block-revealed))
+      (setq my/org-block-revealed nil))))
+
 ;; Hooks
 
 (defun my/org-mode-setup ()
@@ -178,13 +238,32 @@
 (sup 'org-modern)
 (with-eval-after-load 'org
   ;; `org-modern` keeps structural polish and ordinary end-of-line tags.
+  ;; With `org-indent-mode' on, org-modern drops its fringe block
+  ;; bracket and leaves leading stars alone: `org-modern-indent' below
+  ;; redraws the brackets, and keeping the stars is what gives nested
+  ;; headings their increasing indentation.
   (setq
-   org-modern-priority nil
-   org-modern-progress nil
-   org-modern-timestamp nil
-   org-modern-todo nil
+   org-modern-hide-stars nil
+   org-modern-priority t
+   org-modern-progress t
+   org-modern-timestamp t
+   org-modern-todo t
    org-modern-tag t)
   (global-org-modern-mode))
+
+;; Reproduces org-modern's block styling under `org-indent-mode', which
+;; org-modern itself disables (it needs the fringe).  Must be added late
+;; to `org-mode-hook', hence the depth.
+(use
+ org-modern-indent
+ :straight
+ (org-modern-indent
+  :type git
+  :host github
+  :repo "jdtsmith/org-modern-indent")
+ :commands (org-modern-indent-mode)
+ :after org
+ :init (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
 
 (use
@@ -214,7 +293,7 @@
  :config
  (setf (alist-get 'file org-link-frame-setup) #'find-file)
  (evil-define-key
-  'normal org-mode-map (kbd "RET") #'my/org-open-link-or-evil-ret)
+  'normal org-mode-map (kbd "RET") #'my/org-normal-ret-dwim)
  (evil-define-key
   'insert
   org-mode-map
@@ -223,6 +302,20 @@
   (kbd "<S-return>")
   #'my/org-shift-return-dwim)
  (require 'org-indent)
+ ;; `org-tempo' is what turns `<s TAB' (and friends) into block
+ ;; expansion; without it only `C-c C-,' inserts templates.
+ (require 'org-tempo)
+ (dolist (template
+          '(("el" . "src emacs-lisp")
+            ("json" . "src json")
+            ("md" . "src markdown")
+            ("nix" . "src nix")
+            ("py" . "src python")
+            ("sh" . "src sh")
+            ("scm" . "src scheme")
+            ("ts" . "src typescript")
+            ("yaml" . "src yaml")))
+   (add-to-list 'org-structure-template-alist template))
  (my/org-ensure-theme-refresh-hooks)
  (my/org-setup-faces))
 
@@ -290,8 +383,41 @@
  :config (setq org-hide-emphasis-markers t)
  (setq
   org-appear-autoemphasis t
+  org-appear-entities t
+  org-appear-autokeywords t
   org-appear-autolinks t
   org-appear-autosubmarkers t))
+
+;; Same idea as `org-appear', for the block delimiter lines org-modern
+;; hides.  Defined in this file, see "Block delimiter reveal" above.
+(add-hook 'org-mode-hook #'my/org-block-appear-mode)
+
+;; Under evaluation, no key bindings yet: `M-x org-timegrid-week' opens
+;; the SVG week calendar built from `org-agenda-files'.
+(use
+ org-timegrid
+ :straight (org-timegrid :type git :host github :repo "Gleek/org-timegrid")
+ :commands (org-timegrid-week)
+ :custom
+ (org-timegrid-org-files 'agenda)
+ (org-timegrid-default-zoom 0.7)
+ :config (require 'org-timegrid-org))
+
+;; Under evaluation, no key bindings yet: `M-x org-remark-mark' marks a
+;; region, `org-remark-open' edits its note.  The tracking mode is what
+;; makes existing highlights come back when a file is visited again.
+(use
+ org-remark
+ :straight (org-remark :type git :host github :repo "nobiot/org-remark")
+ :commands
+ (org-remark-mark
+  org-remark-mode
+  org-remark-next
+  org-remark-open
+  org-remark-prev
+  org-remark-remove
+  org-remark-view)
+ :init (org-remark-global-tracking-mode +1))
 
 (use valign :hook (org-mode . valign-mode))
 

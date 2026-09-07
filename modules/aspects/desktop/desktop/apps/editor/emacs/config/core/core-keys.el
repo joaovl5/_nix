@@ -251,6 +251,14 @@
  :ensure t
  :demand t
  :after evil
+ :init
+ ;; `C-h'/`C-l' worked everywhere but `C-j'/`C-k' died in Org: Evil
+ ;; Collection binds them to `outline-forward-same-level' /
+ ;; `outline-backward-same-level' in `outline-mode-map', and an auxiliary
+ ;; keymap attached to an active major-mode map outranks the global Evil
+ ;; state maps.  Blacklisting keeps the window-motion binds authoritative
+ ;; in every mode Evil Collection supports.
+ (setq evil-collection-key-blacklist '("C-h" "C-j" "C-k" "C-l"))
  :config (evil-collection-init))
 
 (use
@@ -346,6 +354,11 @@ Resize: _h_ width-  _l_ width+  _k_ height-  _j_ height+  _<escape>_ exit
 
 (setq text-scale-mode-step 1.05)
 
+;; `global-text-scale-adjust' rescales every frame and buffer, and takes
+;; its direction from the last key, so `M--' decreases and `M-='
+;; increases.  The shifted pair keeps the buffer-local scaling of
+;; `text-scale-decrease' and `text-scale-increase'.
+
 ;; keep-sorted start
 (global-set-key (kbd "C-c -") 'split-window-below)
 (global-set-key (kbd "C-c ;") 'eval-expression)
@@ -355,9 +368,11 @@ Resize: _h_ width-  _l_ width+  _k_ height-  _j_ height+  _<escape>_ exit
 (global-set-key (kbd "C-l") 'completion-at-point)
 (global-set-key (kbd "C-s") 'save-buffer)
 (global-set-key (kbd "C-x C-c") #'my-quit-emacs)
-(global-set-key (kbd "M--") #'text-scale-decrease)
+(global-set-key (kbd "M-+") #'text-scale-increase)
+(global-set-key (kbd "M--") #'global-text-scale-adjust)
 (global-set-key (kbd "M-<tab>") 'other-window)
-(global-set-key (kbd "M-=") #'text-scale-increase)
+(global-set-key (kbd "M-=") #'global-text-scale-adjust)
+(global-set-key (kbd "M-_") #'text-scale-decrease)
 (global-set-key (kbd "M-c") 'kill-ring-save)
 (global-set-key (kbd "M-h") 'windmove-left)
 (global-set-key (kbd "M-j") 'windmove-down)

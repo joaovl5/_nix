@@ -48,6 +48,23 @@ PROMPT sets the `read-string prompt."
 (editorconfig-mode 1)
 (save-place-mode 1)
 
+;; --- session persistence
+
+;; Session restore regressed because `desktop-save-mode'/`savehist-mode'
+;; were dropped in commit c692895 ("cleanups and pipes"); only
+;; `save-place-mode' survived, and that just restores point inside files
+;; you reopen by hand.  `no-littering' keeps the desktop under
+;; `var/desktop/'.
+(setq
+ ;; keep-sorted start
+ desktop-load-locked-desktop 'check-pid
+ desktop-restore-eager 8
+ desktop-save t
+ history-length 300)
+;; keep-sorted end
+(desktop-save-mode 1)
+(savehist-mode 1)
+
 ;; Keep Emacs recovery artifacts out of project trees.
 ;; `no-littering' sets a session prefix, so clear it after packages load.
 (setq
