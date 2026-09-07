@@ -17,7 +17,7 @@ _: {
               mode = "1920x1080@100Hz";
               position = "0,240";
               transform = "90";
-              scale = 1;
+              scale = 1.0;
             }
             {
               criteria = "HDMI-A-1";

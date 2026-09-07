@@ -17,7 +17,6 @@ let
     "sane-fnlfmt-src"
     "stable"
     "superpowers"
-    "tree-sitter-kanata"
     "unstable-small"
     # keep-sorted end
   ];

@@ -5,41 +5,16 @@ _: {
     inputs,
     ...
   }: let
-    nts = pkgs.vimPlugins.nvim-treesitter;
-    treesitter = let
-      kanataGrammar = pkgs.tree-sitter.buildGrammar {
-        language = "kanata";
-        version = "0.1.0+${inputs.tree-sitter-kanata.shortRev}";
-        src = inputs.tree-sitter-kanata;
-        # Neovim evaluates #match? with Vim regex; escape literal @ in upstream query.
-        postPatch = ''
-          substituteInPlace queries/highlights.scm \
-            --replace-fail '"@.+"' '"\\@.+"'
-        '';
-      };
-    in
-      nts.withPlugins (_: nts.allGrammars ++ [kanataGrammar]);
-
-    grammarsPath = pkgs.symlinkJoin {
-      name = "nvim-treesitter-grammars";
-      # The configured parsers inherit these query-only fragments, which allGrammars omits.
-      paths = treesitter.dependencies ++ [nts.queries.ecma nts.queries.html_tags nts.queries.jsx];
+    plugins_set = with pkgs.vimPlugins; {
+      inherit
+        parinfer-rust
+        blink-cmp
+        blink-pairs
+        friendly-snippets
+        lspkind-nvim
+        colorful-menu-nvim
+        ;
     };
-
-    plugins_set =
-      {
-        inherit treesitter;
-      }
-      // (with pkgs.vimPlugins; {
-        inherit
-          parinfer-rust
-          blink-cmp
-          blink-pairs
-          friendly-snippets
-          lspkind-nvim
-          colorful-menu-nvim
-          ;
-      });
 
     add_rtp_lines = lib.join "\n" (
       lib.mapAttrsToList
@@ -47,12 +22,7 @@ _: {
         vim.opt.runtimepath:append('${package}')
         _G.plugin_dirs['${name}'] = '${package}'
       '')
-      (
-        plugins_set
-        // {
-          inherit grammarsPath;
-        }
-      )
+      plugins_set
     );
   in {
     hybrid-links.links.neovim = {
@@ -102,8 +72,12 @@ _: {
           fennel
         ];
       extraPackages = with pkgs; [
+        curl
+        gcc
+        gnutar
         lua5_1
         luarocks
+        tree-sitter
       ];
     };
 

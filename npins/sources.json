@@ -443,18 +443,6 @@
       "url": null,
       "hash": "sha256-Nbfzvd7h7KrO9OW7W3DdUgDkQW11xSfZylFXLWJ8J5I="
     },
-    "tree-sitter-kanata": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "ssh://git@git.trll.ing/mirrors/tree-sitter-kanata.git"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "af53b4c35d6faa3b4ba7c317fb795a6eb679b42a",
-      "url": null,
-      "hash": "sha256-+7EiIkcSe4raApw1H1iQJC2aILLdSrM7Y3tAswbCO1o="
-    },
     "unstable": {
       "type": "Channel",
       "name": "nixos-unstable",
