@@ -64,6 +64,9 @@
          :pyrefly {}
          :svelte {}
          :glsl_analyzer {}
+         :nickel_ls {}
+         :nushell {}
+         :ocamllsp {}
          ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
          :tsp_server {}

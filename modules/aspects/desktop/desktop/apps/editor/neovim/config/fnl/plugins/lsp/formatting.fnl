@@ -12,6 +12,7 @@
 
 (local default_formatters_by_ft
        {; keep-sorted start
+
         :* [:keep-sorted]
         :dockerfile [:dockerfmt]
         :fennel [:sane_fnlfmt]
@@ -24,8 +25,10 @@
         :kulala [:kulala-fmt]
         :lua [:stylua]
         :markdown [:rumdl]
+        :nickel [:nickel]
         :nim [:nph]
         :nix [:alejandra]
+        :nu [:nufmt]
         :python [:ruff_fix :ruff_format :ruff_organize_imports]
         :rust [:rustfmt]
         :sh [:shfmt]
@@ -35,7 +38,6 @@
         :typescriptreact [:prettierd]
         :typespec [:typespec]
         :yaml [:yamlfmt]})
-
 ; :_ [:trim_whitespace :trim_newlines :squeeze_blanks]
 
 ; keep-sorted end

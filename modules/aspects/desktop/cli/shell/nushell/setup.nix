@@ -1,5 +1,5 @@
 _: {
-  den.aspects.cli.homeManager = {
+  den.aspects.cli.homeManager = {pkgs, ...}: {
     programs.nushell = {
       enable = true;
     };
@@ -11,7 +11,11 @@ _: {
       direnv.enableNushellIntegration = true;
       zoxide.enableNushellIntegration = true;
       yazi.enableNushellIntegration = true;
-      eza.enableNushellIntegration = true;
+      eza.enableNushellIntegration = false;
     };
+
+    home.packages = with pkgs; [
+      nufmt
+    ];
   };
 }
