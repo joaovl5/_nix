@@ -83,6 +83,8 @@ _: {
       nps
       # manage source pins
       npins
+      tack
+      nixtamal
       # better 'nix' with pretty things
       nix-output-monitor
       # inspect things
