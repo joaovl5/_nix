@@ -207,7 +207,24 @@ _: {
             EnvironmentFile = environment_file;
           };
         wants = optional network_online "network-online.target";
-        inherit script;
+        script =
+          if network_online
+          then ''
+            attempt=1
+            while ! (
+              ${script}
+            ); do
+              if ((attempt >= 12)); then
+                echo "${name} failed after $attempt attempts" >&2
+                exit 1
+              fi
+
+              echo "${name} attempt $attempt failed; retrying in 5 seconds" >&2
+              ${pkgs.coreutils}/bin/sleep 5
+              ((attempt += 1))
+            done
+          ''
+          else script;
       };
 
     mk_timer = {
@@ -234,7 +251,7 @@ _: {
           ++ ["init"]
           ++ source_args
           ++ ["--copy-chunker-params"];
-        probe_args = destination_args ++ ["cat" "config"];
+        probe_args = destination_args ++ ["--no-lock" "cat" "config"];
         command_args =
           destination_args
           ++ ["copy"]
@@ -312,6 +329,9 @@ _: {
       role_name = role_suffix role;
       prune_name = "backup_prune_${host_name}_${role_name}";
       check_name = "backup_check_${host_name}_${role_name}";
+      unlock_args =
+        repo_args destination
+        ++ ["unlock"];
       prune_args =
         repo_args destination
         ++ ["prune"];
@@ -328,6 +348,7 @@ _: {
           ssh_runtime = needs_ssh [destination];
           script = ''
             set -eu
+            ${restic} ${render_argv unlock_args}
             exec ${restic} ${render_argv prune_args}
           '';
         })

@@ -42,6 +42,18 @@ _: {
         pkg = pkgs.forgejo;
         runner_user = "forgejo-runner";
         runner_state_dir = "/var/lib/${runner_user}";
+        runner_ready = pkgs.writeShellScript "forgejo-runner-ready" ''
+          attempt=1
+          while ! ${lib.getExe pkgs.curl} --fail --silent --show-error --max-time 5 --output /dev/null "https://${opts.web.endpoint.target}.${tld}/"; do
+            if ((attempt >= 60)); then
+              echo "Forgejo did not become reachable after $attempt attempts" >&2
+              exit 1
+            fi
+
+            ${pkgs.coreutils}/bin/sleep 2
+            ((attempt += 1))
+          done
+        '';
         runner_config = (pkgs.formats.yaml {}).generate "forgejo-runner.yaml" {
           log.level = "info";
           runner = {
@@ -51,16 +63,11 @@ _: {
             enabled = true;
             dir = "${runner_state_dir}/cache";
           };
-          container.docker_host = "automount";
-          container.force_pull = true;
           server.connections.forgejo = {
             url = "https://${opts.web.endpoint.target}.${tld}/";
             inherit (opts.actions_runner) uuid;
             token_url = "file:$CREDENTIALS_DIRECTORY/token.txt";
-            labels = [
-              "ubuntu-latest:docker://node:20-bookworm"
-              "debian-latest:docker://node:20-bookworm"
-            ];
+            labels = ["nix:host"];
           };
         };
         omp_runner_user = "forgejo-runner-omp-updater";
@@ -132,8 +139,6 @@ _: {
               }
             ];
 
-            virtualisation.docker.enable = true;
-
             sops.secrets.forgejo_actions_runner_token =
               s.mk_secret "${s.dir}/forgejo.yaml" "actions_runner_token" {};
 
@@ -142,17 +147,29 @@ _: {
               isSystemUser = true;
               group = runner_user;
               home = runner_state_dir;
-              extraGroups = ["docker"];
             };
 
             systemd.services.forgejo-runner = {
               description = "Forgejo Actions runner";
               wantedBy = ["multi-user.target"];
-              after = ["docker.service" "network-online.target"];
+              after = ["forgejo.service" "network-online.target" "nix-daemon.service"];
               wants = ["network-online.target"];
-              requires = ["docker.service"];
-              environment.HOME = runner_state_dir;
+              requires = ["forgejo.service"];
+              path = [
+                pkgs.bash
+                pkgs.coreutils
+                pkgs.git
+                pkgs.gnutar
+                pkgs.nodejs_24
+                config.nix.package
+              ];
+              environment = {
+                HOME = runner_state_dir;
+                SHELL = lib.getExe pkgs.bash;
+                SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+              };
               serviceConfig = {
+                ExecStartPre = "${runner_ready}";
                 User = runner_user;
                 Group = runner_user;
                 StateDirectory = runner_user;
@@ -161,6 +178,18 @@ _: {
                 ExecStart = "${lib.getExe pkgs.forgejo-runner} daemon --config ${runner_config}";
                 Restart = "on-failure";
                 RestartSec = "5s";
+                UMask = "0077";
+                CapabilityBoundingSet = "";
+                LockPersonality = true;
+                NoNewPrivileges = true;
+                PrivateDevices = true;
+                PrivateTmp = true;
+                ProtectControlGroups = true;
+                ProtectHome = true;
+                ProtectKernelModules = true;
+                ProtectKernelTunables = true;
+                ProtectSystem = "strict";
+                RestrictSUIDSGID = true;
               };
             };
           })
@@ -185,8 +214,9 @@ _: {
             systemd.services.forgejo-omp-updater-runner = {
               description = "Repository-scoped OMP Forgejo Actions runner";
               wantedBy = ["multi-user.target"];
-              after = ["network-online.target" "nix-daemon.service"];
+              after = ["forgejo.service" "network-online.target" "nix-daemon.service"];
               wants = ["network-online.target"];
+              requires = ["forgejo.service"];
               path = [
                 pkgs.bash
                 pkgs.coreutils
@@ -201,6 +231,7 @@ _: {
                 SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
               };
               serviceConfig = {
+                ExecStartPre = "${runner_ready}";
                 User = omp_runner_user;
                 Group = omp_runner_user;
                 StateDirectory = omp_runner_user;

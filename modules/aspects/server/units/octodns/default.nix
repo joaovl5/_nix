@@ -59,7 +59,17 @@ _: {
                 ${lib.optionalString opts.use_cloudflare_token ''
                   export CLOUDFLARE_TOKEN=$(cat ${s.secret_path "cloudflare_api_token"})
                 ''}
-                ${octodns_env}/bin/octodns-sync --config-file=${octodns_config} --force --doit
+                attempt=1
+                while ! ${octodns_env}/bin/octodns-sync --config-file=${octodns_config} --force --doit; do
+                  if ((attempt >= 6)); then
+                    echo "OctoDNS sync failed after $attempt attempts" >&2
+                    exit 1
+                  fi
+
+                  echo "OctoDNS sync attempt $attempt failed; retrying in 5 seconds" >&2
+                  ${pkgs.coreutils}/bin/sleep 5
+                  ((attempt += 1))
+                done
               '';
             };
           };
