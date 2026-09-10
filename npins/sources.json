@@ -372,9 +372,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "0f255194a00b144ecff8cbfbef511ca91fec967d",
-      "url": "https://git.trll.ing/lav/oh-my-pi/archive/0f255194a00b144ecff8cbfbef511ca91fec967d.tar.gz",
-      "hash": "sha256-+P/Wa6DaJQglY5+I+omyFxTgloYmxAdiGqSc+yNsR5E="
+      "revision": "5230dd3ffd552a022a95f9edaa0165652c4eaaa5",
+      "url": "https://git.trll.ing/lav/oh-my-pi/archive/5230dd3ffd552a022a95f9edaa0165652c4eaaa5.tar.gz",
+      "hash": "sha256-yTw/d57ZdhHA0oL+KfrHX7AScO4R7ZJiqbSzsm4Xmsc="
     },
     "pihole6api-src": {
       "type": "Git",
