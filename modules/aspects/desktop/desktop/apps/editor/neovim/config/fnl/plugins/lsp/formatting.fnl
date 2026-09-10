@@ -29,6 +29,7 @@
         :nim [:nph]
         :nix [:alejandra]
         :nu [:nufmt]
+        :ocaml [:ocamlformat]
         :python [:ruff_fix :ruff_format :ruff_organize_imports]
         :rust [:rustfmt]
         :sh [:shfmt]
