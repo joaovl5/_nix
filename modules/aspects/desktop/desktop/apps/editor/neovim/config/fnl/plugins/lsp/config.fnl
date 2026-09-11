@@ -109,13 +109,6 @@
                                nu.diagnostics.statix
                                nu.code_actions.statix
                                nu.diagnostics.deadnix]}))})
- ; python
- ;; TODO: ^0 setup mypy to use it : nu.diagnostics.mypy
- ; js-like
- ; nu.formatting.prettierd
- ; (no :formatting.jq)]}))})
- ; (no :diagnostics.eslint_d)
- ; (no :code_actions.eslint_d)]}))})
  (plugin :neovim/nvim-lspconfig
          {:config mk_lsp
           :event :VeryLazy
