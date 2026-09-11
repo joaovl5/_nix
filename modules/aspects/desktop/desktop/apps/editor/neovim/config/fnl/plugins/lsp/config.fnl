@@ -94,8 +94,7 @@
          {:dependencies [:nvim-lua/plenary.nvim :nvimtools/none-ls-extras.nvim]
           :event :VeryLazy
           :opts (fn []
-                  (let [nu (. (require :null-ls) :builtins)
-                        no #(require (.. :none-ls. $1))]
+                  (let [nu (. (require :null-ls) :builtins)]
                     {:sources [; general
                                nu.diagnostics.gitleaks
                                nu.hover.dictionary

@@ -46,11 +46,6 @@ local function mk_lsp()
 end
 local function _5_()
   local nu = require("null-ls").builtins
-  local no
-  local function _6_(_241)
-    return require(("none-ls." .. _241))
-  end
-  no = _6_
   return {sources = {nu.diagnostics.gitleaks, nu.hover.dictionary, nu.diagnostics.hadolint, nu.hover.printenv, nu.diagnostics.fish, nu.formatting.alejandra, nu.diagnostics.statix, nu.code_actions.statix, nu.diagnostics.deadnix}}
 end
 return {{"nvimtools/none-ls.nvim", dependencies = {"nvim-lua/plenary.nvim", "nvimtools/none-ls-extras.nvim"}, event = "VeryLazy", opts = _5_}, {"neovim/nvim-lspconfig", config = mk_lsp, event = "VeryLazy", dependencies = {"b0o/schemastore.nvim"}}}
