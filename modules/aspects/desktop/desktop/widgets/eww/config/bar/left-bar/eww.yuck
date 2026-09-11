@@ -78,7 +78,7 @@
   "date '+%d.%m'")
 
 (defwindow bar
-  :monitor 0
+  :monitor "HDMI-A-2"
   :windowtype "dock"
   :geometry (geometry :x "0%"
                       :y "0%"
