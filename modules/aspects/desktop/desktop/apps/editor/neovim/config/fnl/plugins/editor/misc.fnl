@@ -28,7 +28,7 @@
      {:session_lens {:picker :snacks}
       :cwd_change_handling true
       :git_use_branch_name true
-      :git_auto_restore_on_branch_change true
+      :git_auto_restore_on_branch_change false
       :bypass_save_filetypes [:alpha :dashboard :snacks_dashboard]}))
  (p!
    :folke/zen-mode.nvim

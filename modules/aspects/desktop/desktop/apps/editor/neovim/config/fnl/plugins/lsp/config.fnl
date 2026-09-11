@@ -67,13 +67,10 @@
          :nickel_ls {}
          :nushell {}
          :ocamllsp {}
-         ; :ty {}
          :clangd {:cmd [:clangd :--background-index]}
          :tsp_server {}
          :biome {}
          :janet_lsp {}
-         ; :rust_analyzer {}
-         ; :nim_langserver {}
          :nimls {}
          :lua_ls {:cmd [:lua-language-server]
                   :settings {:Lua {:completion {:callSnippet :Replace}}}}
@@ -82,23 +79,6 @@
                      :root_dir get_fennel_root_dir}
          :jsonls {:cmd [:jsonls]
                   :settings {:json {:schemas (schemastore.json.schemas)}}}
-         :nixd
-         {:cmd [:nixd]
-          :settings
-          {:nixd
-           {:nixpkgs {:expr "import <nixpkgs> {}"}
-            :formatting {:command [:alejandra]}
-            :options {:home-manager {;; In case of using home-manager standalone, replace to:
-                                     ;;  "expr": "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.<name>.options"
-                                     :expr "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.lav.options.home-manager.users.type.getSubOptions []"}
-                      :nixos {:expr (let [nixos_hostname :lavpc]
-                                      (.. "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations."
-                                          nixos_hostname
-                                          :.options))}}}}}
-         ; :taplo {:cmd [:taplo]}
-         :marksman {:cmd [:marksman]}
-         :stylua {:cmd [:stylua]}
-         ; :yamlls {:cmd [:yaml-language-server] :args [:--stdio]}
          :nil {:cmd [:nil]
                :filetypes [:nix]
                :root_markers [:flake.nix :.git]

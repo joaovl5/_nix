@@ -4,7 +4,7 @@ do
   local _1_ = require("lib.plugins")
   local _2_ = require("lib.keys")
   local spec_24_auto = {}
-  for __25_auto, attrs_26_auto in ipairs({_1_.lazy(false), _1_.keys(_2_.group("session", _2_.bind("s", _2_.cmd("AutoSession save"), _2_.desc("Save session")), _2_.bind("t", _2_.cmd("AutoSession toggle"), _2_.desc("Toggle autosave")), _2_.bind("f", _2_.cmd("AutoSession search"), _2_.desc("Pick sessions")))), _1_.opts({session_lens = {picker = "snacks"}, cwd_change_handling = true, git_use_branch_name = true, git_auto_restore_on_branch_change = true, bypass_save_filetypes = {"alpha", "dashboard", "snacks_dashboard"}})}) do
+  for __25_auto, attrs_26_auto in ipairs({_1_.lazy(false), _1_.keys(_2_.group("session", _2_.bind("s", _2_.cmd("AutoSession save"), _2_.desc("Save session")), _2_.bind("t", _2_.cmd("AutoSession toggle"), _2_.desc("Toggle autosave")), _2_.bind("f", _2_.cmd("AutoSession search"), _2_.desc("Pick sessions")))), _1_.opts({session_lens = {picker = "snacks"}, cwd_change_handling = true, git_use_branch_name = true, bypass_save_filetypes = {"alpha", "dashboard", "snacks_dashboard"}, git_auto_restore_on_branch_change = false})}) do
     for key_27_auto, value_28_auto in pairs(attrs_26_auto) do
       spec_24_auto[key_27_auto] = value_28_auto
     end
