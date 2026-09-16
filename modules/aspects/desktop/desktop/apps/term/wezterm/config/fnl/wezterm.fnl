@@ -1,9 +1,16 @@
 (local wez (require :wezterm))
+
 (local c (wez.config_builder))
 (local act wez.action)
 
 (set c.enable_kitty_keyboard true)
+(set c.enable_wayland true)
 (set c.window_close_confirmation "NeverPrompt")
+(set c.front_end "WebGpu")
+
+(each [_ gpu (ipairs (wez.gui.enumerate_gpus))]
+  (if (= gpu.device_type :IntegratedGpu)
+      (set c.webgpu_preferred_adapter gpu)))
 
 (local font_def (wez.font "RecMonoSmCasual Nerd Font Mono"))
 

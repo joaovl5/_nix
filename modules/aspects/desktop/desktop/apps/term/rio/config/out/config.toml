@@ -1,0 +1,40 @@
+# See the full configuration reference: https://rioterm.com/docs/config
+confirm-before-quit           = false
+line-height                   = 1.175
+hide-mouse-cursor-when-typing = true
+
+[navigation]
+  mode = "Plain"
+
+[fonts]
+  size = 23
+
+[editor]
+  program = "nvim"
+
+[cursor]
+  shape    = "beam"
+  blinking = true
+
+[bell]
+  visual = true
+
+[effects]
+  trail-cursor       = true
+  trail-cursor-decay = [25, 100]
+
+
+[hints]
+  alphabet = "hjklasdfg;uiopqwer"
+  [[hints.rules]]
+    regex           = '(https://|http://)[^\u{0000}-\u{001F}\u{007F}-\u{009F}<>\"\\s{-}\\^⟨⟩`\\\\]+'
+    hyperlinks      = true
+    post-processing = true
+    persist         = false
+
+    [hints.rules.action]
+      command = "xdg-open" # Simple command
+
+    [hints.rules.binding]
+      key  = "O"
+      mods = ["Control", "Shift"]

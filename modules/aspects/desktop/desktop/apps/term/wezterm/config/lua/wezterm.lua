@@ -3,7 +3,15 @@ local wez = require("wezterm")
 local c = wez.config_builder()
 local act = wez.action
 c.enable_kitty_keyboard = true
+c.enable_wayland = true
 c.window_close_confirmation = "NeverPrompt"
+c.front_end = "WebGpu"
+for _, gpu in ipairs(wez.gui.enumerate_gpus()) do
+  if (gpu.device_type == "IntegratedGpu") then
+    c.webgpu_preferred_adapter = gpu
+  else
+  end
+end
 local font_def = wez.font("RecMonoSmCasual Nerd Font Mono")
 c.initial_cols = 120
 c.initial_rows = 28

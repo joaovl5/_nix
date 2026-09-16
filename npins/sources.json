@@ -388,6 +388,20 @@
       "url": null,
       "hash": "sha256-8vXYZsq9x+1XIXB8c2tBSvQ0qygrwYC9ZKOOfc68apI="
     },
+    "rio": {
+      "type": "Git",
+      "repository": {
+        "type": "Forgejo",
+        "server": "https://git.trll.ing/",
+        "owner": "mirrors",
+        "repo": "rio"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "7ae087500bcde5c0c9f09cb9c50382e9220b3360",
+      "url": "https://git.trll.ing/mirrors/rio/archive/7ae087500bcde5c0c9f09cb9c50382e9220b3360.tar.gz",
+      "hash": "sha256-tH/zrMXQUBzLJF5IA/0LUV2HyNMb4A38mZtexXBdsiQ="
+    },
     "rumdl-src": {
       "type": "Git",
       "repository": {
