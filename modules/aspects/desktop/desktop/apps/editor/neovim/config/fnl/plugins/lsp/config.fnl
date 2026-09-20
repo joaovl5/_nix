@@ -70,7 +70,7 @@
          :clangd {:cmd [:clangd :--background-index]}
          :tsp_server {}
          :biome {}
-         :janet_lsp {}
+         :janet_lsp {:cmd [:sh :-c "jpm janet $(which janet-lsp)"]}
          :nimls {}
          :lua_ls {:cmd [:lua-language-server]
                   :settings {:Lua {:completion {:callSnippet :Replace}}}}

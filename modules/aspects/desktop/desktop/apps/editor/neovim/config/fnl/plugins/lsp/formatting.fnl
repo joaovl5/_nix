@@ -18,7 +18,7 @@
         :fennel [:sane_fnlfmt]
         :fish [:fish_indent]
         :handlebars [:prettierd]
-        :janet [:jandent]
+        :janet [:janet-format]
         :javascript [:prettierd]
         :json [:jsonfmt]
         :kdl [:kdlfmt]
