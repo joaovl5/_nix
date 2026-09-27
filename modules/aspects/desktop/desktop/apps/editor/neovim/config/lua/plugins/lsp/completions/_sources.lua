@@ -12,7 +12,7 @@ local function transform_items(k_icon, k_name)
   end
   return _1_
 end
-local sources = {"grep", "path", "lsp", "snippets", "buffer", "env", "git", "conv_commit"}
+local sources = {"path", "lsp", "snippets", "buffer", "env", "conv_commit"}
 local debug_sources
 do
   local result = {"dap"}
@@ -34,4 +34,4 @@ end
 local function _4_()
   return (vim.bo.filetype == "gitcommit")
 end
-return {default = sources, per_filetype = {["dap-repl"] = debug_sources, ["dap-view"] = debug_sources}, providers = {dap = {name = "dap", module = "blink.compat.sources", enabled = _2_}, grep = {name = "Grep", module = "blink-ripgrep", transform_items = transform_items("\238\173\190 ", "Grep"), opts = {prefix_min_len = 4, backend = {use = "gitgrep-or-ripgrep"}}}, env = {name = "Env Vars", module = "blink-cmp-env", transform_items = transform_items("\243\176\185\187 ", "Env"), opts = {item_kind = _3_, show_braces = false, show_documentation_window = false}}, git = {module = "blink-cmp-git", name = "Git", transform_items = transform_items("\243\176\138\162 ", "Git"), opts = {}}, conv_commit = {name = "Conventional Commits", module = "blink-cmp-conventional-commits", enabled = _4_, opts = {}}}}
+return {default = sources, per_filetype = {["dap-repl"] = debug_sources, ["dap-view"] = debug_sources}, providers = {dap = {name = "dap", module = "blink.compat.sources", enabled = _2_}, env = {name = "Env Vars", module = "blink-cmp-env", transform_items = transform_items("\243\176\185\187 ", "Env"), opts = {item_kind = _3_, show_braces = false, show_documentation_window = false}}, conv_commit = {name = "Conventional Commits", module = "blink-cmp-conventional-commits", enabled = _4_, opts = {}}}}

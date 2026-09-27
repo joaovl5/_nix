@@ -9,13 +9,13 @@
 (fn transform_items [k_icon k_name]
   (partial transform_items_base k_icon k_name))
 
-(let [sources [:grep
+(let [sources [; :grep
                :path
                :lsp
                :snippets
                :buffer
                :env
-               :git
+               ; :git
                :conv_commit]
       debug_sources (let [result [:dap]]
                       (each [_ source (ipairs sources)]
@@ -30,11 +30,11 @@
           :enabled (fn []
                      (do-req :cmp_dap
                              :is_dap_buffer))}
-    :grep {:name :Grep
-           :module :blink-ripgrep
-           :transform_items (transform_items " " :Grep)
-           :opts {:prefix_min_len 4
-                  :backend {:use :gitgrep-or-ripgrep}}}
+    ; :grep {:name :Grep
+    ;        :module :blink-ripgrep
+    ;        :transform_items (transform_items " " :Grep)
+    ;        :opts {:prefix_min_len 4
+    ;               :backend {:use :gitgrep-or-ripgrep}}}
     :env {:name "Env Vars"
           :module :blink-cmp-env
           :transform_items (transform_items "󰹻 " :Env)
@@ -42,10 +42,10 @@
                               btypes.CompletionItemKind.Variable)
                  :show_braces false
                  :show_documentation_window false}}
-    :git {:module :blink-cmp-git
-          :name :Git
-          :transform_items (transform_items "󰊢 " :Git)
-          :opts {}}
+    ; :git {:module :blink-cmp-git
+    ;       :name :Git
+    ;       :transform_items (transform_items "󰊢 " :Git)
+    ;       :opts {}}
     :conv_commit {:name "Conventional Commits"
                   :module :blink-cmp-conventional-commits
                   :enabled (fn []
