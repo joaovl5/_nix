@@ -184,6 +184,10 @@ in {
     ];
   };
 
+  networking.hosts."127.0.0.1" = [
+    "github.com"
+    "raw.githubusercontent.com"
+  ];
   networking.firewall.allowPing = true;
 
   users.users.tester = {
