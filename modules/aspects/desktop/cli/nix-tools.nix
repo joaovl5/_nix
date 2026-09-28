@@ -41,13 +41,6 @@ _: {
         };
       };
 
-      nix-your-shell = {
-        enable = true;
-        nix-output-monitor.enable = true;
-        enableFishIntegration = true;
-        enableNushellIntegration = true;
-      };
-
       nix-init = {
         enable = true;
         settings = {
