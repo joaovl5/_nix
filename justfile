@@ -1,6 +1,6 @@
 nix_raw := "nix --quiet --log-format raw"
 nix_build := nix_raw + " build --no-link --file . "
-rumdl := nix_raw + " run '.#rumdl' --"
+rumdl := "rumdl"
 
 ruff := "ruff --quiet"
 

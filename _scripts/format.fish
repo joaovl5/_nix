@@ -11,7 +11,8 @@ function format_markdown
 
     run_quiet $rumdl fmt \
         --no-cache \
-        --silent
+        --silent \
+        $files
 end
 
 function format_nix

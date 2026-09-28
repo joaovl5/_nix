@@ -13,7 +13,6 @@ let
     "nix-machine-protocol-src"
     "octodns-pihole-src"
     "pihole6api-src"
-    "rumdl-src"
     "sane-fnlfmt-src"
     "stable"
     "superpowers"

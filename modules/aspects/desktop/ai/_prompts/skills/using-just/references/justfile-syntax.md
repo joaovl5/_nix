@@ -46,7 +46,7 @@ name := "world"
 
 # command fragments can remove repetition
 nix_raw := "nix --quiet --log-format raw"
-rumdl := nix_raw + " run '.#rumdl' --"
+some_command := nix_raw + " run '.#blablabla' --"
 
 # first recipe is the default when `just` has no recipe argument
 hello target=name:

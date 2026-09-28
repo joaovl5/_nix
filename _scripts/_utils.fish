@@ -1,5 +1,7 @@
 function tracked_files
-    git ls-files $argv
+    for file in (git ls-files $argv)
+        test -e "$file"; and echo "$file"
+    end
 end
 
 function run_quiet

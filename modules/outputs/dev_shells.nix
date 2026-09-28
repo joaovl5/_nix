@@ -2,13 +2,19 @@
   system = "x86_64-linux";
   pkgs = inputs.nixpkgs.legacyPackages.${system};
   local_packages = import ../_packages {inherit pkgs inputs;};
-  elisp_autofmt = pkgs.writeShellApplication {
+  elisp_autofmt = pkgs.writeShellApplication (let
+    _src = pkgs.emacsPackages.elisp-autofmt.src;
+  in {
     name = "elisp-autofmt";
     runtimeInputs = [pkgs.emacs pkgs.python3];
-    text = ''
-      exec python ${pkgs.emacsPackages.elisp-autofmt.src}/elisp-autofmt-cmd.py "$@"
-    '';
-  };
+    text =
+      # bash
+      ''
+        exec python \
+          ${_src}/elisp-autofmt-cmd.py \
+          "$@"
+      '';
+  });
   main = pkgs.mkShell {
     packages = with pkgs; [
       # keep-sorted start
@@ -22,9 +28,9 @@
       just
       kdlfmt
       keep-sorted
-      local_packages.rumdl
       local_packages.sane_fnlfmt
       ruff
+      rumdl
       shfmt
       sqruff
       statix

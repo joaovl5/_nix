@@ -11,7 +11,6 @@
   octodns-pihole = pkgs.callPackage ./octodns-pihole {
     inherit inputs pihole6api;
   };
-  rumdl = pkgs.callPackage ./rumdl {inherit inputs;};
   sane_fnlfmt = pkgs.callPackage ./sane_fnlfmt {inherit inputs;};
   tubifarry = pkgs.callPackage ./tubifarry {};
 in {
@@ -22,7 +21,6 @@ in {
     llm_agents
     pihole6api
     octodns-pihole
-    rumdl
     sane_fnlfmt
     tubifarry
     ;

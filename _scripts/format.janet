@@ -74,8 +74,7 @@
 # markdown / rumdl
 (let [files (with-files "*.md")]
   (when files
-    (run! "nix" "--quiet" "--log-format" "raw" "run" ".#rumdl" "--"
-          "fmt" "--no-cache" "--silent")))
+    (run! "rumdl" "fmt" "--no-cache" "--silent")))
 
 # nix / alejandra + deadnix + statix
 (let [files (with-files "*.nix")]
