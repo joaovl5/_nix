@@ -79,20 +79,6 @@
       "url": null,
       "hash": "sha256-UXFQ7tFiwn8sPz0EV4CBB2PCf/ZiGIHWn/6MXk81Lxs="
     },
-    "devenv": {
-      "type": "Git",
-      "repository": {
-        "type": "Forgejo",
-        "server": "https://git.trll.ing/",
-        "owner": "mirrors",
-        "repo": "devenv"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "6d76db3889deba50ba7d906ec710d59fcd86354a",
-      "url": "https://git.trll.ing/mirrors/devenv/archive/6d76db3889deba50ba7d906ec710d59fcd86354a.tar.gz",
-      "hash": "sha256-nvpxhuC///gvHzRj9/8A+3+2frKEP8kaabBuQDRO4G4="
-    },
     "disko": {
       "type": "Git",
       "repository": {

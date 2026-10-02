@@ -65,6 +65,7 @@
          :svelte {}
          :glsl_analyzer {}
          :nickel_ls {}
+         :tsc {}
          :nushell {}
          :ocamllsp {}
          :clangd {:cmd [:clangd :--background-index]}

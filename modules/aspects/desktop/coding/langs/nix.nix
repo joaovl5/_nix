@@ -14,8 +14,6 @@ _: {
       deadnix
       # formatter
       alejandra
-
-      inputs.devenv.packages.${system}.default
     ];
   };
 }

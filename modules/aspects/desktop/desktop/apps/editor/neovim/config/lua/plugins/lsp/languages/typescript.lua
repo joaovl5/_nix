@@ -15,15 +15,4 @@ do
   spec_24_auto[1] = "HerringtonDarkholme/yats.vim"
   _4_ = spec_24_auto
 end
-local function _5_()
-  local function _6_(ev)
-    local function _7_()
-      local name_1_auto = require("lazy")
-      local fun_2_auto = name_1_auto.load
-      return fun_2_auto({plugins = {"typescript-tools.nvim"}})
-    end
-    return vim.api.nvim_buf_call(ev.buf, _7_)
-  end
-  return v_2fautocmd("FileType", {pattern = js_ts_filetypes, once = true, callback = _6_})
-end
-return {_4_, {"pmizio/typescript-tools.nvim", dependencies = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}, lazy = true, init = _5_, opts = {}}, {"folke/ts-comments.nvim", opts = {}, event = "VeryLazy"}}
+return {_4_, {"folke/ts-comments.nvim", opts = {}, event = "VeryLazy"}}

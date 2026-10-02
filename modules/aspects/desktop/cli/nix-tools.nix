@@ -31,6 +31,7 @@ _: {
       # handling direnv w/ nix integrations
       direnv = {
         enable = true;
+        silent = true;
         nix-direnv.enable = true;
       };
 
