@@ -14,4 +14,8 @@
 
 [{:dir _G.plugin_dirs.parinfer-rust
   :name :parinfer-rust
-  :ft [:fennel]}]
+  :ft [:fennel
+       :winter
+       :janet
+       :clojure
+       :scheme]}]

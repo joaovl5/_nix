@@ -10,4 +10,4 @@ local function build_parinfer(params)
     return nil
   end
 end
-return {{dir = _G.plugin_dirs["parinfer-rust"], name = "parinfer-rust", ft = {"fennel"}}}
+return {{dir = _G.plugin_dirs["parinfer-rust"], name = "parinfer-rust", ft = {"fennel", "winter", "janet", "clojure", "scheme"}}}
