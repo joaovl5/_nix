@@ -9,6 +9,7 @@ _: {
 
       ##### not general
       # keep-sorted start
+      clang-tools
       dockerfmt
       kdlfmt
       kulala-fmt
