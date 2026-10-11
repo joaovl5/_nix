@@ -51,5 +51,6 @@
 
 [(plugin :nvim-treesitter/nvim-treesitter
          {:branch :main :build ":TSUpdate" :config setup :lazy false})
- (plugin :auipga/hmts.nvim {:branch :patch-1})
+ {:dir "~/src/my/tools/nvim/cmts.nvim"
+  :name "cmts.nvim"}
  (plugin :m-demare/hlargs.nvim {:event :VeryLazy :opts {}})]

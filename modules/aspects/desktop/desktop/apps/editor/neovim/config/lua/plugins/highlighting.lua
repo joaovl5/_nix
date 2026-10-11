@@ -56,4 +56,4 @@ local function setup()
   end
   return v_2fautocmd("FileType", {callback = _9_})
 end
-return {{"nvim-treesitter/nvim-treesitter", branch = "main", build = ":TSUpdate", config = setup, lazy = false}, {"auipga/hmts.nvim", branch = "patch-1"}, {"m-demare/hlargs.nvim", event = "VeryLazy", opts = {}}}
+return {{"nvim-treesitter/nvim-treesitter", branch = "main", build = ":TSUpdate", config = setup, lazy = false}, {dir = "~/src/my/tools/nvim/cmts.nvim", name = "cmts.nvim"}, {"m-demare/hlargs.nvim", event = "VeryLazy", opts = {}}}
