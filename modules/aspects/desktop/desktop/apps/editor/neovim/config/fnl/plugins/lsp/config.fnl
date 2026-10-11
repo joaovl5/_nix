@@ -53,7 +53,8 @@
         blink (require :blink.cmp)
         servers
         {:basedpyright
-         {:on_attach do_basedpyright_attach
+         {:cmd [:uv :run :basedpyright-langserver :--stdio]
+          :on_attach do_basedpyright_attach
           :root_dir get_basedpyright_root_dir
           :settings {:basedpyright {:analysis {:autoSearchPaths true
                                                :typeCheckingMode :recommended
@@ -61,7 +62,7 @@
                                                :reportUnknownParameterType false
                                                :reportExplicitAny false}}}}
          :ruff {:server_capabilities {:hoverProvider false}}
-         :pyrefly {}
+         :pyrefly {:cmd [:uv :run :pyrefly :lsp]}
          :svelte {}
          :glsl_analyzer {}
          :nickel_ls {}
@@ -69,6 +70,7 @@
          :nushell {}
          :ocamllsp {}
          :clangd {:cmd [:clangd :--background-index]}
+         :hls {}
          :tsp_server {}
          :biome {}
          :janet_lsp {:cmd [:sh :-c "jpm janet $(which janet-lsp)"]}
@@ -80,6 +82,8 @@
                      :root_dir get_fennel_root_dir}
          :jsonls {:cmd [:jsonls]
                   :settings {:json {:schemas (schemastore.json.schemas)}}}
+         :winterls {:cmd [:winter :langserver]
+                    :filetypes [:winter]}
          :nil {:cmd [:nil]
                :filetypes [:nix]
                :root_markers [:flake.nix :.git]
