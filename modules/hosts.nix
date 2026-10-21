@@ -40,11 +40,11 @@ in {
       units = host_units "tyrant";
       users.tyrant = server_home_user;
     };
-    temperance = {
-      instantiate = instantiate_nixos;
-      units = host_units "temperance";
-      users.temperance = server_home_user;
-    };
+    # temperance = {
+    #   instantiate = instantiate_nixos;
+    #   units = host_units "temperance";
+    #   users.temperance = server_home_user;
+    # };
     iso = {
       instantiate = instantiate_nixos;
     };

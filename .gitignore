@@ -4,6 +4,7 @@
 *.qcow2.*
 .banks
 .claude
+.deploy
 .deploy-gc
 .direnv
 .jpm

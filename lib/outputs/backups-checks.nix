@@ -225,28 +225,11 @@ in {
   assert !(tyrant.services.restic.backups ? tyrant_nixarr_to_a);
   assert tyrant.services.restic.backups ? tyrant_shared_docs_core_to_a;
   assert tyrant.services.restic.backups.tyrant_shared_docs_core_to_a.paths == ["/srv/shared/docs/core"];
-  assert tyrant.systemd.services ? backup_promote_tyrant_home_snapshot_to_b;
   assert tyrant.systemd.services ? backup_forget_tyrant_home_snapshot_on_a;
   assert tyrant.systemd.services ? backup_prune_tyrant_a;
-  assert tyrant.systemd.services ? backup_prune_tyrant_b;
   assert tyrant.systemd.services ? backup_check_tyrant_a;
-  assert tyrant.systemd.services ? backup_check_tyrant_b;
   assert !(tyrant.systemd.services ? backup_promote_tyrant_home_snapshot_to_c);
-  assert tyrant.systemd.services.backup_promote_tyrant_home_snapshot_to_b.serviceConfig.Type == "oneshot";
-  assert lib.hasInfix "init --from-repo" tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.script;
-  assert lib.hasInfix "--copy-chunker-params" tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.script;
-  assert tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.after == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.wants == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_forget_tyrant_home_snapshot_on_b.after == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_forget_tyrant_home_snapshot_on_b.wants == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_prune_tyrant_b.after == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_prune_tyrant_b.wants == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_check_tyrant_b.after == ["network-online.target"];
-  assert tyrant.my."unit.backup".rendered.services.backup_check_tyrant_b.wants == ["network-online.target"];
-  assert lib.elem tyrant.programs.ssh.package tyrant.my."unit.backup".rendered.services.backup_promote_tyrant_home_snapshot_to_b.path;
-  assert tyrant.my."unit.backup".rendered.services ? backup_promote_tyrant_shared_docs_core_to_b;
   assert tyrant.my."unit.backup".rendered.services ? backup_forget_tyrant_shared_docs_core_on_a;
-  assert tyrant.my."unit.backup".rendered.services ? backup_forget_tyrant_shared_docs_core_on_b;
   assert builtins.attrNames lavpc.my."unit.backup".rendered.services == [];
     pkgs.runCommand "backups-eval" {} "touch $out";
 }

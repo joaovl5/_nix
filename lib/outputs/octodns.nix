@@ -25,11 +25,11 @@ in {
         strict_supports = false;
       };
     };
-    processors.vhost-policy = {
-      class = "octodns_vhost_policy.VhostPolicyProcessor";
-      inherit (globals.dns) public_vhosts;
-      public_ipv4 = globals.hosts.temperance.hostname;
-    };
-    zone_config.processors = ["vhost-policy"];
+    # processors.vhost-policy = {
+    #   class = "octodns_vhost_policy.VhostPolicyProcessor";
+    #   inherit (globals.dns) public_vhosts;
+    #   public_ipv4 = globals.hosts.temperance.hostname;
+    # };
+    # zone_config.processors = ["vhost-policy"];
   };
 }

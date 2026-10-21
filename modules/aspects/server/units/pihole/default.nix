@@ -47,11 +47,11 @@ _: {
         set -euo pipefail
         api_url="http://127.0.0.1:${toString opts.endpoint.port}/api/"
 
-        max_retries=60
+        max_retries=120
         attempt=1
 
         while [ "$attempt" -le "$max_retries" ]; do
-          lists_response="$(${pkgs.curl}/bin/curl --connect-timeout 2 -skS -H "Accept: application/json" "$api_url"lists 2>/dev/null || true)"
+          lists_response="$(${pkgs.curl}/bin/curl --connect-timeout 10 -skS -H "Accept: application/json" "$api_url"lists 2>/dev/null || true)"
           if [ -n "$lists_response" ] && printf '%s' "$lists_response" | ${pkgs.jq}/bin/jq -e '.error == null' > /dev/null 2>&1; then
             exit 0
           fi

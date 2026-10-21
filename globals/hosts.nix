@@ -135,11 +135,12 @@ in rec {
               backend = "filesystem";
               repository_template = "/var/lib/backups/repos/{host}";
             };
-            B = {
-              enable = true;
-              backend = "sftp";
-              repository_template = "sftp://${temperance.ssh_user}@${temperance.hostname}:59222//var/lib/backups/repos/{host}";
-            };
+            B.enable = false;
+            # B = {
+            #   enable = true;
+            #   backend = "sftp";
+            #   repository_template = "sftp://${temperance.ssh_user}@${temperance.hostname}:59222//var/lib/backups/repos/{host}";
+            # };
             C.enable = false;
           };
           host_items = {
@@ -164,76 +165,47 @@ in rec {
         };
 
         # host tunnel (inbound relay)
-        "unit.wireguard" = {
-          enable = true;
-          relay.enable = false;
-          nat.enable = false;
-          interfaces.internal = {
-            name = "wg-host";
-            privateKeyFile = "wg_tyrant_priv";
-            subnet = {
-              ip = "11.1.0.11";
-              mask = "32";
-            };
-          };
-          extra_peers = [
-            {
-              allowedIPs = ["11.1.0.0/24"];
-              endpoint = with temperance; "${hostname}:51820";
-              persistentKeepalive = 25;
-            }
-          ];
-          # VPN namespace for confined services (outbound VPN)
-          client = {
-            enable = true;
-            address = "11.1.0.12/32";
-            dns = tyrant.host_ip;
-            endpoint = with temperance; "${hostname}:51820";
-            # confined_services = ["transmission"];
-            port_mappings = [
-              {
-                from = 9091;
-                to = 9091;
-              }
-            ];
-            open_vpn_ports = [
-              {
-                port = 55055;
-                protocol = "both";
-              }
-            ];
-          };
-        };
-      };
-    };
-  };
-  temperance = {
-    hostname = "89.167.107.74";
-    host_ip = "89.167.107.74";
-    ssh_user = "temperance";
-    ssh_port = default_ssh_port;
-    units = [
-      "fail2ban"
-      "wireguard"
-    ];
-    config = {
-      my = {
-        server.enable = true;
-        host.password.sops_key = "server";
-        "unit.wireguard" = {
-          enable = true;
-          relay = {
-            enable = true;
-            peer.private_ip = tyrant.config.my."unit.wireguard".interfaces.internal.subnet.ip;
-          };
-          interfaces.external.name = "enp1s0";
-          extra_peers = [
-            {
-              publicKey = "Ex/dhc5AoC7VNe1jIu5rISwQnRoJ7JcbW2M43GJvnTY=";
-              allowedIPs = ["11.1.0.12/32"];
-            }
-          ];
-        };
+        "unit.wireguard".enable = false;
+        # "unit.wireguard" = {
+        #   enable = true;
+        #   relay.enable = false;
+        #   nat.enable = false;
+        #   interfaces.internal = {
+        #     name = "wg-host";
+        #     privateKeyFile = "wg_tyrant_priv";
+        #     subnet = {
+        #       ip = "11.1.0.11";
+        #       mask = "32";
+        #     };
+        #   };
+        #   extra_peers = [
+        #     # {
+        #     #   allowedIPs = ["11.1.0.0/24"];
+        #     #   endpoint = with temperance; "${hostname}:51820";
+        #     #   persistentKeepalive = 25;
+        #     # }
+        #   ];
+        #   # VPN namespace for confined services (outbound VPN)
+        #   client = {
+        #     enable = true;
+        #     address = "11.1.0.12/32";
+        #     dns = tyrant.host_ip;
+        #     endpoint = with temperance; "${hostname}:51820";
+        #     # confined_services = ["transmission"];
+        #     port_mappings = [
+        #       {
+        #         from = 9091;
+        #         to = 9091;
+        #       }
+        #     ];
+        #     open_vpn_ports = [
+        #       {
+        #         port = 55055;
+        #         protocol = "both";
+        #       }
+        #     ];
+        #   };
+        # };
       };
     };
   };

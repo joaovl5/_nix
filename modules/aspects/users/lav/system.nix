@@ -114,17 +114,14 @@
 
             ## etc move later
 
-            zrythm
-            ardour
             wireguard-tools
             copier
             jq
             bit-logo
-            azure-cli
+            # azure-cli
             (openvpn.override {
               openssl = openssl_legacy;
             })
-            rustdesk
             rnote
 
             # dependencies
