@@ -102,7 +102,7 @@
             # gui
             waylock ## locker
             ## docs
-            # libreoffice
+            libreoffice
             ## file manager
             thunar
             ## settings
