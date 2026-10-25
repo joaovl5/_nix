@@ -53,7 +53,7 @@ layout {
   center-focused-column "never"
   always-center-single-column
 }
-output "DP-4" {
+output "DP-1" {
   mode "3840x2160@240.084"
   scale 1.333333
   transform "normal"
@@ -67,7 +67,7 @@ output "DP-4" {
     }
   }
 }
-output "HDMI-A-2" {
+output "HDMI-A-1" {
   mode "1920x1080@100.000"
   scale 1
   transform "90"
@@ -348,34 +348,34 @@ binds {
   }
 }
 workspace "A" {
-  open-on-output "DP-4"
+  open-on-output "DP-1"
 }
 workspace "B" {
-  open-on-output "DP-4"
+  open-on-output "DP-1"
 }
 workspace "C" {
-  open-on-output "DP-4"
+  open-on-output "DP-1"
 }
 workspace "D" {
-  open-on-output "DP-4"
+  open-on-output "DP-1"
 }
 workspace "E" {
-  open-on-output "DP-4"
+  open-on-output "DP-1"
 }
 workspace "F" {
-  open-on-output "HDMI-A-2"
+  open-on-output "HDMI-A-1"
 }
 workspace "G" {
-  open-on-output "HDMI-A-2"
+  open-on-output "HDMI-A-1"
 }
 workspace "H" {
-  open-on-output "HDMI-A-2"
+  open-on-output "HDMI-A-1"
 }
 workspace "I" {
-  open-on-output "HDMI-A-2"
+  open-on-output "HDMI-A-1"
 }
 workspace "J" {
-  open-on-output "HDMI-A-2"
+  open-on-output "HDMI-A-1"
 }
 gestures {
   hot-corners {

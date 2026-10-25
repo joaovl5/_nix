@@ -1,8 +1,8 @@
 _: {
   den.aspects.service-login.nixos = _: {
     services.xserver.xrandrHeads = let
-      main = "DP-4";
-      side = "HDMI-A-2";
+      main = "DP-1";
+      side = "HDMI-A-1";
     in [
       {
         output = main;

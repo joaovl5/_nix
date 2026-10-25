@@ -167,7 +167,7 @@
   (calendar-timeline))
 
 (defwindow calendar-bar
-  :monitor "DP-4"
+  :monitor "DP-1"
   :windowtype "dock"
   :focusable "none"
   :exclusive false

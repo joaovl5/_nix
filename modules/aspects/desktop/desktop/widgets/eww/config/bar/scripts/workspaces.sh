@@ -21,7 +21,7 @@ emit_niri_workspaces() {
       map(select(.name != null) | {
         id: .name,
         label: .name,
-        display: (if .output == "DP-4" then "primary" else "secondary" end),
+        display: (if .output == "DP-1" then "primary" else "secondary" end),
         active: .is_active,
         focused: .is_focused,
         urgent: .is_urgent,

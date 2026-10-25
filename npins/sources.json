@@ -1,5 +1,19 @@
 {
   "pins": {
+    "affinity-nix": {
+      "type": "Git",
+      "repository": {
+        "type": "Forgejo",
+        "server": "https://git.trll.ing/",
+        "owner": "mirrors",
+        "repo": "affinity-nix"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "69c5cb42a7dd596027183776d82bf206d732fc91",
+      "url": "https://git.trll.ing/mirrors/affinity-nix/archive/69c5cb42a7dd596027183776d82bf206d732fc91.tar.gz",
+      "hash": "sha256-Uyd6UpHOZ6ly18cIlWz6HBIw5TfV4lCqVpcr01Lzer0="
+    },
     "all-systems": {
       "type": "Git",
       "repository": {

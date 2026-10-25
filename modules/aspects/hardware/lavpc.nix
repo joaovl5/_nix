@@ -26,13 +26,13 @@
 
           # TODO: ^0
           monitor_layout = {
-            "DP-4" = {
+            "DP-1" = {
               primary = true;
               resolution = "3840x2160";
               refresh = "240.08";
               scaling = "1.333333";
             };
-            "HDMI-A-2" = {
+            "HDMI-A-1" = {
               primary = false;
               transform = "90";
             };

@@ -5,6 +5,8 @@ _: {
       yt-dlp
       mpv
       vlc
+      krita
+      inkscape
     ];
 
     programs.freetube = {
