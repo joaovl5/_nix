@@ -50,6 +50,29 @@ in rec {
     host_ip = "192.168.15.13";
     ssh_user = "tyrant";
     ssh_port = default_ssh_port;
+    nix_builder = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILS4vZLX4SeXrzjWrZHqUsIAQhgHne5gHHOWnu0fQxbd lav@lavpc";
+      host_key = "AAAAC3NzaC1lZDI1NTE5AAAAIEcdQbiJQxFWx7lgAoIeoU6VfdfhD8TsaEXatbh8ULT8";
+    };
+    celler = {
+      cache_public_key = "main:REPLACE_WITH_CELLER_CACHE_PUBLIC_KEY_BODY";
+      jwt_public_key = ''
+        -----BEGIN PUBLIC KEY-----
+        MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzmeD2CqBhcyajueAfSMZ
+        WyKMqpZ3LIs8lbSxdhJnNIWil1ljR3F11lxAIVWLyq23vLxeC2TnlnHGnqhC6PM+
+        z6RLPwMAr6OKPu6y3Uq9R3aVD65auNS5I5pvs93cHaVrq6m5SK9evwceVsKvdwoM
+        fegXka07dxUxbDodEeuzQskkcYkGgiGmvRqqSoUNtOpYm3KGHYHCTXW3Lmm2rFyy
+        L1kUYnHKMTW92rAeiFr2pmWm1SG+CYItupLYVQ8JyZnnNQ+7dng9whjoTMkrP3B8
+        MgR43i4Y75S3RI3xXhEIigWPFlSBI0c12T8tapA5tc2mDoHmgw911WHvhQi7LZDO
+        S60DfnEZ6Qzm+uCjI0DwpUVRhBSpxQ73nQm/LXIIlHABv67sh+r3dPSyw6gqD9g5
+        isQ/YZzHKxXhw2Qc+RvhICCY6779yPQs/IcxvP0oqL0/wPUGaqwUsNE0nnXBrCxl
+        i2B/dFz+SBa08iqZ9WmjW9HgjOMDl6Ky/bbe+nijvW6I9ip6DKlOzZHIbsV95iJC
+        X5Ykkjh0Nml0SSCF6A690OliYq6QhRmPH2fs1rfdrUX5PBYDTEImTV7guX8SG32K
+        thXbOY6dgCm8FbYpNmZpCGnPHmtTliCxlPVUkl1jX+pqj3VG4HQ+X2/hn49ogAHm
+        WE+JFlV/t3ofJDaIdOMZ7X0CAwEAAQ==
+        -----END PUBLIC KEY-----
+      '';
+    };
     units = [
       "backup"
       "fail2ban"
