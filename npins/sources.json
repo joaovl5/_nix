@@ -38,6 +38,19 @@
       "url": "https://git.trll.ing/lav/bonsai-llama-pkg/archive/70c5c08f2910f542263b3fe4875b583df0b75c93.tar.gz",
       "hash": "sha256-V6KmbhhwuVqrCzYkLSNKShqhOzig4GZgkb9q9ZLDhJE="
     },
+    "celler": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "celler-cache",
+        "repo": "celler"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "2d5be60ca34a290a1a6c5ce34b3843db67d12f70",
+      "url": "https://github.com/celler-cache/celler/archive/2d5be60ca34a290a1a6c5ce34b3843db67d12f70.tar.gz",
+      "hash": "sha256-XbhTm0x3Bo93p3V08KTy9ZDbUFEdh4rIK0unWD+HDow="
+    },
     "concord": {
       "type": "Git",
       "repository": {
@@ -250,9 +263,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "06b7915ee24c52b29c6462d6768ef273dedf8f9d",
+      "revision": "855961e64057b2315c3dfb017ea1700c2bc81831",
       "url": null,
-      "hash": "sha256-daE6+igin++w7BOhVucmRhEnRp7bv0BDJ52GcxRic+U="
+      "hash": "sha256-U+l9xuiPYLojUeTeavUPltN3zkTwx+bKix2Ssna+t5A="
     },
     "nix-darwin": {
       "type": "Git",
