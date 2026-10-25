@@ -55,7 +55,7 @@ in rec {
       host_key = "AAAAC3NzaC1lZDI1NTE5AAAAIEcdQbiJQxFWx7lgAoIeoU6VfdfhD8TsaEXatbh8ULT8";
     };
     celler = {
-      cache_public_key = "main:REPLACE_WITH_CELLER_CACHE_PUBLIC_KEY_BODY";
+      cache_public_key = "main:/F978aSTgeg2sPLj5t7WCzkfyErZ4K4edKIDAem7wPs=";
       jwt_public_key = ''
         -----BEGIN PUBLIC KEY-----
         MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzmeD2CqBhcyajueAfSMZ
