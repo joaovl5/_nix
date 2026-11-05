@@ -136,16 +136,7 @@
           [:filename :branch]
           :c
           ["%="]
-          :x [(comp :triforce
-                    {:level {:enabled true
-                             :prefix "󰦇 "}
-                     :achievements {:enabled true
-                                    :icon " "}
-                     :streak {:enabled true
-                              :icon " "}
-                     :session_time {:enabled true
-                                    :icon " "}})
-              (. (require :token-count.integrations.lualine) :current_buffer)]
+          :x []
           :y [:filetype]
           :z []})
   (local raw-inactive-sections

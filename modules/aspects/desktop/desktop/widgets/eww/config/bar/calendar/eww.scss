@@ -19,20 +19,6 @@ $calendar_font_size_small: $calendar_font_size - 2px;
   font-weight: bold;
 }
 
-.all-day-event {
-  background-color: #202020;
-  border: 1px solid #454545;
-  border-radius: 3px;
-  color: #b7d5ff;
-  font-size: $calendar_font_size;
-  margin-right: 5px;
-  padding: 0 5px;
-}
-
-.all-day-event:hover {
-  background-color: #303030;
-}
-
 .calendar-status {
   color: $color_text_muted;
   font-size: $calendar_font_size_small;

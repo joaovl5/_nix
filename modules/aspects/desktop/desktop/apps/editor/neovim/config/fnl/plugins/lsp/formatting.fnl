@@ -6,6 +6,7 @@
         :jandent {:command :jindt :stdin true}
         :kdlfmt {:command :kdlfmt :args [:format :--kdl-version :v1 :--stdin]}
         :prettierd {:command :prettierd}
+        :rustfmt {:options {:default_edition :2024}}
         :sane_fnlfmt {:command :fnlfmt :args [:-]}})
 
 ; keep-sorted end

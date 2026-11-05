@@ -42,7 +42,7 @@ local function comp_mode_color()
   return {fg = colors[mode_value(mode_color, current_mode, "fg")]}
 end
 local function setup_lualine()
-  local raw_sections = {a = {comp(comp_mode, {color = comp_mode_color})}, b = {"filename", "branch"}, c = {"%="}, x = {comp("triforce", {level = {enabled = true, prefix = "\243\176\166\135 "}, achievements = {enabled = true, icon = "\239\130\145 "}, streak = {enabled = true, icon = "\239\129\173 "}, session_time = {enabled = true, icon = "\239\128\151 "}}), require("token-count.integrations.lualine").current_buffer}, y = {"filetype"}, z = {}}
+  local raw_sections = {a = {comp(comp_mode, {color = comp_mode_color})}, b = {"filename", "branch"}, c = {"%="}, x = {}, y = {"filetype"}, z = {}}
   local raw_inactive_sections = {a = {"filename"}, b = {}, c = {}, x = {}, y = {}, z = {"location"}}
   return {options = {component_separators = "", section_separators = "", theme = {normal = {a = {fg = colors.fg, bg = colors.bg}}, inactive = {a = {fg = colors.fg, bg = colors.bg}}}}, sections = section_transform(raw_sections), inactive_sections = section_transform(raw_inactive_sections), tabline = {}, extensions = {}}
 end

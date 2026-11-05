@@ -18,7 +18,9 @@ _: {
     }) {} (opts:
       o.merge [
         {
-          nixpkgs.config.allowUnfree = true;
+          nixpkgs.config = {
+            allowUnfree = true;
+          };
           nix =
             {
               settings = {

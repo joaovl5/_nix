@@ -35,7 +35,7 @@ _: {
         font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
       };
       boot = {
-        initrd.stage1Greeting = stage1_greeting;
+        # initrd.stage1Greeting = stage1_greeting;
         stage2Greeting = stage2_greeting;
       };
       services.getty = {

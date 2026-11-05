@@ -61,8 +61,10 @@ _: {
               nvidiaSettings = true;
             };
           };
-          nixpkgs.config.cudaSupport = true;
-          nixpkgs.config.cudaCapabilities = [opts.cuda_cap];
+          nixpkgs.config = {
+            cudaSupport = true;
+            cudaCapabilities = [opts.cuda_cap];
+          };
           services.xserver.videoDrivers = ["nvidia"];
           environment.systemPackages = [pkgs.libnvidia-container];
           systemd.services.nvidia-container-toolkit-cdi-generator.serviceConfig = {

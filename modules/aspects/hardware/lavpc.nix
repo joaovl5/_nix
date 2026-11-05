@@ -39,6 +39,9 @@
           };
         };
 
+        # nixpkgs.buildPlatform.system = "x86_64-linux";
+        # nixpkgs.hostPlatform.system = "x86_64-linux";
+
         my.nvidia.enable = true;
 
         time.timeZone = cfg.timezone;

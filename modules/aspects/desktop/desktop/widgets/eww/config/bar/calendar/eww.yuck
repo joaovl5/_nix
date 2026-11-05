@@ -12,7 +12,7 @@
 
 (defpoll calendar_state
   :interval "5m"
-  :initial "{\"schema\":2,\"state\":\"starting\",\"message\":\"loading calendar\",\"heading\":\"calendar\",\"timeline_width\":2750,\"timeline_start\":0,\"timeline_end\":1,\"labels\":[],\"ticks\":[],\"all_day\":[],\"lanes\":[],\"future\":[]}"
+  :initial "{\"schema\":2,\"state\":\"starting\",\"message\":\"loading calendar\",\"heading\":\"calendar\",\"timeline_width\":2750,\"timeline_start\":0,\"timeline_end\":1,\"labels\":[],\"ticks\":[],\"lanes\":[],\"future\":[]}"
   "env UV_PROJECT_ENVIRONMENT=\"$HOME/.cache/lav-shell/.venv\" PYTHONPYCACHEPREFIX=\"$HOME/.cache/lav-shell/pycache\" uv run --project \"$HOME/.config/eww/lav-shell\" --frozen calendar-state")
 
 (defwidget timeline-label [item]
@@ -79,23 +79,6 @@
     :class "calendar-timeline"
     :orientation "v"
     :space-evenly false
-    ; (box
-    ;   :class "all-day-row"
-    ;   :orientation "h"
-    ;   :space-evenly false
-    ;   (for event in {calendar_state.all_day}
-    ;     (eventbox
-    ;       :class "all-day-event"
-    ;       :style "border-color: ${event.color};"
-    ;       :active true
-    ;       :tooltip {event.tooltip}
-    ;       (label :text {event.title})))
-    ;   (label
-    ;     :class "calendar-status ${calendar_state.state}"
-    ;     :text {calendar_state.message}
-    ;     :visible {calendar_state.message != ""}
-    ;     :hexpand true
-    ;     :halign "end"))
     (overlay
       (box
         :orientation "v"

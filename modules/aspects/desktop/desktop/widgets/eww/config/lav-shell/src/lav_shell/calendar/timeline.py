@@ -1,6 +1,6 @@
 """Build bounded daily timeline geometry from normalized events."""
 
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from lav_shell.calendar.constants import (
@@ -28,39 +28,39 @@ def day_bounds(*, zone: ZoneInfo) -> tuple[date, datetime, datetime]:
   return now.date(), start, start + timedelta(hours=12)
 
 
+def multi_day_block(*, start: datetime, end: datetime) -> bool:
+  """Detect blocks too long to present inside one daily timeline."""
+  return end - start > timedelta(days=1)
+
+
 def partition_events(
   *,
   events: list[CalendarEvent],
-  today: date,
   day_start: datetime,
   day_end: datetime,
-  zone: ZoneInfo,
-) -> tuple[list[PlacedEvent], list[AllDayEvent], list[FutureEvent]]:
-  """Partition occurrences into today's rows and the future rail."""
+) -> tuple[list[PlacedEvent], list[FutureEvent]]:
+  """Partition occurrences into today's rows and the future rail.
+
+  All-day occurrences and blocks spanning several days are skipped: a
+  single day has no honest place for them, and clamped blocks read as
+  bogus reminders.
+  """
   timed_today: list[PlacedEvent] = []
-  all_day_today: list[AllDayEvent] = []
   future: list[FutureEvent] = []
   for event in events:
     match event:
       case TimedEvent(start, end, text):
+        if multi_day_block(start=start, end=end):
+          continue
         if end > day_start and start < day_end:
           timed_today.append(
             (max(start, day_start), min(end, day_end), text)
           )
         elif start >= day_end:
-          future.append((start, text, False))
-      case AllDayEvent(start, end, text):
-        if start <= today < end:
-          all_day_today.append(event)
-        elif start > today:
-          future.append(
-            (
-              datetime.combine(start, time.min, tzinfo=zone),
-              text,
-              True,
-            )
-          )
-  return timed_today, all_day_today, future
+          future.append((start, text))
+      case AllDayEvent():
+        continue
+  return timed_today, future
 
 
 def place_lanes(

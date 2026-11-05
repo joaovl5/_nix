@@ -1,6 +1,6 @@
 (import-macros {: do-req : let-req : plugin : key} :./lib/init-macros)
 
-(local {: v/fs-stat : v/usercmd} (require :lib/nvim))
+(local {: v/fs-stat : v/usercmd : v/autocmd} (require :lib/nvim))
 
 (fn set_python_path [path]
   (let [clients (vim.lsp.get_clients {:bufnr (vim.api.nvim_get_current_buf)
@@ -47,6 +47,12 @@
     (on_dir (or (: (vim.iter (vim.fs.parents fname)) :find has_fls_cfg)
                 (vim.fs.root 0 :.git)))))
 
+(fn disable-semantic-tokens [args]
+  "Opt out of LSP semantic highlighting (buggy; handled by treesitter instead)."
+  (let [client (vim.lsp.get_client_by_id args.data.client_id)]
+    (when client
+      (set client.server_capabilities.semanticTokensProvider nil))))
+
 (fn mk_lsp []
   "Setup language servers."
   (let [schemastore (require :schemastore)
@@ -90,6 +96,7 @@
                :settings {:nil {:nix {:flake {:autoArchive true
                                               :autoEvalInputs false
                                               :nixpkgsInputName :nixpkgs}}}}}}]
+    (v/autocmd :LspAttach {:callback disable-semantic-tokens})
     (each [server config (pairs servers)]
       (vim.lsp.config server config)
       (vim.lsp.config server (blink.get_lsp_capabilities))

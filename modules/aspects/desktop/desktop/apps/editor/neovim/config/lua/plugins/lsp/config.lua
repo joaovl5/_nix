@@ -2,6 +2,7 @@
 local _local_1_ = require("lib/nvim")
 local v_2ffs_stat = _local_1_["v/fs-stat"]
 local v_2fusercmd = _local_1_["v/usercmd"]
+local v_2fautocmd = _local_1_["v/autocmd"]
 local function set_python_path(path)
   local clients = vim.lsp.get_clients({bufnr = vim.api.nvim_get_current_buf(), name = "basedpyright"})
   for _, client in ipairs(clients) do
@@ -33,10 +34,20 @@ local function get_fennel_root_dir(bufnr, on_dir)
   has_fls_cfg = _4_
   return on_dir((vim.iter(vim.fs.parents(fname)):find(has_fls_cfg) or vim.fs.root(0, ".git")))
 end
+local function disable_semantic_tokens(args)
+  local client = vim.lsp.get_client_by_id(args.data.client_id)
+  if client then
+    client.server_capabilities.semanticTokensProvider = nil
+    return nil
+  else
+    return nil
+  end
+end
 local function mk_lsp()
   local schemastore = require("schemastore")
   local blink = require("blink.cmp")
   local servers = {basedpyright = {cmd = {"uv", "run", "basedpyright-langserver", "--stdio"}, on_attach = do_basedpyright_attach, root_dir = get_basedpyright_root_dir, settings = {basedpyright = {analysis = {autoSearchPaths = true, typeCheckingMode = "recommended", diagnosticMode = "workspace", reportExplicitAny = false, reportUnknownParameterType = false}}}}, ruff = {server_capabilities = {hoverProvider = false}}, pyrefly = {cmd = {"uv", "run", "pyrefly", "lsp"}}, svelte = {}, glsl_analyzer = {}, nickel_ls = {}, tsc = {}, nushell = {}, ocamllsp = {}, clangd = {cmd = {"clangd", "--background-index"}}, hls = {}, tsp_server = {}, biome = {}, janet_lsp = {cmd = {"sh", "-c", "jpm janet $(which janet-lsp)"}}, nimls = {}, lua_ls = {cmd = {"lua-language-server"}, settings = {Lua = {completion = {callSnippet = "Replace"}}}}, fennel_ls = {cmd = {"fennel-ls"}, single_file_support = true, root_dir = get_fennel_root_dir}, jsonls = {cmd = {"jsonls"}, settings = {json = {schemas = schemastore.json.schemas()}}}, winterls = {cmd = {"winter", "langserver"}, filetypes = {"winter"}}, ["nil"] = {cmd = {"nil"}, filetypes = {"nix"}, root_markers = {"flake.nix", ".git"}, settings = {["nil"] = {nix = {flake = {autoArchive = true, nixpkgsInputName = "nixpkgs", autoEvalInputs = false}}}}}}
+  v_2fautocmd("LspAttach", {callback = disable_semantic_tokens})
   for server, config in pairs(servers) do
     vim.lsp.config(server, config)
     vim.lsp.config(server, blink.get_lsp_capabilities())
@@ -44,8 +55,8 @@ local function mk_lsp()
   end
   return nil
 end
-local function _5_()
+local function _6_()
   local nu = require("null-ls").builtins
   return {sources = {nu.diagnostics.gitleaks, nu.hover.dictionary, nu.diagnostics.hadolint, nu.hover.printenv, nu.diagnostics.fish, nu.formatting.alejandra, nu.diagnostics.statix, nu.code_actions.statix, nu.diagnostics.deadnix}}
 end
-return {{"nvimtools/none-ls.nvim", dependencies = {"nvim-lua/plenary.nvim", "nvimtools/none-ls-extras.nvim"}, event = "VeryLazy", opts = _5_}, {"neovim/nvim-lspconfig", config = mk_lsp, event = "VeryLazy", dependencies = {"b0o/schemastore.nvim"}}}
+return {{"nvimtools/none-ls.nvim", dependencies = {"nvim-lua/plenary.nvim", "nvimtools/none-ls-extras.nvim"}, event = "VeryLazy", opts = _6_}, {"neovim/nvim-lspconfig", config = mk_lsp, event = "VeryLazy", dependencies = {"b0o/schemastore.nvim"}}}

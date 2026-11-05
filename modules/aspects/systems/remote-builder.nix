@@ -48,8 +48,12 @@
           protocol = "ssh-ng";
           sshUser = "nix-builder";
           sshKey = config.sops.secrets.${secret_name}.path;
-          systems = ["x86_64-linux"];
-          maxJobs = 6;
+          # i686-linux is needed for pkgsi686Linux (steam, the 32-bit NVIDIA/Mesa
+          # libs, ...). x86_64 Nix accepts i686 drvs natively, so the builder can
+          # cover it. Without it those drvs have no machine and, because local
+          # builds are disabled below, the whole build hard-fails.
+          systems = ["x86_64-linux" "i686-linux"];
+          maxJobs = 2;
           speedFactor = 1;
           supportedFeatures = ["benchmark" "big-parallel" "nixos-test"];
           publicHostKey = builder.host_key;

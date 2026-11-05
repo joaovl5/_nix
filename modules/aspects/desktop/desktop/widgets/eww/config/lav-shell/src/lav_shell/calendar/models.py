@@ -38,4 +38,4 @@ class AllDayEvent:
 
 type CalendarEvent = TimedEvent | AllDayEvent
 type PlacedEvent = tuple[datetime, datetime, EventText]
-type FutureEvent = tuple[datetime, EventText, bool]
+type FutureEvent = tuple[datetime, EventText]

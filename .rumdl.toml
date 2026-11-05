@@ -1,6 +1,5 @@
 [global]
   exclude = [
-    # Common directories to exclude
     ".git",
     ".github",
     "node_modules",
