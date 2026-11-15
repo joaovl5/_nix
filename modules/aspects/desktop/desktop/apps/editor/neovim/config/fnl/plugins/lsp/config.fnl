@@ -70,6 +70,8 @@
          :ruff {:server_capabilities {:hoverProvider false}}
          :pyrefly {:cmd [:uv :run :pyrefly :lsp]}
          :svelte {}
+         :buf_ls {}
+         :gopls {}
          :glsl_analyzer {}
          :nickel_ls {}
          :tsc {}
@@ -77,6 +79,7 @@
          :ocamllsp {}
          :clangd {:cmd [:clangd :--background-index]}
          :hls {}
+         :tombi {}
          :tsp_server {}
          :biome {}
          :janet_lsp {:cmd [:sh :-c "jpm janet $(which janet-lsp)"]}

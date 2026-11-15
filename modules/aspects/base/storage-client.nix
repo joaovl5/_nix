@@ -2,6 +2,7 @@ _: {
   den.aspects.base-storage-client.nixos = {
     config,
     mylib,
+    lib,
     ...
   }: let
     my = mylib.use config;
@@ -19,13 +20,26 @@ _: {
         export_path = opt "Client-visible NFS export path." t.str "/";
         automount_timeout = opt "Idle timeout before the automounted shared tree is unmounted." t.str "10min";
       };
-    }) {} (opts:
+    }) {} (opts: let
+      sanitized_mp =
+        "${opts.client.mount_point}.mount"
+        |> lib.removePrefix "/" # gotta remove the initial `/`
+        |> lib.replaceStrings ["/"] ["-"];
+    in
       o.when opts.client.enable {
         boot.supportedFilesystems = ["nfs"];
 
         systemd.tmpfiles.rules = [
           "d ${opts.client.mount_point} 0755 ${username} users - -"
         ];
+
+        systemd.units.${sanitized_mp} = {
+          overrideStrategy = "asDropin";
+          text = ''
+            [Unit]
+            StartLimitIntervalSec=0
+          '';
+        };
 
         fileSystems.${opts.client.mount_point} = {
           device = "${opts.client.server}:${opts.client.export_path}";
@@ -38,7 +52,8 @@ _: {
             "softerr"
             "timeo=100"
             "retrans=3"
-            "x-systemd.mount-timeout=30s"
+            "x-systemd.mount-timeout=5s"
+            "retry=0"
             "x-systemd.automount"
             "x-systemd.idle-timeout=${opts.client.automount_timeout}"
           ];

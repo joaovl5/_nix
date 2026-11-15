@@ -57,7 +57,6 @@
               "sr_mod"
             ];
             systemd = {
-              enable = true;
               network = {
                 enable = true;
               };

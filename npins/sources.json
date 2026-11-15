@@ -341,9 +341,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "8398149db4f704f191ab42deee3ff99fbe478e86",
+      "revision": "8035dc9a3fcbed25e29e8b0eb3572899d4bd465b",
       "url": null,
-      "hash": "sha256-M84ezuif0PISlKVAOp435BOInrWZU8o1f8pYfl2ayWY="
+      "hash": "sha256-Hgj0GrcPkXD/N6QFgz3i4HPhzObHVVpDsHngy1QVIH4="
     },
     "nixos-dns": {
       "type": "Git",

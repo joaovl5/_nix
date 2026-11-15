@@ -1,0 +1,12 @@
+#!r6rs ; -*- mode: scheme; coding: utf-8 -*-
+(import (akku format manifest))
+
+(akku-package ("main" "0.0.0-alpha.0")
+  (synopsis "I did not edit Akku.manifest")
+  (description
+   "Please change the synopsis and description before publish the package."
+   "Multiple strings in the description will become separate paragraphs.")
+  (authors "")
+  (license "NOASSERTION")
+  (depends ("arew-json" "^1.0.0-alpha.0"))
+)

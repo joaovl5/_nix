@@ -117,6 +117,16 @@ _: {
               stateDir = source_data_dir;
               settings = {
                 session.COOKIE_SECURE = true;
+                "markup.asciidoc" = let
+                  adoc = lib.getExe pkgs.asciidoctor;
+                in {
+                  ENABLED = true;
+                  FILE_EXTENSIONS = ".adoc,.asciidoc";
+                  RENDER_COMMAND = "${adoc} --embedded --safe-mode=secure --out-file=- -";
+                  IS_INPUT_FILE = false;
+                  RENDER_CONTENT_MODE = "sanitized";
+                  NEEDS_PREPROCESS = true;
+                };
                 server = with opts.web.endpoint; rec {
                   HTTP_PORT = port;
                   DOMAIN = "${target}.${tld}";

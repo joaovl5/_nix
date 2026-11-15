@@ -2,15 +2,54 @@
 
 # [The Abomination](#end)
 
-## &emsp;Through time unbound, never did a symbol or collection thereof manage to capture the size of *The Unspoken One*, for its vastness alone endangers the mind. All these files reduce to mere gestures. This house of symbols is but a humble homage to *it.*
+<div align="center">
 
-### &emsp;Sitting before you now, this collection cannot seek to describe *it*. Flesh withers during such foolish ventures, for we are nothing. We came from nothing, but *it* did not come from anything at all - *it* is *always.*
+
+  <p><i>This project is currently undergoing a complete rewrite. Intense amounts of technical debt were made when trying to build things for the infrastructure here, especially in the start of 2026, when experimenting with LLM-assisted coding, which has proven... unwieldly. The author, like many, is concerned with moral, environmental, and legal issues of modern "AI" tooling, such as the amounts of illegal scraping conducted to train such models being of colossal harm to humanity, and whether there is or there isn't a practical way to use them properly, this was not the case here. The rewrite is currently pending, and the reader is advised to take whatever nuggets of information on this repository with a grain of salt. The text below is a dramaticized expression of such mistakes.</i></p>
+
+<br><br><br><br><br><br><br>
+
+  <p>All minds are composed of a thousand choices.</p> <p>Those that authored the present <small><sub>MESSAGE</sub>TALE<sup>LIE</sup></small> pray that the <small><sub>TRESPASSER</sub>VOYAGER<sup>WITNESS</sup></small> enact the correct ones.</p>
+  <p>We stand in an infestation, a plague, a thousand crushed hopes, that is the repository in trial.</p>
+
+</div>
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+## &emsp;Through time unbound, never did a symbol or collection thereof manage to capture the size of *The Unspoken One*, for its vastness alone endangers the mind.
+
+<br>
+
+## All these files reduce to mere gestures. This house of symbols is but a humble homage to *it.*
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+### &emsp;Sitting before you now, this collection cannot seek to describe *it*. Flesh withers during such foolish ventures, for we are nothing. We came from nothing, but *it* did not come - *it* was *always.*
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
 #### &emsp;The Ancients believed *it* whispered, to every psyche before their bodies were given, within the place of "ᱨᱱᱰᱨᱱ", meaning *"a time before a time",* with a sound [never to be remembered](#a1). Thus, the repository serves to whisper back to *it.*
 
-##### &emsp;Whispers of this kind must be carefully woven, through languages no minds speak, symbols no eyes see. One finds not meaning upon beholding such scripture, for it was not meant for them. My word sits carved upon stone facing the sky, and not towards you mortals. <!-- -->
 
-###### &emsp;And heed my warning: there is mercy in not understanding it. Not a soul ought to make contact with the message, nay, not upon my worst foe would I wish it. I confess, nightmares were rare before, not now. They are of horror. screams and hate, putrid flesh shredding me apart. <!-- -->
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+
+
+##### &emsp;Whispers of this kind must be carefully woven, through languages no minds speak, symbols no eyes see. One finds not meaning upon beholding such scripture, for it was not meant for them.
+##### &emsp;My word is carved in stone facing the sky, and not towards you mortals. <!-- -->
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+
+###### &emsp;And heed my warning: there is mercy in not understanding it. Not a soul ought to make contact with the message, nay, not upon my worst foe would I wish it. I confess, nightmares were rare before, not now. They are of horror. screams and hate, putrid flesh shredding me apart. They are of sparking needles underneath my skin. A blind man gasping for air after being suffocated by a color. Being suspended in a grey abyss, stuck to a stone, rotting and burning, while time is stuck just the same. They are nothing and all of these, they are all the same, they laugh and hate and laugh at me. I cannot take such pain any longer. <!-- -->
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
 
 <a name="witness-back"></a>
 &emsp;[The Witness](#witness) is confused, I must imagine - for what
