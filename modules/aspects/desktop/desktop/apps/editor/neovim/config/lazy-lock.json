@@ -70,6 +70,7 @@
   "oasis.nvim": { "branch": "main", "commit": "171689960eeec9f3ad1e8686a20f6db780a6c72c" },
   "ocaml.nvim": { "branch": "main", "commit": "cd21b0d92270fa8aa455d3986dd73f447c28505f" },
   "oldworld.nvim": { "branch": "main", "commit": "db072a0bd2c90035fc3a57a73014cb54d3902f1f" },
+  "pest.nvim": { "branch": "master", "commit": "ab8d791300ea30e7cd279090e8b440033892452c" },
   "plenary.nvim": { "branch": "master", "commit": "74b06c6c75e4eeb3108ec01852001636d85a932b" },
   "popup.nvim": { "branch": "master", "commit": "b7404d35d5d3548a82149238289fa71f7f6de4ac" },
   "pretty_hover": { "branch": "master", "commit": "934df974ef6158b100fe910e8556e6c4a66614c2" },

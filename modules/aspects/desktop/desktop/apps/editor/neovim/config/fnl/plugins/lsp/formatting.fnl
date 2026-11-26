@@ -15,6 +15,8 @@
        {; keep-sorted start
 
         :* [:keep-sorted]
+        :astro [:biome]
+        :css [:biome]
         :dockerfile [:dockerfmt]
         :fennel [:sane_fnlfmt]
         :fish [:fish_indent]
@@ -37,8 +39,10 @@
         :proto [:buf]
         :python [:ruff_fix :ruff_format :ruff_organize_imports]
         :rust [:rustfmt]
+        :scss [:biome]
         :sh [:shfmt]
         :sql [:sqruff]
+        :svelte [:biome]
         :toml [:taplo]
         :typescript [:prettierd]
         :typescriptreact [:prettierd]

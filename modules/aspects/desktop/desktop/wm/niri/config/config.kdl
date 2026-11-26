@@ -385,3 +385,7 @@ gestures {
 xwayland-satellite {
   path "xwayland-satellite"
 }
+debug {
+  wait-for-frame-completion-before-queueing
+  disable-direct-scanout
+}

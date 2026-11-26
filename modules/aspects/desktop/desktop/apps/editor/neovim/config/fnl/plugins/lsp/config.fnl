@@ -71,6 +71,7 @@
          :pyrefly {:cmd [:uv :run :pyrefly :lsp]}
          :svelte {}
          :buf_ls {}
+         :pest_ls {}
          :gopls {}
          :glsl_analyzer {}
          :nickel_ls {}
@@ -82,6 +83,8 @@
          :tombi {}
          :tsp_server {}
          :biome {}
+         :astro {}
+         :rumdl {}
          :janet_lsp {:cmd [:sh :-c "jpm janet $(which janet-lsp)"]}
          :nimls {}
          :lua_ls {:cmd [:lua-language-server]
@@ -91,8 +94,8 @@
                      :root_dir get_fennel_root_dir}
          :jsonls {:cmd [:jsonls]
                   :settings {:json {:schemas (schemastore.json.schemas)}}}
-         :winterls {:cmd [:winter :langserver]
-                    :filetypes [:winter]}
+         ; :winterls {:cmd [:winter :langserver]
+         ;            :filetypes [:winter]}
          :nil {:cmd [:nil]
                :filetypes [:nix]
                :root_markers [:flake.nix :.git]

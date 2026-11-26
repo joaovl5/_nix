@@ -35,7 +35,7 @@
    ; draw relative line numbers
    ; text indicators
    :list true
-   :listchars "tab:» ,trail:·,nbsp:␣"
+   :listchars "tab: ·,trail:·,nbsp:␣"
    :fillchars "eob: ,fold:╌"
    ; wrap
    :wrap false
@@ -67,7 +67,7 @@
    ; folds
    :foldlevel 99
    ; no folds by default
-   :foldmethod :indent
+   ; :foldmethod :indent
    :foldnestmax 10
    :foldtext ""
    ; ## EDITOR
@@ -126,7 +126,7 @@
   {:severity_sort true
    :float {:border :rounded :source :if_many}
    :signs {:priority 9999
-           :severity {:min :WARN :max :ERROR}
+           :severity {:max :ERROR}
            :text (doto {}
                    (tset vim.diagnostic.severity.ERROR
                          "󰅚 ")
